@@ -1,0 +1,30 @@
+<!ELEMENT pagesets (pageset*)>
+<!ELEMENT pageset (page*)>
+<!ELEMENT page (source,roles,subpages?)>
+<!ELEMENT source (#PCDATA)>
+<!ELEMENT roles (
+  public?,
+  outside?,
+  inside?
+)*>
+
+<!ELEMENT public (#PCDATA)>
+<!ELEMENT outside (#PCDATA)>
+<!ELEMENT inside (#PCDATA)>
+
+<!ELEMENT subpages (page*)>
+<!ATTLIST pageset
+ scope CDATA #IMPLIED
+>
+<!ATTLIST page
+ hidden CDATA #IMPLIED
+ disabled CDATA #IMPLIED
+ id ID #IMPLIED
+ default CDATA #IMPLIED
+ cache CDATA #IMPLIED
+>
+<!ATTLIST source
+ type CDATA #IMPLIED
+ file CDATA #IMPLIED
+ factory CDATA #IMPLIED
+>

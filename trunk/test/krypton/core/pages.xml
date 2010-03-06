@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE pagesets SYSTEM "pages.dtd">
+<pagesets>
+
+  <!--  MAIN NAVIGATION PAGES  -->
+  <pageset scope="main">
+
+    <page id="home" default="1" cache="1">
+      <source type="static" file="home.html"/>
+      <roles>
+        <public/>
+      </roles>
+    </page>
+    <page id="blog" default="1">
+      <source type="dynamic" file="Blog"/>
+      <roles>
+        <public/>
+      </roles>
+    </page>
+    <page id="register">
+      <source type="dynamic" file="Register"/>
+      <roles>
+        <outside/>
+      </roles>
+    </page>
+    <page id="login">
+      <source type="dynamic" file="Login"/>
+      <roles>
+        <outside/>
+      </roles>
+    </page>
+    <page id="logout">
+      <source type="dynamic" file="Logout"/>
+      <roles>
+        <inside/>
+      </roles>
+    </page>
+    <page id="manage">
+      <source type="dynamic" file="Manager"/>
+      <roles>
+        <inside/>
+      </roles>
+    </page>
+
+    <page id="catalog">
+      <source type="static" file="catalog.html"/>
+      <roles>
+        <inside/>
+      </roles>
+      <subpages>
+        <page id="list">
+          <source type="dynamic" file="CatalogList" factory="factory"/>
+          <roles>
+            <outside/>
+            <inside/>
+          </roles>
+        </page>
+        <page id="search">
+          <source type="dynamic" file="CatalogSearch" factory="factory"/>
+          <roles>
+            <inside/>
+            <outside/>
+          </roles>
+        </page>
+        <page id="shop" hidden="1" disabled="1">
+          <source type="dynamic" file="CatalogSearch" factory="factory"/>
+          <roles>
+            <inside/>
+          </roles>
+        </page>
+      </subpages>
+    </page>
+  </pageset>
+
+  <!--  FOOTER PAGES  -->
+  <pageset scope="foot">
+    <page id="help" disabled="1">
+      <source type="static" file="information/help.html"/>
+      <roles>
+        <public/>
+      </roles>
+    </page>
+    <page id="contact" hidden="1">
+      <source type="dynamic" file="Contact"/>
+      <roles>
+        <public/>
+      </roles>
+    </page>
+    <page id="imprint">
+      <source type="static" file="information/imprint.html"/>
+      <roles>
+        <public/>
+      </roles>
+    </page>
+  </pageset>
+</pagesets>

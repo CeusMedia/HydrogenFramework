@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<definition>
+  <channel type="html">
+
+    <form name="addSomething">												<!-- form for adding something -->
+
+      <field name="relation_id">											<!-- relation field -->
+        <syntax mandatory="1"/>												<!-- syntax definition -->
+        <input name="add_relation_id" type="select" style="l mandatory" source="optionsRelation" colspan=""/>		<!-- input definition -->
+        <semantic predicate="hasValue"/>										<!-- semantic definition -->
+        <semantic predicate="isGreater" edge="1"/>									<!-- semantic definition -->
+      </field>
+
+      <field name="title">												<!-- title field -->
+        <syntax class="" mandatory="1" minlength="3" maxlength="50"/>							<!-- syntax definition -->
+        <input name="add_title" type="input" style="l mandatory" validator="" colspan=""/>				<!-- input definition -->
+      </field>
+
+    </form>
+
+  </channel>
+</definition>
