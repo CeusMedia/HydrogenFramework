@@ -157,9 +157,9 @@ class Framework_Hydrogen_Model
 	 *	@param		array			$limits			Array of Limits to include in SQL Query
 	 *	@return		array
 	 */
-	public function getAll( $conditions = array(), $orders = array(), $limits = array() )
+	public function getAll( $conditions = array(), $orders = array(), $limits = array(), $columns = array(), $groupings = array() )
 	{
-		$data	= $this->table->getAllData( array(), $conditions, $orders, $limits );
+		$data	= $this->table->getAllData( $columns, $conditions, $orders, $limits );
 		return $data;
 	}
 
