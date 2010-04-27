@@ -1,5 +1,5 @@
 <?php
-class View_Helper_Navigation_MultiList extends Framework_Hydrogen_View_Helper
+class Framework_Hydrogen_View_Helper_Navigation_MultiList extends Framework_Hydrogen_View_Helper
 {
 	protected $multiple	= FALSE;
 

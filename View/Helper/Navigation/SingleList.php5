@@ -1,5 +1,5 @@
 <?php
-class View_Helper_Navigation_SingleList extends Framework_Hydrogen_View_Helper
+class Framework_Hydrogen_View_Helper_Navigation_SingleList extends Framework_Hydrogen_View_Helper
 {
 	protected $linkMap;
 	protected $classInner		= NULL;
