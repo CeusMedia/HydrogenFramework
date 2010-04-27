@@ -25,9 +25,6 @@
  *	@since			01.05.2006
  *	@version		0.1
  */
-import( 'de.ceus-media.adt.OptionObject' );
-import( 'de.ceus-media.file.Reader' );
-import( 'de.ceus-media.file.Writer' );
 /**
  *	Definition of Input Field within Channels, Screens and Forms.
  *	@package		framework.hydrogen
@@ -54,7 +51,7 @@ class Framework_Hydrogen_FieldDefinition extends ADT_OptionObject
 	 *	@param		string		prefix		Prefix of XML Definition Files
 	 *	@return		void
 	 */
-	public function __construct( $path = "", $use_cache = false, $cache_path = "cache/", $prefix = "" )
+	public function __construct( $path = "", $use_cache = FALSE, $cache_path = "cache/", $prefix = "" )
 	{
 		$this->setOption( 'path', $path );
 		if( $use_cache )
