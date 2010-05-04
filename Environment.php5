@@ -82,8 +82,6 @@ class Framework_Hydrogen_Environment
 
 	public function close()
 	{
-		if( $this->dbc )
-			$this->dbc->close();
 		unset( $this->dbc );																		//
 		unset( $this->session );																	//
 		unset( $this->request );																	//
@@ -166,22 +164,45 @@ class Framework_Hydrogen_Environment
 			error_reporting( $this->config->get( 'config.error.reporting' ) );
 	}
 
+	/**
+	 *	Sets up database support.
+	 *	@todo		implement pdo driver options (in config also)
+	 */
 	protected function initDatabase()
 	{
-		if( !$this->config->has( 'database.type' ) )
-			return;
-		$type		= $this->config->get( 'database.type' );
+		$driver		= $this->config->get( 'database.driver' );
 		$host		= $this->config->get( 'database.host' );
+		$port		= $this->config->get( 'database.port' );
 		$name		= $this->config->get( 'database.name' );
 		$username	= $this->config->get( 'database.username' );
 		$password	= $this->config->get( 'database.password' );
 		$prefix		= $this->config->get( 'database.prefix' );
 		$logfile	= $this->config->get( 'database.log' );
-		$lazy		= $this->config->get( 'database.lazy' );
+#		$lazy		= $this->config->get( 'database.lazy' );
+		$charset	= $this->config->get( 'database.charset' );
 
-		$class		= $lazy ? 'Database_MySQL_LazyConnection' : 'Database_MySQL_Connection';
-		$this->dbc	= Alg_Object_Factory::createObject( $class, array( $logfile ) );
-		$this->dbc->connect( $host, $username, $password, $name );
+		if( empty( $driver ) )
+			throw new RuntimeException( 'Database driver must be set in config:database.driver' );
+
+		$dsn		= new Database_PDO_DataSourceName( $driver, $name );
+		if( $host )
+			$dsn->setHost( $host );
+		if( $port )
+			$dsn->setPort( $port );
+		if( $username )
+			$dsn->setUsername( $username );
+		if( $password )
+			$dsn->setPassword( $password );
+
+		$driverOptions	= array();																	// to be implemented
+
+#		$class		= $lazy ? 'Database_MySQL_LazyConnection' : 'Database_MySQL_Connection';
+#		$this->dbc	= Alg_Object_Factory::createObject( $class, array( $logfile ) );
+#		$this->dbc	= new Database_MySQL_Connection( $logfile );
+		$this->dbc	= new Database_PDO_Connection( $dsn, $username, $password, $driverOptions );
+#		$this->dbc->connect( $host, $username, $password, $name );
+#		if( $charset )
+#			$this->dbc->exec( "SET NAMES '".$charset."';" );
 	}
 
 /*	protected function initFieldDefinition()

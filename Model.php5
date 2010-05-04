@@ -27,7 +27,6 @@ class DummyCache{
  *
  *	@category		cmFrameworks
  *	@package		framework.hydrogen
- *	@uses			Database_TableWriter
  *	@author			Christian Würker <christian.wuerker@ceus-media.de>
  *	@copyright		2007-2010 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -35,12 +34,11 @@ class DummyCache{
  *	@since			0.1
  *	@version		$Id$
  */
-import( 'de.ceus-media.database.TableWriter' );
 /**
  *	Generic Model Class of Framework Hydrogen.
  *	@category		cmFrameworks
  *	@package		framework.hydrogen
- *	@uses			Database_TableWriter
+ *	@uses			Database_PDO_TableWriter
  *	@author			Christian Würker <christian.wuerker@ceus-media.de>
  *	@copyright		2007-2010 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -57,10 +55,10 @@ class Framework_Hydrogen_Model
 	/**	@var		array							$fields			List of Database Table Fields */
 	protected $fields								= array();
 	/**	@var		array							$name			Array of foreign Keys of Database Table */
- 	protected $foreignKeys							= array();
+ 	protected $indices							= array();
 	/**	@var		string							$primaryKey		Primary Key of Database Table */
 	protected $primaryKey							= "";
-	/**	@var		Database_TableWriter			$table			Database Table Writer Object for reading from and writing to Database Table */
+	/**	@var		Database_PDO_TableWriter		$table			Database Table Writer Object for reading from and writing to Database Table */
 	protected $table;
 	/**	@var		string							$prefix			Database Table Prefix */
  	protected $prefix;
@@ -77,14 +75,14 @@ class Framework_Hydrogen_Model
 	public function __construct( Framework_Hydrogen_Environment $env, $id = NULL )
 	{
 		$this->setEnv( $env );
-		$this->table	= new Database_TableWriter(
+		$this->table	= new Database_PDO_TableWriter(
 			$env->getDatabase(),
 			$this->prefix.$this->name,
 			$this->fields,
 			$this->primaryKey,
 			$id
 		);
-		$this->table->setForeignKeys( $this->foreignKeys );
+		$this->table->setIndices( $this->indices );
 #		$this->cache	= new Net_Memory_Cache();
 #		$this->cache	= new DummyCache();
 #		$this->cache	= new File_Cache( 'cache' );
@@ -101,7 +99,7 @@ class Framework_Hydrogen_Model
 	 */
 	public function add( $data )
 	{
-		$id	= $this->table->addData( $data );
+		$id	= $this->table->insert( $data );
 		$this->cache->set( $this->cacheKey.$id, $data );
 		return $id;
 	}
@@ -117,9 +115,9 @@ class Framework_Hydrogen_Model
 	{
 		$this->table->focusPrimary( $id );
 		$result	= FALSE;
-		if( count( $this->table->getData() ) )
+		if( count( $this->table->get( FALSE ) ) )
 		{
-			$this->table->modifyData( $data );
+			$this->table->update( $data );
 			$result	= TRUE;
 		}
 		$this->table->defocus();
@@ -140,7 +138,7 @@ class Framework_Hydrogen_Model
 		if( !$data )
 		{
 			$this->table->focusPrimary( $id );
-			$data	= $this->table->getData( TRUE );
+			$data	= $this->table->get( TRUE );
 			$this->table->defocus();
 			$this->cache->set( $this->cacheKey.$id, $data );
 		}
@@ -159,58 +157,57 @@ class Framework_Hydrogen_Model
 	 */
 	public function getAll( $conditions = array(), $orders = array(), $limits = array(), $columns = array(), $groupings = array() )
 	{
-		$data	= $this->table->getAllData( $columns, $conditions, $orders, $limits );
+		$data	= $this->table->find( $columns, $conditions, $orders, $limits );
 		return $data;
 	}
 
 	/**
-	 *	Returns Data of all Lines selected by Foreign Key.
+	 *	Returns Data of all Lines selected by Index.
 	 *	@access		public
-	 *	@param		string			$key			Field Name of Foreign Key
-	 *	@param		string			$value			Value of Foreign Key
-	 *	@param		array			$conditions		Array of Conditions to include in SQL Query
+	 *	@param		string			$column			Column name of Index
+	 *	@param		string			$value			Value of Index
 	 *	@param		array			$orders			Array of Orders to include in SQL Query
 	 *	@param		array			$limits			Array of Limits to include in SQL Query
 	 *	@return		array
 	 */
-	public function getAllByForeignKey( $key, $value, $conditions = array(), $orders = array(), $limits = array() )
+	public function getAllByIndex( $index, $value, $orders = array(), $limits = array() )
 	{
-		$this->table->focusForeign( $key, $value );
-		$data	= $this->table->getData( array(), $conditions, $orders, $limits );
+		$this->table->focusIndex( $index, $value );
+		$data	= $this->table->get( FALSE, $orders, $limits );
 		$this->table->defocus();
 		return $data;
 	}
 
 	/**
-	 *	Returns Data of all Lines selected by Foreign Keys.
+	 *	Returns Data of all Lines selected by Indices.
 	 *	@access		public
-	 *	@param		array			$keys			Array of Foreign Keys
+	 *	@param		array			$indices			Array of Indices
 	 *	@param		array			$conditions		Array of Conditions to include in SQL Query
 	 *	@param		array			$orders			Array of Orders to include in SQL Query
 	 *	@param		array			$limits			Array of Limits to include in SQL Query
 	 *	@return		array
 	 */
-	public function getAllByForeignKeys( $keys = array(), $conditions = array(), $orders = array(), $limits = array() )
+	public function getAllByIndices( $indices = array(), $orders = array(), $limits = array() )
 	{
-		foreach( $keys as $key => $value )
-			$this->table->focusForeign( $key, $value );
-		$data	= $this->table->getAllData( array(), $conditions, $orders, $limits );
+		foreach( $indices as $index => $value )
+			$this->table->focusIndex( $index, $value );
+		$data	= $this->table->get( FALSE, $orders, $limits );
 		$this->table->defocus();
 		return $data;
 	}
 
 	/**
-	 *	Returns Data of single Line by ID selected by Foreign Key.
+	 *	Returns Data of single Line by ID selected by Index.
 	 *	@access		public
-	 *	@param		string			$key			Field Name of Foreign Key
-	 *	@param		string			$value			Value of Foreign Key
+	 *	@param		string			$key			Field Name of Index
+	 *	@param		string			$value			Value of Index
 	 *	@param		string			$field			Single Field to return
 	 *	@return		mixed
 	 */
-	public function getByForeignKey( $key, $value, $field = "" )
+	public function getByIndex( $key, $value, $field = "" )
 	{
-		$this->table->focusForeign( $key, $value );
-		$data	= $this->table->getData( TRUE );
+		$this->table->focusIndex( $key, $value );
+		$data	= $this->table->get( TRUE );
 		$this->table->defocus();
 		if( $field )
 			return $data[$field];
@@ -218,17 +215,17 @@ class Framework_Hydrogen_Model
 	}
 	
 	/**
-	 *	Returns Data of single Line selected by Foreign Keys.
+	 *	Returns Data of single Line selected by Indices.
 	 *	@access		public
-	 *	@param		array			$keys			Array of Foreign Keys
+	 *	@param		array			$keys			Array of Indices
 	 *	@param		string			$field			Single Field to return
 	 *	@return		mixed
 	 */
-	public function getByForeignKeys( $keys = array(), $field = "" )
+	public function getByIndices( $keys = array(), $field = "" )
 	{
 		foreach( $keys as $key => $value )
-			$this->table->focusForeign( $key, $value );
-		$data	= $this->table->getData( TRUE );
+			$this->table->focusIndex( $key, $value );
+		$data	= $this->table->get( TRUE );
 		$this->table->defocus();
 		if( $field )
 			return $data[$field];
@@ -245,9 +242,9 @@ class Framework_Hydrogen_Model
 	{
 		$this->table->focusPrimary( $id );
 		$result	= FALSE;
-		if( count( $this->table->getData() ) )
+		if( count( $this->table->get( FALSE ) ) )
 		{
-			$this->table->deleteData();
+			$this->table->delete();
 			$result	= TRUE;
 		}
 		$this->table->defocus();
