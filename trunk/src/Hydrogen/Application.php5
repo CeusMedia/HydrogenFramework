@@ -117,7 +117,8 @@ class Framework_Hydrogen_Application
 				'words'			=> $language->getWords( 'main' ),				// main UI word pairs
 				'content'		=> $this->content,								// calculates page content
 				'clock'			=> $this->clock,								// system clock for performance messure
-				'dbQueries'		=> (int) $database->countQueries,				// number of SQL queries sent
+				'dbQueries'		=> (int) $database->numberExecutes,				// number of SQL queries executed
+				'dbStatements'	=> (int) $database->numberStatements,			// number of SQL statements sent
 				'dev'			=> ob_get_clean(),								// error or development messages
 			)
 		);
