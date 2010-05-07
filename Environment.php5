@@ -2,7 +2,7 @@
 /**
  *	Setup for Resource Environment for Hydrogen Applications.
  *
- *	Copyright (c) 2010 Christian Würker (ceus-media.de)
+ *	Copyright (c) 2007-2010 Christian Würker (ceus-media.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -17,33 +17,29 @@
  *	You should have received a copy of the GNU General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *	@category		cmClasses
- *	@package		framework.hydrogen
- *	@uses			File_Configuration_Reader
- *	@uses			Net_HTTP_Request_Receiver
- *	@uses			Net_HTTP_Request_Response
- *	@uses			Net_HTTP_Session
+ *	@category		cmFrameworks
+ *	@package		Hydrogen
  *	@author			Christian Würker <christian.wuerker@ceus-media.de>
- *	@copyright		2010 Christian Würker
+ *	@copyright		2007-2010 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
- *	@link			http://code.google.com/p/cmclasses/
- *	@since			01.03.2010
- *	@version		0.1
+ *	@link			http://code.google.com/p/cmframeworks/
+ *	@since			0.1
+ *	@version		$Id$
  */
 /**
  *	Setup for Resource Environment for Hydrogen Applications.
- *	@category		cmClasses
- *	@package		framework.hydrogen
+ *	@category		cmFrameworks
+ *	@package		Hydrogen
  *	@uses			File_Configuration_Reader
  *	@uses			Net_HTTP_Request_Receiver
  *	@uses			Net_HTTP_Request_Response
  *	@uses			Net_HTTP_Session
  *	@author			Christian Würker <christian.wuerker@ceus-media.de>
- *	@copyright		2010 Christian Würker
+ *	@copyright		2007-2010 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
- *	@link			http://code.google.com/p/cmclasses/
- *	@since			01.03.2010
- *	@version		0.1
+ *	@link			http://code.google.com/p/cmframeworks/
+ *	@since			0.1
+ *	@version		$Id$
  */
 class Framework_Hydrogen_Environment
 {
@@ -157,11 +153,10 @@ class Framework_Hydrogen_Environment
 
 	protected function initConfiguration()
 	{
-		$data			= parse_ini_file( self::$configFile, FALSE );
-		$this->config	= new ADT_List_Dictionary( $data );
-		$errorLevelKey	= 'config.error.reporting';
-		if( $this->config->has( 'config.error.reporting' ) )
-			error_reporting( $this->config->get( 'config.error.reporting' ) );
+		$data			= parse_ini_file( self::$configFile, FALSE );			//  parse configuration file
+		$this->config	= new ADT_List_Dictionary( $data );						//  create dictionary from array
+		if( $this->config->has( 'config.error.reporting' ) )					//  error reporting is defined
+			error_reporting( $this->config->get( 'config.error.reporting' ) );	//  set error reporting level
 	}
 
 	/**

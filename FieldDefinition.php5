@@ -2,7 +2,7 @@
 /**
  *	Definition of Input Field within Channels, Screens and Forms.
  *
- *	Copyright (c) 2007-2009 Christian Würker (ceus-media.de)
+ *	Copyright (c) 2007-2010 Christian Würker (ceus-media.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -17,26 +17,28 @@
  *	You should have received a copy of the GNU General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *	@package		framework.hydrogen
+ *	@category		cmFrameworks
+ *	@package		Hydrogen
  *	@author			Christian Würker <christian.wuerker@ceus-media.de>
- *	@copyright		2007-2009 Christian Würker
+ *	@copyright		2007-2010 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
- *	@link			http://code.google.com/p/cmclasses/
- *	@since			01.05.2006
- *	@version		0.1
+ *	@link			http://code.google.com/p/cmframeworks/
+ *	@since			0.1
+ *	@version		$Id$
  */
 /**
  *	Definition of Input Field within Channels, Screens and Forms.
- *	@package		framework.hydrogen
+ *	@category		cmFrameworks
+ *	@package		Hydrogen
  *	@extends		ADT_OptionObject
  *	@uses			File_Reader
  *	@uses			File_Writer
  *	@author			Christian Würker <christian.wuerker@ceus-media.de>
- *	@copyright		2007-2009 Christian Würker
+ *	@copyright		2007-2010 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
- *	@link			http://code.google.com/p/cmclasses/
- *	@since			01.05.2006
- *	@version		0.1
+ *	@link			http://code.google.com/p/cmframeworks/
+ *	@since			0.1
+ *	@version		$Id$
  */
 class Framework_Hydrogen_FieldDefinition extends ADT_OptionObject
 {

@@ -2,7 +2,7 @@
 /**
  *	Generic Controller Class of Framework Hydrogen.
  *
- *	Copyright (c) 2007-2009 Christian Wï¿½rker (ceus-media.de)
+ *	Copyright (c) 2007-2010 Christian Würker (ceus-media.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -17,25 +17,25 @@
  *	You should have received a copy of the GNU General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *	@category		cmClasses
- *	@package		framework.hydrogen
- *	@author			Christian Wï¿½rker <christian.wuerker@ceus-media.de>
- *	@copyright		2007-2009 Christian Wï¿½rker
+ *	@category		cmFrameworks
+ *	@package		Hydrogen
+ *	@author			Christian Würker <christian.wuerker@ceus-media.de>
+ *	@copyright		2007-2010 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
- *	@link			http://code.google.com/p/cmclasses/
- *	@since			01.09.2006
- *	@version		0.5
+ *	@link			http://code.google.com/p/cmframeworks/
+ *	@since			0.1
+ *	@version		$Id$
  */
 /**
  *	Generic Controller Class of Framework Hydrogen.
- *	@category		cmClasses
- *	@package		framework.hydrogen
- *	@author			Christian Wï¿½rker <christian.wuerker@ceus-media.de>
- *	@copyright		2007-2009 Christian Wï¿½rker
+ *	@category		cmFrameworks
+ *	@package		Hydrogen
+ *	@author			Christian Würker <christian.wuerker@ceus-media.de>
+ *	@copyright		2007-2010 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
- *	@link			http://code.google.com/p/cmclasses/
- *	@since			01.09.2006
- *	@version		0.5
+ *	@link			http://code.google.com/p/cmframeworks/
+ *	@since			0.1
+ *	@version		$Id$
  */
 class Framework_Hydrogen_Controller
 {
@@ -68,32 +68,6 @@ class Framework_Hydrogen_Controller
 	public function addData( $key, $value, $topic = NULL )
 	{
 		return $this->setData( array( $key => $value ), $topic );
-	}
-
-	/**
-	 *
-	 *	Sets Data for View.
-	 *	@access		public
-	 *	@param		array		$data			Array of Data for View
-	 *	@param		string		[$topic]			Topic Name of Data
-	 *	@return		void
-	 */
-	public function setData( $data, $topic = "" )
-	{
-		if( !is_array( $data ) )
-			throw new InvalidArgumentException( 'Must be array' );
-		if( is_string( $topic) && !empty( $topic ) )
-		{
-			if( !isset( $this->_data[$topic] ) )
-				$this->_data[$topic]	= array();
-			foreach( $data as $key => $value )
-				$this->_data[$topic][$key]	= $value;
-		}
-		else
-		{
-			foreach( $data as $key => $value )
-				$this->_data[$key]	= $value;
-		}
 	}
 	
 	/**
@@ -129,12 +103,12 @@ class Framework_Hydrogen_Controller
 	/**
 	 *	Redirects by calling different Controller and Action.
 	 *	@access		public
-	 *	@param		string		$controller		Controller to be called
-	 *	@param		string		$action			Action to be called
+	 *	@param		string		$controller		Controller to be called, default: index
+	 *	@param		string		$action			Action to be called, default: index
 	 *	@param		array		$parameters		Map of additional parameters to set in request
 	 *	@return		void
 	 */
-	public function redirect( $controller, $action = "index", $parameters = array() )
+	public function redirect( $controller = 'index', $action = "index", $parameters = array() )
 	{
 		$this->env->getRequest()->set( 'controller', $controller );
 		$this->env->getRequest()->set( 'action', $action );
@@ -160,16 +134,29 @@ class Framework_Hydrogen_Controller
 	}
 
 	/**
-	 *	Loads View Class of called Controller.
-	 *	@access		protected
+	 *
+	 *	Sets Data for View.
+	 *	@access		public
+	 *	@param		array		$data			Array of Data for View
+	 *	@param		string		[$topic]			Topic Name of Data
 	 *	@return		void
 	 */
-	protected function getViewObject()
+	public function setData( $data, $topic = "" )
 	{
-		$class	= $this->prefixView.ucfirst( $this->controller );
-		if( !class_exists( $class, TRUE ) )
-			throw new RuntimeException( 'View "'.ucfirst( $this->controller ).'" is missing', 301 );
-		return Alg_Object_Factory::createObject( $class, array( &$this->env ) );
+		if( !is_array( $data ) )
+			throw new InvalidArgumentException( 'Must be array' );
+		if( is_string( $topic) && !empty( $topic ) )
+		{
+			if( !isset( $this->_data[$topic] ) )
+				$this->_data[$topic]	= array();
+			foreach( $data as $key => $value )
+				$this->_data[$topic][$key]	= $value;
+		}
+		else
+		{
+			foreach( $data as $key => $value )
+				$this->_data[$key]	= $value;
+		}
 	}
 
 	/**
