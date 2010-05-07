@@ -2,7 +2,7 @@
 /**
  *	Generic Main Class of Framework Hydrogen
  *
- *	Copyright (c) 2007-2009 Christian Würker (ceus-media.de)
+ *	Copyright (c) 2007-2010 Christian Würker (ceus-media.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -17,19 +17,19 @@
  *	You should have received a copy of the GNU General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *	@category		cmClasses
- *	@package		framework.hydrogen
+ *	@category		cmFrameworks
+ *	@package		Hydrogen
  *	@author			Christian Würker <christian.wuerker@ceus-media.de>
- *	@copyright		2007-2009 Christian Würker
+ *	@copyright		2007-2010 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
- *	@link			http://code.google.com/p/cmclasses/
- *	@since			01.09.2006
- *	@version		0.1
+ *	@link			http://code.google.com/p/cmframeworks/
+ *	@since			0.1
+ *	@version		$Id$
  */
 /**
  *	Generic Main Class of Framework Hydrogen
- *	@category		cmClasses
- *	@package		framework.hydrogen
+ *	@category		cmFrameworks
+ *	@package		Hydrogen
  *	@uses			Database_MySQL_Connection
  *	@uses			File_INI_Reader
  *	@uses			Net_HTTP_PartitionSession
@@ -42,11 +42,11 @@
  *	@uses			Framework_Hydrogen_Controller
  *	@uses			Language
  *	@author			Christian Würker <christian.wuerker@ceus-media.de>
- *	@copyright		2007-2009 Christian Würker
+ *	@copyright		2007-2010 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
- *	@link			http://code.google.com/p/cmclasses/
- *	@since			01.09.2006
- *	@version		0.1
+ *	@link			http://code.google.com/p/cmframeworks/
+ *	@since			0.1
+ *	@version		$Id$
  *	@todo			Code Documentation
  */
 class Framework_Hydrogen_Application
