@@ -99,7 +99,20 @@ class Framework_Hydrogen_Controller
 			return $result;
 		return $view->load();
 	}
-	
+
+	/**
+	 *	Loads View Class of called Controller.
+	 *	@access		protected
+	 *	@return		void
+	 */
+	protected function getViewObject()
+	{
+		$class	= $this->prefixView.ucfirst( $this->controller );
+		if( !class_exists( $class, TRUE ) )
+			throw new RuntimeException( 'View "'.ucfirst( $this->controller ).'" is missing', 301 );
+		return Alg_Object_Factory::createObject( $class, array( &$this->env ) );
+	}
+
 	/**
 	 *	Redirects by calling different Controller and Action.
 	 *	@access		public
