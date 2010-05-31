@@ -189,7 +189,7 @@ class Framework_Hydrogen_View
 			if( !is_string( $content ) )
 				$content	= $buffer;
 			else
-				$this->env->getMessenger()->noteFailure( $buffer );
+				$this->env->getMessenger()->noteFailure( nl2br( $buffer ) );
 		}
 		return $content;
 	}

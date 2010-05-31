@@ -62,8 +62,11 @@ class Framework_Hydrogen_Model
 	protected $table;
 	/**	@var		string							$prefix			Database Table Prefix */
  	protected $prefix;
+	/**	@var		ADT_List_Dictionary				$cache			Model data cache */
+	protected $cache;
 
-	public $cache;
+	public static $cacheClass						= 'ADT_List_Dictionary';
+
 
 	/**
 	 *	Constructor.
@@ -86,7 +89,7 @@ class Framework_Hydrogen_Model
 #		$this->cache	= new Net_Memory_Cache();
 #		$this->cache	= new DummyCache();
 #		$this->cache	= new File_Cache( 'cache' );
-		$this->cache	= new ADT_List_Dictionary();
+		$this->cache	= Alg_Object_Factory::createObject( self::$cacheClass );
 		$this->cacheKey	= 'db.'.$this->prefix.$this->name.'.';
 	}
 	
@@ -109,22 +112,19 @@ class Framework_Hydrogen_Model
 	 *	@access		public
 	 *	@param		int				$id				ID to focus on
 	 *	@param		array			$data			Data to edit
-	 *	@return		bool
+	 *	@return		int				Number of changed rows
 	 */
 	public function edit( $id, $data )
 	{
 		$this->table->focusPrimary( $id );
-		$result	= FALSE;
+		$result	= 0;
 		if( count( $this->table->get( FALSE ) ) )
-		{
-			$this->table->update( $data );
-			$result	= TRUE;
-		}
+			$result	= $this->table->update( $data );
 		$this->table->defocus();
 		$this->cache->remove( $this->cacheKey.$id );
 		return $result;
 	}
-	
+
 	/**
 	 *	Returns Data of single Line by ID.
 	 *	@access		public
@@ -132,7 +132,7 @@ class Framework_Hydrogen_Model
 	 *	@param		string			$field			Single Field to return
 	 *	@return		mixed
 	 */
-	public function get( $id, $field = "" )
+	public function get( $id, $field = '' )
 	{
 		$data = $this->cache->get( $this->cacheKey.$id );
 		if( !$data )
@@ -197,7 +197,7 @@ class Framework_Hydrogen_Model
 	}
 
 	/**
-	 *	Returns Data of single Line by ID selected by Index.
+	 *	Returns data of single line selected by index.
 	 *	@access		public
 	 *	@param		string			$key			Field Name of Index
 	 *	@param		string			$value			Value of Index
@@ -215,21 +215,56 @@ class Framework_Hydrogen_Model
 	}
 	
 	/**
-	 *	Returns Data of single Line selected by Indices.
+	 *	Returns data of single line selected by indices.
 	 *	@access		public
-	 *	@param		array			$keys			Array of Indices
-	 *	@param		string			$field			Single Field to return
+	 *	@param		array			$indices		Map of indices
+	 *	@param		string			$field			Single field to return
 	 *	@return		mixed
 	 */
-	public function getByIndices( $keys = array(), $field = "" )
+	public function getByIndices( $indices, $field = "" )
 	{
-		foreach( $keys as $key => $value )
+		foreach( $indices as $key => $value )
 			$this->table->focusIndex( $key, $value );
 		$data	= $this->table->get( TRUE );
 		$this->table->defocus();
 		if( $field )
 			return $data[$field];
 		return $data;
+	}
+
+	/**
+	 *	Indicates whether a table row is existing by ID.
+	 *	@param		int				$id				ID to focus on
+	 *	@return		bool
+	 */
+	public function has( $id )
+	{
+		if( $this->cache->has( $this->cacheKey.$id ) )
+			return TRUE;
+		return (bool) $this->get( $id );
+	}
+
+	/**
+	 *	Indicates whether a table row is existing by index.
+	 *	@access		public
+	 *	@param		string			$key			Column name of index
+	 *	@param		string			$value			Value of index
+	 *	@return		bool
+	 */
+	public function hasByIndex( $key, $value )
+	{
+		return (bool) $this->getByIndex( $key, $value );
+	}
+
+	/**
+	 *	Indicates whether a table row is existing by a map of indices.
+	 *	@access		public
+	 *	@param		array			$indices		Map of indices
+	 *	@return		bool
+	 */
+	public function hasByIndices( $indices )
+	{
+		return (bool) $this->getByIndices( $indices );
 	}
 	
 	/**

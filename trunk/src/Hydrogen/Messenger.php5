@@ -145,7 +145,7 @@ class Framework_Hydrogen_Messenger
 	 *	@param		string		$arg2				Argument to be set into Message
 	 *	@return		void
 	 */
-	public function noteError( $message, $arg1 = false, $arg2 = false )
+	public function noteError( $message, $arg1 = NULL, $arg2 = NULL )
 	{
 		$message	= $this->setIn( $message, $arg1, $arg2 );
 		$this->noteMessage( 1, $message);
@@ -159,7 +159,7 @@ class Framework_Hydrogen_Messenger
 	 *	@param		string		$arg2				Argument to be set into Message
 	 *	@return		void
 	 */
-	public function noteFailure( $message, $arg1 = false, $arg2 = false )
+	public function noteFailure( $message, $arg1 = NULL, $arg2 = NULL )
 	{
 		$message	= $this->setIn( $message, $arg1, $arg2 );
 		$this->noteMessage( 0, $message);
@@ -173,7 +173,7 @@ class Framework_Hydrogen_Messenger
 	 *	@param		string		$arg2				Argument to be set into Message
 	 *	@return		void
 	 */
-	public function noteNotice( $message, $arg1 = false, $arg2 = false )
+	public function noteNotice( $message, $arg1 = NULL, $arg2 = NULL )
 	{
 		$message	= $this->setIn( $message, $arg1, $arg2 );
 		$this->noteMessage( 2, $message);
@@ -187,7 +187,7 @@ class Framework_Hydrogen_Messenger
 	 *	@param		string		$arg2				Argument to be set into Message
 	 *	@return		void
 	 */
-	public function noteSuccess( $message, $arg1 = false, $arg2 = false )
+	public function noteSuccess( $message, $arg1 = NULL, $arg2 = NULL )
 	{
 		$message	= $this->setIn( $message, $arg1, $arg2 );
 		$this->noteMessage( 3, $message);
@@ -217,6 +217,7 @@ class Framework_Hydrogen_Messenger
 	 */
 	protected function setIn( $message, $arg1, $arg2 )
 	{
+		$message	= sprintf( $message, (string) $arg1, (string) $arg2 );
 		if( $arg2 )
 			$message	= preg_replace( "@(.*)\{\S+\}(.*)\{\S+\}(.*)@si", "$1".$arg1."$2".$arg2."$3", $message );
 		else if( $arg1 )

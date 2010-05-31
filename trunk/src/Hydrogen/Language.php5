@@ -61,30 +61,16 @@ class Framework_Hydrogen_Language
 	public function __construct( Framework_Hydrogen_Environment $env )
 	{
 		$this->env			= $env;
-		$this->filePath		= $this->env->getConfig()->get( 'path.locales' );
-		$languages			= $this->env->getConfig()->get( 'locale.allowed' );
-		$language			= $this->env->getConfig()->get( 'locale.default' );
+		$config				= $env->getConfig();
+
+		$this->filePath		= (string) $config->get( 'path.locales' );
+		$languages			= $config->has( 'locale.allowed' ) ? $config['locale.allowed'] : 'en';
+		$language			= $config->has( 'locale.default' ) ? $config['locale.default'] : 'en';
 		$this->languages	= explode( ',', $languages );
-		if( $this->env->getSession()->get( 'language' ) )
+
+		if( $this->env->getSession() && $this->env->getSession()->get( 'language' ) )
 			$language		= $this->env->getSession()->get( 'language' );
 		$this->setLanguage( $language );
-	}
-	
-	/**
-	 *	Sets a Language.
-	 *	@access		public
-	 *	@param		string		$language		Language to select
-	 *	@return		void
-	 */
-	public function setLanguage( $language )
-	{
-		$language	= strtolower( $language );
-		if( !in_array( $language, $this->languages ) )
-			return FALSE;
-		$this->data		= array();
-		$this->language	= $language;
-		$this->load( 'main' );
-		return TRUE;
 	}
 	
 	/**
@@ -101,34 +87,21 @@ class Framework_Hydrogen_Language
 	 *	Returns Array of Word Pairs of Language Topic.
 	 *	@access		public
 	 *	@param		string		$topic			Topic of Language
+	 *	@param		bool		$strict			Flag: throw exception if language topic is not loaded
 	 *	@param		bool		$force			Flag: note Failure if not loaded
 	 *	@return		array
+	 *	@throws		RuntimeException if language topic is not loaded and strict is on
 	 */
-	public function getWords( $topic, $force = FALSE )
+	public function getWords( $topic, $strict = TRUE, $force = TRUE )
 	{
 		if( isset( $this->data[$topic] ) )
 			return $this->data[$topic];
-		else if( $force )
-			$this->env->getMessenger()->noteFailure( 'Language Topic "'.$topic.'" is not defined yet' );
+		$message	= 'Invalid language topic "'.$topic.'"';
+		if( $strict )
+			throw new RuntimeException( $message, 221 );
+		if( $force )
+			$this->env->getMessenger()->noteFailure( $message );
 		return array();
-	}
-	
-	/**
-	 *	Loads Language File by Topic.
-	 *	@access		public
-	 *	@param		string		$topic			Topic of Language
-	 *	@return		void
-	 */
-	public function load( $topic, $force = FALSE )
-	{
-		$filename	= $this->getFilenameOfLanguage( $topic );
-		if( file_exists( $filename ) )
-		{
-			$data	= parse_ini_file( $filename, TRUE );
-			$this->data[$topic]	= $data;
-		}
-		else if( $force )
-			$this->env->getMessenger()->noteFailure( 'Language File "'.$topic.'" is not defined yet' );
 	}
 
 	/**
@@ -141,4 +114,49 @@ class Framework_Hydrogen_Language
 	{
 		return $this->filePath.$this->language."/".$topic.".ini";	
 	}
+
+	/**
+	 *	Loads Language File by Topic.
+	 *	@access		public
+	 *	@param		string		$topic			Topic of Language
+	 *	@param		bool		$strict			Flag: throw Exception if language file is not existing
+	 *	@return		void
+	 *	@throws		RuntimeException if language file is not existing (and strict is on)
+	 */
+	public function load( $topic, $strict = FALSE, $force = FALSE )
+	{
+		$fileName	= $this->getFilenameOfLanguage( $topic );
+		if( file_exists( $fileName ) )
+		{
+			$data	= parse_ini_file( $fileName, TRUE );
+			$this->data[$topic]	= $data;
+		}
+		else
+		{
+			$message	= 'Invalid language file "'.$topic.' ('.$fileName.')"';
+			if( $strict )
+				throw new RuntimeException( $message, 221 );
+			if( $force )
+				$this->env->getMessenger()->noteFailure( $message );
+		}
+	}
+
+	/**
+	 *	Sets a Language.
+	 *	@access		public
+	 *	@param		string		$language		Language to select
+	 *	@return		void
+	 */
+	public function setLanguage( $language )
+	{
+		$language	= strtolower( $language );
+		if( !in_array( $language, $this->languages ) )
+			return FALSE;
+		$this->data		= array();
+		$this->language	= $language;
+
+		$this->load( 'main' );
+		return TRUE;
+	}
 }
+?>

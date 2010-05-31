@@ -60,7 +60,6 @@ class Framework_Hydrogen_Application
 
 	protected $components			= array();
 	protected $_dev;
-	protected $clock;
 
 	public $prefixController		= "Controller_";
 	public $prefixModel				= "Model_";
@@ -74,16 +73,20 @@ class Framework_Hydrogen_Application
 	 */
 	public function __construct( $env = NULL )
 	{
+		error_reporting( E_ALL );
 		try
 		{
-			$this->clock	= new Alg_Time_Clock();
 			if( !$env )
 				$env		= Alg_Object_Factory::createObject( self::$classEnvironment );
 			$this->env		= $env;
-			$result			= $this->main();
-			$this->env->getResponse()->write( $result );
-			$this->env->getResponse()->send();
+
+			/*	@todo		Hack for moved clock, please remove later */
+			$this->clock	= $this->env->getClock();
+
+			$this->respond( $this->main() );
+			$this->logOnComplete();
 			$this->env->close();
+			exit( 0 );
 		}
 		catch( Exception $e )
 		{
@@ -91,6 +94,12 @@ class Framework_Hydrogen_Application
 		}
 	}
 
+	protected function logOnComplete()
+	{
+		$responseLength	= $this->env->getResponse()->getLength();
+		$responseTime	= $this->env->getClock()->stop( 6, 0 );
+		// ...
+	}
 	
 	/**
 	 *	Main Method of Framework calling Controller (and View) and Master View.
@@ -114,7 +123,7 @@ class Framework_Hydrogen_Application
 				'request'		=> $this->env->getRequest(),					// request object
 				'messenger'		=> $this->env->getMessenger(),					// UI messages for user
 				'language'		=> $config['languages.default'],				// document language
-				'words'			=> $language->getWords( 'main' ),				// main UI word pairs
+				'words'			=> $language->getWords( 'main', FALSE, FALSE ),	// main UI word pairs
 				'content'		=> $this->content,								// calculates page content
 				'clock'			=> $this->clock,								// system clock for performance messure
 				'dbQueries'		=> (int) $database->numberExecutes,				// number of SQL queries executed
@@ -132,21 +141,24 @@ class Framework_Hydrogen_Application
 	 */
 	protected function control( $defaultController = 'index', $defaultAction = 'index' )
 	{
-		$dispatched	= array();
+		$request	= $this->env->getRequest();
+		$dispatched		= array();
+		$requestMethod	= strtoupper( getEnv( 'REQUEST_METHOD' ) );
+		$requestMethod	= $request->getMethod();
 		try
 		{
 			do
 			{
-				$request	= $this->env->getRequest();
 				if( !$request->get( 'controller' ) )
 					$request->set( 'controller', $defaultController );
 				if( !$request->get( 'action' ) )
 					$request->set( 'action', $defaultAction );
 				$controller	= $request->get( 'controller' );
 				$action		= $request->get( 'action' );
+				$arguments	= $request->get( 'arguments' );
+				if( !is_array( $arguments ) )
+					$arguments	= array();
 
-		#		remark( "controller: ".$controller );
-		#		remark( "action: ".$action );
 				if( empty( $dispatched[$controller][$action] ) )
 					$dispatched[$controller][$action]	= 0;
 				if( $dispatched[$controller][$action] > 2 )
@@ -156,24 +168,32 @@ class Framework_Hydrogen_Application
 				}
 				$dispatched[$controller][$action]++;
 
-				$class		= $this->prefixController.ucfirst( $controller );
-				if( !class_exists( $class ) )
-					throw new RuntimeException( 'Controller "'.ucfirst( $controller ).'" not defined yet', 201 );
-				$object	= Alg_Object_Factory::createObject( $class, array( &$this->env ) );
-				if( !method_exists( $object, $action ) )
-					return $this->env->getMessenger()->noteFailure( "Action '".ucfirst( $class )."::".$action."' not defined yet." );
-				Alg_Object_MethodFactory::callObjectMethod( $object, $action );
-				if( strtoupper( getEnv( 'REQUEST_METHOD' ) ) == 'GET' )
+				$className	= $this->prefixController.ucfirst( $controller );						// get controller class name
+				if( !class_exists( $className ) )													// class is neither loaded nor loadable
 				{
-					if( !$object->redirect )
+					$message	= 'Invalid Controller "'.ucfirst( $controller ).'"';
+					throw new RuntimeException( $message, 201 );									// break with internal error
+				}
+				$factory	= new Alg_Object_Factory();												// raise object factory
+				$instance	= $factory->createObject( $className, array( &$this->env ) );			// build controller instance
+				if( !method_exists( $instance, $action ) )											// no action method in controller instance
+				{
+					$message	= 'Invalid Action "'.ucfirst( $className ).'::'.$action.'"';
+					throw new RuntimeException( $message, 211 );									// break with internal error
+				}
+				Alg_Object_MethodFactory::callObjectMethod( $instance, $action, $arguments );		// call action method in controller class with arguments
+
+				if( $requestMethod == 'GET' )
+				{
+					if( !$instance->redirect && $this->env->getSession() )
 					{
 						$this->env->getSession()->set( 'lastController', $controller );
 						$this->env->getSession()->set( 'lastAction', $action );
 					}
 				}
 			}
-			while( $object->redirect );
-			return $this->content = $object->getView();
+			while( $instance->redirect );
+			return $this->content = $instance->getView();
 		}
 		catch( Exception $e )
 		{
@@ -182,12 +202,36 @@ class Framework_Hydrogen_Application
 				$view	= new View_Error( $this->env );
 				$result	= $view->handleException( $e );
 				if( $result )
-				{
 					return $this->content = $result;
-				}
 			}
-			$this->env->getMessenger()->noteFailure( $e->getMessage().'.' );
+			else if( $this->env->getMessenger() )
+				$this->env->getMessenger()->noteFailure( $e->getMessage().'.' );
+			else
+				throw $e;
+
 		}
+	}
+
+	/**
+	 *	Simple implementation of content response. Can be overridden for special moves.
+	 *	@access		public
+	 *	@param		string		$body		Response content body
+	 *	@return		int			Number of sent bytes
+	 */
+	protected function respond( $body, $headers = array() )
+	{
+		$response	= $this->env->getResponse();
+
+		if( $body )
+			$response->setBody( $body );
+
+		foreach( $headers as $key => $value )
+			if( $value instanceof Net_HTTP_Header )
+				$response->addHeader( $header );
+			else
+				$response->addHeaderPair( $key, $value );
+		
+		return $response->send();
 	}
 
 	/**
