@@ -66,6 +66,7 @@ class Framework_Hydrogen_Environment
 	 */
 	public function __construct()
 	{
+		$this->initClock();
 		$this->initConfiguration();																	//  --  CONFIGURATION  --  //
 		$this->initSession();																		//  --  SESSION HANDLING  --  //
 		$this->initMessenger();																		//  --  UI MESSENGER  --  //
@@ -84,8 +85,15 @@ class Framework_Hydrogen_Environment
 		unset( $this->response );																	//
 		unset( $this->messenger );																	//
 		unset( $this->language );																	//
+		unset( $this->config );																		//
+		unset( $this->clock );																		//
 	}
-	
+
+	public function getClock()
+	{
+		return $this->clock;
+	}
+
 	/**
 	 *	Returns Configuration Object.
 	 *	@access		public
@@ -151,6 +159,11 @@ class Framework_Hydrogen_Environment
 		return $this->session;
 	}
 
+	public function initClock()
+	{
+		$this->clock	= new Alg_Time_Clock();
+	}
+
 	protected function initConfiguration()
 	{
 		$data			= parse_ini_file( self::$configFile, FALSE );			//  parse configuration file
@@ -165,16 +178,18 @@ class Framework_Hydrogen_Environment
 	 */
 	protected function initDatabase()
 	{
-		$driver		= $this->config->get( 'database.driver' );
-		$host		= $this->config->get( 'database.host' );
-		$port		= $this->config->get( 'database.port' );
-		$name		= $this->config->get( 'database.name' );
-		$username	= $this->config->get( 'database.username' );
-		$password	= $this->config->get( 'database.password' );
-		$prefix		= $this->config->get( 'database.prefix' );
-		$logfile	= $this->config->get( 'database.log' );
-#		$lazy		= $this->config->get( 'database.lazy' );
-		$charset	= $this->config->get( 'database.charset' );
+		$driver			= $this->config->get( 'database.driver' );
+		$host			= $this->config->get( 'database.host' );
+		$port			= $this->config->get( 'database.port' );
+		$name			= $this->config->get( 'database.name' );
+		$username		= $this->config->get( 'database.username' );
+		$password		= $this->config->get( 'database.password' );
+		$prefix			= $this->config->get( 'database.prefix' );
+		$logfile		= $this->config->get( 'database.log' );
+#		$lazy			= $this->config->get( 'database.lazy' );
+		$charset		= $this->config->get( 'database.charset' );
+		$logStatements	= $this->config->get( 'database.log.statements' );
+		$logErrors		= $this->config->get( 'database.log.errors' );
 
 		if( empty( $driver ) )
 			throw new RuntimeException( 'Database driver must be set in config:database.driver' );
@@ -195,6 +210,11 @@ class Framework_Hydrogen_Environment
 #		$this->dbc	= Alg_Object_Factory::createObject( $class, array( $logfile ) );
 #		$this->dbc	= new Database_MySQL_Connection( $logfile );
 		$this->dbc	= new Database_PDO_Connection( $dsn, $username, $password, $driverOptions );
+		if( $logStatements )
+			$this->dbc->setStatementLogFile( $logStatements );
+		if( $logErrors )
+			$this->dbc->setErrorLogFile( $logErrors );
+
 #		$this->dbc->connect( $host, $username, $password, $name );
 #		if( $charset )
 #			$this->dbc->exec( "SET NAMES '".$charset."';" );
@@ -223,18 +243,15 @@ class Framework_Hydrogen_Environment
 	protected function initRequest()
 	{
 		$this->request		= new Net_HTTP_Request_Receiver();
-/*		if( $this->request->get( 'param' ) && !$this->request->get( 'controller' ) )
-		{
-			$parts	= explode( ".", $this->request->get( 'param' ) );
-			$this->request->set( 'controller', $parts[0] );
-			$this->request->set( 'action', isset( $parts[1] ) ? $parts[1] : "index" );
-			$this->request->set( 'id', isset( $parts[2] ) ? $parts[2] : "0" );
-		}*/
+		$redirectUrl		= getEnv( 'REDIRECT_URL' );
+		if( !empty( $redirectUrl ) )
+			if( method_exists( $this, 'realizeRewrittenUrl' ) )
+				$this->realizeRewrittenUrl( $this->request );
 	}
 
 	protected function initResponse()
 	{
-		$this->response	= new Net_HTTP_Request_Response();
+		$this->response	= new Net_HTTP_Response();
 	}
 
 	protected function initSession()
@@ -245,6 +262,29 @@ class Framework_Hydrogen_Environment
 			$this->config['application.name'],
 			$this->config['config.session.name']
 		);
+	}
+
+	protected function realizeRewrittenUrl( Net_HTTP_Request_Receiver $request )
+	{
+		$path	= $request->getFromSource( 'path', 'GET' );
+		if( !trim( $path ) )
+			return;
+
+		$parts	= explode( '/', $path );
+		$request->set( 'controller',	array_shift( $parts ) );
+		$request->set( 'action',		array_shift( $parts ) );
+		$arguments	= array();
+		while( $part = array_shift( $parts ) )
+			if( trim( $part ) )
+				$arguments[]	= $part;
+		$request->set( 'arguments', $arguments );
+/*		if( $this->request->get( 'param' ) && !$this->request->get( 'controller' ) )
+		{
+			$parts	= explode( ".", $this->request->get( 'param' ) );
+			$this->request->set( 'controller', $parts[0] );
+			$this->request->set( 'action', isset( $parts[1] ) ? $parts[1] : "index" );
+			$this->request->set( 'id', isset( $parts[2] ) ? $parts[2] : "0" );
+		}*/
 	}
 }
 ?>
