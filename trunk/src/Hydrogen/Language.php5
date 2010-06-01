@@ -104,6 +104,11 @@ class Framework_Hydrogen_Language
 		return array();
 	}
 
+	public function hasWords( $topic )
+	{
+		return isset( $this->data[$topic] );
+	}
+
 	/**
 	 *	Returns File Name of Language Topic.
 	 *	@access		protected

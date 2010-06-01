@@ -92,7 +92,9 @@ class Framework_Hydrogen_Controller
 		if( !method_exists( $view, $this->action ) )
 			throw new RuntimeException( 'View Action "'.$this->action.'" not defined yet', 302 );
 		$data			= $this->getData();
-		$data['words']	= $this->env->getLanguage()->getWords( $this->controller );
+		$language		= $this->env->getLanguage();
+		if( $language->hasWords( $this->controller ) )
+			$data['words']	= $language->getWords( $this->controller );
 		$view->setData( $data );
 		$result			= Alg_Object_MethodFactory::callObjectMethod( $view, $this->action );
 		if( is_string( $result ) )
