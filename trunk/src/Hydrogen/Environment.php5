@@ -61,7 +61,6 @@ class Framework_Hydrogen_Environment
 	/**
 	 *	Constructor, sets up Resource Environment.
 	 *	@access		public
-	 *	@param		string		$logicClassName			Class Name of Logic Class, must be loaded before
 	 *	@return		void
 	 */
 	public function __construct()
@@ -254,13 +253,18 @@ class Framework_Hydrogen_Environment
 		$this->response	= new Net_HTTP_Response();
 	}
 
-	protected function initSession()
+	protected function initSession( $keyPartitionName = NULL, $keySessionName = NULL )
 	{
-		$this->session	= new Net_HTTP_Session();
-		return;
+		$partitionName	= md5( getCwd() );
+		$sessionName	= 'sid';
+		if( $keyPartitionName && $this->config->get( $keyPartitionName ) )
+			$partitionName	= $this->config->get( $keyPartitionName );
+		if( $keySessionName && $this->config->get( $keySessionName ) )
+			$sessionName	= $this->config->get( $keySessionName );
+
 		$this->session	= new Net_HTTP_PartitionSession(
-			$this->config['application.name'],
-			$this->config['config.session.name']
+			$partitionName,
+			$sessionName
 		);
 	}
 
