@@ -59,7 +59,7 @@ class Framework_Hydrogen_Controller
 	 *	@param		Framework_Hydrogen_Environment	$env			Application Environment Object
 	 *	@return		void
 	 */
-	public function __construct( Framework_Hydrogen_Environment &$env )
+	public function __construct( Framework_Hydrogen_Environment $env )
 	{
 		$this->setEnv( $env );
 	}

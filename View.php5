@@ -143,12 +143,12 @@ class Framework_Hydrogen_View
 		return $this->loadTemplate( $controller, $action );
 	}
 
-	public function loadContent( $fileName )
+	public function loadContent( $fileName, $data = array() )
 	{
 		if( !$this->isContentFile( $fileName ) )
 			throw new RuntimeException( 'File "'.$fileName.'" is missing.', 321 );
 		$uri	= $this->getContentFileUri( $fileName );
-		return file_get_contents( $uri );
+		return UI_Template::render( $uri, $data);
 	}
 
 	/**
