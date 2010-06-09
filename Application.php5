@@ -53,6 +53,8 @@ class Framework_Hydrogen_Application
 {
 	/**	@var		string							$classEnvironment		Class Name of Application Environment to build */
 	public static $classEnvironment					= 'Framework_Hydrogen_Environment';
+	public static $checkClassActionArguments		= TRUE;
+
 	/**	@var		string							$content				Collected Content to respond */
 	protected $content								= '';
 	/**	@var		Framework_Hydrogen_Environment	$env					Application Environment Object */
@@ -144,6 +146,7 @@ class Framework_Hydrogen_Application
 		try
 		{
 			$dispatcher	= new Framework_Hydrogen_Dispatcher( $this->env );
+			$dispatcher->checkClassActionArguments	= self::$checkClassActionArguments;
 			if( $defaultController )
 				$dispatcher->defaultController	= $defaultController;
 			if( $defaultAction )

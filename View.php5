@@ -188,8 +188,10 @@ class Framework_Hydrogen_View
 		{
 			if( !is_string( $content ) )
 				$content	= $buffer;
-			else
+			else if( $this->env->getMessenger() )
 				$this->env->getMessenger()->noteFailure( nl2br( $buffer ) );
+			else
+				throw new RuntimeException( $buffer );
 		}
 		return $content;
 	}

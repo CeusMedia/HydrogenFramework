@@ -43,15 +43,17 @@
  */
 class Framework_Hydrogen_Dispatcher
 {
-	public $defaultController	= 'index';
-	public $defaultAction		= 'index';
-	public $defaultArguments	= array();
+	public $defaultController			= 'index';
+	public $defaultAction				= 'index';
+	public $defaultArguments			= array();
 
-	protected $history			= array();
+	protected $history					= array();
 
-	public $prefixController		= "Controller_";
-//	public $prefixModel				= "Model_";
-//	public $prefixView				= "View_";
+	public $checkClassActionArguments	= TRUE;
+
+	public $prefixController			= "Controller_";
+//	public $prefixModel					= "Model_";
+//	public $prefixView					= "View_";
 
 
 	public function __construct( Framework_Hydrogen_Environment $env ) {
@@ -136,7 +138,8 @@ class Framework_Hydrogen_Dispatcher
 			$factory	= new Alg_Object_Factory();													// raise object factory
 			$instance	= $factory->createObject( $className, array( &$this->env ) );				// build controller instance
 			$this->checkClassAction( $className, $instance, $action );
-			$this->checkClassActionArguments( $className, $instance, $action );
+			if( $this->checkClassActionArguments )
+				$this->checkClassActionArguments( $className, $instance, $action );
 
 			Alg_Object_MethodFactory::callObjectMethod( $instance, $action, $arguments );			// call action method in controller class with arguments
 
