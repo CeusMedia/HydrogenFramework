@@ -200,6 +200,7 @@ class Framework_Hydrogen_Messenger
 	 */
 	public function gotError()
 	{
+		$messages	= (array) $this->env->getSession()->get( $this->keyMessages );
 		foreach( $messages as $message )
 			if( $message['type'] < 2 )
 				return true;
