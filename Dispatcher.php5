@@ -64,7 +64,7 @@ class Framework_Hydrogen_Dispatcher
 	{
 		if( !class_exists( $className ) )															// class is neither loaded nor loadable
 		{
-			$message	= 'Invalid Controller "'.ucfirst( $controller ).'"';
+			$message	= 'Invalid Controller "'.ucfirst( $className ).'"';
 			throw new RuntimeException( $message, 201 );											// break with internal error
 		}
 	}
