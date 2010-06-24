@@ -186,7 +186,6 @@ class Framework_Hydrogen_View
 		$content	= $result;
 		if( trim( $buffer ) )
 		{
-			error_log( $buffer."\n", 3, "buffer.log" );
 			if( !is_string( $content ) )
 				$content	= $buffer;
 			else if( $this->env->getMessenger() )
