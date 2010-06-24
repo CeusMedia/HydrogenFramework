@@ -144,7 +144,6 @@ class Framework_Hydrogen_Dispatcher
 			Alg_Object_MethodFactory::callObjectMethod( $instance, $action, $arguments );			// call action method in controller class with arguments
 
 			$this->noteLastCall( $instance );
-
 		}
 		while( $instance->redirect );
 		return $instance->getView();
