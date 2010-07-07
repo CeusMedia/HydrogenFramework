@@ -64,6 +64,8 @@ class Framework_Hydrogen_Model
  	protected $prefix;
 	/**	@var		ADT_List_Dictionary				$cache			Model data cache */
 	protected $cache;
+	/**	@var		int								$fetchMode		PDO fetch mode */
+	protected $fetchMode;
 
 	public static $cacheClass						= 'ADT_List_Dictionary';
 
@@ -85,6 +87,8 @@ class Framework_Hydrogen_Model
 			$this->primaryKey,
 			$id
 		);
+		if( $this->fetchMode )
+			$this->table->setFetchMode( $this->fetchMode );
 		$this->table->setIndices( $this->indices );
 #		$this->cache	= new Net_Memory_Cache();
 #		$this->cache	= new DummyCache();
