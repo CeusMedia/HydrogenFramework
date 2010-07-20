@@ -101,7 +101,7 @@ class Framework_Hydrogen_Base
 		$this->setViewComponents( array(
 				'config'		=> $this->config,
 				'content'		=> $this->content,
-				'messages'		=> $this->messenger->buildMessages( $this->config['layout']['format_timestamp'] ),
+				'messages'		=> $this->messenger->buildMessages( $this->config['layout']['format_timestamp'], TRUE, TRUE ),
 				'language'		=> $this->config['languages']['default'],
 				'words'			=> $this->language->getWords( 'main' ),
 				'stopwatch'		=> $this->clock->stop(),

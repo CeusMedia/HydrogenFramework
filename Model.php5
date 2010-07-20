@@ -110,7 +110,25 @@ class Framework_Hydrogen_Model
 		$this->cache->set( $this->cacheKey.$id, $data );
 		return $id;
 	}
-	
+
+	public function count( $conditions )
+	{
+		return $this->table->count( $conditions );
+	}
+
+	/**
+	 *	Returns number of entries within an index.
+	 *	@access		public
+	 *	@param		string			$column			Column name of Index
+	 *	@param		string			$value			Value of Index
+	 *	@return		integer			Number of entries within this index
+	 */
+	public function countByIndex( $index, $value )
+	{
+		$conditions	= array( $index => $value );
+		return $this->count( $conditions );
+	}
+
 	/**
 	 *	Returns Data of single Line by ID.
 	 *	@access		public

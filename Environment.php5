@@ -278,9 +278,12 @@ class Framework_Hydrogen_Environment
 		$request->set( 'controller',	array_shift( $parts ) );
 		$request->set( 'action',		array_shift( $parts ) );
 		$arguments	= array();
-		while( $part = array_shift( $parts ) )
-			if( trim( $part ) )
+		while( count( $parts ) )
+		{
+			$part = trim( array_shift( $parts ) );
+			if( strlen( $part ) )
 				$arguments[]	= $part;
+		}
 		$request->set( 'arguments', $arguments );
 /*		if( $this->request->get( 'param' ) && !$this->request->get( 'controller' ) )
 		{
