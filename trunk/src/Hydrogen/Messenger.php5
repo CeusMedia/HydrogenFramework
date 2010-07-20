@@ -96,9 +96,12 @@ class Framework_Hydrogen_Messenger
 	/**
 	 *	Builds Output for each Message on the Message Stack.
 	 *	@access		public
+	 *	@param		string		$timeFormat		Date string to format message timestamp with
+	 *	@param		bool		$clear			Flag: clear stack in session after rendering
+	 *	@param		bool		$linkResources	Flag: try to link resources in message
 	 *	@return		string
 	 */
-	public function buildMessages( $timeFormat = NULL, $clear = TRUE )
+	public function buildMessages( $timeFormat = NULL, $clear = TRUE, $linkResources = FALSE )
 	{
 		$messages	= (array) $this->env->getSession()->get( $this->keyMessages );
 		$list		= '';
@@ -107,6 +110,10 @@ class Framework_Hydrogen_Messenger
 			$list	= array();
 			foreach( $messages as $message )
 			{
+				if( $linkResources )
+					$message['message']	= preg_replace( '/(http.+)("|\'| )/U', '<a href="\\1">\\1</a>\\2', $message['message'] );
+
+
 				$class		= $this->classes[$message['type']];
 				$message	= UI_HTML_Tag::create( 'span', $message['message'], array( 'class' => 'message' ) );
 				if( $timeFormat && !empty( $message['timestamp'] ) )
