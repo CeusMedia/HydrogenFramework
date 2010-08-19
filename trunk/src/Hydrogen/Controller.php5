@@ -39,6 +39,9 @@
  */
 class Framework_Hydrogen_Controller
 {
+	protected static $prefixModel		= "Model_";
+	protected static $prefixView		= "View_";
+
 	/**	@var		Framework_Hydrogen_Environment	$env			Application Environment Object */
 	protected $env;
 	/**	@var		array							$_data			Collected Data for View */
@@ -49,9 +52,8 @@ class Framework_Hydrogen_Controller
 	protected $action			= "";
 	/**	@var		bool							$redirect		Flag for Redirection */
 	var $redirect				= FALSE;
-
-	protected $prefixModel		= "Model_";
-	protected $prefixView		= "View_";
+	/**	@var		Framework_Hydrogen_Environment	$view			View instance for controller */
+	protected $view;
 
 	/**
 	 *	Constructor.
@@ -62,12 +64,13 @@ class Framework_Hydrogen_Controller
 	public function __construct( Framework_Hydrogen_Environment $env )
 	{
 		$this->setEnv( $env );
+		$this->view	= $this->getViewObject();
 	}
 	
 	//  --  SETTERS & GETTERS  --  //
 	public function addData( $key, $value, $topic = NULL )
 	{
-		return $this->setData( array( $key => $value ), $topic );
+		return $this->view->setData( array( $key => $value ), $topic );
 	}
 	
 	/**
@@ -77,7 +80,7 @@ class Framework_Hydrogen_Controller
 	 */
 	public function getData()
 	{
-		return $this->_data;
+		return $this->view->getData();
 	}
 	
 	//  --  PUBLIC METHODS  --  //
@@ -88,18 +91,15 @@ class Framework_Hydrogen_Controller
 	 */
 	public function getView()
 	{
-		$view	= $this->getViewObject();
-		if( !method_exists( $view, $this->action ) )
+		if( !method_exists( $this->view, $this->action ) )
 			throw new RuntimeException( 'View Action "'.$this->action.'" not defined yet', 302 );
-		$data			= $this->getData();
 		$language		= $this->env->getLanguage();
 		if( $language->hasWords( $this->controller ) )
 			$data['words']	= $language->getWords( $this->controller );
-		$view->setData( $data );
-		$result			= Alg_Object_MethodFactory::callObjectMethod( $view, $this->action );
+		$result			= Alg_Object_MethodFactory::callObjectMethod( $this->view, $this->action );
 		if( is_string( $result ) )
 			return $result;
-		return $view->load();
+		return $this->view->load();
 	}
 
 	/**
@@ -109,7 +109,7 @@ class Framework_Hydrogen_Controller
 	 */
 	protected function getViewObject()
 	{
-		$class	= $this->prefixView.ucfirst( $this->controller );
+		$class	= self::$prefixView.ucfirst( $this->controller );
 		if( !class_exists( $class, TRUE ) )
 			throw new RuntimeException( 'View "'.ucfirst( $this->controller ).'" is missing', 301 );
 		return Alg_Object_Factory::createObject( $class, array( &$this->env ) );

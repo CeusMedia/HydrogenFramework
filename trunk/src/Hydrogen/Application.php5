@@ -164,7 +164,7 @@ class Framework_Hydrogen_Application
 			}
 			else if( !$this->env->getMessenger() )
 				throw $e;
-			$this->env->getMessenger()->noteFailure( $e->getMessage().'.' );
+			$this->env->getMessenger()->noteFailure( $e->getMessage() );
 		}
 	}
 
