@@ -206,10 +206,10 @@ class Framework_Hydrogen_View
 	 *	Sets Data of View.
 	 *	@access		public
 	 *	@param		array		$data			Array of Data for View
-	 *	@param		string		[$topic]			Topic Name of Data
+	 *	@param		string		$topic			Optional: Topic Name of Data
 	 *	@return		void
 	 */
-	public function setData( $data, $topic = "" )
+	public function setData( $data, $topic = NULL )
 	{
 		if( $topic )
 		{

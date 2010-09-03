@@ -95,7 +95,7 @@ class Framework_Hydrogen_Controller
 			throw new RuntimeException( 'View Action "'.$this->action.'" not defined yet', 302 );
 		$language		= $this->env->getLanguage();
 		if( $language->hasWords( $this->controller ) )
-			$data['words']	= $language->getWords( $this->controller );
+			$this->view->setData( $language->getWords( $this->controller ), 'words' );
 		$result			= Alg_Object_MethodFactory::callObjectMethod( $this->view, $this->action );
 		if( is_string( $result ) )
 			return $result;
@@ -158,6 +158,9 @@ class Framework_Hydrogen_Controller
 	 */
 	public function setData( $data, $topic = "" )
 	{
+		if( $this->view )
+			$this->view->setData( $data, $topic );
+		return;
 		if( !is_array( $data ) )
 			throw new InvalidArgumentException( 'Must be array' );
 		if( is_string( $topic) && !empty( $topic ) )

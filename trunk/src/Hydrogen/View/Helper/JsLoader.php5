@@ -100,7 +100,9 @@ class Framework_Hydrogen_View_Helper_JsLoader
 	 *	@return		string
 	 */
 	public function getHash() {
-		$key	= implode( '_', $this->scripts );
+		$copy	= $this->scripts;
+		sort( $copy );
+		$key	= implode( '_', $copy );
 		return md5( $this->revision.$key );
 	}
 
@@ -120,19 +122,8 @@ class Framework_Hydrogen_View_Helper_JsLoader
 	 *	@return		string
 	 */
 	public function getContent(){
-		if( $revision )
-			$content	= "/* @revision ".$revision." */\n";
-		$fileJs	= $this->getCacheFileName();
-		if( file_exists( $fileJs ) )
-			return File_Reader::load( $fileJs );
-		$contents	= array();
-		foreach( $this->scripts as $url ){
-			$content	= file_get_contents( $url );
-			$contents[]	= $content;
-		}
-		$content	= implode( "\n\n", $contents );
-		File_Writer::save( $fileJs, $content );
-		return $content;
+		$fileJs	= $this->getFileName();
+		return File_Reader::load( $fileJs );
 	}
 
 	/**
@@ -144,15 +135,13 @@ class Framework_Hydrogen_View_Helper_JsLoader
 		$fileJs	= $this->getCacheFileName();
 		if( !file_exists( $fileJs ) ) {
 			$contents	= array();
+			if( $this->revision )
+				$content	= "/* @revision ".$this->revision." */\n";
 			foreach( $this->scripts as $url ){
 				$content	= file_get_contents( $url );
 				$contents[]	= $content;
 			}
 			$content	= implode( "\n\n", $contents );
-			$attributes	= array(
-				'type'		=> 'text/javascript',
-				'language'	=> 'JavaScript'
-			);
 			File_Writer::save( $fileJs, $content );
 		}
 		return $fileJs;

@@ -88,7 +88,9 @@ class Framework_Hydrogen_Application
 		}
 		catch( Exception $e )
 		{
-			new UI_HTML_Exception_TraceViewer( $e );
+			$page	= new UI_HTML_Exception_Page();
+			die( $page->render( $e ) );
+		#	new UI_HTML_Exception_TraceViewer( $e );
 		}
 	}
 
