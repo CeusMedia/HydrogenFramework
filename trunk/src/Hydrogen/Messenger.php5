@@ -82,6 +82,21 @@ class Framework_Hydrogen_Messenger
 	}
 	
 	/**
+	 *	Inserts arguments into a Message.
+	 *	@access		protected
+	 *	@param		string		$arguments			List with message and parameters to apply using sprintf
+	 *	@return		string		Resulting message or original message if insufficient parameters
+	 */
+	protected function applyParametersToMessage( $arguments )
+	{
+		$function	= new ReflectionFunction( 'sprintf' );
+		$message	= $function->invokeArgs( $arguments );
+		if( !$message )
+			$message	= array_shift( $arguments );
+		return $message;
+	}
+
+	/**
 	 *	Build Headings for Message Block.
 	 *	@access		public
 	 *	@return		string
@@ -148,13 +163,12 @@ class Framework_Hydrogen_Messenger
 	 *	Saves a Error Message on the Message Stack.
 	 *	@access		public
 	 *	@param		string		$message			Message to display
-	 *	@param		string		$arg1				Argument to be set into Message
-	 *	@param		string		$arg2				Argument to be set into Message
+	 *	@param		string		[$arg1]*			Arguments to be set into Message
 	 *	@return		void
 	 */
-	public function noteError( $message, $arg1 = NULL, $arg2 = NULL )
+	public function noteError( $message, $arg1 = NULL )
 	{
-		$message	= $this->setIn( $message, $arg1, $arg2 );
+		$message	= $this->applyParametersToMessage( func_get_args() );
 		$this->noteMessage( 1, $message);
 	}
 
@@ -162,13 +176,12 @@ class Framework_Hydrogen_Messenger
 	 *	Saves a Failure Message on the Message Stack.
 	 *	@access		public
 	 *	@param		string		$message			Message to display
-	 *	@param		string		$arg1				Argument to be set into Message
-	 *	@param		string		$arg2				Argument to be set into Message
+	 *	@param		string		[$arg1]*			Arguments to be set into Message
 	 *	@return		void
 	 */
-	public function noteFailure( $message, $arg1 = NULL, $arg2 = NULL )
+	public function noteFailure( $message, $arg1 = NULL )
 	{
-		$message	= $this->setIn( $message, $arg1, $arg2 );
+		$message	= $this->applyParametersToMessage( func_get_args() );
 		$this->noteMessage( 0, $message);
 	}
 	
@@ -182,7 +195,7 @@ class Framework_Hydrogen_Messenger
 	 */
 	public function noteNotice( $message, $arg1 = NULL, $arg2 = NULL )
 	{
-		$message	= $this->setIn( $message, $arg1, $arg2 );
+		$message	= $this->applyParametersToMessage( func_get_args() );
 		$this->noteMessage( 2, $message);
 	}
 	
@@ -196,7 +209,7 @@ class Framework_Hydrogen_Messenger
 	 */
 	public function noteSuccess( $message, $arg1 = NULL, $arg2 = NULL )
 	{
-		$message	= $this->setIn( $message, $arg1, $arg2 );
+		$message	= $this->applyParametersToMessage( func_get_args() );
 		$this->noteMessage( 3, $message);
 	}
 	
@@ -212,27 +225,6 @@ class Framework_Hydrogen_Messenger
 			if( $message['type'] < 2 )
 				return true;
 		return false;
-	}
-
-	//  --  PRIVATE METHODS
-	/**
-	 *	Inserts arguments into a Message.
-	 *	@access		protected
-	 *	@param		string		$message			Message to display
-	 *	@param		string		$arg1				Argument to be set into Message
-	 *	@param		string		$arg2				Argument to be set into Message
-	 *	@return		string
-	 */
-	protected function setIn( $message, $arg1, $arg2 )
-	{
-		$message	= sprintf( $message, (string) $arg1, (string) $arg2 );
-		if( $arg2 )
-			$message	= preg_replace( "@(.*)\{\S+\}(.*)\{\S+\}(.*)@si", "$1".$arg1."$2".$arg2."$3", $message );
-		else if( $arg1 )
-			$message	= preg_replace( "@(.*)\{\S+\}(.*)@si", "$1###".$arg1."###$2", $message );
-//		$message		= preg_replace( "@\{\S+\}@i", "", $message );
-		$message		= str_replace( "###", "", $message );
-		return $message;
 	}
 	
 	/**
