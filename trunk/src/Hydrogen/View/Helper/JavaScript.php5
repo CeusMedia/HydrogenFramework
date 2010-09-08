@@ -131,16 +131,19 @@ class Framework_Hydrogen_View_Helper_JavaScript
 	/**
 	 *	Returns name of combined JavaScript file.
 	 *	@access		protected
+	 *	@param		bool		$forceFresh		Flag: force fresh creation instead of using cache
 	 *	@return		string
 	 */
-	protected function getFileName(){
+	protected function getFileName( $forceFresh = FALSE ){
 		$fileJs	= $this->getCacheFileName();
-		if( !file_exists( $fileJs ) ) {
+		if( !file_exists( $fileJs ) || $forceFresh ) {
 			$contents	= array();
 			if( $this->revision )
 				$content	= "/* @revision ".$this->revision." */\n";
 			foreach( $this->urls as $url ){
-				$content	= file_get_contents( $url );
+				$content	= @file_get_contents( $url );
+				if( $content === FALSE )
+					throw new RuntimeException( 'Script file "'.$url.'" not existing' );
 				$contents[]	= $content;
 			}
 			$content	= implode( "\n\n", $contents );
@@ -157,14 +160,15 @@ class Framework_Hydrogen_View_Helper_JavaScript
 	 *	Renders an HTML scrtipt tag with all collected JavaScript URLs and blocks.
 	 *	@access		public
 	 *	@param		bool		$indentEndTag	Flag: indent end tag by 2 tabs
+	 *	@param		bool		$forceFresh		Flag: force fresh creation instead of using cache
 	 *	@return		string
 	 */
-	public function render( $indentEndTag = FALSE ){
+	public function render( $indentEndTag = FALSE, $forceFresh = FALSE ){
 		$links		= '';
 		$scripts	= '';
 		if( $this->urls )
 		{
-			$fileJs	= $this->getFileName();
+			$fileJs	= $this->getFileName( $forceFresh );
 			$attributes	= array(
 				'type'		=> 'text/javascript',
 	//			'language'	=> 'JavaScript',
