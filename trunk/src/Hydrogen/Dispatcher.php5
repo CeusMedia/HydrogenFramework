@@ -57,7 +57,8 @@ class Framework_Hydrogen_Dispatcher
 
 
 	public function __construct( Framework_Hydrogen_Environment $env ) {
-		$this->env	= $env;
+		$this->env		= $env;
+		$this->request	= $env->getRequest();
 	}
 
 	protected function checkClass( $className )
@@ -80,8 +81,8 @@ class Framework_Hydrogen_Dispatcher
 
 	protected function checkClassActionArguments( $className, $instance )
 	{
-		$action		= $this->env->getRequest()->get( 'action' );
-		$arguments	= $this->env->getRequest()->get( 'arguments' );
+		$action		= $this->request->get( 'action' );
+		$arguments	= $this->request->get( 'arguments' );
 		$numberArgsAtLeast	= 0;
 		$numberArgsTotal	= 0;
 		$methodReflection	= new ReflectionMethod( $instance, $action );
@@ -107,8 +108,8 @@ class Framework_Hydrogen_Dispatcher
 
 	protected function checkForLoop()
 	{
-		$controller	= $this->env->getRequest()->get( 'controller' );
-		$action		= $this->env->getRequest()->get( 'action' );
+		$controller	= $this->request->get( 'controller' );
+		$action		= $this->request->get( 'action' );
 		if( empty( $this->history[$controller][$action] ) )
 			$this->history[$controller][$action]	= 0;
 		if( $this->history[$controller][$action] > 2 )
@@ -128,10 +129,9 @@ class Framework_Hydrogen_Dispatcher
 			$this->realizeCall();
 			$this->checkForLoop();
 
-			$request	= $this->env->getRequest();
-			$controller	= $request->get( 'controller' );
-			$action		= $request->get( 'action' );
-			$arguments	= $request->get( 'arguments' );
+			$controller	= trim( $this->request->get( 'controller' ) );
+			$action		= trim( $this->request->get( 'action' ) );
+			$arguments	= trim( $this->request->get( 'arguments' ) );
 
 			$className	= $this->prefixController.ucfirst( $controller );							// get controller class name
 			$this->checkClass( $className );
@@ -151,27 +151,25 @@ class Framework_Hydrogen_Dispatcher
 
 	protected function noteLastCall( $instance )
 	{
-		$request	= $this->env->getRequest();
 		$session	= $this->env->getSession();
 		if( !$session )
 			return;
-		if( $request->getMethod() != 'GET' )
+		if( $this->request->getMethod() != 'GET' )
 			return;
 		if( $instance->redirect )
 			return;
-		$session->set( 'lastController', $request->get( 'controller' ) );
-		$session->set( 'lastAction', $request->get( 'action' ) );
+		$session->set( 'lastController', $this->request->get( 'controller' ) );
+		$session->set( 'lastAction', $this->request->get( 'action' ) );
 	}
 
 	protected function realizeCall()
 	{
-		$request	= $this->env->getRequest();
-		if( !$request->get( 'controller' ) )
-			$request->set( 'controller', $this->defaultController );
-		if( !$request->get( 'action' ) )
-			$request->set( 'action', $this->defaultAction );
-		if( !$request->get( 'arguments' ) )
-			$request->set( 'arguments', $this->defaultArguments );
+		if( !trim( $this->request->get( 'controller' ) ) )
+			$this->request->set( 'controller', $this->defaultController );
+		if( !trim( $this->request->get( 'action' ) ) )
+			$this->request->set( 'action', $this->defaultAction );
+		if( !$this->request->get( 'arguments' ) )
+			$this->request->set( 'arguments', $this->defaultArguments );
 	}
 }
 ?>
