@@ -57,7 +57,8 @@ class Framework_Hydrogen_View_Helper_Navigation_SingleList extends Framework_Hyd
 		foreach( $this->linkMap as $key => $label )
 		{
 			$class		= ( $current == $key ) ? 'active' : NULL;
-			$link		= UI_HTML_Elements::Link( './?controller='.$key, $label, $class );
+			$url		= $key == "index" ? "./" : './?controller='.$key;
+			$link		= UI_HTML_Elements::Link( $url, $label, $class );
 			$list[]		= UI_HTML_Elements::ListItem( $link, 0 );
 		}
 		$attr	= array( 'class' => $class );

@@ -52,7 +52,8 @@ class Framework_Hydrogen_View_Helper_JavaScript
 	 *	@access		protected
 	 *	@return		void
 	 */
-	protected function __construct(){}
+	protected function __construct(){
+	}
 
 	/**
 	 *	Cloning this object is not allowed.
@@ -111,7 +112,7 @@ class Framework_Hydrogen_View_Helper_JavaScript
 	 *	@access		public
 	 *	@return		string
 	 */
-	public function getHash() {
+	public function getPackageHash() {
 		$copy	= $this->urls;
 		sort( $copy );
 		$key	= implode( '_', $copy );
@@ -123,8 +124,8 @@ class Framework_Hydrogen_View_Helper_JavaScript
 	 *	@access		protected
 	 *	@return		string
 	 */
-	protected function getCacheFileName(){
-		$hash	= $this->getHash();
+	protected function getPackageCacheFileName(){
+		$hash	= $this->getPackageHash();
 		return $this->pathCache.$hash.'.js';
 	}
 
@@ -134,8 +135,8 @@ class Framework_Hydrogen_View_Helper_JavaScript
 	 *	@param		bool		$forceFresh		Flag: force fresh creation instead of using cache
 	 *	@return		string
 	 */
-	protected function getFileName( $forceFresh = FALSE ){
-		$fileJs	= $this->getCacheFileName();
+	protected function getPackageFileName( $forceFresh = FALSE ){
+		$fileJs	= $this->getPackageCacheFileName();
 		if( !file_exists( $fileJs ) || $forceFresh ) {
 			$contents	= array();
 			if( $this->revision )
@@ -163,18 +164,35 @@ class Framework_Hydrogen_View_Helper_JavaScript
 	 *	@param		bool		$forceFresh		Flag: force fresh creation instead of using cache
 	 *	@return		string
 	 */
-	public function render( $indentEndTag = FALSE, $forceFresh = FALSE ){
+	public function render( $enablePackage = TRUE, $indentEndTag = FALSE, $forceFresh = FALSE ){
 		$links		= '';
 		$scripts	= '';
 		if( $this->urls )
 		{
-			$fileJs	= $this->getFileName( $forceFresh );
-			$attributes	= array(
-				'type'		=> 'text/javascript',
-	//			'language'	=> 'JavaScript',
-				'src'		=> $fileJs
-			);
-			$links	= UI_HTML_Tag::create( 'script', NULL, $attributes );
+			if( $enablePackage )
+			{
+				$fileJs	= $this->getPackageFileName( $forceFresh );
+				$attributes	= array(
+					'type'		=> 'text/javascript',
+		//			'language'	=> 'JavaScript',
+					'src'		=> $fileJs
+				);
+				$links	= UI_HTML_Tag::create( 'script', NULL, $attributes );
+			}
+			else
+			{
+				$list	= array();
+				foreach( $this->urls as $url )
+				{
+					$attributes	= array(
+						'type'		=> 'text/javascript',
+			//			'language'	=> 'JavaScript',
+						'src'		=> $url
+					);
+					$list[]	= UI_HTML_Tag::create( 'script', NULL, $attributes );
+				}
+				$links	= implode( "\n", $list  );
+			}
 		}
 
 		if( $this->scripts )

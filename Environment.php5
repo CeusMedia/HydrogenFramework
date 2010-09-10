@@ -41,7 +41,7 @@
  *	@since			0.1
  *	@version		$Id$
  */
-class Framework_Hydrogen_Environment
+class Framework_Hydrogen_Environment implements ArrayAccess
 {
 	/**	@var	File_Configuration_Reader		$config		Configuration Object */
 	protected $config;
@@ -86,6 +86,14 @@ class Framework_Hydrogen_Environment
 		unset( $this->language );																	//
 		unset( $this->config );																		//
 		unset( $this->clock );																		//
+	}
+
+	public function get( $key )
+	{
+		if( isset( $this->$key ) && !is_null( $key ) )
+			return $this->$key;
+		$message	= 'No environment resource found for key "%1$s"';
+		throw new RuntimeException( sprintf( $message, $key ) );
 	}
 
 	public function getClock()
@@ -268,6 +276,27 @@ class Framework_Hydrogen_Environment
 		);
 	}
 
+	public function offsetExists( $key )
+	{
+//		return property_exists( $this, $key );														//  PHP 5.3
+		return isset( $this->$key );																//  PHP 5.2
+	}
+
+	public function offsetGet( $key )
+	{
+		return $this->get( $key );
+	}
+
+	public function offsetSet( $key, $value )
+	{
+		return $this->set( $key, $value );
+	}
+
+	public function offsetUnset( $key )
+	{
+		return $this->remove( $key );
+	}
+
 	protected function realizeRewrittenUrl( Net_HTTP_Request_Receiver $request )
 	{
 		$path	= $request->getFromSource( 'path', 'GET' );
@@ -292,6 +321,26 @@ class Framework_Hydrogen_Environment
 			$this->request->set( 'action', isset( $parts[1] ) ? $parts[1] : "index" );
 			$this->request->set( 'id', isset( $parts[2] ) ? $parts[2] : "0" );
 		}*/
+	}
+
+	public function remove( $key )
+	{
+		$this->$key	= NULL;
+	}
+
+	public function set( $key, $object )
+	{
+		if( !is_object( $object ) )
+		{
+			$message	= 'Given resource "%1$s" is not an object';
+			throw new InvalidArgumentException( sprintf( $message, $key ) );
+		}
+		if( !preg_match( '/^\w$/', $key ) )
+		{
+			$message	= 'Invalid resource key "%1$s"';
+			throw new InvalidArgumentException( sprintf( $message, $key ) );
+		}
+		$this->$key	= $object;
 	}
 }
 ?>
