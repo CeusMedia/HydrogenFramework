@@ -131,7 +131,7 @@ class Framework_Hydrogen_Dispatcher
 
 			$controller	= trim( $this->request->get( 'controller' ) );
 			$action		= trim( $this->request->get( 'action' ) );
-			$arguments	= trim( $this->request->get( 'arguments' ) );
+			$arguments	= $this->request->get( 'arguments' );
 
 			$className	= $this->prefixController.ucfirst( $controller );							// get controller class name
 			$this->checkClass( $className );
