@@ -5,7 +5,7 @@
  *	@package		Chat.Client
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2010 Ceus Media
- *	@version		$Id: Server.php 1434 2010-09-10 19:12:03Z christian.wuerker $
+ *	@version		$Id$
  */
 /**
  *	Resource to communicate with chat server.
@@ -15,7 +15,7 @@
  *	@uses			Net_CURL
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2010 Ceus Media
- *	@version		$Id: Server.php 1434 2010-09-10 19:12:03Z christian.wuerker $
+ *	@version		$Id$
  */
 class Framework_Hydrogen_Environment_Resource_Server_Json {
 
