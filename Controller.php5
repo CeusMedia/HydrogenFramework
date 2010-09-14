@@ -42,7 +42,7 @@ class Framework_Hydrogen_Controller
 	protected static $prefixModel		= "Model_";
 	protected static $prefixView		= "View_";
 
-	/**	@var		Framework_Hydrogen_Environment	$env			Application Environment Object */
+	/**	@var		Framework_Hydrogen_Environment_Abstract	$env			Application Environment Object */
 	protected $env;
 	/**	@var		array							$_data			Collected Data for View */
 	var $_data					= array();
@@ -58,10 +58,10 @@ class Framework_Hydrogen_Controller
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		Framework_Hydrogen_Environment	$env			Application Environment Object
+	 *	@param		Framework_Hydrogen_Environment_Abstract	$env			Application Environment Object
 	 *	@return		void
 	 */
-	public function __construct( Framework_Hydrogen_Environment $env )
+	public function __construct( Framework_Hydrogen_Environment_Abstract $env )
 	{
 		$this->setEnv( $env );
 		$this->view	= $this->getViewObject();
@@ -180,10 +180,10 @@ class Framework_Hydrogen_Controller
 	/**
 	 *	Sets Environment of Controller by copying Framework Member Variables.
 	 *	@access		protected
-	 *	@param		Framework_Hydrogen_Environment	$env			Framework Resource Environment Object
+	 *	@param		Framework_Hydrogen_Environment_Abstract	$env			Framework Resource Environment Object
 	 *	@return		void
 	 */
-	protected function setEnv( Framework_Hydrogen_Environment &$env )
+	protected function setEnv( Framework_Hydrogen_Environment_Abstract &$env )
 	{
 		$this->env			= $env;
 		$this->controller	= $env->getRequest()->get( 'controller' );

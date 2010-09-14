@@ -48,14 +48,14 @@ class DummyCache{
  */
 class Framework_Hydrogen_Model
 {
-	/**	@var		Framework_Hydrogen_Environment	$env			Application Environment Object */
+	/**	@var		Framework_Hydrogen_Environment_Abstract	$env			Application Environment Object */
 	protected $env;
 	/**	@var		string							$name			Name of Database Table without Prefix */
 	protected $name									= "";
 	/**	@var		array							$fields			List of Database Table Fields */
 	protected $fields								= array();
 	/**	@var		array							$name			Array of foreign Keys of Database Table */
- 	protected $indices							= array();
+ 	protected $indices								= array();
 	/**	@var		string							$primaryKey		Primary Key of Database Table */
 	protected $primaryKey							= "";
 	/**	@var		Database_PDO_TableWriter		$table			Database Table Writer Object for reading from and writing to Database Table */
@@ -73,11 +73,11 @@ class Framework_Hydrogen_Model
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		Framework_Hydrogen_Environment	$env			Application Environment Object
+	 *	@param		Framework_Hydrogen_Environment_Abstract	$env			Application Environment Object
 	 *	@param		int								$id				ID to focus on
 	 *	@return		void
 	 */
-	public function __construct( Framework_Hydrogen_Environment $env, $id = NULL )
+	public function __construct( Framework_Hydrogen_Environment_Abstract $env, $id = NULL )
 	{
 		$this->setEnv( $env );
 		$this->table	= new Database_PDO_TableWriter(
@@ -312,10 +312,10 @@ class Framework_Hydrogen_Model
 	/**
 	 *	Sets Environment of Controller by copying Framework Member Variables.
 	 *	@access		protected
-	 *	@param		Framework_Hydrogen_Environment	$env			Application Environment Object
+	 *	@param		Framework_Hydrogen_Environment_Abstract	$env			Application Environment Object
 	 *	@return		void
 	 */
-	protected function setEnv( Framework_Hydrogen_Environment $env )
+	protected function setEnv( Framework_Hydrogen_Environment_Abstract $env )
 	{
 		$this->env			= $env;
 		$this->prefix		= $env->getConfig()->get( 'database.prefix' );
