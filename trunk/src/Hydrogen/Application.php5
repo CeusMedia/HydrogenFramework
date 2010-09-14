@@ -52,7 +52,7 @@
 class Framework_Hydrogen_Application
 {
 	/**	@var		string							$classEnvironment		Class Name of Application Environment to build */
-	public static $classEnvironment					= 'Framework_Hydrogen_Environment';
+	public static $classEnvironment					= 'Framework_Hydrogen_Environment_Web';
 	public static $checkClassActionArguments		= TRUE;
 
 	/**	@var		string							$content				Collected Content to respond */
@@ -66,7 +66,7 @@ class Framework_Hydrogen_Application
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		Framework_Hydrogen_Environment	$env					Framework Environment
+	 *	@param		Framework_Hydrogen_Environment_Abstract	$env					Framework Environment
 	 *	@return		void
 	 */
 	public function __construct( $env = NULL )

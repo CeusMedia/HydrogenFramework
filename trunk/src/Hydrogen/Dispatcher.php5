@@ -40,6 +40,7 @@
  *	@since			0.1
  *	@version		$Id$
  *	@todo			Code Documentation
+ *	@deprecated		use Framework_Hydrogen_Environment_Resource_Dispatcher instead
  */
 class Framework_Hydrogen_Dispatcher
 {
@@ -56,7 +57,7 @@ class Framework_Hydrogen_Dispatcher
 //	public $prefixView					= "View_";
 
 
-	public function __construct( Framework_Hydrogen_Environment $env ) {
+	public function __construct( Framework_Hydrogen_Environment_Abstract $env ) {
 		$this->env		= $env;
 		$this->request	= $env->getRequest();
 	}
