@@ -41,7 +41,7 @@ class Framework_Hydrogen_View_Helper
 {
 	protected $env;
 
-	public function setEnv( Framework_Hydrogen_Environment $env )
+	public function setEnv( Framework_Hydrogen_Environment_Abstract $env )
 	{
 		$this->env	= $env;
 	}
