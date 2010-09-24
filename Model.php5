@@ -46,7 +46,7 @@ class DummyCache{
  *	@since			0.1
  *	@version		$Id$
  */
-class Framework_Hydrogen_Model
+class CMF_Hydrogen_Model
 {
 	/**	@var		Framework_Hydrogen_Environment_Abstract	$env			Application Environment Object */
 	protected $env;
@@ -77,7 +77,7 @@ class Framework_Hydrogen_Model
 	 *	@param		int								$id				ID to focus on
 	 *	@return		void
 	 */
-	public function __construct( Framework_Hydrogen_Environment_Abstract $env, $id = NULL )
+	public function __construct( CMF_Hydrogen_Environment_Abstract $env, $id = NULL )
 	{
 		$this->setEnv( $env );
 		$this->table	= new Database_PDO_TableWriter(
@@ -315,7 +315,7 @@ class Framework_Hydrogen_Model
 	 *	@param		Framework_Hydrogen_Environment_Abstract	$env			Application Environment Object
 	 *	@return		void
 	 */
-	protected function setEnv( Framework_Hydrogen_Environment_Abstract $env )
+	protected function setEnv( CMF_Hydrogen_Environment_Abstract $env )
 	{
 		$this->env			= $env;
 		$this->prefix		= $env->getConfig()->get( 'database.prefix' );

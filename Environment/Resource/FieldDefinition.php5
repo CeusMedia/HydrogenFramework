@@ -40,7 +40,7 @@
  *	@since			0.1
  *	@version		$Id$
  */
-class Framework_Hydrogen_Environment_Resource_FieldDefinition extends ADT_OptionObject
+class CMF_Hydrogen_Environment_Resource_FieldDefinition extends ADT_OptionObject
 {
 	private $definition	= array();
 	

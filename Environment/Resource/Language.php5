@@ -37,7 +37,7 @@
  *	@since			0.1
  *	@version		$Id$
  */
-class Framework_Hydrogen_Environment_Resource_Language
+class CMF_Hydrogen_Environment_Resource_Language
 {
 	/**	@var		array							$data			Array of loaded Language File Definitions */
 	protected $data;
@@ -58,7 +58,7 @@ class Framework_Hydrogen_Environment_Resource_Language
 	 *	@param		string							$language		Language to select
 	 *	@return		void
 	 */
-	public function __construct( Framework_Hydrogen_Environment_Abstract $env )
+	public function __construct( CMF_Hydrogen_Environment_Abstract $env )
 	{
 		$this->env			= $env;
 		$config				= $env->getConfig();

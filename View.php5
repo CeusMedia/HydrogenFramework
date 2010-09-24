@@ -39,7 +39,7 @@
  *	@since			0.1
  *	@version		$Id$
  */
-class Framework_Hydrogen_View
+class CMF_Hydrogen_View
 {
 	/**	@var		array							$data			Collected Data for View */
 	protected $data	= array();
@@ -82,7 +82,7 @@ class Framework_Hydrogen_View
 	 *	@param		Framework_Hydrogen_Environment_Abstract	$env			Framework Resource Environment Object
 	 *	@return		void
 	 */
-	public function __construct( Framework_Hydrogen_Environment_Abstract $env )
+	public function __construct( CMF_Hydrogen_Environment_Abstract $env )
 	{
 		$this->setEnv( $env );
 		$this->html	= new UI_HTML_Elements;
@@ -231,7 +231,7 @@ class Framework_Hydrogen_View
 	 *	@param		Framework_Hydrogen_Environment_Abstract	$env			Framework Resource Environment Object
 	 *	@return		void
 	 */
-	protected function setEnv( Framework_Hydrogen_Environment_Abstract $env )
+	protected function setEnv( CMF_Hydrogen_Environment_Abstract $env )
 	{
 		$this->env			= $env;
 		$this->controller	= $this->env->getRequest()->get( 'controller' );
