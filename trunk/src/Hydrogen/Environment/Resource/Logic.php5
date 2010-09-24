@@ -21,7 +21,7 @@
  *	@since			0.1
  *	@version		$Id$
  */
-class Framework_Hydrogen_Environment_Resource_Logic
+class CMF_Hydrogen_Environment_Resource_Logic
 {
 	const OS_LINUX				= 1;
 	const OS_WINDOWS			= 2;
@@ -39,7 +39,7 @@ class Framework_Hydrogen_Environment_Resource_Logic
 	 *	@param		Framework_Hydrogen_Environment_Abstract	$env	Environment
 	 *	@return		void
 	 */
-	public function  __construct( Framework_Hydrogen_Environment_Abstract $env ) {
+	public function  __construct( CMF_Hydrogen_Environment_Abstract $env ) {
 		$this->env		= $env;
 		$this->config	= $env->getConfig();
 		$this->os		= self::OS_LINUX;															//  set OS to Linux by default

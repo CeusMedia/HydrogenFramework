@@ -40,7 +40,7 @@
  *	@since			0.1
  *	@version		$Id$
  */
-class Framework_Hydrogen_Environment_Resource_Messenger
+class CMF_Hydrogen_Environment_Resource_Messenger
 {
 	/**	@var		Framework_Hydrogen_Environment	$env			Application Environment Object */
 	protected $env;
@@ -61,7 +61,7 @@ class Framework_Hydrogen_Environment_Resource_Messenger
 	 *	@param		Framework_Hydrogen_Environment	$env			Instance of any Session Handler
 	 *	@return		void
 	 */
-	public function __construct( Framework_Hydrogen_Environment_Abstract $env  )
+	public function __construct( CMF_Hydrogen_Environment_Abstract $env  )
 	{
 		$this->env	= $env;
 	}

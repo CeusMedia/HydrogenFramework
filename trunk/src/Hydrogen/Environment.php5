@@ -42,7 +42,7 @@
  *	@version		$Id$
  *	@deprecated		use web (or later console etc.) environment instead
  */
-class Framework_Hydrogen_Environment extends Framework_Hydrogen_Environment_Web
+class CMF_Hydrogen_Environment extends CMF_Hydrogen_Environment_Web
 {
 	/**
 	 *	Constructor, sets up Resource Environment.

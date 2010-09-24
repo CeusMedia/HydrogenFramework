@@ -37,7 +37,7 @@
  *	@since			0.1
  *	@version		$Id$
  */
-class Framework_Hydrogen_Controller
+class CMF_Hydrogen_Controller
 {
 	protected static $prefixModel		= "Model_";
 	protected static $prefixView		= "View_";
@@ -61,7 +61,7 @@ class Framework_Hydrogen_Controller
 	 *	@param		Framework_Hydrogen_Environment_Abstract	$env			Application Environment Object
 	 *	@return		void
 	 */
-	public function __construct( Framework_Hydrogen_Environment_Abstract $env )
+	public function __construct( CMF_Hydrogen_Environment_Abstract $env )
 	{
 		$this->setEnv( $env );
 		$this->view	= $this->getViewObject();
@@ -183,7 +183,7 @@ class Framework_Hydrogen_Controller
 	 *	@param		Framework_Hydrogen_Environment_Abstract	$env			Framework Resource Environment Object
 	 *	@return		void
 	 */
-	protected function setEnv( Framework_Hydrogen_Environment_Abstract &$env )
+	protected function setEnv( CMF_Hydrogen_Environment_Abstract &$env )
 	{
 		$this->env			= $env;
 		$this->controller	= $env->getRequest()->get( 'controller' );

@@ -37,11 +37,11 @@
  *	@since			0.1
  *	@version		$Id$
  */
-class Framework_Hydrogen_View_Helper
+class CMF_Hydrogen_View_Helper
 {
 	protected $env;
 
-	public function setEnv( Framework_Hydrogen_Environment_Abstract $env )
+	public function setEnv( CMF_Hydrogen_Environment_Abstract $env )
 	{
 		$this->env	= $env;
 	}

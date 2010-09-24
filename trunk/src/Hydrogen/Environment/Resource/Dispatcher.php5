@@ -41,7 +41,7 @@
  *	@version		$Id: Dispatcher.php5 86 2010-09-11 10:29:54Z christian.wuerker $
  *	@todo			Code Documentation
  */
-class Framework_Hydrogen_Environment_Resource_Dispatcher
+class CMF_Hydrogen_Environment_Resource_Dispatcher
 {
 	public $defaultController			= 'index';
 	public $defaultAction				= 'index';
@@ -56,7 +56,7 @@ class Framework_Hydrogen_Environment_Resource_Dispatcher
 //	public $prefixView					= "View_";
 
 
-	public function __construct( Framework_Hydrogen_Environment_Abstract $env ) {
+	public function __construct( CMF_Hydrogen_Environment_Abstract $env ) {
 		$this->env		= $env;
 		$this->request	= $env->getRequest();
 	}

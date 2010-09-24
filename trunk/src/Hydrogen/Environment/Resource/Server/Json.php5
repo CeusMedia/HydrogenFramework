@@ -17,7 +17,7 @@
  *	@copyright		2010 Ceus Media
  *	@version		$Id$
  */
-class Framework_Hydrogen_Environment_Resource_Server_Json {
+class CMF_Hydrogen_Environment_Resource_Server_Json {
 
 	protected $env;
 	protected $serverUri;
@@ -33,7 +33,7 @@ class Framework_Hydrogen_Environment_Resource_Server_Json {
 	 *	@param		Framework_Hydrogen_Environment_Abstract	$env	Environment
 	 *	@return		void
 	 */
-	public function  __construct( Framework_Hydrogen_Environment_Abstract $env ) {
+	public function  __construct( CMF_Hydrogen_Environment_Abstract $env ) {
 		$this->env			= $env;
 		$this->serverUri	= $env->getConfig()->get( 'server.uri' );
 		if( empty( $this->serverUri ) )

@@ -37,7 +37,7 @@
  *	@since			0.1
  *	@version		$Id$
  */
-class Framework_Hydrogen_View_Helper_JavaScript
+class CMF_Hydrogen_View_Helper_JavaScript
 {
 	protected static $instance;
 	protected $pathCache			= "contents/cache/";

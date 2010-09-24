@@ -49,7 +49,7 @@
  *	@version		$Id$
  *	@todo			Code Documentation
  */
-class Framework_Hydrogen_Application
+class CMF_Hydrogen_Application
 {
 	/**	@var		string							$classEnvironment		Class Name of Application Environment to build */
 	public static $classEnvironment					= 'Framework_Hydrogen_Environment_Web';
@@ -147,7 +147,7 @@ class Framework_Hydrogen_Application
 		$request		= $this->env->getRequest();
 		try
 		{
-			$dispatcher	= new Framework_Hydrogen_Dispatcher( $this->env );
+			$dispatcher	= new CMF_Hydrogen_Dispatcher( $this->env );
 			$dispatcher->checkClassActionArguments	= self::$checkClassActionArguments;
 			if( $defaultController )
 				$dispatcher->defaultController	= $defaultController;
@@ -214,7 +214,7 @@ class Framework_Hydrogen_Application
 	 */
 	protected function view( $templateFile = "master.php" )
 	{
-		$view	= new Framework_Hydrogen_View( $this->env );
+		$view	= new CMF_Hydrogen_View( $this->env );
 		$path	= $this->env->getConfig()->get( 'path.templates' );
 		return $view->loadTemplateFile( $path.$templateFile, $this->components );
 	}

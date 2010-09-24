@@ -41,7 +41,7 @@
  *	@since			0.1
  *	@version		$Id$
  */
-class Framework_Hydrogen_Environment_Web extends Framework_Hydrogen_Environment_Abstract
+class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 {
 	/**	@var	Database_BaseConnection			$dbc		Database Connection Object */
 	protected $dbc;
@@ -202,7 +202,7 @@ class Framework_Hydrogen_Environment_Web extends Framework_Hydrogen_Environment_
 
 /*	protected function initFieldDefinition()
 	{
-		$this->definition	= new Framework_Hydrogen_FieldDefinition(
+		$this->definition	= new CMF_Hydrogen_FieldDefinition(
 			"config/",
 			$this->config['config.use_cache'],
 			$this->config['config.cache_path']
@@ -212,12 +212,12 @@ class Framework_Hydrogen_Environment_Web extends Framework_Hydrogen_Environment_
 */
 	protected function initLanguage()
 	{
-		$this->language		= new Framework_Hydrogen_Environment_Resource_Language( $this );
+		$this->language		= new CMF_Hydrogen_Environment_Resource_Language( $this );
 	}
 
 	protected function initMessenger()
 	{
-		$this->messenger	= new Framework_Hydrogen_Environment_Resource_Messenger( $this );
+		$this->messenger	= new CMF_Hydrogen_Environment_Resource_Messenger( $this );
 	}
 
 	/**
@@ -227,7 +227,7 @@ class Framework_Hydrogen_Environment_Web extends Framework_Hydrogen_Environment_
 	 */
 	protected function initPage()
 	{
-		$this->page	= new Framework_Hydrogen_Environment_Resource_Page( $this );
+		$this->page	= new CMF_Hydrogen_Environment_Resource_Page( $this );
 		if( $this->getConfig()->get( 'app.base.url' ) )
 			$this->page->setBaseHref( $this->getConfig()->get( 'app.base.url' ) );
 	}

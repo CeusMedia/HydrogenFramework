@@ -40,7 +40,7 @@
  *	@version		$Id$
  *	@todo			Code doc
  */
-class Framework_Hydrogen_View_Helper_Navigation_SingleList extends Framework_Hydrogen_View_Helper
+class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_Helper
 {
 	protected $linkMap;
 	protected $classInner		= 'single';

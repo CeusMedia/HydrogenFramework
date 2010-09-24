@@ -40,7 +40,7 @@
  *	@since			0.1
  *	@version		$Id$
  */
-abstract class Framework_Hydrogen_Environment_Abstract implements ArrayAccess
+abstract class CMF_Hydrogen_Environment_Abstract implements ArrayAccess
 {
 	/**	@var	Alg_Time_Clock				$clock		Clock Object */
 	protected $clock;

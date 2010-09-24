@@ -37,7 +37,7 @@
  *	@since			0.1
  *	@version		$Id$
  */
-class Framework_Hydrogen_View_Helper_JsLoader
+class CMF_Hydrogen_View_Helper_JsLoader
 {
 	/**	@var		ADT_Singleton		$instance		Instance of Singleton */
 	protected static $instance;
@@ -90,7 +90,7 @@ class Framework_Hydrogen_View_Helper_JsLoader
 	 */
 	public static function getInstance(){
 		if( !self::$instance )
-			self::$instance	= new Framework_Hydrogen_View_Helper_JsLoader();
+			self::$instance	= new CMF_Hydrogen_View_Helper_JsLoader();
 		return self::$instance;
 	}
 
