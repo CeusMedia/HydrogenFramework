@@ -56,7 +56,7 @@ class CMF_Hydrogen_View
 		'model',
 		'controller',
 		'action',
-		);
+	);
 	/**	@var		Database_MySQL_Connection		$dbc			Database Connection */
 	protected $dbc;
 	/**	@var		array							$config			Configuration Settings */

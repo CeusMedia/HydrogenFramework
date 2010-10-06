@@ -30,10 +30,7 @@
  *	Setup for Resource Environment for Hydrogen Applications.
  *	@category		cmFrameworks
  *	@package		Hydrogen
- *	@uses			File_Configuration_Reader
- *	@uses			Net_HTTP_Request_Receiver
- *	@uses			Net_HTTP_Request_Response
- *	@uses			Net_HTTP_Session
+ *	@extends		Framework_Hydrogen_Environment_Web
  *	@author			Christian Würker <christian.wuerker@ceus-media.de>
  *	@copyright		2007-2010 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
