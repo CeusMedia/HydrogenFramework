@@ -45,6 +45,7 @@ class CMF_Hydrogen_View_Helper_JavaScript
 	/**	@var	array				$scripts		List of JavaScript blocks */
 	protected $scripts				= array();
 	protected $urls					= array();
+	public $indent					= "\t\t";
 
 	/**
 	 *	Constructor is disabled from public context.
@@ -191,7 +192,7 @@ class CMF_Hydrogen_View_Helper_JavaScript
 					);
 					$list[]	= UI_HTML_Tag::create( 'script', NULL, $attributes );
 				}
-				$links	= implode( "\n", $list  );
+				$links	= implode( "\n".$this->indent, $list  );
 			}
 		}
 
@@ -204,7 +205,7 @@ class CMF_Hydrogen_View_Helper_JavaScript
 				'type'		=> 'text/javascript',
 	//			'language'	=> 'JavaScript',
 			);
-			$scripts	= UI_HTML_Tag::create( 'script', $content, $attributes );
+			$scripts	= "\n".$this->indent.UI_HTML_Tag::create( 'script', $content."\n".$this->indent, $attributes );
 		}
 		return $links.$scripts;
 	}

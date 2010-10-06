@@ -39,8 +39,15 @@
  */
 class CMF_Hydrogen_View_Helper
 {
-	protected $env;
+	/**	@var		CMF_Hydrogen_Environment_Abstract	$env	Environment Object */
+	protected		$env;
 
+	/**
+	 *	Set environment if needed inside helper.
+	 *	@access		public
+	 *	@param		CMF_Hydrogen_Environment_Abstract	$env	Environment Object
+	 *	@return		void
+	 */
 	public function setEnv( CMF_Hydrogen_Environment_Abstract $env )
 	{
 		$this->env	= $env;
