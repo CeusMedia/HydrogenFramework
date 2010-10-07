@@ -1,5 +1,5 @@
 <?php
-class CMF_Hydrogen_Application_Web_Abstract extends CMF_Hydrogen_Application_Abstract{
+abstract class CMF_Hydrogen_Application_Web_Abstract extends CMF_Hydrogen_Application_Abstract{
 
 	protected $components			= array();
 

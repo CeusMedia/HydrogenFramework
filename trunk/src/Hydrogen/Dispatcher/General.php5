@@ -18,7 +18,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *	@category		cmFrameworks
- *	@package		Hydrogen.Environment.Resource
+ *	@package		Hydrogen.Dispatcher
  *	@author			Christian Würker <christian.wuerker@ceus-media.de>
  *	@copyright		2007-2010 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -29,7 +29,7 @@
 /**
  *	Generic Main Class of Framework Hydrogen
  *	@category		cmFrameworks
- *	@package		Hydrogen.Environment.Resource
+ *	@package		Hydrogen.Dispatcher
  *	@uses			RuntimeException
  *	@uses			ReflectionMethod
  *	@uses			Alg_Object_Factory
@@ -41,7 +41,7 @@
  *	@version		$Id: Dispatcher.php5 86 2010-09-11 10:29:54Z christian.wuerker $
  *	@todo			Code Documentation
  */
-class CMF_Hydrogen_Environment_Resource_Dispatcher
+class CMF_Hydrogen_Dispatcher_General
 {
 	public $defaultController			= 'index';
 	public $defaultAction				= 'index';
