@@ -30,7 +30,7 @@
  *	Setup for Resource Environment for Hydrogen Applications.
  *	@category		cmFrameworks
  *	@package		Hydrogen.Environment
- *	@extends		Framework_Hydrogen_Environment_Abstract
+ *	@extends		CMF_Hydrogen_Environment_Abstract
  *	@uses			Net_HTTP_Request_Receiver
  *	@uses			Net_HTTP_Request_Response
  *	@uses			Net_HTTP_Session
@@ -51,11 +51,11 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	protected $response;
 	/**	@var	Net_HTTP_Session				$session	Session Object */
 	protected $session;
-	/** @var	Framework_Hydrogen_Environment_Resource_Messenger	$messenger	Messenger Object */
+	/** @var	CMF_Hydrogen_Environment_Resource_Messenger	$messenger	Messenger Object */
 	protected $messenger;
-	/** @var	Framework_Hydrogen_Environment_Resource_Language	$language	Language Object */
+	/** @var	CMF_Hydrogen_Environment_Resource_Language	$language	Language Object */
 	protected $language;
-	/**	@var	Framework_Hydrogen_Environment_Resource_Page		$page		Page Object */
+	/**	@var	CMF_Hydrogen_Environment_Resource_Page		$page		Page Object */
 	protected $page;
 
 	/**
@@ -95,7 +95,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	/**
 	 *	Returns Language Object.
 	 *	@access		public
-	 *	@return		Framework_Hydrogen_Environment_Resource_Language
+	 *	@return		CMF_Hydrogen_Environment_Resource_Language
 	 */
 	public function getLanguage()
 	{
@@ -105,7 +105,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	/**
 	 *	Returns Messenger Object.
 	 *	@access		public
-	 *	@return		Framework_Hydrogen_Environment_Resource_Messenger
+	 *	@return		CMF_Hydrogen_Environment_Resource_Messenger
 	 */
 	public function getMessenger()
 	{

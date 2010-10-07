@@ -48,7 +48,7 @@ class DummyCache{
  */
 class CMF_Hydrogen_Model
 {
-	/**	@var		Framework_Hydrogen_Environment_Abstract	$env			Application Environment Object */
+	/**	@var		CMF_Hydrogen_Environment_Abstract	$env			Application Environment Object */
 	protected $env;
 	/**	@var		string							$name			Name of Database Table without Prefix */
 	protected $name									= "";
@@ -73,7 +73,7 @@ class CMF_Hydrogen_Model
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		Framework_Hydrogen_Environment_Abstract	$env			Application Environment Object
+	 *	@param		CMF_Hydrogen_Environment_Abstract	$env			Application Environment Object
 	 *	@param		int								$id				ID to focus on
 	 *	@return		void
 	 */
@@ -312,7 +312,7 @@ class CMF_Hydrogen_Model
 	/**
 	 *	Sets Environment of Controller by copying Framework Member Variables.
 	 *	@access		protected
-	 *	@param		Framework_Hydrogen_Environment_Abstract	$env			Application Environment Object
+	 *	@param		CMF_Hydrogen_Environment_Abstract	$env			Application Environment Object
 	 *	@return		void
 	 */
 	protected function setEnv( CMF_Hydrogen_Environment_Abstract $env )

@@ -30,7 +30,7 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		Framework_Hydrogen_Environment_Abstract	$env	Environment
+	 *	@param		CMF_Hydrogen_Environment_Abstract	$env	Environment
 	 *	@return		void
 	 */
 	public function  __construct( CMF_Hydrogen_Environment_Abstract $env ) {

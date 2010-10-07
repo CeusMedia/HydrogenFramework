@@ -30,7 +30,7 @@
  *	Setup for Resource Environment for Hydrogen Applications.
  *	@category		cmFrameworks
  *	@package		Hydrogen
- *	@extends		Framework_Hydrogen_Environment_Web
+ *	@extends		CMF_Hydrogen_Environment_Web
  *	@author			Christian Würker <christian.wuerker@ceus-media.de>
  *	@copyright		2007-2010 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -39,7 +39,7 @@
  *	@version		$Id$
  *	@deprecated		use web (or later console etc.) environment instead
  */
-class CMF_Hydrogen_Environment extends CMF_Hydrogen_Environment_Web
+class _CMF_Hydrogen_Environment extends CMF_Hydrogen_Environment_Web
 {
 	/**
 	 *	Constructor, sets up Resource Environment.
