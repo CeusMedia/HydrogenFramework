@@ -42,6 +42,6 @@
  *	@todo			Code Documentation
  *	@deprecated		use CMF_Hydrogen_Environment_Resource_Dispatcher instead
  */
-class CMF_Hydrogen_Dispatcher extends Framework_Hydrogen_Environment_Resource_Dispatcher
+class CMF_Hydrogen_Dispatcher extends CMF_Hydrogen_Environment_Resource_Dispatcher
 {}
 ?>

@@ -39,23 +39,22 @@
  */
 class CMF_Hydrogen_Environment_Resource_Language
 {
-	/**	@var		array							$data			Array of loaded Language File Definitions */
+	/**	@var		array								$data			Array of loaded Language File Definitions */
 	protected $data;
-	/**	@var		Framework_Hydrogen_Environment	$env			Application Environment Object */
+	/**	@var		CMF_Hydrogen_Environment_Abstract	$env			Application Environment Object */
 	protected $env;
-	/**	@var		string							$filePath		Path to Language Files */
+	/**	@var		string								$filePath		Path to Language Files */
 	protected $filePath;
-	/**	@var		string							$language		Set Language */
+	/**	@var		string								$language		Set Language */
 	protected $language;
-	/**	@var		array							$languages		List of allowed Languages */
+	/**	@var		array								$languages		List of allowed Languages */
 	protected $languages;
-	/**	@var		array							$envKeys		Keys of Environment */
 	
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		Framework_Hydrogen_Environment	$env			Application Environment Object
-	 *	@param		string							$language		Language to select
+	 *	@param		CMF_Hydrogen_Environment_Abstract	$env			Application Environment Object
+	 *	@param		string								$language		Language to select
 	 *	@return		void
 	 */
 	public function __construct( CMF_Hydrogen_Environment_Abstract $env )

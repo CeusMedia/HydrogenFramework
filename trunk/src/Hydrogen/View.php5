@@ -41,52 +41,40 @@
  */
 class CMF_Hydrogen_View
 {
-	/**	@var		array							$data			Collected Data for View */
-	protected $data	= array();
-	/**	@var		Framework_Hydrogen_Environment_Abstract	$env	Environment Object */
+	/**	@var		array											$data			Collected Data for View */
+	protected $data			= array();
+	/**	@var		CMF_Hydrogen_Environment_Abstract				$env			Environment Object */
 	protected $env;
-	/**	@var		array							$envKeys		Keys of Environment */
-	protected $envKeys	= array(
-		'dbc',
-		'config',
-		'session',
-		'request',
-		'language',
-		'messenger',
-		'model',
-		'controller',
-		'action',
-	);
-	/**	@var		Database_MySQL_Connection		$dbc			Database Connection */
+	/**	@var		Database_MySQL_Connection						$dbc			Database Connection */
 	protected $dbc;
-	/**	@var		array							$config			Configuration Settings */
+	/**	@var		array											$config			Configuration Settings */
 	protected $config;
-	/**	@var		Net_HTTP_PartitionSession		$session		Partition Session */
+	/**	@var		Net_HTTP_PartitionSession						$session		Partition Session */
 	protected $session;
-	/**	@var		Net_HTTP_Request_Receiver		$request		Receiver of Request Parameters */
+	/**	@var		Net_HTTP_Request_Receiver						$request		Receiver of Request Parameters */
 	protected $request;
-	/**	@var		Framework_Hydrogen_Language		$language		Language Support */
+	/**	@var		CMF_Hydrogen_Environment_Resource_Language		$language		Language Support */
 	protected $language;
-	/**	@var		Framework_Hydrogen_Messenger	$messenger		UI Messenger */
+	/**	@var		CMF_Hydrogen_Environment_Resource_Messenger		$messenger		UI Messenger */
 	protected $messenger;
-	/**	@var		string							$controller		Name of called Controller */
-	protected $controller	= "";
-	/**	@var		string							$action			Name of called Action */
-	protected $action	= "";
+	/**	@var		string											$controller		Name of called Controller */
+	protected $controller	= NULL;
+	/**	@var		string											$action			Name of called Action */
+	protected $action		= NULL;
 
 	protected $helpers;
 
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		Framework_Hydrogen_Environment_Abstract	$env			Framework Resource Environment Object
+	 *	@param		CMF_Hydrogen_Environment_Abstract	$env			Framework Resource Environment Object
 	 *	@return		void
 	 */
 	public function __construct( CMF_Hydrogen_Environment_Abstract $env )
 	{
 		$this->setEnv( $env );
-		$this->html	= new UI_HTML_Elements;
-		$this->time	= new Alg_Time_Converter();
+		$this->html		= new UI_HTML_Elements;
+		$this->time		= new Alg_Time_Converter();
 		$this->helpers	= new ADT_List_Dictionary;
 	}
 
@@ -228,7 +216,7 @@ class CMF_Hydrogen_View
 	/**
 	 *	Sets Environment of Controller by copying Framework Member Variables.
 	 *	@access		protected
-	 *	@param		Framework_Hydrogen_Environment_Abstract	$env			Framework Resource Environment Object
+	 *	@param		CMF_Hydrogen_Environment_Abstract	$env			Framework Resource Environment Object
 	 *	@return		void
 	 */
 	protected function setEnv( CMF_Hydrogen_Environment_Abstract $env )

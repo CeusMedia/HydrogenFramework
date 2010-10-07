@@ -1,6 +1,6 @@
 <?php
 /**
- *	Generic Main Class of Framework Hydrogen
+ *	Application class for a MVC web site.
  *
  *	Copyright (c) 2007-2010 Christian Würker (ceus-media.de)
  *
@@ -18,55 +18,38 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *	@category		cmFrameworks
- *	@package		Hydrogen
+ *	@package		Hydrogen.Application.Web
  *	@author			Christian Würker <christian.wuerker@ceus-media.de>
  *	@copyright		2007-2010 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.1
- *	@version		$Id$
+ *	@version		$Id: Application.php5 99 2010-09-24 05:48:59Z christian.wuerker $
  */
 /**
- *	Generic Main Class of Framework Hydrogen
+ *	Application class for a MVC web site.
  *	@category		cmFrameworks
- *	@package		Hydrogen
- *	@uses			Database_MySQL_Connection
- *	@uses			File_INI_Reader
- *	@uses			Net_HTTP_PartitionSession
- *	@uses			Net_HTTP_Request_Receiver
- *	@uses			Alg_Time_Clock
- *	@uses			Framework_Hydrogen_FieldDefinition
- *	@uses			Framework_Hydrogen_Messenger
- *	@uses			Framework_Hydrogen_Model
- *	@uses			Framework_Hydrogen_View
- *	@uses			Framework_Hydrogen_Controller
- *	@uses			Language
+ *	@package		Hydrogen.Application.Web
  *	@author			Christian Würker <christian.wuerker@ceus-media.de>
  *	@copyright		2007-2010 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.1
- *	@version		$Id$
+ *	@version		$Id: Application.php5 99 2010-09-24 05:48:59Z christian.wuerker $
  *	@todo			Code Documentation
  */
-class CMF_Hydrogen_Application
+class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abstract
 {
-	/**	@var		string							$classEnvironment		Class Name of Application Environment to build */
-	public static $classEnvironment					= 'Framework_Hydrogen_Environment_Web';
-	public static $checkClassActionArguments		= TRUE;
+	public static $checkClassActionArguments			= TRUE;
 
-	/**	@var		string							$content				Collected Content to respond */
-	protected $content								= '';
-	/**	@var		Framework_Hydrogen_Environment	$env					Application Environment Object */
-	protected $env;
-
-	protected $components			= array();
+	/**	@var		string								$content				Collected Content to respond */
+	protected $content									= '';
 	protected $_dev;
 
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		Framework_Hydrogen_Environment_Abstract	$env					Framework Environment
+	 *	@param		CMF_Hydrogen_Environment_Abstract	$env					Framework Environment
 	 *	@return		void
 	 */
 	public function __construct( $env = NULL )
@@ -94,13 +77,6 @@ class CMF_Hydrogen_Application
 		}
 	}
 
-	protected function logOnComplete()
-	{
-		$responseLength	= $this->env->getResponse()->getLength();
-		$responseTime	= $this->env->getClock()->stop( 6, 0 );
-		// ...
-	}
-	
 	/**
 	 *	Main Method of Framework calling Controller (and View) and Master View.
 	 *	@access		protected
@@ -188,35 +164,8 @@ class CMF_Hydrogen_Application
 				$response->addHeader( $header );
 			else
 				$response->addHeaderPair( $key, $value );
-		
+
 		return $response->send();
-	}
-
-	/**
-	 *	Sets collacted View Components for Master View.
-	 *	@access		protected
-	 *	@return		void
-	 */
-	protected function setViewComponents( $components = array() )
-	{
-		foreach( $components as $key => $component )
-		{
-			if( !array_key_exists( $key, $this->components ) )
-				$this->components[$key]	= $component;
-			
-		}
-	}
-
-	/**
-	 *	Collates View Components and puts out Master View.
-	 *	@access		protected
-	 *	@return		void
-	 */
-	protected function view( $templateFile = "master.php" )
-	{
-		$view	= new CMF_Hydrogen_View( $this->env );
-		$path	= $this->env->getConfig()->get( 'path.templates' );
-		return $view->loadTemplateFile( $path.$templateFile, $this->components );
 	}
 }
 ?>

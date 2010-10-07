@@ -42,7 +42,7 @@
  */
 class CMF_Hydrogen_Environment_Resource_Messenger
 {
-	/**	@var		Framework_Hydrogen_Environment	$env			Application Environment Object */
+	/**	@var		CMF_Hydrogen_Environment_Abstract	$env			Application Environment Object */
 	protected $env;
 	/**	@var		array							$classes		CSS Classes of Message Types */
 	protected $classes	= array(
@@ -58,7 +58,7 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		Framework_Hydrogen_Environment	$env			Instance of any Session Handler
+	 *	@param		CMF_Hydrogen_Environment_Abstract	$env			Instance of any Session Handler
 	 *	@return		void
 	 */
 	public function __construct( CMF_Hydrogen_Environment_Abstract $env  )

@@ -42,23 +42,23 @@ class CMF_Hydrogen_Controller
 	protected static $prefixModel		= "Model_";
 	protected static $prefixView		= "View_";
 
-	/**	@var		Framework_Hydrogen_Environment_Abstract	$env			Application Environment Object */
+	/**	@var		CMF_Hydrogen_Environment_Abstract	$env			Application Environment Object */
 	protected $env;
-	/**	@var		array							$_data			Collected Data for View */
+	/**	@var		array								$_data			Collected Data for View */
 	var $_data					= array();
-	/**	@var		string							$controller		Name of called Controller */
+	/**	@var		string								$controller		Name of called Controller */
 	protected $controller		= "";
-	/**	@var		string							$action			Name of called Action */
+	/**	@var		string								$action			Name of called Action */
 	protected $action			= "";
-	/**	@var		bool							$redirect		Flag for Redirection */
+	/**	@var		bool								$redirect		Flag for Redirection */
 	var $redirect				= FALSE;
-	/**	@var		Framework_Hydrogen_Environment	$view			View instance for controller */
+	/**	@var		CMF_Hydrogen_View					$view			View instance for controller */
 	protected $view;
 
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		Framework_Hydrogen_Environment_Abstract	$env			Application Environment Object
+	 *	@param		CMF_Hydrogen_Environment_Abstract	$env			Application Environment Object
 	 *	@return		void
 	 */
 	public function __construct( CMF_Hydrogen_Environment_Abstract $env )
@@ -180,7 +180,7 @@ class CMF_Hydrogen_Controller
 	/**
 	 *	Sets Environment of Controller by copying Framework Member Variables.
 	 *	@access		protected
-	 *	@param		Framework_Hydrogen_Environment_Abstract	$env			Framework Resource Environment Object
+	 *	@param		CMF_Hydrogen_Environment_Abstract	$env			Framework Resource Environment Object
 	 *	@return		void
 	 */
 	protected function setEnv( CMF_Hydrogen_Environment_Abstract &$env )
