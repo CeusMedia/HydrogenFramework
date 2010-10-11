@@ -102,9 +102,10 @@ class CMF_Hydrogen_Model
 	 *	Returns Data of single Line by ID.
 	 *	@access		public
 	 *	@param		array			$data			Data to add to Table
+	 *	@param		bool		$stripTags		Flag: strip HTML Tags from values
 	 *	@return		int
 	 */
-	public function add( $data )
+	public function add( $data, $stripTags = TRUE )
 	{
 		$id	= $this->table->insert( $data );
 		$this->cache->set( $this->cacheKey.$id, $data );

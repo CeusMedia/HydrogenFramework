@@ -36,8 +36,26 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 	public function  __construct( CMF_Hydrogen_Environment_Abstract $env ) {
 		$this->env			= $env;
 		$this->serverUri	= $env->getConfig()->get( 'server.uri' );
+		$this->clientIp		= getEnv( 'REMOTE_ADDR' );
 		if( empty( $this->serverUri ) )
 			throw new RuntimeException( 'No server URI set in config (server.uri)' );
+	}
+
+	protected function buildServerGetUrl( $controller, $action = NULL, $arguments = array(), $parameters = array() ) {
+		$url	= $this->buildServerPostUrl( $controller, $action, $arguments );
+		if( is_null( $parameters ) )
+			$parameters	= array();
+		if( !is_array( $parameters ) )
+			throw new InvalidArgumentException( 'Parameters must be an array or NULL' );
+		if( $this->env->getSession()->get( 'token' ) )
+		{
+			$parameters['token']	= $this->env->getSession()->get( 'token' );
+			if( $this->env->getSession()->get( 'ip' ) )
+				$parameters['ip']	= $this->env->getSession()->get( 'ip' );
+		}
+		if( $parameters )
+			$url	.= '?'.http_build_query( $parameters, NULL, '&amp;' );
+		return $url;
 	}
 
 	/**
@@ -48,7 +66,7 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 	 *	@param		array		$arguments		List of URI arguments
 	 *	@return		strring		URL on server
 	 */
-	protected function buildServerUrl( $controller, $action = NULL, $arguments = array() ) {
+	protected function buildServerPostUrl( $controller, $action = NULL, $arguments = array() ) {
 		if( $arguments && empty( $action ) )
 			$action		= 'index';
 		if( $action && !$controller )
@@ -63,8 +81,6 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 			$arguments[$nr]	= urlencode( $argument );
 		$arguments	= implode( '/', $arguments );
 		$url		= $this->serverUri.$controller.$action.$arguments;
-		if( $this->env->getSession()->has( 'token' ) )
-			$url	.= "?token=".$this->env->getSession()->get( 'token' );
 		return $url;
 	}
 
@@ -96,8 +112,8 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 		return $this->curlOptions[$method];
 	}
 
-	public function getData( $controller, $action = NULL, $arguments = array(), $curlOptions = array() ) {
-		$url	= $this->buildServerUrl( $controller, $action, $arguments );
+	public function getData( $controller, $action = NULL, $arguments = array(), $parameters = array(), $curlOptions = array() ) {
+		$url	= $this->buildServerGetUrl( $controller, $action, $arguments, $parameters = array() );
 		return	$this->getDataFromUrl( $url, $curlOptions );
 	}
 
@@ -136,7 +152,7 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 
 	public function postData( $controller, $action = NULL, $arguments = NULL, $data = array(), $curlOptions = array() )
 	{
-		$url	= $this->buildServerUrl( $controller, $action, $arguments );
+		$url	= $this->buildServerPostUrl( $controller, $action, $arguments );
 		return $this->postDataToUrl( $url, $data, $curlOptions );
 	}
 
@@ -149,10 +165,15 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 	{
 		if( $data instanceof ADT_List_Dictionary )
 			$data	= $data->getAll();
+		if( $this->env->getSession()->get( 'token' ) )
+		{
+			$data['token']	= $this->env->getSession()->get( 'token' );
+			if( $this->env->getSession()->get( 'ip' ) )
+				$data['ip']	= $this->env->getSession()->get( 'ip' );
+		}
 		foreach( $data as $key => $value )															//  cURL hack (file upload identifier)
 			if( is_string( $value ) && substr( $value, 0, 1 ) == "@" )								//  leading @ in field values
 				$data[$key]	= "\\".$value;															//  need to be escaped
-
 		$curl	= new Net_CURL( $url );
 
 		$options	= array_merge(
