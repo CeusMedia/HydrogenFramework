@@ -43,7 +43,7 @@ class CMF_Hydrogen_View
 {
 	/**	@var		array											$data			Collected Data for View */
 	protected $data			= array();
-	/**	@var		CMF_Hydrogen_Environment_Abstract				$env			Environment Object */
+	/**	@var		CMF_Hydrogen_Environment						$env			Environment Object */
 	protected $env;
 	/**	@var		Database_MySQL_Connection						$dbc			Database Connection */
 	protected $dbc;
@@ -70,7 +70,7 @@ class CMF_Hydrogen_View
 	 *	@param		CMF_Hydrogen_Environment_Abstract	$env			Framework Resource Environment Object
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment_Abstract $env )
+	public function __construct( CMF_Hydrogen_Environment $env )
 	{
 		$this->setEnv( $env );
 		$this->html		= new UI_HTML_Elements;
@@ -83,7 +83,7 @@ class CMF_Hydrogen_View
 		if( is_object( $object ) )
 		{
 			$object->setEnv( $this->env );
-			$this->helpers->$name	= $object;
+			$this->helpers->set( $name, $object );
 		}
 		else
 			$this->registerHelper($name, $object, $parameters);
@@ -94,15 +94,21 @@ class CMF_Hydrogen_View
 		return $this->data;
 	}
 
-	protected function getContentFileUri( $fileName )
+	public function getContentUri( $fileKey, $path = NULL )
 	{
-		$path		= $this->env->getConfig()->get( 'path.locales' );
+		$path		= preg_replace( '/^(.+)(\/)*$/', '\\1/', $path );
+		$pathLocale	= $this->env->getConfig()->get( 'path.locales' );
  		$language	= $this->env->getLanguage()->getLanguage();
-		$uri		= $path.$language.'/'.$fileName;
+		$uri		= $pathLocale.$language.'/'.$path.$fileKey;
 		return $uri;
 	}
-	
-	
+
+	protected function getTemplateUri( $controller, $action )
+	{
+		$fileKey	= $controller.'/'.$action.'.php';
+		return $this->getTemplateUriFromFile( $fileKey );
+	}
+
 	/**
 	 *	Returns File Name of Template.
 	 *	@access		protected
@@ -110,55 +116,76 @@ class CMF_Hydrogen_View
 	 *	@param		string		$action			Name of Action
 	 *	@return		string
 	 */
-	protected function getFilenameOfTemplate( $controller, $action )
+	protected function getTemplateUriFromFile( $fileKey )
 	{
-		$pathname	= $this->env->getConfig()->get( 'path.templates' );
-		$filename	= $controller."/".$action.".php";
-		return $pathname.$filename;
+		$path		= $this->env->getConfig()->get( 'path.templates' );
+		return $path.$fileKey;
 	}
 
-	public function isContentFile( $fileName )
+	public function hasContent( $controller, $action, $path = NULL )
 	{
-		$uri	= $this->getContentFileUri( $fileName );
+		$fileKey	= $controller.'/'.$action.'.html';
+		return $this->hasContentFile( $fileKey, $path );
+	}
+
+	public function hasContentFile( $fileKey, $path = NULL )
+	{
+		$uri	= $this->getContentUri( $fileKey, $path );
 		return file_exists( $uri );
 	}
 
-	public function load()
+
+	public function hasTemplate( $controller, $action )
 	{
-		$request	= $this->env->getRequest();
-		$controller	= $request->get( 'controller' );
-		$action		= $request->get( 'action' );
-		return $this->loadTemplate( $controller, $action );
+		$uri		= $this->getTemplateUri( $controller, $action );
+		return file_exists( $uri );
 	}
 
-	public function loadContent( $fileName, $data = array() )
+	public function hasTemplateFile( $fileKey )
 	{
-		if( !$this->isContentFile( $fileName ) )
-			throw new RuntimeException( 'File "'.$fileName.'" is missing.', 321 );
-		$uri	= $this->getContentFileUri( $fileName );
+		$file	= $controller.'/'.$action.'.php';
+		$uri	= $this->getTemplateUriFromFile( $file );
+		return file_exists( $uri );
+	}
+
+	public function loadContent( $controller, $action, $data = array(), $path = NULL )
+	{
+		$fileKey	= $controller.'/'.$action.'.html';
+		return $this->loadContentFile( $fileKey, $data, $path );
+	}
+
+	public function loadContentFile( $fileKey, $data = array(), $path = NULL )
+	{
+		if( !is_array( $data ) )
+			$data	= array();
+		if( !$this->hasContentFile( $fileKey, $path ) )
+			throw new RuntimeException( 'Locale content file "'.$fileKey.'" is missing.', 321 );
+		$uri	= $this->getContentUri( $fileKey, $path );
+		$data	= array_merge( $this->data, $data );
 		return UI_Template::render( $uri, $data);
 	}
 
 	/**
-	 *	Loads Template of View and returns Content.
+	 *	Returns rendered Content of Template for a Controller Action.
 	 *	@access		public
 	 *	@param		string		$controller			Name of Controller
 	 *	@param		string		$action				Name of Action
 	 *	@param		array		$data				Additional Array of View Data
 	 *	@return		string
 	 */
-	protected function loadTemplate( $controller, $action, $data = array() )
+	public function loadTemplate( $controller, $action, $data = array() )
 	{
-#		throw new Exception("test");
-		$fileName	= $this->getFilenameOfTemplate( $controller, $action );
-		if( !file_exists( $fileName ) )
+		$fileKey	= $controller.'/'.$action.'.php';
+		$uri		= $this->getTemplateUri( $controller, $action );
+		if( !file_exists( $uri ) )
 			throw new RuntimeException( 'Template "'.$this->controller.'/'.$this->action.'" is not existing', 311 );
-		return $this->loadTemplateFile( $fileName, $data );
+		return $this->loadTemplateFile( $fileKey, $data );
 	}
 
 	public function loadTemplateFile( $fileName, $data = array() )
 	{
-		if( !file_exists( $fileName ) )
+		$uri	= $this->getTemplateUriFromFile( $fileName );
+		if( !file_exists( $uri ) )
 			throw new RuntimeException( 'Template "'.$fileName.'" is not existing', 311 );
 
 		$content	= '';
@@ -169,7 +196,7 @@ class CMF_Hydrogen_View
 		$request	= $this->env->getRequest();
 		$session	= $this->env->getSession();
 		$helpers	= $this->helpers;
-		$result		= require( $fileName );
+		$result		= require( $uri );
 		$buffer		= ob_get_clean();
 		$content	= $result;
 		if( trim( $buffer ) )

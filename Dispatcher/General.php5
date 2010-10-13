@@ -95,7 +95,7 @@ class CMF_Hydrogen_Dispatcher_General
 		}
 		if( count( $arguments ) < $numberArgsAtLeast )
 		{
-			$message	= 'No enough arguments for action "'.ucfirst( $className ).'::'.$action.'"';
+			$message	= 'Not enough arguments for action "'.ucfirst( $className ).'::'.$action.'"';
 			throw new RuntimeException( $message, 212 );											// break with internal error
 		}
 		if( count( $arguments ) > $numberArgsTotal )

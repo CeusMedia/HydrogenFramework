@@ -99,7 +99,11 @@ class CMF_Hydrogen_Controller
 		$result			= Alg_Object_MethodFactory::callObjectMethod( $this->view, $this->action );
 		if( is_string( $result ) )
 			return $result;
-		return $this->view->load();
+		if( $this->view->hasTemplate( $this->controller, $this->action ) )
+			return $this->view->loadTemplate( $this->controller, $this->action );
+		if( $this->view->hasContent( $this->controller, $this->action, 'html/' ) )
+			return $this->view->loadContent( $this->controller, $this->action, NULL, 'html/' );
+		throw new Exception( 'Neither view class method nor content file defined' );
 	}
 
 	/**
