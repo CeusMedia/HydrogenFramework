@@ -31,6 +31,7 @@
  *	@category		cmFrameworks
  *	@package		Hydrogen.Resource
  *	@abstract		Must be extended for application needs.
+ *	@implements		CMF_Hydrogen_Environment
  *	@implements		ArrayAccess
  *	@uses			ADT_List_Dictionary
  *	@author			Christian Würker <christian.wuerker@ceus-media.de>
@@ -40,7 +41,7 @@
  *	@since			0.1
  *	@version		$Id$
  */
-abstract class CMF_Hydrogen_Environment_Abstract implements ArrayAccess
+abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environment, ArrayAccess
 {
 	/**	@var	Alg_Time_Clock				$clock		Clock Object */
 	protected $clock;
