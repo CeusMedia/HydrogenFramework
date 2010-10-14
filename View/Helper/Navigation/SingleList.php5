@@ -31,7 +31,7 @@
  *
  *	@category		cmFrameworks
  *	@package		Hydrogen.View.Helper.Navigation
- *	@extends		CMF_Hydrogen_View_Helper
+ *	@extends		CMF_Hydrogen_View_Helper_Abstract
  *	@author			Christian Würker <christian.wuerker@ceus-media.de>
  *	@copyright		2007-2010 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -40,10 +40,11 @@
  *	@version		$Id$
  *	@todo			Code doc
  */
-class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_Helper
+class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_Helper_Abstract
 {
 	protected $linkMap;
 	protected $classInner		= 'single';
+	protected $needsEnv			= FALSE;
 
 	public function __construct( $linkMap )
 	{

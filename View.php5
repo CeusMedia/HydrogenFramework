@@ -148,10 +148,10 @@ class CMF_Hydrogen_View
 		return file_exists( $uri );
 	}
 
-	public function loadContent( $controller, $action, $data = array(), $path = NULL )
+	public function loadContent( $controller, $action, $data = array() )
 	{
-		$fileKey	= $controller.'/'.$action.'.html';
-		return $this->loadContentFile( $fileKey, $data, $path );
+		$fileKey	= 'html/'.$controller.'/'.$action.'.html';
+		return $this->loadContentFile( $fileKey, $data );
 	}
 
 	public function loadContentFile( $fileKey, $data = array(), $path = NULL )
