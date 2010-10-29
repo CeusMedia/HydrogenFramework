@@ -127,13 +127,15 @@ class CMF_Hydrogen_Controller
 	 *	@param		array		$parameters		Map of additional parameters to set in request
 	 *	@return		void
 	 */
-	public function redirect( $controller = 'index', $action = "index", $parameters = array() )
+	public function redirect( $controller = 'index', $action = "index", $arguments = array(), $parameters = array() )
 	{
-		$this->env->getRequest()->set( 'controller', $controller );
-		$this->env->getRequest()->set( 'action', $action );
+		$request	= $this->env->getRequest();
+		$request->set( 'controller', $controller );
+		$request->set( 'action', $action );
+		$request->set( 'arguments', $arguments );
 		foreach( $parameters as $key => $value )
 			if( !empty( $key ) )
-				$this->env->getRequest()->set( $key, $value );
+				$request->set( $key, $value );
 		$this->redirect = TRUE;
 	}
 	

@@ -54,7 +54,7 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 				$parameters['ip']	= $this->env->getSession()->get( 'ip' );
 		}
 		if( $parameters )
-			$url	.= '?'.http_build_query( $parameters, NULL, '&amp;' );
+			$url	.= '?'.http_build_query( $parameters, NULL, '&' );
 		return $url;
 	}
 
@@ -136,14 +136,15 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 	}
 
 	protected function handleResponse( $json, $url, $statusCode ) {
-		if( $statusCode != 200 )
+
+		if( $statusCode != 200 && $statusCode != 500 )
 			throw new RuntimeException( 'Resource '.$url.' has HTTP code '.$statusCode );
 		$response	= json_decode( $json );
 		if( !is_object( $response ) )
 			throw new RuntimeException( 'Resource '.$url.' is no JSON object' );
 		if( isset( $response->exception ) && $response->exception ) {
 			if( !preg_match( '/: */', $response->exception ) )
-				throw new RuntimeException( $exception );
+				throw new RuntimeException( $response->exception );
 			list( $exception, $message ) = preg_split( '/: */', $response->exception, 2 );
 			throw Alg_Object_Factory::createObject( $exception, array( $message ) );
 		}
