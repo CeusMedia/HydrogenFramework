@@ -43,12 +43,17 @@
 class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_Helper_Abstract
 {
 	protected $linkMap;
-	protected $classInner		= 'single';
+	protected $innerClass		= 'single';
+	protected $innerId			= 'navigation-inner';
 	protected $needsEnv			= FALSE;
 
-	public function __construct( $linkMap )
+	public function __construct( $linkMap, $innerClass = NULL, $innerId = NULL )
 	{
 		$this->linkMap		= $linkMap;
+		if( $innerClass )
+			$this->innerClass	= $innerClass;
+		if( $innerId )
+			$this->innerId		= $innerId;
 	}
 
 	public function render( $current = NULL )
@@ -65,15 +70,20 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_H
 		$attr	= array( 'class' => $class );
 		$list	= UI_HTML_Elements::unorderedList( $list, 0, $attr );
 		$attr	= array(
-			'id'	=> 'navigation-inner',
-			'class'	=> $this->classInner
+			'id'	=> $this->innerId,
+			'class'	=> $this->innerClass
 		);
 		return UI_HTML_Tag::create( 'div', $list, $attr );
 	}
 
-	public function setClassInner( $class )
+	public function setInnerClass( $class )
 	{
-		$this->classInner	= $class;
+		$this->innerClass	= $class;
+	}
+
+	public function setInnerId( $id )
+	{
+		$this->innerId	= $id;
 	}
 }
 ?>

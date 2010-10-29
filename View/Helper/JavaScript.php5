@@ -91,7 +91,7 @@ class CMF_Hydrogen_View_Helper_JavaScript
 	 *	@return		void
 	 */
 	public function clearCache(){
-		$index	= new File_RegexFilter( $this->pathCache, '/\.js$/' );
+		$index	= new File_RegexFilter( $this->pathCache, '/pack\.\w+\.js$/' );
 		foreach( $index as $file )
 			unlink( $file->getPathname() );
 	}
@@ -127,7 +127,7 @@ class CMF_Hydrogen_View_Helper_JavaScript
 	 */
 	protected function getPackageCacheFileName(){
 		$hash	= $this->getPackageHash();
-		return $this->pathCache.$hash.'.js';
+		return 'pack.'.$this->pathCache.$hash.'.js';
 	}
 
 	/**
