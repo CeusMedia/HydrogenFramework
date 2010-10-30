@@ -194,7 +194,10 @@ class CMF_Hydrogen_Controller
 		$this->env			= $env;
 		$this->controller	= $env->getRequest()->get( 'controller' );
 		$this->action		= $env->getRequest()->get( 'action' );
-		$this->env->getLanguage()->load( $this->controller, FALSE, FALSE );
+		if( $this->env->has( 'language' ) )
+		{
+			$this->env->getLanguage()->load( $this->controller, FALSE, FALSE );
+		}
 	}
 }
 ?>
