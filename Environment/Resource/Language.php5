@@ -67,11 +67,29 @@ class CMF_Hydrogen_Environment_Resource_Language
 		$language			= $config->has( 'locale.default' ) ? $config['locale.default'] : 'en';
 		$this->languages	= explode( ',', $languages );
 
-		if( $this->env->getSession() && $this->env->getSession()->get( 'language' ) )
-			$language		= $this->env->getSession()->get( 'language' );
+
+		if( $this->env->has( 'session' ) )
+		{
+			$switchTo	= $this->env->getRequest()->get( 'switchLanguageTo' );
+			if( $switchTo && in_array( $switchTo, $this->languages ) )
+			{
+				$this->env->getSession()->set( 'language', $switchTo );
+				if( !empty( $_SERVER['HTTP_REFERER'] ) )
+				{
+					$referer = $_SERVER['HTTP_REFERER'];
+					if( !preg_match( '/switchLanguageTo/', $referer ) )
+					{
+						header( 'Location: '.$referer );
+						exit;
+					}
+				}
+			}
+			if( $this->env->getSession()->get( 'language' ) )
+				$language		= $this->env->getSession()->get( 'language' );
+		}
 		$this->setLanguage( $language );
 	}
-	
+
 	/**
 	 *	Returns selected Language.
 	 *	@access		public
@@ -80,6 +98,16 @@ class CMF_Hydrogen_Environment_Resource_Language
 	public function getLanguage()
 	{
 		return $this->language;
+	}
+
+	/**
+	 *	Returns list of allowed languages.
+	 *	@access		public
+	 *	@return		string
+	 */
+	public function getLanguages()
+	{
+		return $this->languages;
 	}
 	
 	/**
