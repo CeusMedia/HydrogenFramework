@@ -89,9 +89,12 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 	 */
 	protected function applyParametersToMessage( $arguments )
 	{
-		$function	= new ReflectionFunction( 'sprintf' );
-		$message	= $function->invokeArgs( $arguments );
-		if( !$message )
+		if( count( $arguments ) > 1 )
+		{
+			$function	= new ReflectionFunction( 'sprintf' );
+			$message	= $function->invokeArgs( $arguments );
+		}
+		else
 			$message	= array_shift( $arguments );
 		return $message;
 	}

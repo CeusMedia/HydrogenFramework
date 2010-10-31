@@ -91,28 +91,37 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 	protected function main()
 	{
 		ob_start();
-		$content	= $this->control();														// dispatch and run request
-
+		$content	= $this->control();											// dispatch and run request
+		$dev		= ob_get_clean();
+		
 		if( $this->env->getRequest()->isAjax() )								// this is an AJAX request
 			return $content;													// deliver content only
 
 		$config		= $this->env->getConfig();									// shortcut to configation object
-		$language	= $this->env->getLanguage();								// shortcut to language object
-		$database	= $this->env->getDatabase();								// shortcut to database connection object
-		$this->setViewComponents(												// set up information sources for main template
-			array(
-				'config'		=> $config,										// configuration object
-				'request'		=> $this->env->getRequest(),					// request object
-				'messenger'		=> $this->env->getMessenger(),					// UI messages for user
-				'language'		=> $config['languages.default'],				// document language
-				'words'			=> $language->getWords( 'main', FALSE, FALSE ),	// main UI word pairs
-				'content'		=> $content,									// rendered response page view content
-				'clock'			=> $this->clock,								// system clock for performance messure
-				'dbQueries'		=> (int) $database->numberExecutes,				// number of SQL queries executed
-				'dbStatements'	=> (int) $database->numberStatements,			// number of SQL statements sent
-				'dev'			=> ob_get_clean(),								// error or development messages
-			)
+
+		$data		 = array(
+			'config'		=> $config,											// configuration object
+			'request'		=> $this->env->getRequest(),						// request object
+			'content'		=> $content,										// rendered response page view content
+			'clock'			=> $this->clock,									// system clock for performance messure
+			'dev'			=> $dev,											// warnings, notices or development messages
 		);
+
+		if( $this->env->has( 'messenger' ) )
+			$data['messenger']	= $this->env->getMessenger();					// UI messages for user
+		if( $this->env->has( 'language' ) )
+		{
+			$language			= $this->env->getLanguage();					// shortcut to language object
+			$data['language']	= $language->getLanguage();						// document language
+			$data['words']		= $language->getWords( 'main', FALSE, FALSE );	// main UI word pairs
+		}
+		if( $this->env->has( 'database' ) )
+		{
+			$database	= $this->env->getDatabase();							// shortcut to database connection object
+			$data['dbQueries']		= (int) $database->numberExecutes;			// number of SQL queries executed
+			$data['dbStatements']	= (int) $database->numberStatements;		// number of SQL statements sent
+		}
+		$this->setViewComponents( $data );										// set up information sources for main template
 		return $this->view();													// render and return main template to constructor
 	}
 

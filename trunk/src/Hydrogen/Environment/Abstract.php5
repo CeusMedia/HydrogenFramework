@@ -100,7 +100,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	{
 		$method	= 'get'.ucFirst( $key );
 		if( is_callable( array( $this, $method ) ) )
-			if( is_object( call_user_method( $method, $this ) ) )
+			if( is_object( call_user_func( array( $this, $method ) ) ) )
 				return TRUE;
 		return FALSE;
 	}
