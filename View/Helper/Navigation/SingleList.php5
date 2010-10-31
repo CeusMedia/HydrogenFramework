@@ -60,9 +60,11 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_H
 	{
 		$list	= array();
 		$active	= FALSE;
+		$path	= empty( $_REQUEST['path'] ) ? $current : $_REQUEST['path'];
 		foreach( $this->linkMap as $key => $label )
 		{
-			$class		= ( $current == $key ) ? 'active' : NULL;
+			$active		= substr( $path, 0, strlen( $key ) ) == $key;
+			$class		= $active ? 'active' : NULL;
 			$url		= $key == "index" ? "./" : './?controller='.$key;
 			$link		= UI_HTML_Elements::Link( $url, $label, $class );
 			$list[]		= UI_HTML_Elements::ListItem( $link, 0 );
