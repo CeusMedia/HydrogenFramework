@@ -20,6 +20,8 @@
 class CMF_Hydrogen_Environment_Resource_Server_Json {
 
 	protected $env;
+	protected $serverUsername;
+	protected $serverPassword;
 	protected $serverUri;
 	protected $curlOptions	= array(
 		'ALL'	=> array(),
@@ -36,6 +38,11 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 	public function  __construct( CMF_Hydrogen_Environment_Abstract $env ) {
 		$this->env			= $env;
 		$this->serverUri	= $env->getConfig()->get( 'server.uri' );
+
+		$this->serverUsername		= $env->getConfig()->get( 'server.username' );
+		$this->serverPassword		= $env->getConfig()->get( 'server.password' );
+		$this->setCurlOption( CURLOPT_USERPWD, $this->serverUsername.':'.$this->serverPassword );
+
 		$this->clientIp		= getEnv( 'REMOTE_ADDR' );
 		if( empty( $this->serverUri ) )
 			throw new RuntimeException( 'No server URI set in config (server.uri)' );
@@ -122,12 +129,13 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 	}
 
 	public function getDataFromUrl( $url, $curlOptions = array() ) {
-		$options	= array_merge(
-			$this->curlOptions['ALL'],
-			$this->curlOptions['GET'],
-			$curlOptions
-		);
+		$options	= $this->curlOptions['ALL'] + $this->curlOptions['GET'] + $curlOptions;
+		$username	= $this->env->getConfig()->get( 'server.username' );
+		$password	= $this->env->getConfig()->get( 'server.password' );
 		$reader		= new Net_Reader( $url );
+#		if( $this->serverUsername && $this->serverPassword )
+#			$reader->setBasicAuth( $this->serverUsername, $this->serverPassword );
+
 		$json		= $reader->read( $options );
 		$statusCode	= $reader->getStatus( Net_CURL::STATUS_HTTP_CODE );
 		error_log( time()." GET (".$statusCode."): ".$json."\n", 3, "logs/server.response.log" );
@@ -177,11 +185,7 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 				$data[$key]	= "\\".$value;															//  need to be escaped
 		$curl	= new Net_CURL( $url );
 
-		$options	= array_merge(
-			$this->curlOptions['ALL'],
-			$this->curlOptions['POST'],
-			$curlOptions
-		);
+		$options	= $this->curlOptions['ALL'] + $this->curlOptions['POST'] + $curlOptions;
 		foreach( $options as $key => $value )
 			$curl->setOption( $key, $value );
 		$curl->setOption( CURLOPT_POST, TRUE );
