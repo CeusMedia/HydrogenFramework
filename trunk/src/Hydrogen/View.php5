@@ -78,6 +78,11 @@ class CMF_Hydrogen_View
 		$this->helpers	= new ADT_List_Dictionary;
 	}
 
+	public function addData( $key, $value, $topic = NULL )
+	{
+		return $this->setData( array( $key => $value ), $topic );
+	}
+
 	protected function addHelper( $name, $object, $parameters = array() )
 	{
 		if( is_object( $object ) )
@@ -88,7 +93,7 @@ class CMF_Hydrogen_View
 		else
 			$this->registerHelper($name, $object, $parameters);
 	}
-	
+
 	public function & getData()
 	{
 		return $this->data;

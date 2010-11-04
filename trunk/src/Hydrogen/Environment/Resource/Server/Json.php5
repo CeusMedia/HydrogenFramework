@@ -132,13 +132,22 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 		$options	= $this->curlOptions['ALL'] + $this->curlOptions['GET'] + $curlOptions;
 		$username	= $this->env->getConfig()->get( 'server.username' );
 		$password	= $this->env->getConfig()->get( 'server.password' );
+		$pathLogs	= $this->env->getConfig()->get( 'path.logs' );
+
 		$reader		= new Net_Reader( $url );
 #		if( $this->serverUsername && $this->serverPassword )
 #			$reader->setBasicAuth( $this->serverUsername, $this->serverPassword );
 
-		$json		= $reader->read( $options );
+		try {
+			$reader->read( $options );
+		}
+		catch( Exception $e ){
+			die( $e->getMessage() );
+		}
+		$json	= $reader->getBody();
+
 		$statusCode	= $reader->getStatus( Net_CURL::STATUS_HTTP_CODE );
-		error_log( time()." GET (".$statusCode."): ".$json."\n", 3, "logs/server.response.log" );
+		error_log( time()." GET (".$statusCode."): ".$json."\n", 3, $pathLogs.'server.response.log' );
 		$response	= $this->handleResponse( $json, $url, $statusCode );
 		return $response->data;
 	}

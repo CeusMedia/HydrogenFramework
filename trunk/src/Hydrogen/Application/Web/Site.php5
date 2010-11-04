@@ -143,8 +143,8 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 				$response->addHeader( $header );
 			else
 				$response->addHeaderPair( $key, $value );
-
-		return $response->send();
+		return Net_HTTP_Response_Sender::sendResponse( $response );
+#		return $response->send( TRUE, 'logs/compression.log' );
 	}
 
 	/**

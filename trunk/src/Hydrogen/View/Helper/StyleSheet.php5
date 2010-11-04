@@ -1,6 +1,6 @@
 <?php
 /**
- *	Helper to collect and combine JavaScripts.
+ *	Helper to collect and combine StyleSheets.
  *
  *	Copyright (c) 2010 Christian Würker (ceus-media.de)
  *
@@ -27,7 +27,7 @@
  *	@version		$Id$
  */
 /**
- *	Component to collect and combine JavaScripts.
+ *	Component to collect and combine StyleSheet.
  *	@category		cmFrameworks
  *	@package		Hydrogen.View.Helper
  *	@author			Christian Würker <christian.wuerker@ceus-media.de>
@@ -37,13 +37,13 @@
  *	@since			0.1
  *	@version		$Id$
  */
-class CMF_Hydrogen_View_Helper_JavaScript
+class CMF_Hydrogen_View_Helper_StyleSheet
 {
 	protected static $instance;
 	protected $pathCache			= "contents/cache/";
 	protected $revision;
-	/**	@var	array				$scripts		List of JavaScript blocks */
-	protected $scripts				= array();
+	/**	@var	array				$styles		List of StyleSheet blocks */
+	protected $styles				= array();
 	protected $urls					= array();
 	public $indent					= "\t\t";
 
@@ -64,20 +64,20 @@ class CMF_Hydrogen_View_Helper_JavaScript
 	private function __clone(){}
 
 	/**
-	 *	Collect a JavaScript block.
+	 *	Collect a StyleSheet block.
 	 *	@access		public
-	 *	@param		string		$script		JavaScript block
+	 *	@param		string		$style		StyleSheet block
 	 *	@param		bool		$onTop		Put this block on top of all others
 	 *	@return		void
 	 */
-	public function addScript( $script, $onTop = FALSE ){
-		$onTop ? array_unshift( $this->scripts, $script ) : array_push( $this->scripts, $script );
+	public function addStyle( $style, $onTop = FALSE ){
+		$onTop ? array_unshift( $this->styles, $style ) : array_push( $this->styles, $style );
 	}
 
 	/**
-	 *	Add a JavaScript URL.
+	 *	Add a StyleSheet URL.
 	 *	@access		public
-	 *	@param		string		$url		JavaScript URL
+	 *	@param		string		$url		StyleSheet URL
 	 *	@param		bool		$onTop		Flag: add this URL on top of all others
 	 *	@return		void
 	 */
@@ -86,12 +86,12 @@ class CMF_Hydrogen_View_Helper_JavaScript
 	}
 
 	/**
-	 *	Removes all combined scripts in file cache.
+	 *	Removes all combined styles in file cache.
 	 *	@access		public
 	 *	@return		void
 	 */
 	public function clearCache(){
-		$index	= new File_RegexFilter( $this->pathCache, '/pack\.\w+\.js$/' );
+		$index	= new File_RegexFilter( $this->pathCache, '/pack\.\w+\.css$/' );
 		foreach( $index as $file )
 			unlink( $file->getPathname() );
 	}
@@ -127,35 +127,71 @@ class CMF_Hydrogen_View_Helper_JavaScript
 	 */
 	protected function getPackageCacheFileName(){
 		$hash	= $this->getPackageHash();
-		return $this->pathCache.'pack.'.$hash.'.js';
+		return $this->pathCache.'pack.'.$hash.'.css';
 	}
 
 	/**
-	 *	Returns name of combined JavaScript file.
+	 *	Returns name of combined StyleSheet file.
 	 *	@access		protected
 	 *	@param		bool		$forceFresh		Flag: force fresh creation instead of using cache
 	 *	@return		string
 	 */
 	protected function getPackageFileName( $forceFresh = FALSE ){
-		$fileJs	= $this->getPackageCacheFileName();
-		if( !file_exists( $fileJs ) || $forceFresh ) {
+		$combiner	= new File_CSS_Combiner();
+		$compressor	= new File_CSS_Compressor();
+		$fileCss	= $this->getPackageCacheFileName();
+		if( !file_exists( $fileCss ) || $forceFresh ) {
 			$contents	= array();
 			if( $this->revision )
 				$content	= "/* @revision ".$this->revision." */\n";
 			foreach( $this->urls as $url ){
 				$content	= @file_get_contents( $url );
 				if( $content === FALSE )
-					throw new RuntimeException( 'Script file "'.$url.'" not existing' );
+					throw new RuntimeException( 'Style file "'.$url.'" not existing' );
+				if( !preg_match( '@://@', $url ) ){
+					$path		= dirname( $url ).'/';
+					$content	= $combiner->combineString( $path, $content, TRUE );
+				}
+				$matches	= array();
+				preg_match_all( '/url\((.+)\)/U', $content, $matches );
+				if( $matches = array_pop( $matches ) )
+				{
+					$path	= dirname( $url );
+					foreach( $matches as $match )
+					{
+						$match	= trim( $match );
+						if( preg_match( '/^([a-z]+\:)?\/\//', $match ) )
+							continue;
+						$path	= dirname( $url );
+						$parts	= explode( '/', $match );
+						while( ( $part = array_shift( $parts ) ) == '..' )
+						{
+							if( preg_match( '/[a-z0-9]/', $path ) )
+								$path	= dirname( $path );
+							else
+								$path	= '../';
+						}
+						$url	= $path.'/'.$part.'/'.implode( '/', $parts );
+						$url	= str_replace( $this->pathCache, '', $url );
+						$imageUrl	= $url;
+						if( !preg_match( '/^([a-z]+:|)\/\//', $url ) )
+							$imageUrl	= $this->pathCache.$imageUrl;
+						if( !file_get_contents(  $imageUrl ) )
+							throw new RuntimeException( 'Image "'.$imageUrl.'" is missing' );
+						$content	= str_replace( $match, $url, $content );
+					}
+				}
 				$contents[]	= $content;
 			}
 			$content	= implode( "\n\n", $contents );
-			File_Writer::save( $fileJs, $content );
+			$content	= $compressor->compressString( $content );
+			File_Writer::save( $fileCss, $content );
 		}
-		return $fileJs;
+		return $fileCss;
 	}
 
 	/**
-	 *	Renders an HTML scrtipt tag with all collected JavaScript URLs and blocks.
+	 *	Renders an HTML scrtipt tag with all collected StyleSheet URLs and blocks.
 	 *	@access		public
 	 *	@param		bool		$indentEndTag	Flag: indent end tag by 2 tabs
 	 *	@param		bool		$forceFresh		Flag: force fresh creation instead of using cache
@@ -163,18 +199,19 @@ class CMF_Hydrogen_View_Helper_JavaScript
 	 */
 	public function render( $enablePackage = TRUE, $indentEndTag = FALSE, $forceFresh = FALSE ){
 		$links		= '';
-		$scripts	= '';
+		$styles		= '';
 		if( $this->urls )
 		{
 			if( $enablePackage )
 			{
-				$fileJs	= $this->getPackageFileName( $forceFresh );
+				$fileCss	= $this->getPackageFileName( $forceFresh );
 				$attributes	= array(
-					'type'		=> 'text/javascript',
-		//			'language'	=> 'JavaScript',
-					'src'		=> $fileJs
+					'type'		=> 'text/css',
+					'rel'		=> 'stylesheet',
+					'media'		=> 'all',
+					'href'		=> $fileCss
 				);
-				$links	= UI_HTML_Tag::create( 'script', NULL, $attributes );
+				$links	= UI_HTML_Tag::create( 'link', NULL, $attributes );
 			}
 			else
 			{
@@ -182,32 +219,32 @@ class CMF_Hydrogen_View_Helper_JavaScript
 				foreach( $this->urls as $url )
 				{
 					$attributes	= array(
-						'type'		=> 'text/javascript',
-			//			'language'	=> 'JavaScript',
-						'src'		=> $url
+						'rel'		=> 'stylesheet',
+						'type'		=> 'text/css',
+						'media'		=> 'all',
+						'href'		=> $url
 					);
-					$list[]	= UI_HTML_Tag::create( 'script', NULL, $attributes );
+					$list[]	= UI_HTML_Tag::create( 'link', NULL, $attributes );
 				}
 				$links	= implode( "\n".$this->indent, $list  );
 			}
 		}
 
-		if( $this->scripts )
+		if( $this->styles )
 		{
-			array_unshift( $this->scripts, '' );
-			array_push( $this->scripts, $indentEndTag ? "\t\t" : '' );
-			$content	= implode( "\n", $this->scripts );
+			array_unshift( $this->styles, '' );
+			array_push( $this->styles, $indentEndTag ? "\t\t" : '' );
+			$content	= implode( "\n", $this->styles );
 			$attributes	= array(
-				'type'		=> 'text/javascript',
-	//			'language'	=> 'JavaScript',
+				'type'		=> 'text/css',
 			);
-			$scripts	= "\n".$this->indent.UI_HTML_Tag::create( 'script', $content."\n".$this->indent, $attributes );
+			$styles	= "\n".$this->indent.UI_HTML_Tag::create( 'style', $content."\n".$this->indent, $attributes );
 		}
-		return $links.$scripts;
+		return $links.$styles;
 	}
 
 	/**
-	 *	Returns a list of collected JavaScripts URLs.
+	 *	Returns a list of collected StyleSheet URLs.
 	 *	@access		public
 	 *	@return		array
 	 */
