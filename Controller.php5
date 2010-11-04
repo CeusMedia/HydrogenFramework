@@ -67,7 +67,6 @@ class CMF_Hydrogen_Controller
 		$this->view	= $this->getViewObject();
 	}
 	
-	//  --  SETTERS & GETTERS  --  //
 	public function addData( $key, $value, $topic = NULL )
 	{
 		return $this->view->setData( array( $key => $value ), $topic );
