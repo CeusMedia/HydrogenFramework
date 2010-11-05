@@ -159,13 +159,11 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 		$response	= json_decode( $json );
 		if( !is_object( $response ) )
 			throw new RuntimeException( 'Resource '.$url.' is no JSON object' );
-		if( isset( $response->exception ) && $response->exception ) {
-			if( !preg_match( '/: */', $response->exception ) )
-				throw new RuntimeException( $response->exception );
-			list( $exception, $message ) = preg_split( '/: */', $response->exception, 2 );
-			throw Alg_Object_Factory::createObject( $exception, array( $message ) );
-		}
-		return $response;
+		if( empty( $response->exception ) )
+			return $response;
+		if( empty( $response->serial ) )
+			throw new RuntimeException( $response->exception );
+		throw unserialize( $response->serial );
 	}
 
 	public function postData( $controller, $action = NULL, $arguments = NULL, $data = array(), $curlOptions = array() )
