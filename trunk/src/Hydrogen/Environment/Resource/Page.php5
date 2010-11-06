@@ -56,8 +56,8 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 
 	public function build( $bodyAttributes = array() )
 	{
-		$this->addHead( $this->css->render( $this->packJavaScripts ) );
-		$this->addBody( $this->js->render( $this->packStyleSheets ) );
+		$this->addHead( $this->css->render( $this->packStyleSheets ) );
+		$this->addBody( $this->js->render( $this->packJavaScripts ) );
 		return parent::build( $bodyAttributes );
 	}
 
