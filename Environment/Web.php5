@@ -234,7 +234,8 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 
 	protected function initRequest()
 	{
-		$this->request		= new Net_HTTP_Request_Receiver();
+		$this->request		= new Net_HTTP_Request();
+		$this->request->fromEnv( $this->getSession() );
 		$redirectUrl		= getEnv( 'REDIRECT_URL' );
 		if( !empty( $redirectUrl ) )
 			if( method_exists( $this, 'realizeRewrittenUrl' ) )
@@ -261,9 +262,9 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 		);
 	}
 
-	protected function realizeRewrittenUrl( Net_HTTP_Request_Receiver $request )
+	protected function realizeRewrittenUrl( Net_HTTP_Request $request )
 	{
-		$path	= $request->getFromSource( 'path', 'GET' );
+		$path	= $request->getFromSource( 'path', 'get' );
 		if( !trim( $path ) )
 			return;
 

@@ -129,25 +129,16 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 	}
 
 	public function getDataFromUrl( $url, $curlOptions = array() ) {
+		$reader		= new Net_HTTP_Reader();
+		$headers	= array( 'Accept-Encoding: gzip, deflate' );
 		$options	= $this->curlOptions['ALL'] + $this->curlOptions['GET'] + $curlOptions;
-		$username	= $this->env->getConfig()->get( 'server.username' );
-		$password	= $this->env->getConfig()->get( 'server.password' );
+		$response	= $reader->get( $url, $headers, $options );
+		$json		= $response->getBody();
+
+		$statusCode	= $reader->getCurlInfo( Net_CURL::STATUS_HTTP_CODE );
 		$pathLogs	= $this->env->getConfig()->get( 'path.logs' );
-
-		$reader		= new Net_Reader( $url );
-#		if( $this->serverUsername && $this->serverPassword )
-#			$reader->setBasicAuth( $this->serverUsername, $this->serverPassword );
-
-		try {
-			$reader->read( $options );
-		}
-		catch( Exception $e ){
-			die( $e->getMessage() );
-		}
-		$json	= $reader->getBody();
-
-		$statusCode	= $reader->getStatus( Net_CURL::STATUS_HTTP_CODE );
-		error_log( time()." GET (".$statusCode."): ".$json."\n", 3, $pathLogs.'server.response.log' );
+		$logFile	= $pathLogs.'server.response.log';
+		error_log( time()." GET (".$statusCode."): ".$json."\n", 3, $logFile );
 		$response	= $this->handleResponse( $json, $url, $statusCode );
 		return $response->data;
 	}
@@ -166,23 +157,19 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 		throw unserialize( $response->serial );
 	}
 
-	public function postData( $controller, $action = NULL, $arguments = NULL, $data = array(), $curlOptions = array() )
-	{
+	public function postData( $controller, $action = NULL, $arguments = NULL, $data = array(), $curlOptions = array() ) {
 		$url	= $this->buildServerPostUrl( $controller, $action, $arguments );
 		return $this->postDataToUrl( $url, $data, $curlOptions );
 	}
 
-	public function postDataToUri( $uri, $data = array(), $curlOptions = array() )
-	{
+	public function postDataToUri( $uri, $data = array(), $curlOptions = array() ) {
 		return $this->postDataToUrl( $this->serverUri.$uri, $data, $curlOptions );
 	}
 
-	public function postDataToUrl( $url, $data = array(), $curlOptions = array() )
-	{
+	public function postDataToUrl( $url, $data = array(), $curlOptions = array() ) {
 		if( $data instanceof ADT_List_Dictionary )
 			$data	= $data->getAll();
-		if( $this->env->getSession()->get( 'token' ) )
-		{
+		if( $this->env->getSession()->get( 'token' ) ) {
 			$data['token']	= $this->env->getSession()->get( 'token' );
 			if( $this->env->getSession()->get( 'ip' ) )
 				$data['ip']	= $this->env->getSession()->get( 'ip' );
@@ -190,18 +177,19 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 		foreach( $data as $key => $value )															//  cURL hack (file upload identifier)
 			if( is_string( $value ) && substr( $value, 0, 1 ) == "@" )								//  leading @ in field values
 				$data[$key]	= "\\".$value;															//  need to be escaped
-		$curl	= new Net_CURL( $url );
 
+		$reader		= new Net_HTTP_Reader();
+		$headers	= array( 'Accept-Encoding: gzip, deflate' );
+		$curlOptions[CURLOPT_POST]	= TRUE;
+		$curlOptions[CURLOPT_POSTFIELDS] = http_build_query( $data );
 		$options	= $this->curlOptions['ALL'] + $this->curlOptions['POST'] + $curlOptions;
-		foreach( $options as $key => $value )
-			$curl->setOption( $key, $value );
-		$curl->setOption( CURLOPT_POST, TRUE );
-		$curl->setOption( CURLOPT_POSTFIELDS, http_build_query( $data ) );
-		foreach( $options as $key => $value )
-			$curl->setOption( $key, $value );
-		$json		= $curl->exec();
-		$statusCode	= $curl->getStatus( Net_CURL::STATUS_HTTP_CODE );
-		error_log( time()." POST (".$statusCode."): ".$json."\n", 3, "logs/server.response.log" );
+		$response	= $reader->post( $url, $data, $headers, $options );
+		$json		= $response->getBody();
+
+		$statusCode	= $reader->getCurlInfo( Net_CURL::STATUS_HTTP_CODE );
+		$pathLogs	= $this->env->getConfig()->get( 'path.logs' );
+		$logFile	= $pathLogs.'server.response.log';
+		error_log( time()." POST (".$statusCode."): ".$json."\n", 3, $logFile );
 		$response	= $this->handleResponse( $json, $url, $statusCode );
 		return $response->data;
 	}
