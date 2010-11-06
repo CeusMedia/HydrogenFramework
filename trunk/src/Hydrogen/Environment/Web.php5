@@ -69,10 +69,10 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 		$this->initSession();																		//  --  SESSION HANDLING  --  //
 		$this->initMessenger();																		//  --  UI MESSENGER  --  //
 		$this->initDatabase();																		//  --  DATABASE CONNECTION  --  //
-		$this->initLanguage();																		//  --  LANGUAGE SUPPORT  --  //
 		$this->initRequest();																		//  --  HTTP REQUEST HANDLER  --  //
 		$this->initResponse();																		//  --  HTTP RESPONSE HANDLER  --  //
 //		$this->initFieldDefinition();																//  --  FIELD DEFINITION SUPPORT  --  //
+		$this->initLanguage();																		//  --  LANGUAGE SUPPORT  --  //
 		$this->initPage();
 	}
 
@@ -228,6 +228,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	protected function initPage()
 	{
 		$this->page	= new CMF_Hydrogen_Environment_Resource_Page( $this );
+		$this->page->setPackaging( TRUE, TRUE );
 		if( $this->getConfig()->get( 'app.base.url' ) )
 			$this->page->setBaseHref( $this->getConfig()->get( 'app.base.url' ) );
 	}
