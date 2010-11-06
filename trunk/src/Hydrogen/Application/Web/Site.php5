@@ -143,8 +143,21 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 				$response->addHeader( $header );
 			else
 				$response->addHeaderPair( $key, $value );
-		return Net_HTTP_Response_Sender::sendResponse( $response );
-#		return $response->send( TRUE, 'logs/compression.log' );
+
+		$type		= NULL;
+		$encodings	= $this->env->getRequest()->headers->getHeader( 'Accept-Encoding' );
+		if( $encodings )
+		{
+			$typesSupported	= array( 'gzip', 'deflate' );
+			$typesRequested	= array_keys( $encodings[0]->getValue( TRUE ) );
+			foreach( $typesRequested as $code ){
+				if( in_array( $code, $typesSupported ) ){
+					$type	= $code;
+					break;
+				}
+			}
+		}
+		return Net_HTTP_Response_Sender::sendResponse( $response, $type );
 	}
 
 	/**
