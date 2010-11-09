@@ -55,11 +55,9 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 		if( !is_array( $parameters ) )
 			throw new InvalidArgumentException( 'Parameters must be an array or NULL' );
 		if( $this->env->getSession()->get( 'token' ) )
-		{
 			$parameters['token']	= $this->env->getSession()->get( 'token' );
-			if( $this->env->getSession()->get( 'ip' ) )
-				$parameters['ip']	= $this->env->getSession()->get( 'ip' );
-		}
+		if( $this->env->getSession()->get( 'ip' ) )
+			$parameters['ip']	= $this->env->getSession()->get( 'ip' );
 		if( $parameters )
 			$url	.= '?'.http_build_query( $parameters, NULL, '&' );
 		return $url;
@@ -138,7 +136,7 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 		$statusCode	= $reader->getCurlInfo( Net_CURL::STATUS_HTTP_CODE );
 		$pathLogs	= $this->env->getConfig()->get( 'path.logs' );
 		$logFile	= $pathLogs.'server.response.log';
-		error_log( time()." GET (".$statusCode."): ".$json."\n", 3, $logFile );
+		error_log( time()." POST (".$statusCode."): ".$json."\n", 3, $logFile );
 		$response	= $this->handleResponse( $json, $url, $statusCode );
 		return $response->data;
 	}
@@ -169,11 +167,10 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 	public function postDataToUrl( $url, $data = array(), $curlOptions = array() ) {
 		if( $data instanceof ADT_List_Dictionary )
 			$data	= $data->getAll();
-		if( $this->env->getSession()->get( 'token' ) ) {
+		if( $this->env->getSession()->get( 'token' ) )
 			$data['token']	= $this->env->getSession()->get( 'token' );
-			if( $this->env->getSession()->get( 'ip' ) )
-				$data['ip']	= $this->env->getSession()->get( 'ip' );
-		}
+		if( $this->env->getSession()->get( 'ip' ) )
+			$data['ip']	= $this->env->getSession()->get( 'ip' );
 		foreach( $data as $key => $value )															//  cURL hack (file upload identifier)
 			if( is_string( $value ) && substr( $value, 0, 1 ) == "@" )								//  leading @ in field values
 				$data[$key]	= "\\".$value;															//  need to be escaped
@@ -185,6 +182,8 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 		$options	= $this->curlOptions['ALL'] + $this->curlOptions['POST'] + $curlOptions;
 		$response	= $reader->post( $url, $data, $headers, $options );
 		$json		= $response->getBody();
+
+print_m( $curlOptions );
 
 		$statusCode	= $reader->getCurlInfo( Net_CURL::STATUS_HTTP_CODE );
 		$pathLogs	= $this->env->getConfig()->get( 'path.logs' );
