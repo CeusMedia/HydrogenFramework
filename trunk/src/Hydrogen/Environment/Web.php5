@@ -225,10 +225,10 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	 *	@access		protected
 	 *	@return		void
 	 */
-	protected function initPage()
+	protected function initPage( $pageJavaScripts = TRUE, $packStyleSheets = TRUE )
 	{
 		$this->page	= new CMF_Hydrogen_Environment_Resource_Page( $this );
-		$this->page->setPackaging( TRUE, TRUE );
+		$this->page->setPackaging( $pageJavaScripts, $packStyleSheets );
 		if( $this->getConfig()->get( 'app.base.url' ) )
 			$this->page->setBaseHref( $this->getConfig()->get( 'app.base.url' ) );
 	}

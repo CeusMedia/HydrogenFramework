@@ -51,9 +51,7 @@ class CMF_Hydrogen_Dispatcher_General
 
 	public $checkClassActionArguments	= TRUE;
 
-	public $prefixController			= "Controller_";
-//	public $prefixModel					= "Model_";
-//	public $prefixView					= "View_";
+	public static $prefixController		= "Controller_";
 
 
 	public function __construct( CMF_Hydrogen_Environment_Abstract $env ) {
@@ -133,7 +131,7 @@ class CMF_Hydrogen_Dispatcher_General
 			$action		= trim( $this->request->get( 'action' ) );
 			$arguments	= $this->request->get( 'arguments' );
 
-			$className	= $this->prefixController.ucfirst( $controller );							// get controller class name
+			$className	= self::$prefixController.ucfirst( $controller );							// get controller class name
 			$this->checkClass( $className );
 			$factory	= new Alg_Object_Factory();													// raise object factory
 			$instance	= $factory->createObject( $className, array( &$this->env ) );				// build controller instance
