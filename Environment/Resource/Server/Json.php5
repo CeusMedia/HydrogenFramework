@@ -1,16 +1,16 @@
 <?php
 /**
  *	Resource to communicate with chat server.
- *	@category		cmApps
- *	@package		Chat.Client
+ *	@category		cmFrameworks
+ *	@package		Hydrogen.Environment.Resource.Server
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2010 Ceus Media
  *	@version		$Id$
  */
 /**
  *	Resource to communicate with chat server.
- *	@category		cmApps
- *	@package		Chat.Client
+ *	@category		cmFrameworks
+ *	@package		Hydrogen.Environment.Resource.Server
  *	@uses			Net_Reader
  *	@uses			Net_CURL
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
