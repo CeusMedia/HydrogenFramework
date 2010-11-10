@@ -39,8 +39,8 @@
  */
 class CMF_Hydrogen_Controller
 {
-	protected static $prefixModel		= "Model_";
-	protected static $prefixView		= "View_";
+	public static $prefixModel		= "Model_";
+	public static $prefixView		= "View_";
 
 	/**	@var		CMF_Hydrogen_Environment_Abstract	$env			Application Environment Object */
 	protected $env;
