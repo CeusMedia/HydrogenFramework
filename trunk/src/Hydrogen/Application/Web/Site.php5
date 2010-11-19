@@ -135,6 +135,7 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 	{
 		$response	= $this->env->getResponse();
 
+		$body		= ob_get_clean().$body;
 		if( $body )
 			$response->setBody( $body );
 
