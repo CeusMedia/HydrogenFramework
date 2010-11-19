@@ -2,7 +2,7 @@
 /**
  *	...
  *
- *	Copyright (c) 2007-2010 Christian Würker (ceus-media.de)
+ *	Copyright (c) 2010 Christian Würker (ceus-media.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		cmFrameworks
  *	@package		Hydrogen.View.Helper.Navigation
  *	@author			Christian Würker <christian.wuerker@ceus-media.de>
- *	@copyright		2007-2010 Christian Würker
+ *	@copyright		2010 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.1
@@ -33,31 +33,31 @@
  *	@package		Hydrogen.View.Helper.Navigation
  *	@extends		CMF_Hydrogen_View_Helper_Abstract
  *	@author			Christian Würker <christian.wuerker@ceus-media.de>
- *	@copyright		2007-2010 Christian Würker
+ *	@copyright		2010 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.1
  *	@version		$Id$
  *	@todo			Code doc
  */
-class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_Helper_Abstract
+class CMF_Hydrogen_View_Helper_Navigation_SingleAclList extends CMF_Hydrogen_View_Helper_Navigation_SingleList
 {
-	protected $linkMap;
-	protected $innerClass		= 'single';
-	protected $innerId			= 'navigation-inner';
-	protected $needsEnv			= FALSE;
-
-	public function __construct( $linkMap, $innerClass = NULL, $innerId = NULL )
-	{
-		$this->linkMap		= $linkMap;
-		if( $innerClass )
-			$this->innerClass	= $innerClass;
-		if( $innerId )
-			$this->innerId		= $innerId;
-	}
+	protected $needsEnv			= TRUE;
 
 	public function render( $current = NULL )
 	{
+		$roleId		= $this->env->session->get( 'roleId' );
+		if( $roleId )
+		{
+			foreach( $this->linkMap as $key => $label ){
+				$parts	= explode( '/', $key );
+				$controller	= array_shift( $parts );
+				$action		= $parts ? array_shift( $parts ) : 'index';
+				if( !$this->env->acl->hasRight( $roleId, $controller, $action ) )
+					unset( $this->linkMap[$key] );
+			}
+		}
+
 		$list	= array();
 		$active	= FALSE;
 		$path	= empty( $_REQUEST['path'] ) ? $current : $_REQUEST['path'];
@@ -65,27 +65,16 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_H
 		{
 			$active		= $path == $key || substr( $path, 0, strlen( $key ) + 1 ) == $key.'/';
 			$class		= $active ? 'active' : NULL;
-			$url		= $key == "index" ? "./" : './?controller='.$key;
+			$url		= $key == "index" ? "./" : './'.$key;
 			$link		= UI_HTML_Elements::Link( $url, $label, $class );
-			$list[]		= UI_HTML_Elements::ListItem( $link, 0 );
+			$list[]		= UI_HTML_Elements::ListItem( $link );
 		}
-		$attr	= array( 'class' => $class );
-		$list	= UI_HTML_Elements::unorderedList( $list, 0, $attr );
+		$list	= UI_HTML_Elements::unorderedList( $list );
 		$attr	= array(
 			'id'	=> $this->innerId,
 			'class'	=> $this->innerClass
 		);
 		return UI_HTML_Tag::create( 'div', $list, $attr );
-	}
-
-	public function setInnerClass( $class )
-	{
-		$this->innerClass	= $class;
-	}
-
-	public function setInnerId( $id )
-	{
-		$this->innerId	= $id;
 	}
 }
 ?>

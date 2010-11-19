@@ -61,6 +61,11 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$this->initConfiguration();																	//  --  CONFIGURATION  --  //
 	}
 
+	public function __get( $key )
+	{
+		return $this->get( $key );
+	}
+
 	public function close()
 	{
 		unset( $this->config );																		//
