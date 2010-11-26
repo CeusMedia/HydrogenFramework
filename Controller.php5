@@ -112,9 +112,10 @@ class CMF_Hydrogen_Controller
 	 */
 	protected function getViewObject()
 	{
-		$class	= self::$prefixView.ucfirst( $this->controller );
+		$name	= str_replace( ' ', '_', ucwords( str_replace( '/', ' ', $this->controller ) ) );
+		$class	= self::$prefixView.$name;
 		if( !class_exists( $class, TRUE ) )
-			throw new RuntimeException( 'View "'.ucfirst( $this->controller ).'" is missing', 301 );
+			throw new RuntimeException( 'View "'.$name.'" is missing', 301 );
 		return Alg_Object_Factory::createObject( $class, array( &$this->env ) );
 	}
 

@@ -40,6 +40,7 @@
  */
 class CMF_Hydrogen_Environment_Resource_Acl_Server
 {
+	public $roleTypeSysop	= 0;
 	protected $rights	= array();
 	protected $roles	= array();
 
@@ -114,7 +115,7 @@ class CMF_Hydrogen_Environment_Resource_Acl_Server
 	 */
 	public function isSysop( $roleId )
 	{
-		return $this->getRole( $roleId )->type == 0;
+		return $this->getRole( $roleId )->type == $this->roleTypeSysop;
 	}
 
 	/**
