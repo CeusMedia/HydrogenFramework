@@ -236,7 +236,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	protected function initRequest()
 	{
 		$this->request		= new Net_HTTP_Request();
-		$this->request->fromEnv( $this->getSession() );
+		$this->request->fromEnv( $this->has( 'session' ) );
 		$redirectUrl		= getEnv( 'REDIRECT_URL' );
 		if( !empty( $redirectUrl ) )
 			if( method_exists( $this, 'realizeRewrittenUrl' ) )
@@ -263,15 +263,15 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 		);
 	}
 
-	protected function realizeRewrittenUrl( Net_HTTP_Request $request )
+	protected function realizeRewrittenUrl()
 	{
-		$path	= $request->getFromSource( 'path', 'get' );
+		$path	= $this->request->getFromSource( 'path', 'get' );
 		if( !trim( $path ) )
 			return;
 
 		$parts	= explode( '/', $path );
-		$request->set( 'controller',	array_shift( $parts ) );
-		$request->set( 'action',		array_shift( $parts ) );
+		$this->request->set( 'controller',	array_shift( $parts ) );
+		$this->request->set( 'action',		array_shift( $parts ) );
 		$arguments	= array();
 		while( count( $parts ) )
 		{
@@ -279,14 +279,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 			if( strlen( $part ) )
 				$arguments[]	= $part;
 		}
-		$request->set( 'arguments', $arguments );
-/*		if( $this->request->get( 'param' ) && !$this->request->get( 'controller' ) )
-		{
-			$parts	= explode( ".", $this->request->get( 'param' ) );
-			$this->request->set( 'controller', $parts[0] );
-			$this->request->set( 'action', isset( $parts[1] ) ? $parts[1] : "index" );
-			$this->request->set( 'id', isset( $parts[2] ) ? $parts[2] : "0" );
-		}*/
+		$this->request->set( 'arguments', $arguments );
 	}
 }
 ?>

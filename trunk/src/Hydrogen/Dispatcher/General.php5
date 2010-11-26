@@ -63,7 +63,7 @@ class CMF_Hydrogen_Dispatcher_General
 	{
 		if( !class_exists( $className ) )															// class is neither loaded nor loadable
 		{
-			$message	= 'Invalid Controller "'.ucfirst( $className ).'"';
+			$message	= 'Invalid Controller "'.$className.'"';
 			throw new RuntimeException( $message, 201 );											// break with internal error
 		}
 	}
@@ -124,6 +124,7 @@ class CMF_Hydrogen_Dispatcher_General
 	{
 		do
 		{
+//			die( "path;".$this->env->request->get( 'path' ) );
 			$this->realizeCall();
 			$this->checkForLoop();
 
@@ -131,7 +132,9 @@ class CMF_Hydrogen_Dispatcher_General
 			$action		= trim( $this->request->get( 'action' ) );
 			$arguments	= $this->request->get( 'arguments' );
 
-			$className	= self::$prefixController.ucfirst( $controller );							// get controller class name
+			$parts		= str_replace( '/', ' ', $controller );
+			$name		= str_replace( ' ', '_', ucwords( $parts ) );
+			$className	= self::$prefixController.$name;											// get controller class name
 			$this->checkClass( $className );
 			$factory	= new Alg_Object_Factory();													// raise object factory
 			$instance	= $factory->createObject( $className, array( &$this->env ) );				// build controller instance
