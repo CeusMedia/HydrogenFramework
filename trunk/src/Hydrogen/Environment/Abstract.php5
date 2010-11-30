@@ -74,7 +74,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 
 	public function get( $key )
 	{
-		if( isset( $this->$key ) && !is_null( $key ) )
+		if( isset( $this->$key ) && !is_null( $this->$key ) )
 			return $this->$key;
 		$message	= 'No environment resource found for key "%1$s"';
 		throw new RuntimeException( sprintf( $message, $key ) );
