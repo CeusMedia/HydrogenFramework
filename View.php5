@@ -100,7 +100,7 @@ class CMF_Hydrogen_View
 			return $this->data;
 		if( isset( $this->data[$key] ) )
 			return $this->data[$key];
-		throw new InvalidArgumentException( 'Data key "'.$key.'" is invalid' );
+		throw new InvalidArgumentException( 'Data for key "'.$key."' is not set" );
 	}
 
 	public function getContentUri( $fileKey, $path = NULL )

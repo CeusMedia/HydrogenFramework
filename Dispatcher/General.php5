@@ -83,8 +83,13 @@ class CMF_Hydrogen_Dispatcher_General
 		$arguments	= $this->request->get( 'arguments' );
 		$numberArgsAtLeast	= 0;
 		$numberArgsTotal	= 0;
+//		remark($className);
+//		remark($action);
+//		print_m($instance);
 		$methodReflection	= new ReflectionMethod( $instance, $action );
 		$methodArguments	= $methodReflection->getParameters();
+
+//		print_m($methodArguments);
 		while( $methodArgument = array_shift( $methodArguments ) )
 		{
 			$numberArgsTotal++;
@@ -96,6 +101,8 @@ class CMF_Hydrogen_Dispatcher_General
 			$message	= 'Not enough arguments for action "'.ucfirst( $className ).'::'.$action.'"';
 			throw new RuntimeException( $message, 212 );											// break with internal error
 		}
+//		remark(count( $arguments ));
+//		remark($numberArgsTotal);
 		if( count( $arguments ) > $numberArgsTotal )
 		{
 			$message	= 'Too much arguments for action "'.ucfirst( $className ).'::'.$action.'"';
