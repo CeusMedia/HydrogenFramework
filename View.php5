@@ -94,9 +94,13 @@ class CMF_Hydrogen_View
 			$this->registerHelper($name, $object, $parameters);
 	}
 
-	public function & getData()
+	public function & getData( $key = NULL )
 	{
-		return $this->data;
+		if( !$key )
+			return $this->data;
+		if( isset( $this->data[$key] ) )
+			return $this->data[$key];
+		throw new InvalidArgumentException( 'Data key "'.$key.'" is invalid' );
 	}
 
 	public function getContentUri( $fileKey, $path = NULL )
