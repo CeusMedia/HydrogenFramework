@@ -146,11 +146,11 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 				$response->addHeaderPair( $key, $value );
 
 		$type		= NULL;
-		$encodings	= $this->env->getRequest()->headers->getHeader( 'Accept-Encoding' );
-		if( $encodings )
+		$encoding	= $this->env->getRequest()->headers->getField( 'Accept-Encoding' );
+		if( $encoding )
 		{
 			$typesSupported	= array( 'gzip', 'deflate' );
-			$typesRequested	= array_keys( $encodings[0]->getValue( TRUE ) );
+			$typesRequested	= array_keys( $encoding->getValue( TRUE ) );
 			foreach( $typesRequested as $code ){
 				if( in_array( $code, $typesSupported ) ){
 					$type	= $code;
