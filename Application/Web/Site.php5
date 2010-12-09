@@ -140,7 +140,7 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 			$response->setBody( $body );
 
 		foreach( $headers as $key => $value )
-			if( $value instanceof Net_HTTP_Header )
+			if( $value instanceof Net_HTTP_Header_Field )
 				$response->addHeader( $header );
 			else
 				$response->addHeaderPair( $key, $value );
