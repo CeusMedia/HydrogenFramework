@@ -323,7 +323,7 @@ class CMF_Hydrogen_Model
 	 *	@access		public
 	 *	@param		string			$key			Key of Index
 	 *	@param		string			$value			Value of Index
-	 *	@return		integer			Number of entries within this Index
+	 *	@return		bool
 	 */
 	public function removeByIndex( $key, $value )
 	{
@@ -350,7 +350,7 @@ class CMF_Hydrogen_Model
 		if( !is_array( $indices ) )
 			throw new InvalidArgumentException( 'Index map must be an array' );
 		if( !$indices )
-			throw new InvalidArgumentException( 'Index map must have atleast one pair' );
+			throw new InvalidArgumentException( 'Index map cannot be empty' );
 		foreach( $indices as $key => $value )
 			$this->table->focusIndex( $key, $value );
 
