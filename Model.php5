@@ -112,7 +112,7 @@ class CMF_Hydrogen_Model
 		return $id;
 	}
 
-	public function count( $conditions )
+	public function count( $conditions = array() )
 	{
 		return $this->table->count( $conditions );
 	}
@@ -120,11 +120,11 @@ class CMF_Hydrogen_Model
 	/**
 	 *	Returns number of entries within an index.
 	 *	@access		public
-	 *	@param		string			$column			Column name of Index
+	 *	@param		string			$key			Index Key
 	 *	@param		string			$value			Value of Index
 	 *	@return		integer			Number of entries within this index
 	 */
-	public function countByIndex( $index, $value )
+	public function countByIndex( $key, $value )
 	{
 		$conditions	= array( $index => $value );
 		return $this->count( $conditions );
@@ -187,15 +187,15 @@ class CMF_Hydrogen_Model
 	/**
 	 *	Returns Data of all Lines selected by Index.
 	 *	@access		public
-	 *	@param		string			$column			Column name of Index
+	 *	@param		string			$key			Key of Index
 	 *	@param		string			$value			Value of Index
 	 *	@param		array			$orders			Array of Orders to include in SQL Query
 	 *	@param		array			$limits			Array of Limits to include in SQL Query
 	 *	@return		array
 	 */
-	public function getAllByIndex( $index, $value, $orders = array(), $limits = array() )
+	public function getAllByIndex( $key, $value, $orders = array(), $limits = array() )
 	{
-		$this->table->focusIndex( $index, $value );
+		$this->table->focusIndex( $key, $value );
 		$data	= $this->table->get( FALSE, $orders, $limits );
 		$this->table->defocus();
 		return $data;
@@ -204,7 +204,7 @@ class CMF_Hydrogen_Model
 	/**
 	 *	Returns Data of all Lines selected by Indices.
 	 *	@access		public
-	 *	@param		array			$indices			Array of Indices
+	 *	@param		array			$indices		Array of Index Keys and Values
 	 *	@param		array			$conditions		Array of Conditions to include in SQL Query
 	 *	@param		array			$orders			Array of Orders to include in SQL Query
 	 *	@param		array			$limits			Array of Limits to include in SQL Query
@@ -212,8 +212,12 @@ class CMF_Hydrogen_Model
 	 */
 	public function getAllByIndices( $indices = array(), $orders = array(), $limits = array() )
 	{
-		foreach( $indices as $index => $value )
-			$this->table->focusIndex( $index, $value );
+		if( !is_array( $indices ) )
+			throw new InvalidArgumentException( 'Index map must be an array' );
+		if( !$indices )
+			throw new InvalidArgumentException( 'Index map must have atleast one pair' );
+		foreach( $indices as $key => $value )
+			$this->table->focusIndex( $key, $value );
 		$data	= $this->table->get( FALSE, $orders, $limits );
 		$this->table->defocus();
 		return $data;
@@ -222,7 +226,7 @@ class CMF_Hydrogen_Model
 	/**
 	 *	Returns data of single line selected by index.
 	 *	@access		public
-	 *	@param		string			$key			Field Name of Index
+	 *	@param		string			$key			Key of Index
 	 *	@param		string			$value			Value of Index
 	 *	@param		string			$field			Single Field to return
 	 *	@return		mixed
@@ -240,12 +244,16 @@ class CMF_Hydrogen_Model
 	/**
 	 *	Returns data of single line selected by indices.
 	 *	@access		public
-	 *	@param		array			$indices		Map of indices
+	 *	@param		array			$indices		Map of Index Keys and Values
 	 *	@param		string			$field			Single field to return
 	 *	@return		mixed
 	 */
 	public function getByIndices( $indices, $field = "" )
 	{
+		if( !is_array( $indices ) )
+			throw new InvalidArgumentException( 'Index map must be an array' );
+		if( !$indices )
+			throw new InvalidArgumentException( 'Index map must have atleast one pair' );
 		foreach( $indices as $key => $value )
 			$this->table->focusIndex( $key, $value );
 		$data	= $this->table->get( TRUE );
@@ -270,8 +278,8 @@ class CMF_Hydrogen_Model
 	/**
 	 *	Indicates whether a table row is existing by index.
 	 *	@access		public
-	 *	@param		string			$key			Column name of index
-	 *	@param		string			$value			Value of index
+	 *	@param		string			$key			Key of Index
+	 *	@param		string			$value			Value of Index
 	 *	@return		bool
 	 */
 	public function hasByIndex( $key, $value )
@@ -280,9 +288,9 @@ class CMF_Hydrogen_Model
 	}
 
 	/**
-	 *	Indicates whether a table row is existing by a map of indices.
+	 *	Indicates whether a Table Row is existing by a Map of Indices.
 	 *	@access		public
-	 *	@param		array			$indices		Map of indices
+	 *	@param		array			$indices		Map of Index Keys and Values
 	 *	@return		bool
 	 */
 	public function hasByIndices( $indices )
@@ -308,6 +316,48 @@ class CMF_Hydrogen_Model
 		$this->table->defocus();
 		$this->cache->remove( $this->cacheKey.$id );
 		return $result;
+	}
+
+	/**
+	 *	Removes entries selected by index.
+	 *	@access		public
+	 *	@param		string			$key			Key of Index
+	 *	@param		string			$value			Value of Index
+	 *	@return		integer			Number of entries within this Index
+	 */
+	public function removeByIndex( $key, $value )
+	{
+		$this->table->focusIndex( $key, $value );
+		$result	= FALSE;
+		if( count( $this->table->get( FALSE ) ) )
+		{
+			$this->table->delete();
+			$result	= TRUE;
+		}
+		$this->table->defocus();
+		$this->cache->remove( $this->cacheKey.$id );
+		return $result;
+	}
+
+	/**
+	 *	Removes entries selected by index.
+	 *	@access		public
+	 *	@param		array			$indices		Map of Index Keys and Values
+	 *	@return		integer			Number of removed entries
+	 */
+	public function removeByIndices( $indices )
+	{
+		if( !is_array( $indices ) )
+			throw new InvalidArgumentException( 'Index map must be an array' );
+		if( !$indices )
+			throw new InvalidArgumentException( 'Index map must have atleast one pair' );
+		foreach( $indices as $key => $value )
+			$this->table->focusIndex( $key, $value );
+
+		$number	= $this->table->delete();
+		$this->table->defocus();
+		$this->cache->remove( $this->cacheKey.$id );
+		return $number;
 	}
 
 	/**
