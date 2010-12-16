@@ -40,6 +40,10 @@
  */
 class CMF_Hydrogen_Environment_Resource_Acl_Database
 {
+	public $roleAccessNone	= 0;
+	public $roleAccessFull	= 1;
+	public $roleAccessAcl	= 2;
+
 	protected $rights	= array();
 	protected $roles	= array();
 
@@ -62,7 +66,9 @@ class CMF_Hydrogen_Environment_Resource_Acl_Database
 	 */
 	protected function getRights( $roleId )
 	{
-		if( $this->isSysop( $roleId ) )
+		if( $this->hasFullAccess( $roleId ) )
+			return array();
+		if( $this->hasNoAccess( $roleId ) )
 			return array();
 		if( !isset( $this->rights[$roleId] ) )
 		{
@@ -99,8 +105,10 @@ class CMF_Hydrogen_Environment_Resource_Acl_Database
 	 */
 	public function hasRight( $roleId, $controller = 'index', $action = 'index' )
 	{
-		if( $this->isSysop( $roleId ) )
+		if( $this->hasFullAccess( $roleId ) )
 			return TRUE;
+		if( $this->hasNoAccess( $roleId ) )
+			return FALSE;
 		$rights	= $this->getRights( $roleId );
 		foreach( $rights as $right )
 			if( $right->controller == $controller )
@@ -115,9 +123,26 @@ class CMF_Hydrogen_Environment_Resource_Acl_Database
 	 *	@param		integer		$roleId			Role ID
 	 *	@return		boolean
 	 */
-	public function isSysop( $roleId )
+	public function hasFullAccess( $roleId )
 	{
-		return $this->getRole( $roleId )->type == 0;
+		$role	= $this->getRole( $roleId );
+		if( $role )
+			throw new InvalidArgumentException( 'Role with ID '.$roleId.' is not existing' );
+		return $role->access == $this->roleAccessFull;
+	}
+
+	/**
+	 *	Indicates wheter a role has no access at all.
+	 *	@access		public
+	 *	@param		integer		$roleId			Role ID
+	 *	@return		boolean
+	 */
+	public function hasNoAccess( $roleId )
+	{
+		$role	= $this->getRole( $roleId );
+		if( $role )
+			throw new InvalidArgumentException( 'Role with ID '.$roleId.' is not existing' );
+		return $role->access == $this->roleAccessFull;
 	}
 
 	/**
@@ -130,8 +155,10 @@ class CMF_Hydrogen_Environment_Resource_Acl_Database
 	 */
 	public function setRight( $roleId, $controller, $action )
 	{
-		if( $this->isSysop( $roleId ) )
-			return 0;
+		if( $this->hasFullAccess( $roleId ) )
+			return -1;
+		if( $this->hasNoAccess( $roleId ) )
+			return -2;
 		$data	= array(
 			'roleId'		=> $roleId,
 			'controller'	=> $controller,
