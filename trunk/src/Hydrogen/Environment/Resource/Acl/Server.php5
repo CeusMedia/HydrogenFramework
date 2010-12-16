@@ -40,7 +40,10 @@
  */
 class CMF_Hydrogen_Environment_Resource_Acl_Server
 {
-	public $roleTypeSysop	= 0;
+	public $roleAccessNone	= 0;
+	public $roleAccessFull	= 1;
+	public $roleAccessAcl	= 2;
+
 	protected $rights	= array();
 	protected $roles	= array();
 
@@ -63,7 +66,9 @@ class CMF_Hydrogen_Environment_Resource_Acl_Server
 	 */
 	protected function getRights( $roleId )
 	{
-		if( $this->isSysop( $roleId ) )
+		if( $this->hasFullAccess( $roleId ) )
+			return array();
+		if( $this->hasNoAccess( $roleId ) )
 			return array();
 		if( !isset( $this->rights[$roleId] ) )
 		{
@@ -88,6 +93,34 @@ class CMF_Hydrogen_Environment_Resource_Acl_Server
 	}
 
 	/**
+	 *	Indicates wheter a role is system operator and has access to all controller actions.
+	 *	@access		public
+	 *	@param		integer		$roleId			Role ID
+	 *	@return		boolean
+	 */
+	public function hasFullAccess( $roleId )
+	{
+		$role	= $this->getRole( $roleId );
+		if( !$role )
+			throw new InvalidArgumentException( 'Role with ID '.$roleId.' is not existing' );
+		return $role->access == $this->roleAccessFull;
+	}
+
+	/**
+	 *	Indicates whether a role has no access as all.
+	 *	@access		public
+	 *	@param		integer		$roleId			Role ID
+	 *	@return		boolean
+	 */
+	public function hasNoAccess( $roleId )
+	{
+		$role	= $this->getRole( $roleId );
+		if( !$role )
+			throw new InvalidArgumentException( 'Role with ID '.$roleId.' is not existing' );
+		return $role->access == $this->roleAccessNone;
+	}
+
+	/**
 	 *	Indicates whether access to a controller action is allowed.
 	 *	@access		public
 	 *	@param		integer		$roleId			Role ID
@@ -97,25 +130,16 @@ class CMF_Hydrogen_Environment_Resource_Acl_Server
 	 */
 	public function hasRight( $roleId, $controller = 'index', $action = 'index' )
 	{
-		if( $this->isSysop( $roleId ) )
+		if( $this->hasFullAccess( $roleId ) )
 			return TRUE;
+		if( $this->hasNoAccess( $roleId ) )
+			return FALSE;
 		$rights	= $this->getRights( $roleId );
 		foreach( $rights as $right )
 			if( $right->controller == $controller )
 				if( $right->action == $action )
 					return TRUE;
 		return FALSE;
-	}
-
-	/**
-	 *	Indicates wheter a role is system operator and has access to all controller actions.
-	 *	@access		public
-	 *	@param		integer		$roleId			Role ID
-	 *	@return		boolean
-	 */
-	public function isSysop( $roleId )
-	{
-		return $this->getRole( $roleId )->type == $this->roleTypeSysop;
 	}
 
 	/**
@@ -128,8 +152,10 @@ class CMF_Hydrogen_Environment_Resource_Acl_Server
 	 */
 	public function setRight( $roleId, $controller, $action )
 	{
-		if( $this->isSysop( $roleId ) )
-			return FALSE;
+		if( $this->hasFullAccess( $roleId ) )
+			return -1;
+		if( $this->hasNoAccess( $roleId ) )
+			return -2;
 		$data	= array( 'controller' => $controller, 'action' => $action );
 		return $this->env->getServer()->postData( 'role', 'setRight', array( $roleId ), $data );
 	}
