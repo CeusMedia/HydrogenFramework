@@ -35,7 +35,7 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 	 *	@param		CMF_Hydrogen_Environment_Abstract	$env	Environment
 	 *	@return		void
 	 */
-	public function  __construct( CMF_Hydrogen_Environment_Abstract $env ) {
+	public function __construct( CMF_Hydrogen_Environment_Abstract $env ) {
 		$this->env			= $env;
 		$this->serverUri	= $env->getConfig()->get( 'server.uri' );
 
@@ -182,8 +182,6 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 		$options	= $this->curlOptions['ALL'] + $this->curlOptions['POST'] + $curlOptions;
 		$response	= $reader->post( $url, $data, $headers, $options );
 		$json		= $response->getBody();
-
-print_m( $curlOptions );
 
 		$statusCode	= $reader->getCurlInfo( Net_CURL::STATUS_HTTP_CODE );
 		$pathLogs	= $this->env->getConfig()->get( 'path.logs' );

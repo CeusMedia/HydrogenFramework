@@ -170,7 +170,7 @@ class CMF_Hydrogen_View
 		if( !$this->hasContentFile( $fileKey, $path ) )
 			throw new RuntimeException( 'Locale content file "'.$fileKey.'" is missing.', 321 );
 		$uri	= $this->getContentUri( $fileKey, $path );
-		$data	= array_merge( $this->data, $data );
+//		$data	= array_merge( $this->data, $data );
 		return UI_Template::render( $uri, $data);
 	}
 
