@@ -102,7 +102,7 @@ class CMF_Hydrogen_Controller
 			return $this->view->loadTemplate( $this->controller, $this->action );
 		if( $this->view->hasContent( $this->controller, $this->action, 'html/' ) )
 			return $this->view->loadContent( $this->controller, $this->action, NULL, 'html/' );
-		throw new Exception( 'Neither view class method nor content file defined' );
+		throw new Exception( 'Neither view template nor content file defined' );
 	}
 
 	/**

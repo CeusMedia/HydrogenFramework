@@ -143,8 +143,8 @@ class CMF_Hydrogen_Dispatcher_General
 			$name		= str_replace( ' ', '_', ucwords( $parts ) );
 			$className	= self::$prefixController.$name;											// get controller class name
 			$this->checkClass( $className );
-			$factory	= new Alg_Object_Factory();													// raise object factory
-			$instance	= $factory->createObject( $className, array( &$this->env ) );				// build controller instance
+			$factory	= new Alg_Object_Factory( array( $this->env ) );							// raise object factory
+			$instance	= $factory->create( $className );											// build controller instance
 			$this->checkClassAction( $className, $instance, $action );
 			if( $this->checkClassActionArguments )
 				$this->checkClassActionArguments( $className, $instance, $action );
