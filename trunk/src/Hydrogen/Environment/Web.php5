@@ -180,46 +180,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	 */
 	protected function initDatabase()
 	{
-		$driver			= $this->config->get( 'database.driver' );
-		$host			= $this->config->get( 'database.host' );
-		$port			= $this->config->get( 'database.port' );
-		$name			= $this->config->get( 'database.name' );
-		$username		= $this->config->get( 'database.username' );
-		$password		= $this->config->get( 'database.password' );
-		$prefix			= $this->config->get( 'database.prefix' );
-		$logfile		= $this->config->get( 'database.log' );
-#		$lazy			= $this->config->get( 'database.lazy' );
-		$charset		= $this->config->get( 'database.charset' );
-		$logStatements	= $this->config->get( 'database.log.statements' );
-		$logErrors		= $this->config->get( 'database.log.errors' );
-
-		if( empty( $driver ) )
-			throw new RuntimeException( 'Database driver must be set in config:database.driver' );
-
-		$dsn		= new Database_PDO_DataSourceName( $driver, $name );
-		if( $host )
-			$dsn->setHost( $host );
-		if( $port )
-			$dsn->setPort( $port );
-		if( $username )
-			$dsn->setUsername( $username );
-		if( $password )
-			$dsn->setPassword( $password );
-
-		$driverOptions	= array();																	// to be implemented
-
-#		$class		= $lazy ? 'Database_MySQL_LazyConnection' : 'Database_MySQL_Connection';
-#		$this->dbc	= Alg_Object_Factory::createObject( $class, array( $logfile ) );
-#		$this->dbc	= new Database_MySQL_Connection( $logfile );
-		$this->dbc	= new Database_PDO_Connection( $dsn, $username, $password, $driverOptions );
-		if( $logStatements )
-			$this->dbc->setStatementLogFile( $logStatements );
-		if( $logErrors )
-			$this->dbc->setErrorLogFile( $logErrors );
-
-#		$this->dbc->connect( $host, $username, $password, $name );
-#		if( $charset )
-#			$this->dbc->exec( "SET NAMES '".$charset."';" );
+		$this->dbc	= new CMF_Hydrogen_Environment_Resource_Database_PDO( $this );
 	}
 
 /*	protected function initFieldDefinition()
