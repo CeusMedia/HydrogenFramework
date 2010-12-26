@@ -43,13 +43,17 @@
  */
 class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 {
-	/**	@var	Database_BaseConnection			$dbc		Database Connection Object */
+	public static $classRouter		= 'CMF_Hydrogen_Environment_Router_Single';
+
+	/**	@var	Database_BaseConnection						$dbc		Database Connection Object */
 	protected $dbc;
-	/**	@var	Net_HTTP_Request_Receiver		$request	HTTP Request Object */
+	/**	@var	Net_HTTP_Request_Receiver					$request	HTTP Request Object */
 	protected $request;
-	/**	@var	Net_HTTP_Request_Response		$request	HTTP Response Object */
+	/**	@var	Net_HTTP_Request_Response					$request	HTTP Response Object */
 	protected $response;
-	/**	@var	Net_HTTP_Session				$session	Session Object */
+	/**	@var	CMF_Hydrogen_Environment_Router_Abstract	$router		Router Object */
+	protected $router;
+	/**	@var	Net_HTTP_Session							$session	Session Object */
 	protected $session;
 	/** @var	CMF_Hydrogen_Environment_Resource_Messenger	$messenger	Messenger Object */
 	protected $messenger;
@@ -65,15 +69,23 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	 */
 	public function __construct()
 	{
-		parent::__construct();
-		$this->initSession();																		//  --  SESSION HANDLING  --  //
-		$this->initMessenger();																		//  --  UI MESSENGER  --  //
-		$this->initDatabase();																		//  --  DATABASE CONNECTION  --  //
-		$this->initRequest();																		//  --  HTTP REQUEST HANDLER  --  //
-		$this->initResponse();																		//  --  HTTP RESPONSE HANDLER  --  //
-//		$this->initFieldDefinition();																//  --  FIELD DEFINITION SUPPORT  --  //
-		$this->initLanguage();																		//  --  LANGUAGE SUPPORT  --  //
-		$this->initPage();
+		try
+		{
+			parent::__construct();
+			$this->initSession();																		//  --  SESSION HANDLING  --  //
+			$this->initMessenger();																		//  --  UI MESSENGER  --  //
+			$this->initDatabase();																		//  --  DATABASE CONNECTION  --  //
+			$this->initRequest();																		//  --  HTTP REQUEST HANDLER  --  //
+			$this->initResponse();																		//  --  HTTP RESPONSE HANDLER  --  //
+			$this->initRouter();																		//  --  HTTP REQUEST HANDLER  --  //
+	//		$this->initFieldDefinition();																//  --  FIELD DEFINITION SUPPORT  --  //
+			$this->initLanguage();																		//  --  LANGUAGE SUPPORT  --  //
+			$this->initPage();
+		}
+		catch( Exception $e )
+		{
+			die( UI_HTML_Exception_Page::render( $e ) );
+		}
 	}
 
 	public function close()
@@ -120,6 +132,16 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	public function getPage()
 	{
 		return $this->page;
+	}
+
+	/**
+	 *	Returns Router Object.
+	 *	@access		public
+	 *	@return		CMF_Hydrogen_Router_Abstract
+	 */
+	public function getRouter()
+	{
+		return $this->router;
 	}
 
 	/**
@@ -237,15 +259,17 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	{
 		$this->request		= new Net_HTTP_Request();
 		$this->request->fromEnv( $this->has( 'session' ) );
-		$redirectUrl		= getEnv( 'REDIRECT_URL' );
-		if( !empty( $redirectUrl ) )
-			if( method_exists( $this, 'realizeRewrittenUrl' ) )
-				$this->realizeRewrittenUrl( $this->request );
 	}
 
 	protected function initResponse()
 	{
 		$this->response	= new Net_HTTP_Response();
+	}
+
+	protected function initRouter( $routerClass = NULL )
+	{
+		$classRouter	= $routerClass ? $routerClass : self::$classRouter;
+		$this->router	= Alg_Object_Factory::createObject( $classRouter, array( $this ) );
 	}
 
 	protected function initSession( $keyPartitionName = NULL, $keySessionName = NULL )
@@ -261,25 +285,6 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 			$partitionName,
 			$sessionName
 		);
-	}
-
-	protected function realizeRewrittenUrl()
-	{
-		$path	= $this->request->getFromSource( 'path', 'get' );
-		if( !trim( $path ) )
-			return;
-
-		$parts	= explode( '/', $path );
-		$this->request->set( 'controller',	array_shift( $parts ) );
-		$this->request->set( 'action',		array_shift( $parts ) );
-		$arguments	= array();
-		while( count( $parts ) )
-		{
-			$part = trim( array_shift( $parts ) );
-			if( strlen( $part ) )
-				$arguments[]	= $part;
-		}
-		$this->request->set( 'arguments', $arguments );
 	}
 }
 ?>
