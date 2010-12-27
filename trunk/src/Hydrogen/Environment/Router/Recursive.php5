@@ -1,5 +1,5 @@
 <?php
-class CMF_Hydrogen_Environment_Router_Recursive
+class CMF_Hydrogen_Environment_Router_Recursive extends CMF_Hydrogen_Environment_Router_Abstract implements CMF_Hydrogen_Environment_Router_Interface
 {
 	public function parseFromRequest()
 	{
@@ -36,10 +36,10 @@ class CMF_Hydrogen_Environment_Router_Recursive
 			}
 			array_unshift( $right, array_pop( $left ) );
 		}
-		remark( 'Router::Level X' );
-		remark( "controller: ".$this->request->get( 'controller' ) );
-		remark( "action: ".$this->request->get( 'action' ) );
-		die;
+/*		remark( 'Router::Level X' );
+		remark( "controller: ".$request->get( 'controller' ) );
+		remark( "action: ".$request->get( 'action' ) );
+		die;*/
 	}
 }
 
