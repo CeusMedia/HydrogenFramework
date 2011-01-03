@@ -41,6 +41,8 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 {
 	protected $packJavaScripts	= FALSE;
 	protected $packStyleSheets	= FALSE;
+	protected $pathPrimer;
+	protected $pathTheme;
 
 	public function __construct( CMF_Hydrogen_Environment_Abstract $env )
 	{
@@ -52,6 +54,19 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 		parent::__construct( $language );
 		$this->js	= CMF_Hydrogen_View_Helper_JavaScript::getInstance();
 		$this->css	= CMF_Hydrogen_View_Helper_StyleSheet::getInstance();
+
+		$path	= $env->config->get( 'path.themes' );
+		if( $env->config->get( 'layout.primer' ) )
+			$this->pathPrimer	= $path.$env->config->get( 'layout.primer' ).'/';
+		$this->pathTheme	= $path.$env->config->get( 'layout.theme' ).'/';
+	}
+
+	public function addPrimerStyle( $fileName ){
+		$this->css->addUrl( $this->pathPrimer.'css/'.$fileName );
+	}
+
+	public function addThemeStyle( $fileName ){
+		$this->css->addUrl( $this->pathTheme.'css/'.$fileName );
 	}
 
 	public function build( $bodyAttributes = array() )

@@ -3,6 +3,9 @@ class CMF_Hydrogen_Environment_Router_Recursive extends CMF_Hydrogen_Environment
 {
 	public function parseFromRequest()
 	{
+		if( !$this->env->request )
+			throw new RuntimeException( 'Routing needs a registered request resource' );
+
 		$request	= $this->env->getRequest();
 
 		$path	= $request->getFromSource( 'path', 'get' );
@@ -36,9 +39,13 @@ class CMF_Hydrogen_Environment_Router_Recursive extends CMF_Hydrogen_Environment
 			}
 			array_unshift( $right, array_pop( $left ) );
 		}
-/*		remark( 'Router::Level X' );
-		remark( "controller: ".$request->get( 'controller' ) );
+		if( !$request->get( 'controller' ) )
+			$request->set( 'arguments', $right );
+
+/*		remark( "controller: ".$request->get( 'controller' ) );
 		remark( "action: ".$request->get( 'action' ) );
+		remark( "arguments: " );
+		print_m( $request->get( 'arguments' ) );
 		die;*/
 	}
 }

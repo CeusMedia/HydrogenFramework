@@ -157,7 +157,7 @@ class CMF_Hydrogen_Dispatcher_General
 		return $instance->getView();
 	}
 
-	protected function noteLastCall( $instance )
+	protected function noteLastCall( CMF_Hydrogen_Controller $instance )
 	{
 		$session	= $this->env->getSession();
 		if( !$session )

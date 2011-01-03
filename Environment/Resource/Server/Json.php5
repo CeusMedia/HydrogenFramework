@@ -37,11 +37,17 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 	 */
 	public function __construct( CMF_Hydrogen_Environment_Abstract $env ) {
 		$this->env			= $env;
-		$this->serverUri	= $env->getConfig()->get( 'server.uri' );
+		$this->serverUri	= $env->config->get( 'server.uri' );
 
 		$this->serverUsername		= $env->getConfig()->get( 'server.username' );
 		$this->serverPassword		= $env->getConfig()->get( 'server.password' );
 		$this->setCurlOption( CURLOPT_USERPWD, $this->serverUsername.':'.$this->serverPassword );
+
+		if( $env->config->get( 'app.base.url' ) ) {
+			$parts		= parse_url( $env->config->get( 'app.base.url' ) );
+			$referer	= $parts['scheme'].'://'.$parts['host'].getEnv( 'REQUEST_URI' );
+			$this->setCurlOption( CURLOPT_REFERER, $referer );
+		}
 
 		$this->clientIp		= getEnv( 'REMOTE_ADDR' );
 		if( empty( $this->serverUri ) )
