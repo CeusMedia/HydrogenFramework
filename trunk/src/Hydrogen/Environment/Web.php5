@@ -43,7 +43,8 @@
  */
 class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 {
-	public static $classRouter		= 'CMF_Hydrogen_Environment_Router_Single';
+	public static $classRouter			= 'CMF_Hydrogen_Environment_Router_Single';
+	public static $configKeyBaseHref	= 'application.base';
 
 	/**	@var	Database_BaseConnection						$dbc		Database Connection Object */
 	protected $dbc;
