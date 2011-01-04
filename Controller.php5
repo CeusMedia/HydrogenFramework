@@ -64,7 +64,8 @@ class CMF_Hydrogen_Controller
 	public function __construct( CMF_Hydrogen_Environment_Abstract $env )
 	{
 		$this->setEnv( $env );
-		$this->view	= $this->getViewObject();
+		$this->view	= $this->getViewObject( $this->controller );
+		$this->onInit();
 	}
 	
 	public function addData( $key, $value, $topic = NULL )
@@ -90,6 +91,8 @@ class CMF_Hydrogen_Controller
 	 */
 	public function getView()
 	{
+		if( !$this->view )
+			throw new RuntimeException( 'No view object created in Constructor' );
 		if( !method_exists( $this->view, $this->action ) )
 			throw new RuntimeException( 'View Action "'.$this->action.'" not defined yet', 302 );
 		$language		= $this->env->getLanguage();
@@ -110,13 +113,22 @@ class CMF_Hydrogen_Controller
 	 *	@access		protected
 	 *	@return		void
 	 */
-	protected function getViewObject()
+	protected function getViewObject( $controller )
 	{
-		$name	= str_replace( ' ', '_', ucwords( str_replace( '/', ' ', $this->controller ) ) );
+		$name	= str_replace( ' ', '_', ucwords( str_replace( '/', ' ', $controller ) ) );
 		$class	= self::$prefixView.$name;
 		if( !class_exists( $class, TRUE ) )
 			throw new RuntimeException( 'View "'.$name.'" is missing', 301 );
 		return Alg_Object_Factory::createObject( $class, array( &$this->env ) );
+	}
+
+	/**
+	 *	Empty method which is called after construction and can be customised.
+	 *	@access		protected
+	 *	@return		void
+	 */
+	protected function onInit()
+	{
 	}
 
 	/**
