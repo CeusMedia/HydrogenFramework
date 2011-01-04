@@ -115,11 +115,24 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$this->clock	= new Alg_Time_Clock();
 	}
 
+	/**
+	 *	Sets up configuration resource reading main config file and module config files.
+	 *	@access		protected
+	 *	@return		void
+	 */
 	protected function initConfiguration()
 	{
 		if( !file_exists( self::$configFile ) )
 			throw new RuntimeException( 'Config file "'.self::$configFile.'" not existing' );
 		$data			= parse_ini_file( self::$configFile, FALSE );			//  parse configuration file
+		$pathModules	= dirname( self::$configFile ).'/modules/';
+		if( is_dir( $pathModules ) )
+		{
+			$filePattern	= '@^[A-Z][A-Za-z0-9]+\.ini$@U';
+			$index	= new File_RecursiveRegexFilter( $pathModules, $filePattern );
+			foreach( $index as $entry )
+				$data	= array_merge( $data, parse_ini_file( $entry->getPathname() ) );
+		}
 		$this->config	= new ADT_List_Dictionary( $data );						//  create dictionary from array
 		if( $this->config->has( 'config.error.reporting' ) )					//  error reporting is defined
 			error_reporting( $this->config->get( 'config.error.reporting' ) );	//  set error reporting level
