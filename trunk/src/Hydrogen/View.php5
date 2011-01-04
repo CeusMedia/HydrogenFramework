@@ -76,6 +76,7 @@ class CMF_Hydrogen_View
 		$this->html		= new UI_HTML_Elements;
 		$this->time		= new Alg_Time_Converter();
 		$this->helpers	= new ADT_List_Dictionary;
+		$this->onInit();
 	}
 
 	public function addData( $key, $value, $topic = NULL )
@@ -218,6 +219,15 @@ class CMF_Hydrogen_View
 				throw new RuntimeException( $buffer );
 		}
 		return $content;
+	}
+
+	/**
+	 *	Empty method which is called after construction and can be customised.
+	 *	@access		protected
+	 *	@return		void
+	 */
+	protected function onInit()
+	{
 	}
 
 	protected function registerHelper( $name, $class, $parameters = array() )
