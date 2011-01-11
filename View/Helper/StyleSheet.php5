@@ -39,29 +39,12 @@
  */
 class CMF_Hydrogen_View_Helper_StyleSheet
 {
-	protected static $instance;
 	protected $pathCache			= "contents/cache/";
 	protected $revision;
 	/**	@var	array				$styles		List of StyleSheet blocks */
 	protected $styles				= array();
 	protected $urls					= array();
 	public $indent					= "\t\t";
-
-	/**
-	 *	Constructor is disabled from public context.
-	 *	Use static call 'getInstance()' instead of 'new'.
-	 *	@access		protected
-	 *	@return		void
-	 */
-	protected function __construct(){
-	}
-
-	/**
-	 *	Cloning this object is not allowed.
-	 *	@access		private
-	 *	@return		void
-	 */
-	private function __clone(){}
 
 	/**
 	 *	Collect a StyleSheet block.
@@ -94,18 +77,6 @@ class CMF_Hydrogen_View_Helper_StyleSheet
 		$index	= new File_RegexFilter( $this->pathCache, '/pack\.\w+\.css$/' );
 		foreach( $index as $file )
 			unlink( $file->getPathname() );
-	}
-
-	/**
-	 *	Returns a single instance of this Singleton class.
-	 *	@static
-	 *	@access		public
-	 *	@return		ADT_Singleton	Single instance of this Singleton class
-	 */
-	public static function getInstance(){
-		if( !self::$instance )
-			self::$instance	= new self();
-		return self::$instance;
 	}
 
 	/**
@@ -176,8 +147,8 @@ class CMF_Hydrogen_View_Helper_StyleSheet
 						$imageUrl	= $url;
 						if( !preg_match( '/^([a-z]+:|)\/\//', $url ) )
 							$imageUrl	= $this->pathCache.$imageUrl;
-						if( !file_get_contents(  $imageUrl ) )
-							throw new RuntimeException( 'Image "'.$imageUrl.'" is missing' );
+//						if( !file_get_contents(  $imageUrl ) )
+//							throw new RuntimeException( 'Image "'.$imageUrl.'" is missing' );
 						$content	= str_replace( $match, $url, $content );
 					}
 				}
