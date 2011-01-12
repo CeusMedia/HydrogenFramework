@@ -36,11 +36,10 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 	 *	@return		void
 	 */
 	public function __construct( CMF_Hydrogen_Environment_Abstract $env ) {
-		$this->env			= $env;
-		$this->serverUri	= $env->config->get( 'server.uri' );
-
-		$this->serverUsername		= $env->getConfig()->get( 'server.username' );
-		$this->serverPassword		= $env->getConfig()->get( 'server.password' );
+		$this->env				= $env;
+		$this->serverUri		= $env->config->get( 'server.uri' );
+		$this->serverUsername	= $env->config->get( 'server.username' );
+		$this->serverPassword	= $env->config->get( 'server.password' );
 		$this->setCurlOption( CURLOPT_USERPWD, $this->serverUsername.':'.$this->serverPassword );
 
 		if( $env->config->get( 'app.base.url' ) ) {
@@ -140,9 +139,10 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 		$json		= $response->getBody();
 
 		$statusCode	= $reader->getCurlInfo( Net_CURL::STATUS_HTTP_CODE );
-		$pathLogs	= $this->env->getConfig()->get( 'path.logs' );
-		$logFile	= $pathLogs.'server.response.log';
-		error_log( time()." POST (".$statusCode."): ".$json."\n", 3, $logFile );
+		$logPath	= $this->env->config->get( 'path.logs' );
+		$logFile	= $this->env->config->get( 'server.log' );
+		if( $logFile )
+			error_log( time()." GET (".$statusCode."): ".$json."\n", 3, $logPath.$logFile );
 		$response	= $this->handleResponse( $json, $url, $statusCode );
 		return $response->data;
 	}
@@ -190,9 +190,10 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 		$json		= $response->getBody();
 
 		$statusCode	= $reader->getCurlInfo( Net_CURL::STATUS_HTTP_CODE );
-		$pathLogs	= $this->env->getConfig()->get( 'path.logs' );
-		$logFile	= $pathLogs.'server.response.log';
-		error_log( time()." POST (".$statusCode."): ".$json."\n", 3, $logFile );
+		$logPath	= $this->env->config->get( 'path.logs' );
+		$logFile	= $this->env->config->get( 'server.log' );
+		if( $logFile )
+			error_log( time()." POST (".$statusCode."): ".$json."\n", 3, $logFile );
 		$response	= $this->handleResponse( $json, $url, $statusCode );
 		return $response->data;
 	}
