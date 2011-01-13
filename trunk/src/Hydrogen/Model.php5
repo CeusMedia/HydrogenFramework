@@ -126,7 +126,7 @@ class CMF_Hydrogen_Model
 	 */
 	public function countByIndex( $key, $value )
 	{
-		$conditions	= array( $index => $value );
+		$conditions	= array( $key => $value );
 		return $this->count( $conditions );
 	}
 
