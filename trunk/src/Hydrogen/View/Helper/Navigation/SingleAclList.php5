@@ -69,7 +69,8 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAclList extends CMF_Hydrogen_Vie
 			$class		= $active ? 'active' : NULL;
 			$url		= $key == "index" ? "./" : './'.$key;
 			$link		= UI_HTML_Elements::Link( $url, $label, $class );
-			$list[]		= UI_HTML_Elements::ListItem( $link );
+			$attributes	= array( 'id' => 'navi-link-'.str_replace( '/', '-', $key ) );
+			$list[]		= UI_HTML_Elements::ListItem( $link, 0, $attributes );
 		}
 		$list	= UI_HTML_Elements::unorderedList( $list );
 		$attr	= array(

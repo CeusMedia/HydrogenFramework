@@ -46,21 +46,21 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	public static $classRouter			= 'CMF_Hydrogen_Environment_Router_Single';
 	public static $configKeyBaseHref	= 'application.base';
 
-	/**	@var	Database_BaseConnection						$dbc		Database Connection Object */
+	/**	@var	CMF_Hydrogen_Environment_Resource_Database_PDO	$dbc		Database Connection Object */
 	protected $dbc;
-	/**	@var	Net_HTTP_Request_Receiver					$request	HTTP Request Object */
+	/**	@var	Net_HTTP_Request_Receiver						$request	HTTP Request Object */
 	protected $request;
-	/**	@var	Net_HTTP_Request_Response					$request	HTTP Response Object */
+	/**	@var	Net_HTTP_Request_Response						$request	HTTP Response Object */
 	protected $response;
-	/**	@var	CMF_Hydrogen_Environment_Router_Abstract	$router		Router Object */
+	/**	@var	CMF_Hydrogen_Environment_Router_Abstract		$router		Router Object */
 	protected $router;
-	/**	@var	Net_HTTP_Session							$session	Session Object */
+	/**	@var	Net_HTTP_Session								$session	Session Object */
 	protected $session;
-	/** @var	CMF_Hydrogen_Environment_Resource_Messenger	$messenger	Messenger Object */
+	/** @var	CMF_Hydrogen_Environment_Resource_Messenger		$messenger	Messenger Object */
 	protected $messenger;
-	/** @var	CMF_Hydrogen_Environment_Resource_Language	$language	Language Object */
+	/** @var	CMF_Hydrogen_Environment_Resource_Language		$language	Language Object */
 	protected $language;
-	/**	@var	CMF_Hydrogen_Environment_Resource_Page		$page		Page Object */
+	/**	@var	CMF_Hydrogen_Environment_Resource_Page			$page		Page Object */
 	protected $page;
 
 	/**
