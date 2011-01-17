@@ -147,7 +147,8 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 
 		$type		= NULL;
 		$encodings	= $this->env->getRequest()->headers->getField( 'Accept-Encoding' );
-		if( $encodings )
+		$isAjax		= $this->env->request->isAjax();
+		if( $encodings && !$isAjax )
 		{
 			$typesSupported	= array( 'gzip', 'deflate' );
 			$typesRequested	= array_keys( $encodings[0]->getValue( TRUE ) );
