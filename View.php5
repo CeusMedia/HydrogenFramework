@@ -106,7 +106,7 @@ class CMF_Hydrogen_View
 
 	public function getContentUri( $fileKey, $path = NULL )
 	{
-		$path		= preg_replace( '/^(.+)(\/)*$/', '\\1/', $path );
+		$path		= preg_replace( '/^(.+)(\/)*$/U', '\\1/', $path );
 		$pathLocale	= $this->env->getConfig()->get( 'path.locales' );
  		$language	= $this->env->getLanguage()->getLanguage();
 		$uri		= $pathLocale.$language.'/'.$path.$fileKey;
