@@ -115,6 +115,7 @@ class CMF_Hydrogen_View_Helper_StyleSheet
 			$contents	= array();
 			if( $this->revision )
 				$content	= "/* @revision ".$this->revision." */\n";
+
 			foreach( $this->urls as $url ){
 				$content	= @file_get_contents( $url );
 				if( $content === FALSE )
@@ -123,33 +124,33 @@ class CMF_Hydrogen_View_Helper_StyleSheet
 					$path		= dirname( $url ).'/';
 					$content	= $combiner->combineString( $path, $content, TRUE );
 				}
+				$pathCacheReal	= realpath( dirname( $url ) );
+				$pathFileReal	= realpath( $this->pathCache );
+				$diff		= preg_replace( '/^'.str_replace( '/', '\/', $pathFileReal ).'/', '', $pathCacheReal );
+				$diffParts	= explode( '/', preg_replace( '/^\//', '', $diff ) );
+				$levels		= count( $diffParts );
 				$matches	= array();
 				preg_match_all( '/url\((.+)\)/U', $content, $matches );
 				if( $matches = array_pop( $matches ) )
 				{
-					$path	= dirname( $url );
 					foreach( $matches as $match )
 					{
 						$match	= trim( $match );
 						if( preg_match( '/^([a-z]+\:)?\/\//', $match ) )
 							continue;
-						$path	= dirname( $url );
-						$parts	= explode( '/', $match );
-						while( ( $part = array_shift( $parts ) ) == '..' )
-						{
-							if( preg_match( '/[a-z0-9]/', $path ) )
-								$path	= dirname( $path );
-							else
-								$path	= '../';
+						$parts		= explode( '/', $match );
+						$prefixParts	= array();
+						for( $i=0; $i<$levels; $i++ ){
+							$part = array_shift( $parts );
+							if( $part !== '..' )
+								$prefixParts[]	= $part;
 						}
-						$url	= $path.'/'.$part.'/'.implode( '/', $parts );
-						$url	= str_replace( $this->pathCache, '', $url );
-						$imageUrl	= $url;
-						if( !preg_match( '/^([a-z]+:|)\/\//', $url ) )
-							$imageUrl	= $this->pathCache.$imageUrl;
+						if( $prefixParts )
+							$prefixParts[]	= '';
+						$imageUrl	= implode( '/', $prefixParts ).implode( '/', $parts );
 //						if( !file_get_contents(  $imageUrl ) )
 //							throw new RuntimeException( 'Image "'.$imageUrl.'" is missing' );
-						$content	= str_replace( $match, $url, $content );
+						$content	= str_replace( $match, $imageUrl, $content );
 					}
 				}
 				$contents[]	= $content;
@@ -189,6 +190,8 @@ class CMF_Hydrogen_View_Helper_StyleSheet
 				$list	= array();
 				foreach( $this->urls as $url )
 				{
+					if( $this->revision )
+						$url	.= '?r'.$this->revision;
 					$attributes	= array(
 						'rel'		=> 'stylesheet',
 						'type'		=> 'text/css',
