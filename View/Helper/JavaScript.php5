@@ -155,6 +155,15 @@ class CMF_Hydrogen_View_Helper_JavaScript
 	}
 
 	/**
+	 *	Returns a list of collected JavaScripts URLs.
+	 *	@access		public
+	 *	@return		array
+	 */
+	public function getUrlList(){
+		return $this->urls;
+	}
+
+	/**
 	 *	Renders an HTML scrtipt tag with all collected JavaScript URLs and blocks.
 	 *	@access		public
 	 *	@param		bool		$indentEndTag	Flag: indent end tag by 2 tabs
@@ -181,6 +190,8 @@ class CMF_Hydrogen_View_Helper_JavaScript
 				$list	= array();
 				foreach( $this->urls as $url )
 				{
+					if( $this->revision )
+						$url	.= '?r'.$this->revision;
 					$attributes	= array(
 						'type'		=> 'text/javascript',
 			//			'language'	=> 'JavaScript',
@@ -204,15 +215,6 @@ class CMF_Hydrogen_View_Helper_JavaScript
 			$scripts	= "\n".$this->indent.UI_HTML_Tag::create( 'script', $content."\n".$this->indent, $attributes );
 		}
 		return $links.$scripts;
-	}
-
-	/**
-	 *	Returns a list of collected JavaScripts URLs.
-	 *	@access		public
-	 *	@return		array
-	 */
-	public function getUrlList(){
-		return $this->urls;
 	}
 
 	/**
