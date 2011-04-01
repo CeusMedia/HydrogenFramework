@@ -30,7 +30,6 @@
  *	Router interface.
  *	@category		cmFrameworks
  *	@package		Hydrogen.Environment.Router
- *	@uses			CMF_Hydrogen_Environment_Abstract
  *	@author			Christian Würker <christian.wuerker@ceus-media.de>
  *	@copyright		2011 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
