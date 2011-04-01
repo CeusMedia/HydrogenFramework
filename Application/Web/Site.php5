@@ -159,7 +159,7 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 				}
 			}
 		}
-		return Net_HTTP_Response_Sender::sendResponse( $response, $type );
+		return Net_HTTP_Response_Sender::sendResponse( $response, $type, TRUE );
 	}
 
 	/**
