@@ -53,6 +53,7 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 
 		parent::__construct( $language );
 		$this->js	= CMF_Hydrogen_View_Helper_JavaScript::getInstance();
+		$this->css			= new stdClass;
 		$this->css->primer	= new CMF_Hydrogen_View_Helper_StyleSheet;
 		$this->css->theme	= new CMF_Hydrogen_View_Helper_StyleSheet;
 

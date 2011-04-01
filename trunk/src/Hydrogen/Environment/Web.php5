@@ -70,6 +70,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	 */
 	public function __construct()
 	{
+		ob_start();
 		try
 		{
 			parent::__construct();
@@ -179,7 +180,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	 *	Sets up database support.
 	 *	@todo		implement pdo driver options (in config also)
 	 */
-	protected function initDatabase()
+	public function initDatabase()
 	{
 		$this->dbc	= new CMF_Hydrogen_Environment_Resource_Database_PDO( $this );
 	}

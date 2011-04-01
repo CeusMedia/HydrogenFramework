@@ -125,7 +125,7 @@ class CMF_Hydrogen_View_Helper_StyleSheet
 					$content	= $combiner->combineString( $path, $content, TRUE );
 				}
 				$pathCacheReal	= realpath( dirname( $url ) );
-				$pathFileReal	= realpath( $this->pathCache );
+				$pathFileReal	= str_replace( '\\', '/', realpath( $this->pathCache ) );
 				$diff		= preg_replace( '/^'.str_replace( '/', '\/', $pathFileReal ).'/', '', $pathCacheReal );
 				$diffParts	= explode( '/', preg_replace( '/^\//', '', $diff ) );
 				$levels		= count( $diffParts );
