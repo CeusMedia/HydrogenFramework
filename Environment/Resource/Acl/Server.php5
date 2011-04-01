@@ -18,25 +18,25 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *	@category		cmFrameworks
- *	@package		Hydrogen.Resource.Acl
+ *	@package		Hydrogen.Environment.Resource.Acl
  *	@author			Christian Würker <christian.wuerker@ceus-media.de>
  *	@copyright		2010 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
- *	@since			0.1
+ *	@since			0.3
  *	@version		$Id$
  */
 /**
  *	Setup for access control list using a remote server.
  *
  *	@category		cmFrameworks
- *	@package		Hydrogen.Resource.Acl
+ *	@package		Hydrogen.Environment.Resource.Acl
  *	@extends		CMF_Hydrogen_Environment_Resource_Acl_Abstract
  *	@author			Christian Würker <christian.wuerker@ceus-media.de>
  *	@copyright		2010 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
- *	@since			0.1
+ *	@since			0.3
  *	@version		$Id$
  */
 class CMF_Hydrogen_Environment_Resource_Acl_Server extends CMF_Hydrogen_Environment_Resource_Acl_Abstract
