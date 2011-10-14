@@ -205,6 +205,7 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 
 		$reader		= new Net_HTTP_Reader();
 		$headers	= array( 'Accept-Encoding: gzip, deflate' );
+		$headers	= array( 'Accept: text/json' );
 		$curlOptions[CURLOPT_POST]	= TRUE;
 		$curlOptions[CURLOPT_POSTFIELDS] = http_build_query( $data );
 		$options	= $this->curlOptions['ALL'] + $this->curlOptions['POST'] + $curlOptions;
@@ -215,7 +216,7 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 		$logPath	= $this->env->config->get( 'path.logs' );
 		$logFile	= $this->env->config->get( 'server.log' );
 		if( $logFile )
-			error_log( time()." POST (".$statusCode."): ".$json."\n", 3, $logFile );
+			error_log( time()." POST (".$statusCode."): ".$json."\n", 3, $logPath.$logFile );
 		$response	= $this->handleResponse( $json, $url, $statusCode );
 		return $response->data;
 	}

@@ -43,12 +43,15 @@
  */
 abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environment, ArrayAccess
 {
-	/**	@var	Alg_Time_Clock				$clock		Clock Object */
+	/**	@var	Alg_Time_Clock		$clock		Clock Object */
 	protected $clock;
-	/**	@var	ADT_List_Dictionary			$config		Configuration Object */
+	/**	@var	ADT_List_Dictionary	$config		Configuration Object */
 	protected $config;
 
-	public static $configFile				= "config.ini.inc";
+	public static $configFile		= "config.ini.inc";
+
+	protected $acl					= NULL;
+	protected $modules				= NULL;
 
 	/**
 	 *	Constructor, sets up Resource Environment.
@@ -59,6 +62,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	{
 		$this->initClock();
 		$this->initConfiguration();																	//  --  CONFIGURATION  --  //
+		$this->initModules();
 	}
 
 	public function __get( $key )
@@ -80,6 +84,16 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		throw new RuntimeException( sprintf( $message, $key ) );
 	}
 
+	/**
+	 *	Initialize remote access control list.
+	 *	@access		public
+	 *	@return		void
+	 */
+	public function getAcl()
+	{
+		return $this->acl;
+	}
+
 	public function getClock()
 	{
 		return $this->clock;
@@ -93,6 +107,10 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	public function getConfig()
 	{
 		return $this->config;
+	}
+
+	public function getModules(){
+		return $this->modules;
 	}
 
 	/**
@@ -112,6 +130,37 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		return FALSE;
 	}
 
+	public function hasAcl()
+	{
+		return $this->getConfig()->get( 'module.roles' );
+	}
+
+	public function hasModules()
+	{
+		return $this->modules !== NULL;
+	}
+
+	/**
+	 *	Initialize remote access control list if roles module is installed.
+	 *	Supported types:
+	 *	- CMF_Hydrogen_Environment_Resource_Acl_Database
+	 *	- CMF_Hydrogen_Environment_Resource_Acl_Server
+	 *	@access		protected
+	 *	@return		void
+	 */
+	protected function initAcl()
+	{
+		if( !$this->getConfig()->get( 'module.roles' ) )
+			return;
+		$type	= $this->getConfig()->get( 'module.roles.acl' );
+		if( !$type )
+			$type	= 'CMF_Hydrogen_Environment_Resource_Acl_Database';
+		
+		$this->acl	= Alg_Object_Factory::createObject( $type, array( $this ) );
+		$this->acl->roleAccessNone	= 0;
+		$this->acl->roleAccessFull	= 128;
+	}
+
 	public function initClock()
 	{
 		$this->clock	= new Alg_Time_Clock();
@@ -127,17 +176,23 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		if( !file_exists( self::$configFile ) )
 			throw new RuntimeException( 'Config file "'.self::$configFile.'" not existing' );
 		$data			= parse_ini_file( self::$configFile, FALSE );			//  parse configuration file
-		$pathModules	= dirname( self::$configFile ).'/modules/';
-		if( is_dir( $pathModules ) )
-		{
-			$filePattern	= '@^[A-Z][A-Za-z0-9]+\.ini$@U';
-			$index	= new File_RecursiveRegexFilter( $pathModules, $filePattern );
-			foreach( $index as $entry )
-				$data	= array_merge( $data, parse_ini_file( $entry->getPathname() ) );
-		}
 		$this->config	= new ADT_List_Dictionary( $data );						//  create dictionary from array
 		if( $this->config->has( 'config.error.reporting' ) )					//  error reporting is defined
 			error_reporting( $this->config->get( 'config.error.reporting' ) );	//  set error reporting level
+	}
+	
+	protected function initModules(){
+		if( class_exists( 'Model_Module' ) ){
+			$model		= new Model_Module( $this );
+			$modules	= $model->getInstalled();
+			foreach( $modules as $moduleKey => $moduleData ){
+				$prefix	= 'module.'.strtolower( $moduleKey );
+				$this->config->set( $prefix, TRUE );
+				foreach( $moduleData->config as $key => $value )
+					$this->config->set( $prefix.'.'.$key, $value );
+			}
+			$this->modules	= $model;
+		}
 	}
 
 	public function offsetExists( $key )
