@@ -131,7 +131,6 @@ class CMF_Hydrogen_Dispatcher_General
 	{
 		do
 		{
-//			die( "path;".$this->env->request->get( 'path' ) );
 			$this->realizeCall();
 			$this->checkForLoop();
 

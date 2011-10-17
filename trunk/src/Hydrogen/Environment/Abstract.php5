@@ -184,7 +184,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	protected function initModules(){
 		if( class_exists( 'Model_Module' ) ){
 			$model		= new Model_Module( $this );
-			$modules	= $model->getInstalled();
+			$modules	= $model->getInstalled( $model->getAvailable() );
 			foreach( $modules as $moduleKey => $moduleData ){
 				$prefix	= 'module.'.strtolower( $moduleKey );
 				$this->config->set( $prefix, TRUE );
