@@ -230,6 +230,16 @@ class CMF_Hydrogen_View
 	{
 	}
 
+	protected function populateTexts( $keys, $path ){
+		$list	= array();
+		foreach( $keys as $key ){
+			$uri	= $path.$key.'.html';
+			$list[$key]	= "";
+			if( $this->hasContentFile( $uri ) )
+				$list[$key]	= $this->loadContentFile( $uri );
+		}
+	}
+
 	protected function registerHelper( $name, $class, $parameters = array() )
 	{
 		$object	= Alg_Object_Factory::createObject( $class, $parameters );
