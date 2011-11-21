@@ -43,11 +43,13 @@
  */
 abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environment, ArrayAccess
 {
-	/**	@var	Alg_Time_Clock		$clock		Clock Object */
+	/**	@var	Alg_Time_Clock				$clock			Clock Object */
 	protected $clock;
-	/**	@var	ADT_List_Dictionary	$config		Configuration Object */
+	/**	@var	ADT_List_Dictionary			$config			Configuration Object */
 	protected $config;
-
+	/**	@var	CMF_Hydrogen_Application	$application	Instance of Application */
+	protected $application;
+	
 	public static $configFile		= "config.ini.inc";
 
 	protected $acl					= NULL;
@@ -62,7 +64,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	{
 		$this->initClock();
 		$this->initConfiguration();																	//  --  CONFIGURATION  --  //
-		$this->initModules();
+		$this->initModules();																		//  --  MODULE SUPPORT  --  //
 	}
 
 	public function __get( $key )
@@ -84,6 +86,10 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		throw new RuntimeException( sprintf( $message, $key ) );
 	}
 
+	public function getApp(){
+		return $this->application;
+	}
+	
 	/**
 	 *	Initialize remote access control list.
 	 *	@access		public
@@ -184,13 +190,14 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	protected function initModules(){
 		if( class_exists( 'Model_Module' ) ){
 			$model		= new Model_Module( $this );
-			$modules	= $model->getInstalled( $model->getAvailable() );
+			$modules	= $model->getInstalled();
 			foreach( $modules as $moduleKey => $moduleData ){
 				$prefix	= 'module.'.strtolower( $moduleKey );
 				$this->config->set( $prefix, TRUE );
 				foreach( $moduleData->config as $key => $value )
 					$this->config->set( $prefix.'.'.$key, $value );
 			}
+			$model->pathRepos	= $this->config->get( 'module.modules.path' );
 			$this->modules	= $model;
 		}
 	}
@@ -228,7 +235,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 			$message	= 'Given resource "%1$s" is not an object';
 			throw new InvalidArgumentException( sprintf( $message, $key ) );
 		}
-		if( !preg_match( '/^\w$/', $key ) )
+		if( !preg_match( '/^\w+$/', $key ) )
 		{
 			$message	= 'Invalid resource key "%1$s"';
 			throw new InvalidArgumentException( sprintf( $message, $key ) );

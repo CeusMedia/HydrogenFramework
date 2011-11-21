@@ -65,7 +65,12 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 				$dispatcher->defaultController	= $defaultController;
 			if( $defaultAction )
 				$dispatcher->defaultAction		= $defaultAction;
-			return $dispatcher->dispatch();
+			$output	= $dispatcher->dispatch();														//  get requested content
+			$this->setViewComponents( array(														//  note for main template
+				'controller'	=> $request->get( 'controller' ),									//  called controller
+				'action'		=> $request->get( 'action' )										//  called action
+			) );
+			return $output;																			//  return generated output
 		}
 		catch( Exception $e )
 		{
