@@ -56,7 +56,7 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_H
 			$this->innerId		= $innerId;
 	}
 
-	public function render( $current = NULL )
+	public function render( $current = NULL, $niceUrls = FALSE )
 	{
 		$list	= array();
 		$active	= FALSE;
@@ -65,7 +65,7 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_H
 		{
 			$active		= $path == $key || substr( $path, 0, strlen( $key ) + 1 ) == $key.'/';
 			$class		= $active ? 'active' : NULL;
-			$url		= $key == "index" ? "./" : './?controller='.$key;
+			$url		= $key == "index" ? "./" : ( $niceUrls ? './'.$key : './?controller='.$key );
 			$link		= UI_HTML_Elements::Link( $url, $label, $class );
 			$list[]		= UI_HTML_Elements::ListItem( $link, 0 );
 		}
