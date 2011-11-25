@@ -1,12 +1,4 @@
 <?php
-class DummyCache{
-
-	function has(){}
-	function get(){}
-	function set(){}
-	function remove(){}
-	function getAll(){}
-}
 /**
  *	Generic Model Class of Framework Hydrogen.
  *
@@ -52,8 +44,8 @@ class CMF_Hydrogen_Model
 	protected $env;
 	/**	@var		string							$name			Name of Database Table without Prefix */
 	protected $name									= "";
-	/**	@var		array							$fields			List of Database Table Fields */
-	protected $fields								= array();
+	/**	@var		array							$columns			List of Database Table Columns */
+	protected $columns								= array();
 	/**	@var		array							$name			Array of foreign Keys of Database Table */
  	protected $indices								= array();
 	/**	@var		string							$primaryKey		Primary Key of Database Table */
@@ -83,16 +75,13 @@ class CMF_Hydrogen_Model
 		$this->table	= new Database_PDO_TableWriter(
 			$env->getDatabase(),
 			$this->prefix.$this->name,
-			$this->fields,
+			$this->columns,
 			$this->primaryKey,
 			$id
 		);
 		if( $this->fetchMode )
 			$this->table->setFetchMode( $this->fetchMode );
 		$this->table->setIndices( $this->indices );
-#		$this->cache	= new Net_Memory_Cache();
-#		$this->cache	= new DummyCache();
-#		$this->cache	= new File_Cache( 'cache' );
 		$this->cache	= Alg_Object_Factory::createObject( self::$cacheClass );
 		$this->cacheKey	= 'db.'.$this->prefix.$this->name.'.';
 	}
@@ -135,14 +124,15 @@ class CMF_Hydrogen_Model
 	 *	@access		public
 	 *	@param		int				$id				ID to focus on
 	 *	@param		array			$data			Data to edit
+	 *	@param		bool			$stripTags		Flag: strip HTML Tags from values
 	 *	@return		int				Number of changed rows
 	 */
-	public function edit( $id, $data )
+	public function edit( $id, $data, $stripTags = TRUE )
 	{
 		$this->table->focusPrimary( $id );
 		$result	= 0;
 		if( count( $this->table->get( FALSE ) ) )
-			$result	= $this->table->update( $data );
+			$result	= $this->table->update( $data, $stripTags );
 		$this->table->defocus();
 		$this->cache->remove( $this->cacheKey.$id );
 		return $result;
@@ -261,6 +251,15 @@ class CMF_Hydrogen_Model
 		if( $field )
 			return $data[$field];
 		return $data;
+	}
+
+	/**
+	 *	Returns list of table columns.
+	 *	@access		public
+	 *	@return		array
+	 */
+	public function getColumns(){
+		return $this->table->getColumns();
 	}
 
 	/**
