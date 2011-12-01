@@ -44,9 +44,9 @@ class CMF_Hydrogen_Model
 	protected $env;
 	/**	@var		string							$name			Name of Database Table without Prefix */
 	protected $name									= "";
-	/**	@var		array							$columns			List of Database Table Columns */
+	/**	@var		array							$columns		List of Database Table Columns */
 	protected $columns								= array();
-	/**	@var		array							$name			Array of foreign Keys of Database Table */
+	/**	@var		array							$name			List of foreign Keys of Database Table */
  	protected $indices								= array();
 	/**	@var		string							$primaryKey		Primary Key of Database Table */
 	protected $primaryKey							= "";
@@ -101,6 +101,12 @@ class CMF_Hydrogen_Model
 		return $id;
 	}
 
+	/**
+	 *	Returns number of entries at all or for given conditions.
+	 *	@access		public
+	 *	@param		array			$conditions		Map of conditions
+	 *	@return		integer			Number of entries
+	 */
 	public function count( $conditions = array() )
 	{
 		return $this->table->count( $conditions );
@@ -155,17 +161,26 @@ class CMF_Hydrogen_Model
 			$this->table->defocus();
 			$this->cache->set( $this->cacheKey.$id, $data );
 		}
-		if( $field )
-			return $data[$field];
+		if( $field ){
+			if( !in_array( $field, $this->columns ) )
+				throw new InvalidArgumentException( 'Field "'.$field.'" is not an existing column' );
+			switch( $this->fetchMode ){
+				case PDO::FETCH_CLASS:
+				case PDO::FETCH_OBJ:
+					return $data->$field;
+				default:
+					return $data[$field];
+			}
+		}
 		return $data;
 	}
 	
 	/**
 	 *	Returns Data of all Lines.
 	 *	@access		public
-	 *	@param		array			$conditions		Array of Conditions to include in SQL Query
-	 *	@param		array			$orders			Array of Orders to include in SQL Query
-	 *	@param		array			$limits			Array of Limits to include in SQL Query
+	 *	@param		array			$conditions		Map of Conditions to include in SQL Query
+	 *	@param		array			$orders			Map of Orders to include in SQL Query
+	 *	@param		array			$limits			Map of Limits to include in SQL Query
 	 *	@return		array
 	 */
 	public function getAll( $conditions = array(), $orders = array(), $limits = array(), $columns = array(), $groupings = array() )
@@ -179,8 +194,8 @@ class CMF_Hydrogen_Model
 	 *	@access		public
 	 *	@param		string			$key			Key of Index
 	 *	@param		string			$value			Value of Index
-	 *	@param		array			$orders			Array of Orders to include in SQL Query
-	 *	@param		array			$limits			Array of Limits to include in SQL Query
+	 *	@param		array			$orders			Map of Orders to include in SQL Query
+	 *	@param		array			$limits			List of Limits to include in SQL Query
 	 *	@return		array
 	 */
 	public function getAllByIndex( $key, $value, $orders = array(), $limits = array() )
@@ -194,10 +209,10 @@ class CMF_Hydrogen_Model
 	/**
 	 *	Returns Data of all Lines selected by Indices.
 	 *	@access		public
-	 *	@param		array			$indices		Array of Index Keys and Values
-	 *	@param		array			$conditions		Array of Conditions to include in SQL Query
-	 *	@param		array			$orders			Array of Orders to include in SQL Query
-	 *	@param		array			$limits			Array of Limits to include in SQL Query
+	 *	@param		array			$indices		Map of Index Keys and Values
+	 *	@param		array			$conditions		Map of Conditions to include in SQL Query
+	 *	@param		array			$orders			Map of Orders to include in SQL Query
+	 *	@param		array			$limits			List of Limits to include in SQL Query
 	 *	@return		array
 	 */
 	public function getAllByIndices( $indices = array(), $orders = array(), $limits = array() )
@@ -226,8 +241,17 @@ class CMF_Hydrogen_Model
 		$this->table->focusIndex( $key, $value );
 		$data	= $this->table->get( TRUE );
 		$this->table->defocus();
-		if( $field )
-			return $data[$field];
+		if( $field ){
+			if( !in_array( $field, $this->columns ) )
+				throw new InvalidArgumentException( 'Field "'.$field.'" is not an existing column' );
+			switch( $this->fetchMode ){
+				case PDO::FETCH_CLASS:
+				case PDO::FETCH_OBJ:
+					return $data->$field;
+				default:
+					return $data[$field];
+			}
+		}
 		return $data;
 	}
 	
@@ -244,12 +268,23 @@ class CMF_Hydrogen_Model
 			throw new InvalidArgumentException( 'Index map must be an array' );
 		if( !$indices )
 			throw new InvalidArgumentException( 'Index map must have atleast one pair' );
+		if( !is_string( $field ) )
+			throw new InvalidArgumentException( 'Field must be a string' );
 		foreach( $indices as $key => $value )
 			$this->table->focusIndex( $key, $value );
 		$data	= $this->table->get( TRUE );
 		$this->table->defocus();
-		if( $field )
-			return $data[$field];
+		if( $field ){
+			if( !in_array( $field, $this->columns ) )
+				throw new InvalidArgumentException( 'Field "'.$field.'" is not an existing column' );
+			switch( $this->fetchMode ){
+				case PDO::FETCH_CLASS:
+				case PDO::FETCH_OBJ:
+					return $data->$field;
+				default:
+					return $data[$field];
+			}
+		}
 		return $data;
 	}
 
@@ -369,6 +404,17 @@ class CMF_Hydrogen_Model
 	{
 		$this->env			= $env;
 		$this->prefix		= $env->getConfig()->get( 'database.prefix' );
+	}
+
+	/**
+	 *	Removes all data and resets incremental counter.
+	 *	Note: This method does not return the number of removed rows.
+	 *	@access		public
+	 *	@return		void
+	 *	@see		http://dev.mysql.com/doc/refman/4.1/en/truncate.html
+	 */
+	public function truncate(){
+		$this->table->truncate();	
 	}
 }
 ?>
