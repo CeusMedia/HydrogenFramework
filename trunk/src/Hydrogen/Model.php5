@@ -96,7 +96,7 @@ class CMF_Hydrogen_Model
 	 */
 	public function add( $data, $stripTags = TRUE )
 	{
-		$id	= $this->table->insert( $data );
+		$id	= $this->table->insert( $data, $stripTags );
 		$this->cache->set( $this->cacheKey.$id, $data );
 		return $id;
 	}
