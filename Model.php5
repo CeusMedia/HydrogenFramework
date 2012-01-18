@@ -363,13 +363,26 @@ class CMF_Hydrogen_Model
 	{
 		$this->table->focusIndex( $key, $value );
 		$result	= FALSE;
-		if( count( $this->table->get( FALSE ) ) )
+		$rows	= $this->table->get( FALSE );
+		if( count( $rows ) )
 		{
 			$this->table->delete();
+			foreach( $rows as $row )
+			{
+				switch( $this->fetchMode )
+				{
+					case PDO::FETCH_CLASS:
+					case PDO::FETCH_OBJ:
+						$id	= $row->{$this->primaryKey};
+						break;
+					default:
+						$id	= $row[$this->primaryKey];
+				}
+				$this->cache->remove( $this->cacheKey.$id );
+			}
 			$result	= TRUE;
 		}
 		$this->table->defocus();
-		$this->cache->remove( $this->cacheKey.$id );
 		return $result;
 	}
 
@@ -388,9 +401,26 @@ class CMF_Hydrogen_Model
 		foreach( $indices as $key => $value )
 			$this->table->focusIndex( $key, $value );
 
-		$number	= $this->table->delete();
+		$rows	= $this->table->get( FALSE );
+		if( count( $rows ) )
+		{
+			$number	= $this->table->delete();
+			foreach( $rows as $row )
+			{
+				switch( $this->fetchMode )
+				{
+					case PDO::FETCH_CLASS:
+					case PDO::FETCH_OBJ:
+						$id	= $row->{$this->primaryKey};
+						break;
+					default:
+						$id	= $row[$this->primaryKey];
+				}
+				$this->cache->remove( $this->cacheKey.$id );
+			}
+		}
+			
 		$this->table->defocus();
-		$this->cache->remove( $this->cacheKey.$id );
 		return $number;
 	}
 

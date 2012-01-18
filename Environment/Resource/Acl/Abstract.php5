@@ -92,20 +92,20 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 	 *	@param		integer		$roleId			Role ID
 	 *	@param		string		$controller		Name of controller
 	 *	@param		string		$action			Name of action
-	 *	@return		boolean
+	 *	@return		integer		Right state: -1: no access at all | 0: no access | 1: access | 2: access at all
 	 */
 	public function hasRight( $roleId, $controller = 'index', $action = 'index' )
 	{
 		if( $this->hasFullAccess( $roleId ) )
-			return TRUE;
+			return 2;
 		if( $this->hasNoAccess( $roleId ) )
-			return FALSE;
+			return -1;
 		$rights	= $this->getRights( $roleId );
 		foreach( $rights as $right )
-			if( $right->controller == $controller )
+			if( strtolower( $right->controller ) == strtolower( $controller ) )
 				if( $right->action == $action )
-					return TRUE;
-		return FALSE;
+					return 1;
+		return 0;
 	}
 }
 ?>
