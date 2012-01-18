@@ -115,6 +115,11 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		return $this->config;
 	}
 
+	public function getDisclosure()
+	{
+		return $this->disclosure;
+	}
+
 	public function getModules(){
 		return $this->modules;
 	}
@@ -185,6 +190,14 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$this->config	= new ADT_List_Dictionary( $data );						//  create dictionary from array
 		if( $this->config->has( 'config.error.reporting' ) )					//  error reporting is defined
 			error_reporting( $this->config->get( 'config.error.reporting' ) );	//  set error reporting level
+	}
+
+	protected function initDisclosure()
+	{
+//	$clock	= new Alg_Time_Clock();
+		$disclosure	= new CMF_Hydrogen_Environment_Resource_Disclosure( array() );
+		$this->disclosure	= $disclosure->reflect( 'classes/Controller/', array( 'classPrefix' => 'Controller_' ) );
+//	remark( $clock->stop() );
 	}
 	
 	protected function initModules(){
