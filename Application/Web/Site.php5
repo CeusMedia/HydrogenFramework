@@ -74,6 +74,11 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 		}
 		catch( Exception $e )
 		{
+			if( class_exists( 'Controller_Error' ) )
+			{
+				$controller	= new Controller_Error( $this->env );
+				$controller->handleException( $e );
+			}
 			if( class_exists( 'View_Error' ) )
 			{
 				$view	= new View_Error( $this->env );
@@ -168,9 +173,8 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 	}
 
 	/**
-	 *	Constructor.
+	 *	Main method.
 	 *	@access		public
-	 *	@param		CMF_Hydrogen_Environment_Abstract	$env					Framework Environment
 	 *	@return		void
 	 */
 	public function run()
