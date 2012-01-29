@@ -16,6 +16,8 @@ abstract class CMF_Hydrogen_Application_Abstract{
 	{
 		if( !$env )
 			$env		= Alg_Object_Factory::createObject( self::$classEnvironment );
+		else if( is_string( $env ) )
+			$env		= Alg_Object_Factory::createObject( $env );
 		$this->env		= $env;
 	}
 

@@ -67,7 +67,7 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_H
 			$class		= $active ? 'active' : NULL;
 			$url		= $key == "index" ? "./" : ( $niceUrls ? './'.$key : './?controller='.$key );
 			$link		= UI_HTML_Elements::Link( $url, $label, $class );
-			$list[]		= UI_HTML_Elements::ListItem( $link, 0 );
+			$list[]		= UI_HTML_Elements::ListItem( $link, 0, array( 'class' => $class ) );
 		}
 		$attr	= array( 'class' => $class );
 		$list	= UI_HTML_Elements::unorderedList( $list, 0, $attr );
