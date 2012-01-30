@@ -45,11 +45,12 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 	protected $serverUsername;
 	protected $serverPassword;
 	protected $serverUri;
-	protected $curlOptions	= array(
+	protected $curlOptions		= array(
 		'ALL'	=> array(),
 		'GET'	=> array(),
 		'POST'	=> array()
 	);
+	protected $userAgent		= 'CMF:Hydrogen/1.0';
 
 	/**
 	 *	Constructor.
@@ -69,6 +70,7 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 			$referer	= $parts['scheme'].'://'.$parts['host'].getEnv( 'REQUEST_URI' );
 			$this->setCurlOption( CURLOPT_REFERER, $referer );
 		}
+		$this->setCurlOption( CURLOPT_USERAGENT, $this->userAgent );
 
 		$this->clientIp		= getEnv( 'REMOTE_ADDR' );
 		if( empty( $this->serverUri ) )
