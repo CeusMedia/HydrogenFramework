@@ -111,13 +111,13 @@ class CMF_Hydrogen_Environment_Resource_Language
 	}
 	
 	/**
-	 *	Returns Array of Word Pairs of Language Topic.
+	 *	Returns array of language sections within a language topic.
 	 *	@access		public
 	 *	@param		string		$topic			Topic of Language
 	 *	@param		bool		$strict			Flag: throw exception if language topic is not loaded
 	 *	@param		bool		$force			Flag: note Failure if not loaded
 	 *	@return		array
-	 *	@throws		RuntimeException if language topic is not loaded and strict is on
+	 *	@throws		RuntimeException if language topic is not loaded/existing and strict is on
 	 */
 	public function getWords( $topic, $strict = TRUE, $force = TRUE )
 	{
@@ -136,6 +136,29 @@ class CMF_Hydrogen_Environment_Resource_Language
 		return isset( $this->data[$topic] );
 	}
 
+	/**
+	 *	Returns map of language pairs with a language section of a language topic.
+	 *	@access		public
+	 *	@param		string		$topic			Topic of Language
+	 *	@param		string		$section		Section of Language
+	 *	@param		bool		$strict			Flag: throw exception if language topic is not loaded
+	 *	@param		bool		$force			Flag: note Failure if not loaded
+	 *	@return		array
+	 *	@throws		RuntimeException if language section is not existing and strict is on
+	 */
+	public function getSection( $topic, $section, $strict = TRUE, $force = TRUE )
+	{
+		$topic	= $this->getWords( $topic, $strict, $force );
+		if( isset( $topic[$section] ) )
+			return $topic[$section];
+		$message	= 'Invalid language section "'.$section.'" in topic "'.$topic.'"';
+		if( $strict )
+			throw new RuntimeException( $message, 221 );
+		if( $force )
+			$this->env->getMessenger()->noteFailure( $message );
+		return array();
+	}
+	
 	/**
 	 *	Returns File Name of Language Topic.
 	 *	@access		protected

@@ -123,6 +123,19 @@ class CMF_Hydrogen_Controller
 	}
 
 	/**
+	 *	Loads View Class of called Controller.
+	 *	@access		protected
+	 *	@return		void
+	 */
+	protected function getWords( $section = NULL, $topic = NULL ){
+		if( empty( $topic ) && $this->env->getLanguage()->hasWords( $this->controller ) )
+			$topic = $this->controller;
+		if( empty( $section ) )
+			return $this->env->getLanguage()->getWords( $topic );
+		return (object) $this->env->getLanguage()->getSection( $topic, $section );
+	}
+
+	/**
 	 *	Empty method which is called after construction and can be customised.
 	 *	@access		protected
 	 *	@return		void
