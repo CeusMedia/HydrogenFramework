@@ -41,28 +41,20 @@
  */
 class CMF_Hydrogen_View
 {
-	/**	@var		array											$data			Collected Data for View */
+	/**	@var		array						$data			Collected Data for View */
 	protected $data			= array();
-	/**	@var		CMF_Hydrogen_Environment						$env			Environment Object */
+	/**	@var		CMF_Hydrogen_Environment	$env			Environment Object */
 	protected $env;
-	/**	@var		Database_MySQL_Connection						$dbc			Database Connection */
-	protected $dbc;
-	/**	@var		array											$config			Configuration Settings */
-	protected $config;
-	/**	@var		Net_HTTP_PartitionSession						$session		Partition Session */
-	protected $session;
-	/**	@var		Net_HTTP_Request_Receiver						$request		Receiver of Request Parameters */
-	protected $request;
-	/**	@var		CMF_Hydrogen_Environment_Resource_Language		$language		Language Support */
-	protected $language;
-	/**	@var		CMF_Hydrogen_Environment_Resource_Messenger		$messenger		UI Messenger */
-	protected $messenger;
-	/**	@var		string											$controller		Name of called Controller */
+	/**	@var		string						$controller		Name of called Controller */
 	protected $controller	= NULL;
-	/**	@var		string											$action			Name of called Action */
+	/**	@var		string						$action			Name of called Action */
 	protected $action		= NULL;
-
+	/**	@var		array						$helpers		Map of view helper classes/objects */
 	protected $helpers;
+	/**	@var		string						$time			Instance of time converter */
+	protected $time;
+	/**	@var		string						$html			Instance of HTML library class */
+	protected $html;
 
 	/**
 	 *	Constructor.
@@ -111,6 +103,19 @@ class CMF_Hydrogen_View
  		$language	= $this->env->getLanguage()->getLanguage();
 		$uri		= $pathLocale.$language.'/'.$path.$fileKey;
 		return $uri;
+	}
+
+	/**
+	 *	Loads View Class of called Controller.
+	 *	@access		protected
+	 *	@return		void
+	 */
+	protected function getWords( $section = NULL, $topic = NULL ){
+		if( empty( $topic ) && $this->env->getLanguage()->hasWords( $this->controller ) )
+			$topic = $this->controller;
+		if( empty( $section ) )
+			return $this->env->getLanguage()->getWords( $topic );
+		return (object) $this->env->getLanguage()->getSection( $topic, $section );
 	}
 
 	protected function getTemplateUri( $controller, $action )
