@@ -243,6 +243,7 @@ class CMF_Hydrogen_View
 			if( $this->hasContentFile( $uri ) )
 				$list[$key]	= $this->loadContentFile( $uri );
 		}
+		return $list;
 	}
 
 	protected function registerHelper( $name, $class, $parameters = array() )

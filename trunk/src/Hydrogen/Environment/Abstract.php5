@@ -161,15 +161,19 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	 */
 	protected function initAcl()
 	{
-		if( !$this->getConfig()->get( 'module.roles' ) )
-			return;
-		$type	= $this->getConfig()->get( 'module.roles.acl' );
-		if( !$type )
-			$type	= 'CMF_Hydrogen_Environment_Resource_Acl_Database';
+		$config		= $this->getConfig();
+		$type		= 'CMF_Hydrogen_Environment_Resource_Acl_AllPublic';
+		if( $config->get( 'module.roles' ) ){
+			$type	= $config->get( 'module.roles.acl' );
+			if( !$type )
+				$type	= 'CMF_Hydrogen_Environment_Resource_Acl_Database';
+		}
 		
 		$this->acl	= Alg_Object_Factory::createObject( $type, array( $this ) );
 		$this->acl->roleAccessNone	= 0;
 		$this->acl->roleAccessFull	= 128;
+		
+		$this->acl->setPublicLinks( explode( ',', $config->get( 'module.acl.public' ) ) );
 	}
 
 	public function initClock()
