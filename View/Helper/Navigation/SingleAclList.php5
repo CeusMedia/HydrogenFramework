@@ -50,9 +50,10 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAclList extends CMF_Hydrogen_Vie
 		if( $roleId )
 		{
 			foreach( $this->linkMap as $key => $label ){
-				if( $this->env->acl->hasRight( $roleId, $key, 'index' ) )
+				$key	= strlen( trim( $key ) ) ? $key : 'index';
+				if( $this->env->acl->hasRight( $roleId, str_replace( '/', '_', $key ), 'index' ) )
 					continue;
-				$parts	= explode( '/', $key );
+				$parts	= explode( '/', str_replace( '_', '/', $key ) );
 				$last	= array_pop( $parts );
 				$first	= join( '/', $parts );
 				if( !$this->env->acl->hasRight( $roleId, $first, $last ) )
@@ -65,6 +66,7 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAclList extends CMF_Hydrogen_Vie
 		$path	= empty( $_REQUEST['path'] ) ? $current : $_REQUEST['path'];
 		foreach( $this->linkMap as $key => $label )
 		{
+			$key		= str_replace( '_', '/', $key );
 			$levelPath	= count( explode( '/', $path ) );
 			$levelKey	= count( explode( '/', $key ) );
 			$active		= $path == $key;

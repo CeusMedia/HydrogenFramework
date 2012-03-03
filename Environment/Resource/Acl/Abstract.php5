@@ -44,9 +44,11 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 	public $roleAccessFull	= 1;
 	public $roleAccessAcl	= 2;
 
-	protected $rights	= array();
-	protected $roles	= array();
-
+	protected $rights		= array();
+	protected $roles		= array();
+	protected $publicLinks	= array();
+	
+	
 	/**
 	 *	Constructor.
 	 *	@access		public
@@ -58,6 +60,29 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 		$this->env	= $env;
 	}
 
+	public function setPublicLinks( $links ){
+		$this->publicLinks	= $links;
+	}
+	
+	/**
+	 *	Returns Role.
+	 *	@access		protected
+	 *	@param		integer		$roleId			Role ID
+	 *	@return		array
+	 */
+	protected function getRole( $roleId )
+	{
+		if( !$roleId )
+			return array();
+		if( !$this->roles )
+		{
+			$model	= new Model_Role( $this->env );
+			foreach( $model->getAll() as $role )
+				$this->roles[$role->roleId]	= $role;
+		}
+		return $this->roles[$roleId];
+	}
+
 	/**
 	 *	Indicates wheter a role is system operator and has access to all controller actions.
 	 *	@access		public
@@ -66,6 +91,8 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 	 */
 	public function hasFullAccess( $roleId )
 	{
+		if( !$roleId )
+			return FALSE;
 		$role	= $this->getRole( $roleId );
 		if( !$role )
 			throw new InvalidArgumentException( 'Role with ID '.$roleId.' is not existing' );
@@ -80,6 +107,8 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 	 */
 	public function hasNoAccess( $roleId )
 	{
+		if( !$roleId )
+			return FALSE;
 		$role	= $this->getRole( $roleId );
 		if( !$role )
 			throw new InvalidArgumentException( 'Role with ID '.$roleId.' is not existing' );
@@ -87,7 +116,7 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 	}
 
 	/**
-	 *	Indicates whether access to a controller action is allowed.
+	 *	Indicates whether access to a controller action is allowed for a given role.
 	 *	@access		public
 	 *	@param		integer		$roleId			Role ID
 	 *	@param		string		$controller		Name of controller
@@ -96,6 +125,11 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 	 */
 	public function hasRight( $roleId, $controller = 'index', $action = 'index' )
 	{
+		if( !$roleId ){
+			if( in_array( $controller.'_'.$action, $this->publicLinks ) )
+				return 3;
+			return -2;
+		}
 		if( $this->hasFullAccess( $roleId ) )
 			return 2;
 		if( $this->hasNoAccess( $roleId ) )
@@ -107,5 +141,29 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 					return 1;
 		return 0;
 	}
+
+	/**
+	 *	Indicates whether access to a controller action is allowed for role of current user.
+	 *	@access		public
+	 *	@param		integer		$roleId			Role ID
+	 *	@param		string		$controller		Name of controller
+	 *	@param		string		$action			Name of action
+	 *	@return		integer		Right state: -1: no access at all | 0: no access | 1: access | 2: access at all
+	 */
+	public function has( $controller = 'index', $action = 'index' ){
+		$roleId	= $this->env->getSession()->get( 'roleId' );
+		return $this->hasRight( $roleId, $controller, $action ) > 0;
+	}
+
+	/**
+	 *	Allowes access to a controller action for a role.
+	 *	@access		public
+	 *	@abstract
+	 *	@param		integer		$roleId			Role ID
+	 *	@param		string		$controller		Name of Controller
+	 *	@param		string		$action			Name of Action
+	 *	@return		integer
+	 */
+	abstract public function setRight( $roleId, $controller, $action );
 }
 ?>

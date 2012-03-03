@@ -124,7 +124,14 @@ class CMF_Hydrogen_Dispatcher_General
 #			break;
 		}
 		$this->history[$controller][$action]++;
+	}
 
+	public function checkAccess( $controller, $action ){
+		$access	= $this->env->getAcl()->has( str_replace( '/', '_', $controller ), $action );
+		if( !$access ){
+			$message	= 'Access to '.$controller.'/'.$action.' denied.';
+			throw new RuntimeException( $message, 403 );											// break with internal error
+		}
 	}
 
 	public function dispatch()
@@ -145,6 +152,8 @@ class CMF_Hydrogen_Dispatcher_General
 			$factory	= new Alg_Object_Factory( array( $this->env ) );							// raise object factory
 			$instance	= $factory->create( $className );											// build controller instance
 			$this->checkClassAction( $className, $instance, $action );
+			$this->checkAccess( $controller, $action);
+			
 			if( $this->checkClassActionArguments )
 				$this->checkClassActionArguments( $className, $instance, $action );
 

@@ -60,5 +60,10 @@ class CMF_Hydrogen_View_Helper_Timestamp extends CMF_Hydrogen_View_Helper_Abstra
 		}
 		return $phrase;
 	}
+
+	static public function statePhrase( $timestamp, $env, $html = FALSE, $languageTopic = 'main', $languageSection = 'phrases-time' ){
+		$instance	= new CMF_Hydrogen_View_Helper_Timestamp( $timestamp );
+		return $instance->toPhrase( $env, $html, $languageTopic, $languageSection );
+	}
 }
 ?>

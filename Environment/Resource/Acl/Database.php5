@@ -69,6 +69,8 @@ class CMF_Hydrogen_Environment_Resource_Acl_Database extends CMF_Hydrogen_Enviro
 	 */
 	protected function getRole( $roleId )
 	{
+		if( !$roleId )
+			return array();
 		if( !$this->roles )
 		{
 			$model	= new Model_Role( $this->env );
