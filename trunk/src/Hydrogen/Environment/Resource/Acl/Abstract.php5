@@ -105,7 +105,7 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 		$role	= $this->getRole( $roleId );
 		if( !$role )
 			throw new InvalidArgumentException( 'Role with ID '.$roleId.' is not existing' );
-		return $role->access == $this->roleAccessFull;
+		return isset( $role->access ) && $role->access == $this->roleAccessFull;
 	}
 
 	/**
@@ -121,7 +121,7 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 		$role	= $this->getRole( $roleId );
 		if( !$role )
 			throw new InvalidArgumentException( 'Role with ID '.$roleId.' is not existing' );
-		return $role->access == $this->roleAccessNone;
+		return !isset( $role->access ) || $role->access == $this->roleAccessNone;
 	}
 
 	/**
