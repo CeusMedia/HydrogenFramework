@@ -70,7 +70,8 @@ class CMF_Hydrogen_Dispatcher_General
 
 	protected function checkClassAction( $className, $instance, $action )
 	{
-		if( !method_exists( $instance, $action ) )													// no action method in controller instance
+		$denied = array( '__construct', '__destruct', 'getView', 'getData' );
+		if( !method_exists( $instance, $action ) || in_array( $action, $denied ) )													// no action method in controller instance
 		{
 			$message	= 'Invalid Action "'.ucfirst( $className ).'::'.$action.'"';
 			throw new RuntimeException( $message, 211 );											// break with internal error

@@ -68,7 +68,7 @@ class CMF_Hydrogen_Controller
 		$this->onInit();
 	}
 	
-	public function addData( $key, $value, $topic = NULL )
+	protected function addData( $key, $value, $topic = NULL )
 	{
 		return $this->view->setData( array( $key => $value ), $topic );
 	}
@@ -90,10 +90,10 @@ class CMF_Hydrogen_Controller
 	
 	/**
 	 *	Returns Data for View.
-	 *	@access		public
+	 *	@access		protected
 	 *	@return		array
 	 */
-	public function getData()
+	protected function getData()
 	{
 		return $this->view->getData();
 	}
@@ -161,13 +161,13 @@ class CMF_Hydrogen_Controller
 
 	/**
 	 *	Redirects by calling different Controller and Action.
-	 *	@access		public
+	 *	@access		protected
 	 *	@param		string		$controller		Controller to be called, default: index
 	 *	@param		string		$action			Action to be called, default: index
 	 *	@param		array		$parameters		Map of additional parameters to set in request
 	 *	@return		void
 	 */
-	public function redirect( $controller = 'index', $action = "index", $arguments = array(), $parameters = array() )
+	protected function redirect( $controller = 'index', $action = "index", $arguments = array(), $parameters = array() )
 	{
 		$request	= $this->env->getRequest();
 		$request->set( 'controller', $controller );
@@ -181,11 +181,11 @@ class CMF_Hydrogen_Controller
 	
 	/**
 	 *	Redirects by requesting a URI.
-	 *	@access		public
+	 *	@access		protected
 	 *	@param		string		$uri				URI to request
 	 *	@return		void
 	 */
-	public function restart( $uri )
+	protected function restart( $uri )
 	{
 		$base	= dirname( getEnv( 'SCRIPT_NAME' ) )."/";
 	#	$this->dbc->close();
@@ -197,12 +197,12 @@ class CMF_Hydrogen_Controller
 	/**
 	 *
 	 *	Sets Data for View.
-	 *	@access		public
+	 *	@access		protected
 	 *	@param		array		$data			Array of Data for View
 	 *	@param		string		[$topic]			Topic Name of Data
 	 *	@return		void
 	 */
-	public function setData( $data, $topic = "" )
+	protected function setData( $data, $topic = "" )
 	{
 		if( $this->view )
 			$this->view->setData( $data, $topic );
