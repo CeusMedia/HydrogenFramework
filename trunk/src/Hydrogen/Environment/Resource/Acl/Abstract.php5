@@ -46,8 +46,8 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 
 	protected $rights		= array();
 	protected $roles		= array();
+	/*	@var		$publicLinks				Map of links with public access */
 	protected $publicLinks	= array();
-	
 	
 	/**
 	 *	Constructor.
@@ -58,10 +58,6 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 	public function __construct( CMF_Hydrogen_Environment_Abstract $env )
 	{
 		$this->env	= $env;
-	}
-
-	public function setPublicLinks( $links ){
-		$this->publicLinks	= $links;
 	}
 	
 	/**
@@ -81,6 +77,19 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 				$this->roles[$role->roleId]	= $role;
 		}
 		return $this->roles[$roleId];
+	}
+
+	/**
+	 *	Indicates whether access to a controller action is allowed for role of current user.
+	 *	@access		public
+	 *	@param		integer		$roleId			Role ID
+	 *	@param		string		$controller		Name of controller
+	 *	@param		string		$action			Name of action
+	 *	@return		integer		Right state: -1: no access at all | 0: no access | 1: access | 2: access at all
+	 */
+	public function has( $controller = 'index', $action = 'index' ){
+		$roleId	= $this->env->getSession()->get( 'roleId' );
+		return $this->hasRight( $roleId, $controller, $action ) > 0;
 	}
 
 	/**
@@ -143,16 +152,13 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 	}
 
 	/**
-	 *	Indicates whether access to a controller action is allowed for role of current user.
+	 *	Sets a list of links with public access.
 	 *	@access		public
-	 *	@param		integer		$roleId			Role ID
-	 *	@param		string		$controller		Name of controller
-	 *	@param		string		$action			Name of action
-	 *	@return		integer		Right state: -1: no access at all | 0: no access | 1: access | 2: access at all
+	 *	@param		array		$links			Map of links, eg. auth_login
+	 *	@return		void
 	 */
-	public function has( $controller = 'index', $action = 'index' ){
-		$roleId	= $this->env->getSession()->get( 'roleId' );
-		return $this->hasRight( $roleId, $controller, $action ) > 0;
+	public function setPublicLinks( $links ){
+		$this->publicLinks	= $links;
 	}
 
 	/**

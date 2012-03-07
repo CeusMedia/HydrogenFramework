@@ -72,6 +72,21 @@ class CMF_Hydrogen_Controller
 	{
 		return $this->view->setData( array( $key => $value ), $topic );
 	}
+
+        protected function compactFilterInput( $input ){
+                if( is_string( $input ) )
+                        if( strlen( $input ) )
+                                return $input;
+                if( !is_array( $input ) )
+                        return NULL;
+                foreach( $input as $nr => $chunk ){
+                        $chunk  = $this->compactFilterInput( $chunk );
+                        if( is_string( $chunk ) && strlen( $chunk ) || is_array$
+                                continue;
+                        unset( $input[$nr] );
+                }
+                return $input;
+	}
 	
 	/**
 	 *	Returns Data for View.
