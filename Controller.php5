@@ -81,7 +81,7 @@ class CMF_Hydrogen_Controller
                         return NULL;
                 foreach( $input as $nr => $chunk ){
                         $chunk  = $this->compactFilterInput( $chunk );
-                        if( is_string( $chunk ) && strlen( $chunk ) || is_array$
+                        if( is_string( $chunk ) && strlen( $chunk ) || is_array( $chunk ) && count( $chunk ) )
                                 continue;
                         unset( $input[$nr] );
                 }
