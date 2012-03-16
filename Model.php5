@@ -298,6 +298,18 @@ class CMF_Hydrogen_Model
 	}
 
 	/**
+	 *	Returns table name with or without index.
+	 *	@access		public
+	 *	@param		boolean		$prefixed		Flag: return table name with prefix
+	 *	@return		string		Table name with or without prefix
+	 */
+	public function getName( $prefixed = TRUE ){
+		if( $prefixed )
+			return $this->prefix.$this->name;
+		return $this->name;
+	}
+
+	/**
 	 *	Indicates whether a table row is existing by ID.
 	 *	@param		int				$id				ID to focus on
 	 *	@return		bool
