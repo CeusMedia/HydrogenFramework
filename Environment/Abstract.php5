@@ -205,17 +205,14 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	}
 	
 	protected function initModules(){
-		if( class_exists( 'Model_Module' ) ){
-			$model		= new Model_Module( $this );
-			$modules	= $model->getInstalled();
-			foreach( $modules as $moduleKey => $moduleData ){
-				$prefix	= 'module.'.strtolower( $moduleKey );
-				$this->config->set( $prefix, TRUE );
-				foreach( $moduleData->config as $key => $value )
-					$this->config->set( $prefix.'.'.$key, $value );
-			}
-			$model->pathRepos	= $this->config->get( 'module.modules.path' );
-			$this->modules	= $model;
+		$config			= $this->getConfig();
+		$this->modules	= new CMF_Hydrogen_Environment_Resource_Module_Handler( $this );
+		$modules		= $this->modules->getInstalled();
+		foreach( $modules as $moduleId => $module ){
+			$prefix	= 'module.'.strtolower( $moduleId );
+			$this->config->set( $prefix, TRUE );
+			foreach( $module->config as $key => $value )
+				$this->config->set( $prefix.'.'.$key, $value );
 		}
 	}
 
