@@ -193,7 +193,7 @@ class CMF_Hydrogen_View
 		$fileKey	= $controller.'/'.$action.'.php';
 		$uri		= $this->getTemplateUri( $controller, $action );
 		if( !file_exists( $uri ) )
-			throw new RuntimeException( 'Template "'.$this->controller.'/'.$this->action.'" is not existing', 311 );
+			throw new RuntimeException( 'Template "'.$controller.'/'.$action.'" is not existing', 311 );
 		return $this->loadTemplateFile( $fileKey, $data );
 	}
 

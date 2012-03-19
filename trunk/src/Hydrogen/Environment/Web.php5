@@ -207,8 +207,10 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	}
 
 	/**
-	 *	Initialize resource to communicate with chat server.
+	 *	Initialize page frame resource.
 	 *	@access		protected
+	 *	@param		boolean		$pageJavaScripts	Flag: compress JavaScripts, default: TRUE
+	 *	@param		boolean		$packStyleSheets	Flag: compress Stylesheet, default: TRUE 
 	 *	@return		void
 	 */
 	protected function initPage( $pageJavaScripts = TRUE, $packStyleSheets = TRUE )
