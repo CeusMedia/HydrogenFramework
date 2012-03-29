@@ -14,7 +14,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Handler{
 		if( !file_exists( $this->path ) )
 			return;
 
-		$index	= new File_RegexFilter( $this->path, '/^[a-z]+\.xml$/i' );
+		$index	= new File_RegexFilter( $this->path, '/^[a-z_]+\.xml$/i' );
 		foreach( $index as $entry ){
 			$moduleId	= preg_replace( '/\.xml$/i', '', $entry->getFilename() );
 			$module		= $this->readModuleXml( $moduleId, TRUE );
@@ -75,6 +75,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Handler{
 		$obj->relations->needs		= array();
 		$obj->relations->supports	= array();
 		$obj->sql				= array();
+		$obj->links				= array();
 		foreach( $xml->files->class as $link )
 			$obj->files->classes[]	= (string) $link;
 		foreach( $xml->files->locale as $link )
@@ -102,6 +103,9 @@ class CMF_Hydrogen_Environment_Resource_Module_Handler{
 				$key	= $event.'@'.$type;
 				$obj->sql[$key]	= (string) $sql;
 			}
+		}
+		foreach( $xml->link as $link ){
+			$obj->links[]	= (string) $link;
 		}
 #		remark( $fileName.': '.$clock->stop( 3, 1 ).'ms' );
 		return $obj;
