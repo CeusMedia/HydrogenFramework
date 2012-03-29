@@ -110,6 +110,7 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 		$config		= $this->env->getConfig();									// shortcut to configation object
 
 		$data		 = array(
+			'page'			=> $this->env->getPage(),
 			'config'		=> $config,											// configuration object
 			'request'		=> $this->env->getRequest(),						// request object
 			'content'		=> $content,										// rendered response page view content
