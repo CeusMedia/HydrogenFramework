@@ -44,39 +44,53 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAclList extends CMF_Hydrogen_Vie
 {
 	protected $needsEnv			= TRUE;
 
+	protected function getFilteredLinkMap(){
+		$roleId		= $this->env->session->get( 'roleId' );
+		if( !$roleId )
+			return $this->linkMap;
+
+		$map	= array();
+		foreach( $this->linkMap as $key => $label ){
+			$key	= strlen( trim( $key ) ) ? $key : 'index';
+			if( $this->env->acl->hasRight( $roleId, str_replace( '/', '_', $key ), 'index' ) )
+				continue;
+			$parts	= explode( '/', str_replace( '_', '/', $key ) );
+			$last	= array_pop( $parts );
+			$first	= join( '/', $parts );
+			if( $this->env->acl->hasRight( $roleId, $first, $last ) )
+				$map[$key]	= $label;
+		}
+		return $map;
+	}
+
 	public function render( $current = NULL )
 	{
-		$roleId		= $this->env->session->get( 'roleId' );
-		if( $roleId )
-		{
-			foreach( $this->linkMap as $key => $label ){
-				$key	= strlen( trim( $key ) ) ? $key : 'index';
-				if( $this->env->acl->hasRight( $roleId, str_replace( '/', '_', $key ), 'index' ) )
-					continue;
-				$parts	= explode( '/', str_replace( '_', '/', $key ) );
-				$last	= array_pop( $parts );
-				$first	= join( '/', $parts );
-				if( !$this->env->acl->hasRight( $roleId, $first, $last ) )
-					unset( $this->linkMap[$key] );
-			}
-		}
-
+		$path		= empty( $_REQUEST['path'] ) ? $current : $_REQUEST['path'];
+		$linkMap	= $this->getFilteredLinkMap();
+		$active		= $this->getCurrentKey( $linkMap, $current );
+		foreach( $linkMap as $key => $label )
+			if( $path == $key )
+				$active = $key;
+		if( !$active )
+			foreach( $linkMap as $key => $label )
+				if( substr( $path, 0, strlen( $key ) + 1 ) == $key.'/' )
+					$active = $key;
+		
 		$list	= array();
-		$active	= FALSE;
-		$path	= empty( $_REQUEST['path'] ) ? $current : $_REQUEST['path'];
-		foreach( $this->linkMap as $key => $label )
+		foreach( $linkMap as $key => $label )
 		{
 			$key		= str_replace( '_', '/', $key );
-			$levelPath	= count( explode( '/', $path ) );
+
+/*			$levelPath	= count( explode( '/', $path ) );
 			$levelKey	= count( explode( '/', $key ) );
-			$active		= $path == $key;
 			if( $levelPath == $levelKey )
 				$active		= $path == $key;
 			else if( $levelPath < $levelKey )
 				$active		= $path.'/index' == $key;
 			else
 				 $active	= substr( $path, 0, strlen( $key ) + 1 ) == $key.'/';
-
+			$class		= $active == $key ? 'active' : NULL;
+*/
 			$class		= $active ? 'active' : NULL;
 			$url		= $key == "index" ? "./" : './'.$key;
 			$link		= UI_HTML_Elements::Link( $url, $label, $class );
