@@ -41,6 +41,7 @@ class CMF_Hydrogen_Controller
 {
 	public static $prefixModel		= "Model_";
 	public static $prefixView		= "View_";
+	public $alias					= "";
 
 	/**	@var		CMF_Hydrogen_Environment_Abstract	$env			Application Environment Object */
 	protected $env;
@@ -184,10 +185,17 @@ class CMF_Hydrogen_Controller
 	 *	@access		protected
 	 *	@param		string		$uri				URI to request
 	 *	@return		void
+	 *	@todo		concept and implement anti-loop
+	 *	@see		http://dev.ceusmedia.de/cmKB/?MTI
 	 */
-	protected function restart( $uri )
+	protected function restart( $uri, $withinModule = FALSE )
 	{
 		$base	= dirname( getEnv( 'SCRIPT_NAME' ) )."/";
+		if( $withinModule ){
+			$controller	= $this->env->getRequest()->get( 'controller' );
+			$base	.= $this->alias ? $this->alias : $controller;
+			$base	.= strlen( $uri ) ? '/' : '';
+		}
 	#	$this->dbc->close();
 	#	$this->session->close();
 		header( "Location: ".$base.$uri );
