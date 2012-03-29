@@ -54,14 +54,17 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 
 	protected $acl					= NULL;
 	protected $modules				= NULL;
+	/**	@var	array						$options		Set options to override static properties */
+	protected $options				= array();
 
 	/**
 	 *	Constructor, sets up Resource Environment.
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function __construct()
+	public function __construct( $options = array() )
 	{
+		$this->options		= $options;
 		$this->initClock();
 		$this->initConfiguration();																	//  --  CONFIGURATION  --  //
 		$this->initModules();																		//  --  MODULE SUPPORT  --  //
@@ -176,7 +179,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$this->acl->setPublicLinks( explode( ',', $config->get( 'module.acl.public' ) ) );
 	}
 
-	public function initClock()
+	protected function initClock()
 	{
 		$this->clock	= new Alg_Time_Clock();
 	}
@@ -188,9 +191,12 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	 */
 	protected function initConfiguration()
 	{
-		if( !file_exists( self::$configFile ) )
-			throw new RuntimeException( 'Config file "'.self::$configFile.'" not existing' );
-		$data			= parse_ini_file( self::$configFile, FALSE );			//  parse configuration file
+		$configFile	= self::$configFile;
+		if( !empty( $this->options['configFile'] ) )
+			$configFile	= $this->options['configFile'];
+		if( !file_exists( $configFile ) )
+			throw new RuntimeException( 'Config file "'.$configFile.'" not existing' );
+		$data			= parse_ini_file( $configFile, FALSE );			//  parse configuration file
 		$this->config	= new ADT_List_Dictionary( $data );						//  create dictionary from array
 		if( $this->config->has( 'config.error.reporting' ) )					//  error reporting is defined
 			error_reporting( $this->config->get( 'config.error.reporting' ) );	//  set error reporting level
