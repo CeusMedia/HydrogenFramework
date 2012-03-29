@@ -56,15 +56,27 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_H
 			$this->innerId		= $innerId;
 	}
 
+	protected function getCurrentKey( $linkMap, $current ){
+		$path	= empty( $_REQUEST['path'] ) ? $current : $_REQUEST['path'];
+		$active	= NULL;
+		foreach( $linkMap as $key => $label )
+			if( $path == $key )
+				$active = $key;
+		if( !$active )
+			foreach( $linkMap as $key => $label )
+				if( substr( $path, 0, strlen( $key ) + 1 ) == $key.'/' )
+					$active = $key;
+		return $active;
+	}
+
 	public function render( $current = NULL, $niceUrls = FALSE )
 	{
-		$list	= array();
-		$active	= FALSE;
 		$path	= empty( $_REQUEST['path'] ) ? $current : $_REQUEST['path'];
+		$active	= $this->getCurrentKey( $this->linkMap, $current );
+		$list	= array();
 		foreach( $this->linkMap as $key => $label )
 		{
-			$active		= $path == $key || substr( $path, 0, strlen( $key ) + 1 ) == $key.'/';
-			$class		= $active ? 'active' : NULL;
+			$class		= $active == $key ? 'active' : NULL;
 			$url		= $key == "index" ? "./" : ( $niceUrls ? './'.$key : './?controller='.$key );
 			$link		= UI_HTML_Elements::Link( $url, $label, $class );
 			$list[]		= UI_HTML_Elements::ListItem( $link, 0, array( 'class' => $class ) );
