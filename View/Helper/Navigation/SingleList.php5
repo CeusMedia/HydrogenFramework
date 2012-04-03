@@ -58,7 +58,7 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_H
 
 	protected function getCurrentKey( $linkMap, $current ){
 		$path	= empty( $_REQUEST['path'] ) ? $current : $_REQUEST['path'];
-		$active	= NULL;
+		$active	= 'index';
 		foreach( $linkMap as $key => $label )
 			if( $path == $key )
 				$active = $key;
@@ -66,6 +66,7 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_H
 			foreach( $linkMap as $key => $label )
 				if( substr( $path, 0, strlen( $key ) + 1 ) == $key.'/' )
 					$active = $key;
+		
 		return $active;
 	}
 
