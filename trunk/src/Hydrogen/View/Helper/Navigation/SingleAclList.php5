@@ -53,12 +53,14 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAclList extends CMF_Hydrogen_Vie
 		foreach( $this->linkMap as $key => $label ){
 			$key	= strlen( trim( $key ) ) ? $key : 'index';
 			if( $this->env->acl->hasRight( $roleId, str_replace( '/', '_', $key ), 'index' ) )
-				continue;
-			$parts	= explode( '/', str_replace( '_', '/', $key ) );
-			$last	= array_pop( $parts );
-			$first	= join( '/', $parts );
-			if( $this->env->acl->hasRight( $roleId, $first, $last ) )
 				$map[$key]	= $label;
+			else{
+				$parts	= explode( '/', str_replace( '_', '/', $key ) );
+				$last	= array_pop( $parts );
+				$first	= join( '/', $parts );
+				if( $this->env->acl->hasRight( $roleId, $first, $last ) )
+					$map[$key]	= $label;
+			}
 		}
 		return $map;
 	}
@@ -68,15 +70,7 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAclList extends CMF_Hydrogen_Vie
 		$path		= empty( $_REQUEST['path'] ) ? $current : $_REQUEST['path'];
 		$linkMap	= $this->getFilteredLinkMap();
 		$active		= $this->getCurrentKey( $linkMap, $current );
-		foreach( $linkMap as $key => $label )
-			if( $path == $key )
-				$active = $key;
-		if( !$active )
-			foreach( $linkMap as $key => $label )
-				if( substr( $path, 0, strlen( $key ) + 1 ) == $key.'/' )
-					$active = $key;
-		
-		$list	= array();
+		$list		= array();
 		foreach( $linkMap as $key => $label )
 		{
 			$key		= str_replace( '_', '/', $key );
@@ -91,7 +85,7 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAclList extends CMF_Hydrogen_Vie
 				 $active	= substr( $path, 0, strlen( $key ) + 1 ) == $key.'/';
 			$class		= $active == $key ? 'active' : NULL;
 */
-			$class		= $active ? 'active' : NULL;
+			$class		= $active == $key ? 'active' : NULL;
 			$url		= $key == "index" ? "./" : './'.$key;
 			$link		= UI_HTML_Elements::Link( $url, $label, $class );
 			$attributes	= array( 'id' => 'navi-link-'.str_replace( '/', '-', $key ), 'class' => $class );
