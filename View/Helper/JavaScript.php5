@@ -191,7 +191,8 @@ class CMF_Hydrogen_View_Helper_JavaScript
 				foreach( $this->urls as $url )
 				{
 					if( $this->revision )
-						$url	.= '?r'.$this->revision;
+						
+						$url	.= ( preg_match( '/\?/', $url ) ? '&amp;' : '?' ).$this->revision;
 					$attributes	= array(
 						'type'		=> 'text/javascript',
 			//			'language'	=> 'JavaScript',
