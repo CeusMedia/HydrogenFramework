@@ -58,16 +58,15 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_H
 
 	protected function getCurrentKey( $linkMap, $current ){
 		$path	= empty( $_REQUEST['path'] ) ? $current : $_REQUEST['path'];
-		$active	= 'index';
 		foreach( $linkMap as $key => $label )
 			if( $path == $key )
-				$active = $key;
-		if( !$active )
-			foreach( $linkMap as $key => $label )
-				if( substr( $path, 0, strlen( $key ) + 1 ) == $key.'/' )
-					$active = $key;
-		
-		return $active;
+				return $key;
+		foreach( $linkMap as $key => $label ){
+			$pathSub	= substr( $path, 0, strlen( $key ) + 1 );
+			if( $pathSub == $key.'/' )
+				return $key;
+		}
+		return NULL;#'index';
 	}
 
 	public function render( $current = NULL, $niceUrls = FALSE )
@@ -82,6 +81,8 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_H
 			$link		= UI_HTML_Elements::Link( $url, $label, $class );
 			$list[]		= UI_HTML_Elements::ListItem( $link, 0, array( 'class' => $class ) );
 		}
+		if( !$list )
+			return $list;
 		$attr	= array( 'class' => $class );
 		$list	= UI_HTML_Elements::unorderedList( $list, 0, $attr );
 		$attr	= array(
