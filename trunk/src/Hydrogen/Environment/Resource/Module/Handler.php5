@@ -54,61 +54,8 @@ class CMF_Hydrogen_Environment_Resource_Module_Handler{
 			$fileName	= $this->path.$moduleId.'.xml';
 		else
 			$fileName	= $this->pathlib.$moduleId.'/module.xml';
-			
-		$clock	= new Alg_Time_Clock();
-		$xml	= XML_ElementReader::readFile( $fileName );
-		$obj	= new stdClass();
-		$obj->title				= (string) $xml->title;
-		$obj->description		= (string) $xml->description;
-		$obj->files				= new stdClass();
-		$obj->files->classes	= array();
-		$obj->files->locales	= array();
-		$obj->files->templates	= array();
-		$obj->files->styles		= array();
-		$obj->files->scripts	= array();
-		$obj->files->images		= array();
-		$obj->config			= array();
-		$obj->version			= (string) $xml->version;
-		$obj->versionAvailable	= NULL;
-		$obj->versionInstalled	= NULL;
-		$obj->relations			= new stdClass();
-		$obj->relations->needs		= array();
-		$obj->relations->supports	= array();
-		$obj->sql				= array();
-		$obj->links				= array();
-		foreach( $xml->files->class as $link )
-			$obj->files->classes[]	= (string) $link;
-		foreach( $xml->files->locale as $link )
-			$obj->files->locales[]	= (string) $link;
-		foreach( $xml->files->template as $link )
-			$obj->files->templates[]	= (string) $link;
-		foreach( $xml->files->style as $link )
-			$obj->files->styles[]	= (string) $link;
-		foreach( $xml->files->script as $link )
-			$obj->files->scripts[]	= (string) $link;
-		foreach( $xml->files->image as $link )
-			$obj->files->images[]	= (string) $link;
-		foreach( $xml->config as $pair )
-			$obj->config[$pair->getAttribute( 'name' )]	= (string) $pair;
-		if( $xml->relations ){
-			foreach( $xml->relations->needs as $moduleName )
-				$obj->relations->needs[]	= (string) $moduleName;
-			foreach( $xml->relations->supports as $moduleName )
-				$obj->relations->supports[]	= (string) $moduleName;
-		}
-		foreach( $xml->sql as $sql ){
-			$event	= $sql->getAttribute( 'on' );
-			$type	= $sql->hasAttribute( 'type' ) ? $sql->getAttribute( 'type' ) : '*';
-			foreach( explode( ',', $type ) as $type ){
-				$key	= $event.'@'.$type;
-				$obj->sql[$key]	= (string) $sql;
-			}
-		}
-		foreach( $xml->link as $link ){
-			$obj->links[]	= (string) $link;
-		}
-#		remark( $fileName.': '.$clock->stop( 3, 1 ).'ms' );
-		return $obj;
+
+		return CMF_Hydrogen_Environment_Resource_Module_Reader::load( $fileName );
 	}
 }
 ?>
