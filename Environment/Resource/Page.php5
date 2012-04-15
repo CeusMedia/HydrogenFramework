@@ -64,36 +64,42 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 
 		$pathScripts	= $env->config->get( 'path.scripts' );
 		$pathScriptsLib	= $env->config->get( 'path.scripts.lib' );
+		$pathStylesLib	= $env->config->get( 'path.styles.lib' );
 
 		
 		$modules	= $this->env->getModules();														//  get module handler resource
-		if( $modules ){																				//  module handler resource is existing
-			foreach( $modules->getInstalled() as $module ){											//  iterate installed modules
-				if( $module->files->styles ){														//  module has style files
-					foreach( $module->files->styles as $style ){									//  iterate module style files
-						$top	= !empty( $style->top );											//  get flag attribute for appending on top
-						if( preg_match( "/^[a-z]+:\/\/.+$/", $style->file ) )						//  style file is absolute URL
-							$this->css->theme->addUrl( $style->file, $top );						//  add style file URL
-						else if( !empty( $style->source ) && $style->source == 'primer' )			//  style file is in primer theme
-							$this->addPrimerStyle( $style->file, $top );							//  load style file from primer theme folder
-						else if( empty( $style->source ) || $style->source == 'theme' )				//  style file is in custom theme
-							$this->addThemeStyle( $style->file );									//  load style file from custom theme folder
-						else																		//  style file is in an individual source folder within themes folder
-							$this->css->primer->addUrl( $path.$style->source.'/'.$style->file );	//  load style file from source folder within themes folder
-					}
+		if( !$modules )																				//  module handler resource is not existing
+			return;
+
+		foreach( $modules->getInstalled() as $module ){												//  iterate installed modules
+			foreach( $module->files->styles as $style ){											//  iterate module style files
+				if( !empty( $style->load ) && $style->load == "auto" ){								//  style file is to be loaded always
+					$source	= !empty( $style->source ) ? $style->source : NULL;						//  get source attribute if possible
+					$top	= !empty( $style->top );												//  get flag attribute for appending on top
+					if( preg_match( "/^[a-z]+:\/\/.+$/", $style->file ) )							//  style file is absolute URL
+						$this->css->theme->addUrl( $style->file, $top );							//  add style file URL
+					else if( $source == 'primer' )													//  style file is in primer theme
+						$this->addPrimerStyle( $style->file, $top );								//  load style file from primer theme folder
+					else if( $source == 'lib' && $pathStylesLib )									//  style file is in styles library, which is enabled by configured path
+						$this->css->primer->addUrl( $pathStylesLib.$style->file, $top );			//  load style file from styles library
+					else if( $source == 'scripts-lib' && $pathScriptsLib )							//  style file is in scripts library, which is enabled by configured path
+						$this->css->primer->addUrl( $pathScriptsLib.$style->file, $top );			//  load style file from scripts library
+					else if( $source == 'theme' || !$source )										//  style file is in custom theme
+						$this->addThemeStyle( $style->file );										//  load style file from custom theme folder
+					else																			//  style file is in an individual source folder within themes folder
+						$this->css->primer->addUrl( $path.$source.'/'.$style->file );				//  load style file from source folder within themes folder
 				}
-				if( $module->files->scripts ){														//  module has script files
-					foreach( $module->files->scripts as $script ){									//  iterate module script files
-						if( !empty( $script->load ) && $script->load == "auto" ){					//  script file is to be loaded always
-							$top	= !empty( $script->top );										//  get flag attribute for appending on top
-							if( preg_match( "/^[a-z]+:\/\/.+$/", $script->file ) )					//  script file is absolute URL
-								$this->js->addUrl( $script->file, !empty( $script->top ) );			//  add script file URL
-							else if( !empty( $script->source ) && $script->source == 'lib' )		//  script file is in script library
-								$this->js->addUrl( $pathScriptsLib.$script->file, $top );			//  load script file from script library
-							else																	//  script file is in app scripts folder
-								$this->js->addUrl( $pathScripts.$script->file, $top );				//  load script file from app scripts folder
-						}
-					}
+			}
+			foreach( $module->files->scripts as $script ){											//  iterate module script files
+				if( !empty( $script->load ) && $script->load == "auto" ){							//  script file is to be loaded always
+					$source	= !empty( $script->source ) ? $script->source : NULL;					//  get source attribute if possible
+					$top	= !empty( $script->top );												//  get flag attribute for appending on top
+					if( preg_match( "/^[a-z]+:\/\/.+$/", $script->file ) )							//  script file is absolute URL
+						$this->js->addUrl( $script->file, $source );								//  add script file URL
+					else if( !empty( $script->source ) && $script->source == 'lib' )				//  script file is in script library
+						$this->js->addUrl( $pathScriptsLib.$script->file, $top );					//  load script file from script library
+					else																			//  script file is in app scripts folder
+						$this->js->addUrl( $pathScripts.$script->file, $top );						//  load script file from app scripts folder
 				}
 			}
 		}
