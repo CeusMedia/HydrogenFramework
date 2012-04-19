@@ -26,6 +26,9 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source implements CMF_Hyd
 	}
 
 	public function scan(){
+		if( !file_exists( $this->source->path ) )
+			throw new RuntimeException( 'Source path "'.$this->source->path.'" is not existing' );
+		
 		$index	= new File_RecursiveNameFilter( $this->source->path, 'module.xml' );
 		foreach( $index as $entry ){
 			$id		= preg_replace( '@^'.$this->source->path.'@', '', $entry->getPath() );
