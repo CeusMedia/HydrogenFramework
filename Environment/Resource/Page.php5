@@ -71,7 +71,7 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 		if( !$modules )																				//  module handler resource is not existing
 			return;
 
-		foreach( $modules->getInstalled() as $module ){												//  iterate installed modules
+		foreach( $modules->getAll() as $module ){												//  iterate installed modules
 			foreach( $module->files->styles as $style ){											//  iterate module style files
 				if( !empty( $style->load ) && $style->load == "auto" ){								//  style file is to be loaded always
 					$source	= !empty( $style->source ) ? $style->source : NULL;						//  get source attribute if possible

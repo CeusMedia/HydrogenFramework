@@ -50,12 +50,14 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	/**	@var	CMF_Hydrogen_Application	$application	Instance of Application */
 	protected $application;
 	
-	public static $configFile		= "config.ini.inc";
+	public static $configFile				= "config.ini.inc";
 
-	protected $acl					= NULL;
-	protected $modules				= NULL;
+	protected $acl							= NULL;
+	protected $modules						= NULL;
 	/**	@var	array						$options		Set options to override static properties */
-	protected $options				= array();
+	protected $options						= array();
+	/**	@var	string						$path			Absolute folder path of application */
+	public $path							= NULL;
 
 	/**
 	 *	Constructor, sets up Resource Environment.
@@ -65,11 +67,18 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	public function __construct( $options = array() )
 	{
 		$this->options		= $options;
+		$this->path			= isset( $options['pathApp'] ) ? $options['pathApp'] : getCwd().'/';
 		$this->initClock();
 		$this->initConfiguration();																	//  --  CONFIGURATION  --  //
 		$this->initModules();																		//  --  MODULE SUPPORT  --  //
+		$this->onInit();
+		$this->onLoad();
 	}
 
+	public function onInit(){}
+	
+	public function onLoad(){}
+	
 	public function __get( $key )
 	{
 		return $this->get( $key );
@@ -212,8 +221,10 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	
 	protected function initModules(){
 		$config			= $this->getConfig();
-		$this->modules	= new CMF_Hydrogen_Environment_Resource_Module_Handler( $this );
-		$modules		= $this->modules->getInstalled();
+#		$this->modules	= new CMF_Hydrogen_Environment_Resource_Module_Handler( $this );
+#		$modules		= $this->modules->getInstalled();
+		$this->modules	= new CMF_Hydrogen_Environment_Resource_Module_Library_Local( $this );
+		$modules		= $this->modules->getAll();
 		foreach( $modules as $moduleId => $module ){
 			$prefix	= 'module.'.strtolower( $moduleId );
 			$this->config->set( $prefix, TRUE );

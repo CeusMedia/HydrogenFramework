@@ -3,10 +3,18 @@ class CMF_Hydrogen_Environment_Resource_Module_Handler{
 
 	protected $modulesInstalled		= array();
 	protected $modulesAvailable		= array();
-
+	protected $sources				= array();
+	
 	public function __construct( CMF_Hydrogen_Environment_Abstract $env ){
 		$this->env		= $env;
 		$config			= $this->env->getConfig();
+
+#		if( class_exists( 'Model_Source' ) ){
+#			$model	= new Model_Source( $env );
+#			foreach( $model->getAll() as $source )
+#				$this->sources[$source->id]	= $source;
+#		}
+#		
 		$this->path		= 'config/modules/';
 		$this->pathlib	= 'modules/';
 		if( $config->get( 'path.module.config' ) )
@@ -14,12 +22,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Handler{
 		if( !file_exists( $this->path ) )
 			return;
 
-		$index	= new File_RegexFilter( $this->path, '/^[a-z_]+\.xml$/i' );
-		foreach( $index as $entry ){
-			$moduleId	= preg_replace( '/\.xml$/i', '', $entry->getFilename() );
-			$module		= $this->readModuleXml( $moduleId, TRUE );
-			$this->modulesInstalled[$moduleId]	= $module;
-		}
+		$this->modulesInstalled	= new CMF_Hydrogen_Environment_Resource_Module_LibraryLocal( $env );
 	}
 
 	public function get( $moduleId, $installed = FALSE ){
@@ -49,12 +52,15 @@ class CMF_Hydrogen_Environment_Resource_Module_Handler{
 		return array_key_exists( $moduleId, $this->modulesInstalled );
 	}
 
-	protected function readModuleXml( $moduleId, $installed = FALSE ){
-		if( $installed )
-			$fileName	= $this->path.$moduleId.'.xml';
-		else
-			$fileName	= $this->pathlib.$moduleId.'/module.xml';
-
+	protected function readModuleXml( $moduleId, $sourceId = NULL ){
+		$fileName	= $this->path.$moduleId.'.xml';
+		if( $sourceId ){
+			if( empty( $this->sources[$sourceId] ) )
+				throw new RuntimeException( 'Module source "'.$sourceId.'" is not existing' );
+			$fileName	= $this->sources[$sourceId]->path.$moduleId.'.xml';
+		}
+		if( !file_exists( $fileName ) )
+			throw new RuntimeException( 'Module "'.$moduleId.'" is not available in source "'.$sourceId.'"' );
 		return CMF_Hydrogen_Environment_Resource_Module_Reader::load( $fileName );
 	}
 }
