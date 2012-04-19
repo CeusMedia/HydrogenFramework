@@ -29,7 +29,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydr
 
 	public function get( $moduleId ){
 		if( $this->has( $moduleId ) )
-			return $this->modulesInstalled[$moduleId];
+			return $this->modules[$moduleId];
 		throw new RuntimeException( 'Module "'.$moduleId.'" is not installed' );
 	}
 
@@ -38,7 +38,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydr
 	}
 
 	public function has( $moduleId ){
-		return array_key_exists( $moduleId, $modules );
+		return array_key_exists( $moduleId, $this->modules );
 	}
 }
 ?>
