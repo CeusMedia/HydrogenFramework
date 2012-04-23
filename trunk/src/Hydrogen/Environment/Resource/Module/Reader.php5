@@ -66,8 +66,23 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 				$obj->sql[$key]	= (string) $sql;
 			}
 		}
-		foreach( $xml->link as $link )
-			$obj->links[]	= (string) $link;
+		foreach( $xml->link as $link ){
+			$access		= $link->hasAttribute( 'access' ) ? $link->getAttribute( 'access' ) : 'public';
+			$language	= $link->hasAttribute( 'lang', 'xml' ) ? $link->getAttribute( 'lang', 'xml' ) : 'en';
+			$label		= (string) $link;
+			$path		= $link->hasAttribute( 'path' ) ? $link->getAttribute( 'path' ) : $label;
+			$rank		= $link->hasAttribute( 'rank' ) ? (int) $link->getAttribute( 'rank' ) : 10;
+			$link		= $link->hasAttribute( 'link' ) ? $link->getAttribute( 'link' ) : $path;
+			$obj->links[]	= (object) array(
+				'access'	=> $access,
+				'language'	=> $language,
+				'path'		=> $path,
+				'link'		=> $link,
+				'rank'		=> $rank,
+				'label'		=> $label,
+			);
+			(string) $link;
+		}
 		return $obj;
 	}
 }
