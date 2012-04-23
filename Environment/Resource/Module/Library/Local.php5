@@ -25,6 +25,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydr
 			$module->versionInstalled	= $module->version;
 			$this->modules[$moduleId]	= $module;
 		}
+		ksort( $this->modules );
 	}
 
 	public function get( $moduleId ){

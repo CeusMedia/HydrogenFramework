@@ -226,10 +226,27 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$this->modules	= new CMF_Hydrogen_Environment_Resource_Module_Library_Local( $this );
 		$modules		= $this->modules->getAll();
 		foreach( $modules as $moduleId => $module ){
-			$prefix	= 'module.'.strtolower( $moduleId );
-			$this->config->set( $prefix, TRUE );
-			foreach( $module->config as $key => $value )
-				$this->config->set( $prefix.'.'.$key, $value );
+			
+			$prefix	= 'module.'.strtolower( $moduleId );											//  build config key prefix of module
+			$this->config->set( $prefix, TRUE );													//  enable module in configuration
+			foreach( $module->config as $key => $value ){											//  iterate module configuration pairs
+				if( is_object( $value) ){															//	@todo remove
+					@settype( $value->value, $value->type );										//  cast value by set type
+					$this->config->set( $prefix.'.'.$key, $value->value );							//	set configuration pair
+				}
+				else																				//  legacy @todo remove
+					$this->config->set( $prefix.'.'.$key, $value );									//  
+			}
+			
+			$public	= explode( ',', $this->config->get( 'module.acl.public' ) );					//  get current public link list
+			foreach( $module->links as $link ){														//  iterate module links
+				if( $link->access == "public" ){													//  link is public
+					$path	= str_replace( '/', '_', $link->path );									//  get link path
+					if( !in_array( $path, $public ) )												//  link is not in public link list
+						$public[]	= $path;														//  add link to public link list
+				}
+			}
+			$this->config->set( 'module.acl.public', implode( ',', $public ) );						//  save public link list
 		}
 	}
 
