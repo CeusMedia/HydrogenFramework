@@ -183,6 +183,8 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	 */
 	protected function initDatabase()
 	{
+		if( in_array( $this->config->get( 'database' ), array( '', 'no' ) ) )
+			return;
 		$this->dbc	= new CMF_Hydrogen_Environment_Resource_Database_PDO( $this );
 	}
 

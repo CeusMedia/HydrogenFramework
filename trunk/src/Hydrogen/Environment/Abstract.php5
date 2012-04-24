@@ -66,12 +66,12 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	 */
 	public function __construct( $options = array() )
 	{
-		$this->options		= $options;
-		$this->path			= isset( $options['pathApp'] ) ? $options['pathApp'] : getCwd().'/';
-		$this->initClock();
-		$this->initConfiguration();																	//  --  CONFIGURATION  --  //
-		$this->initModules();																		//  --  MODULE SUPPORT  --  //
-		$this->onInit();
+		$this->options		= $options;																//  store given environment options
+		$this->path			= isset( $options['pathApp'] ) ? $options['pathApp'] : getCwd().'/';	//  detect application path
+		$this->initClock();																			//  setup clock
+		$this->initConfiguration();																	//  setup configuration
+		$this->initModules();																		//  setup module support
+		$this->onInit();																			//  
 		$this->onLoad();
 	}
 

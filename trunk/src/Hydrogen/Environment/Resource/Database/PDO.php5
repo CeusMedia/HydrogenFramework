@@ -78,9 +78,9 @@ class CMF_Hydrogen_Environment_Resource_Database_PDO extends Database_PDO_Connec
 
 		parent::__construct( $dsn, $username, $password, $driverOptions );
 		if( $logStatements )
-			$this->setStatementLogFile( $logStatements );
+			$this->setStatementLogFile( $config->get( 'path.logs' ).$logStatements );
 		if( $logErrors )
-			$this->setErrorLogFile( $logErrors );
+			$this->setErrorLogFile( $config->get( 'path.logs' ).$logErrors );
 
 #		if( $charset )
 #			$this->exec( "SET NAMES '".$charset."';" );
