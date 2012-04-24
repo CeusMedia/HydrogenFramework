@@ -46,10 +46,14 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 		}
 		foreach( $xml->config as $pair ){
 			$key	= $pair->getAttribute( 'name' );
+			$type	= $pair->hasAttribute( 'type' ) ? $pair->getAttribute( 'type' ) : 'string';
+			$value	= trim( (string) $pair );
+			if( in_array( strtolower( $type ), array( 'boolean', 'bool' ) ) )						//  value is boolean
+				$value	= !in_array( strtolower( $value ), array( 'no', 'false', '0', '' ) );		//  value is not negative
 			$obj->config[$key]	= (object) array(
-				'key'	=> $key,
-				'type'	=> $pair->hasAttribute( 'type' ) ? $pair->getAttribute( 'type' ) : 'string',
-				'value'	=> (string) $pair,
+				'key'	=> trim( $key ),
+				'type'	=> trim( strtolower( $type ) ),
+				'value'	=> $value,
 			);
 		}
 		if( $xml->relations ){
