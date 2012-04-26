@@ -39,6 +39,8 @@
  */
 class CMF_Hydrogen_Environment_Resource_Database_PDO extends Database_PDO_Connection
 {
+	protected $env;
+	
 	public function __construct( CMF_Hydrogen_Environment_Abstract $env )
 	{
 		$this->env	= $env;

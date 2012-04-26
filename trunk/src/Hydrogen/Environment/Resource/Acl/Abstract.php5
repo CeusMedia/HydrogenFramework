@@ -47,7 +47,9 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 	protected $rights		= array();
 	protected $roles		= array();
 	/*	@var		$publicLinks				Map of links with public access */
-	protected $publicLinks	= array();
+	protected $linksPublic			= array();
+	protected $linksPublicInside	= array();
+	protected $linksPublicOutside	= array();
 	
 	/**
 	 *	Constructor.
@@ -134,11 +136,27 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 	 */
 	public function hasRight( $roleId, $controller = 'index', $action = 'index' )
 	{
+#		remark( 'Role: '.$roleId );
+#		remark( 'Public' );
+#		print_m( $this->linksPublic );
+#		remark( 'Public Outside' );
+#		print_m( $this->linksPublicOutside );
+#		remark( 'Public Inside' );
+#		print_m( $this->linksPublicInside );
+#		die;
+		
+		$linkPath	= $controller.'_'.$action;
+		if( in_array( $linkPath, $this->linksPublic ) )
+			return 3;
 		if( !$roleId ){
-			if( in_array( $controller.'_'.$action, $this->publicLinks ) )
-				return 3;
+			if( in_array( $linkPath, $this->linksPublicOutside ) )
+				return 4;
 			return -2;
 		}
+
+		if( in_array( $linkPath, $this->linksPublicInside ) )
+			return 5;
+			
 		if( $this->hasFullAccess( $roleId ) )
 			return 2;
 		if( $this->hasNoAccess( $roleId ) )
@@ -158,7 +176,27 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 	 *	@return		void
 	 */
 	public function setPublicLinks( $links ){
-		$this->publicLinks	= $links;
+		$this->linksPublic	= $links;
+	}
+
+	/**
+	 *	Sets a list of links with public access.
+	 *	@access		public
+	 *	@param		array		$links			Map of links, eg. auth_login
+	 *	@return		void
+	 */
+	public function setPublicInsideLinks( $links ){
+		$this->linksPublicInside	= $links;
+	}
+
+	/**
+	 *	Sets a list of links with public access.
+	 *	@access		public
+	 *	@param		array		$links			Map of links, eg. auth_login
+	 *	@return		void
+	 */
+	public function setPublicOutsideLinks( $links ){
+		$this->linksPublicOutside	= $links;
 	}
 
 	/**

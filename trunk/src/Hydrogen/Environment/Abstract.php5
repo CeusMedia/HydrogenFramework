@@ -186,6 +186,8 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$this->acl->roleAccessFull	= 128;
 		
 		$this->acl->setPublicLinks( explode( ',', $config->get( 'module.acl.public' ) ) );
+		$this->acl->setPublicInsideLinks( explode( ',', $config->get( 'module.acl.inside' ) ) );
+		$this->acl->setPublicOutsideLinks( explode( ',', $config->get( 'module.acl.outside' ) ) );
 	}
 
 	protected function initClock()

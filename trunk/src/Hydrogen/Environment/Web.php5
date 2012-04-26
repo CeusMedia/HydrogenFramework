@@ -183,9 +183,11 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	 */
 	protected function initDatabase()
 	{
-		if( in_array( $this->config->get( 'database' ), array( '', 'no' ) ) )
-			return;
-		$this->dbc	= new CMF_Hydrogen_Environment_Resource_Database_PDO( $this );
+#		if( in_array( $this->config->get( 'database' ), array( '', 'no' ) ) )
+#			return;
+		if( !strlen( trim( $this->config->get( 'database.name' ) ) ) )								//  no database name configured
+			return;																					//  quit without database connect attempt
+		$this->dbc	= new CMF_Hydrogen_Environment_Resource_Database_PDO( $this );					//  try to configure and connect database
 	}
 
 /*	protected function initFieldDefinition()
@@ -253,6 +255,26 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 			$partitionName,
 			$sessionName
 		);
+
+		$isInside	= (int) $this->session->get( 'userId' );
+		$inside		= explode( ',', $this->config->get( 'module.acl.inside' ) );					//  get current inside link list
+		$outside	= explode( ',', $this->config->get( 'module.acl.outside' ) );					//  get current outside link list
+		foreach( $this->modules->getAll() as $module ){
+			foreach( $module->links as $link ){														//  iterate module links
+				if( $link->access == "inside" ){													//  link is inside public
+					$path	= str_replace( '/', '_', $link->path );									//  get link path
+					if( !in_array( $path, $inside ) )												//  link is not in public link list
+						$inside[]	= $path;														//  add link to public link list
+				}
+				if( $link->access == "outside" ){													//  link is outside public
+					$path	= str_replace( '/', '_', $link->path );									//  get link path
+					if( !in_array( $path, $inside ) )												//  link is not in public link list
+						$outside[]	= $path;														//  add link to public link list
+				}
+			}
+		}			
+		$this->config->set( 'module.acl.inside', implode( ',', $inside ) );							//  save public link list
+		$this->config->set( 'module.acl.outside', implode( ',', $outside ) );						//  save public link list
 	}
 }
 ?>
