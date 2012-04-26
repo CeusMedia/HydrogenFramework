@@ -62,14 +62,17 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 			$this->pathPrimer	= $path.$env->config->get( 'layout.primer' ).'/';
 		$this->pathTheme	= $path.$env->config->get( 'layout.theme' ).'/';
 
-		$pathScripts	= $env->config->get( 'path.scripts' );
-		$pathScriptsLib	= $env->config->get( 'path.scripts.lib' );
-		$pathStylesLib	= $env->config->get( 'path.styles.lib' );
+		$this->applyModules();
+	}
 
-		
+	protected function applyModules(){
 		$modules	= $this->env->getModules();														//  get module handler resource
 		if( !$modules )																				//  module handler resource is not existing
 			return;
+
+		$pathScripts	= $this->env->config->get( 'path.scripts' );
+		$pathScriptsLib	= $this->env->config->get( 'path.scripts.lib' );
+		$pathStylesLib	= $this->env->config->get( 'path.styles.lib' );
 
 		foreach( $modules->getAll() as $module ){													//  iterate installed modules
 			foreach( $module->files->styles as $style ){											//  iterate module style files
