@@ -208,8 +208,9 @@ class CMF_Hydrogen_View
 		$config		= $___config	= $this->env->getConfig();
 		$request	= $___request	= $this->env->getRequest();
 		$session	= $___session	= $this->env->getSession();
+		$___data	= $data;
 		extract( $this->data );
-		extract( $data );
+		extract( $___data );
 		$helpers	= $this->helpers;
 		$result		= require( $uri );
 		$buffer		= ob_get_clean();
