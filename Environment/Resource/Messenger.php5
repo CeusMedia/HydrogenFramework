@@ -217,17 +217,18 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 	}
 	
 	/**
-	 *	Indicates wheteher an Error or a Failure has been reported.
+	 *	Indicates wheteher an Error or a Failure has been noted.
 	 *	@access		public
-	 *	@return		bool
+	 *	@return		integer		Number of noted errors or failures
 	 */
 	public function gotError()
 	{
+		$count		= 0;
 		$messages	= (array) $this->env->getSession()->get( $this->keyMessages );
 		foreach( $messages as $message )
 			if( $message['type'] < 2 )
-				return true;
-		return false;
+				$count++;
+		return $count;
 	}
 	
 	/**

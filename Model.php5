@@ -72,6 +72,9 @@ class CMF_Hydrogen_Model
 	public function __construct( CMF_Hydrogen_Environment_Abstract $env, $id = NULL )
 	{
 		$this->setEnv( $env );
+		$dbc	= $env->getDatabase();
+		if( !$dbc )
+			throw new RuntimeException( 'Database resource needed for '.get_class( $this ) );
 		$this->table	= new Database_PDO_TableWriter(
 			$env->getDatabase(),
 			$this->prefix.$this->name,
@@ -84,6 +87,9 @@ class CMF_Hydrogen_Model
 		$this->table->setIndices( $this->indices );
 		$this->cache	= Alg_Object_Factory::createObject( self::$cacheClass );
 		$this->cacheKey	= 'db.'.$this->prefix.$this->name.'.';
+		
+		if( !empty( $this->env->storage ) )
+			$this->table->setUndoStorage( $this->env->storage );
 	}
 	
 	//  --  PUBLIC METHODS  --  // 
@@ -162,6 +168,8 @@ class CMF_Hydrogen_Model
 			$this->cache->set( $this->cacheKey.$id, $data );
 		}
 		if( $field ){
+			if( empty( $data ) )
+				return $data;
 			if( !in_array( $field, $this->columns ) )
 				throw new InvalidArgumentException( 'Field "'.$field.'" is not an existing column' );
 			switch( $this->fetchMode ){
@@ -242,6 +250,8 @@ class CMF_Hydrogen_Model
 		$data	= $this->table->get( TRUE );
 		$this->table->defocus();
 		if( $field ){
+			if( empty( $data ) )
+				return $data;
 			if( !in_array( $field, $this->columns ) )
 				throw new InvalidArgumentException( 'Field "'.$field.'" is not an existing column' );
 			switch( $this->fetchMode ){
@@ -275,6 +285,8 @@ class CMF_Hydrogen_Model
 		$data	= $this->table->get( TRUE );
 		$this->table->defocus();
 		if( $field ){
+			if( empty( $data ) )
+				return $data;
 			if( !in_array( $field, $this->columns ) )
 				throw new InvalidArgumentException( 'Field "'.$field.'" is not an existing column' );
 			switch( $this->fetchMode ){

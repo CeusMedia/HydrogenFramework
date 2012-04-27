@@ -202,15 +202,24 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	 */
 	protected function initConfiguration()
 	{
-		$configFile	= self::$configFile;
-		if( !empty( $this->options['configFile'] ) )
-			$configFile	= $this->options['configFile'];
-		if( !file_exists( $configFile ) )
-			throw new RuntimeException( 'Config file "'.$configFile.'" not existing' );
-		$data			= parse_ini_file( $configFile, FALSE );			//  parse configuration file
-		$this->config	= new ADT_List_Dictionary( $data );						//  create dictionary from array
-		if( $this->config->has( 'config.error.reporting' ) )					//  error reporting is defined
-			error_reporting( $this->config->get( 'config.error.reporting' ) );	//  set error reporting level
+		$configFile	= self::$configFile;															//  get config file @todo remove this old way
+		if( !empty( $this->options['configFile'] ) )												//  get config file from options @todo enforce this new way
+			$configFile	= $this->options['configFile'];												//  get config file from options
+		if( !file_exists( $configFile ) )															//  config file not found
+			throw new RuntimeException( 'Config file "'.$configFile.'" not existing' );				//  quit with exception
+
+		$data			= parse_ini_file( $configFile, FALSE );										//  parse configuration file (without section support)
+
+		foreach( $data as $key => $value ){															//  iterate config pairs for evaluation
+			$data[$key]	= trim( $value );															//  trim value string
+			if( in_array( strtolower( $data[$key] ), array( "yes", "ja" ) ) )						//  value *means* yes
+				$data[$key]	= TRUE;																	//  change value to boolean TRUE
+			else if( in_array( strtolower( $data[$key] ), array( "no", "nein" ) ) )					//  value *means* no
+				$data[$key]	= FALSE;																//  change value to boolean FALSE
+		}
+		$this->config	= new ADT_List_Dictionary( $data );											//  create dictionary from array
+		if( $this->config->has( 'config.error.reporting' ) )										//  error reporting is defined
+			error_reporting( $this->config->get( 'config.error.reporting' ) );						//  set error reporting level
 	}
 
 	protected function initDisclosure()
