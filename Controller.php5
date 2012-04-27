@@ -190,7 +190,7 @@ class CMF_Hydrogen_Controller
 	 */
 	protected function restart( $uri, $withinModule = FALSE )
 	{
-		$base	= dirname( getEnv( 'SCRIPT_NAME' ) )."/";
+		$base   = preg_replace( "@^(.*)\/*$@U", "\\1/", dirname( getEnv( 'SCRIPT_NAME' ) ) );
 		if( $withinModule ){
 			$controller	= $this->env->getRequest()->get( 'controller' );
 			$base	.= $this->alias ? $this->alias : $controller;
