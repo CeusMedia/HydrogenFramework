@@ -11,7 +11,9 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 		$obj->versionAvailable		= NULL;
 		$obj->versionInstalled		= NULL;
 		$obj->price					= (string) $xml->price;
-		$obj->license				= (string) $xml->license;
+		$obj->companies				= array();
+		$obj->authors				= array();
+		$obj->licenses				= array();
 		$obj->price					= (string) $xml->price;
 		$obj->icon					= NULL;
 		$obj->files					= new stdClass();
@@ -44,6 +46,33 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 				$obj->files->{$target}[]	= $object;
 			}
 		}
+
+		foreach( $xml->license as $license ){
+			$source	= $license->hasAttribute( 'source' ) ? $license->getAttribute( 'source' ) : '';
+			$obj->licenses[]	= (object) array(
+				'label'		=> (string) $license,
+				'source'	=> $source
+			);
+		}
+
+		foreach( $xml->company as $company ){
+			$site	= $company->hasAttribute( 'site' ) ? $company->getAttribute( 'site' ) : '';
+			$obj->companies[]	= (object) array(
+				'label'		=> (string) $company,
+				'site'		=> $site
+			);
+		}
+
+		foreach( $xml->author as $author ){
+			$email	= $author->hasAttribute( 'email' ) ? $author->getAttribute( 'email' ) : '';
+			$site	= $author->hasAttribute( 'site' ) ? $author->getAttribute( 'site' ) : '';
+			$obj->authors[]	= (object) array(
+				'name'	=> (string) $author,
+				'email'	=> $email,
+				'site'	=> $site
+			);
+		}
+
 		foreach( $xml->config as $pair ){
 			$key	= $pair->getAttribute( 'name' );
 			$type	= $pair->hasAttribute( 'type' ) ? $pair->getAttribute( 'type' ) : 'string';
@@ -70,6 +99,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 				$obj->sql[$key]	= (string) $sql;
 			}
 		}
+
 		foreach( $xml->link as $link ){
 			$access		= $link->hasAttribute( 'access' ) ? $link->getAttribute( 'access' ) : 'public';
 			$language	= $link->hasAttribute( 'lang', 'xml' ) ? $link->getAttribute( 'lang', 'xml' ) : 'en';
@@ -91,4 +121,3 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 	}
 }
 ?>
-
