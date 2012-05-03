@@ -44,6 +44,9 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 	protected $pathPrimer;
 	protected $pathTheme;
 
+	/**	@var	CMF_Hydrogen_View_Helper_JavaScript		$js		JavaScript Collector Helper */
+	public $js;
+	
 	public function __construct( CMF_Hydrogen_Environment_Abstract $env )
 	{
 		$language	= 'en';
@@ -73,6 +76,7 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 		$pathScripts	= $this->env->config->get( 'path.scripts' );
 		$pathScriptsLib	= $this->env->config->get( 'path.scripts.lib' );
 		$pathStylesLib	= $this->env->config->get( 'path.styles.lib' );
+		$listConfig		= array();
 
 		foreach( $modules->getAll() as $module ){													//  iterate installed modules
 			foreach( $module->files->styles as $style ){											//  iterate module style files
@@ -105,7 +109,15 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 						$this->js->addUrl( $pathScripts.$script->file, $top );						//  load script file from app scripts folder
 				}
 			}
+			foreach( $module->config as $pair ){													//  iterate module configuration pairs
+				if( empty( $pair->protected ) ){
+					$key	= 'module.'.strtolower( $module->id ).'.'.$pair->key;
+					$key	= str_replace( '.', '_', $key );
+					$listConfig[$key]	 = $pair->value;
+				}
+			}
 		}
+		$this->addHead( '<script type="text/javascript">var config = '.json_encode( $listConfig ).';</script>' );
 	}
 
 	public function addPrimerStyle( $fileName, $onTop = FALSE ){

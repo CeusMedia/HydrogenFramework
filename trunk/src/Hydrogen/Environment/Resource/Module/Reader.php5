@@ -58,7 +58,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 		foreach( $xml->company as $company ){
 			$site	= $company->hasAttribute( 'site' ) ? $company->getAttribute( 'site' ) : '';
 			$obj->companies[]	= (object) array(
-				'label'		=> (string) $company,
+				'name'		=> (string) $company,
 				'site'		=> $site
 			);
 		}
@@ -74,15 +74,21 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 		}
 
 		foreach( $xml->config as $pair ){
-			$key	= $pair->getAttribute( 'name' );
-			$type	= $pair->hasAttribute( 'type' ) ? $pair->getAttribute( 'type' ) : 'string';
+			$key		= $pair->getAttribute( 'name' );
+			$type		= $pair->hasAttribute( 'type' ) ? $pair->getAttribute( 'type' ) : 'string';
+			$values		= $pair->hasAttribute( 'values' ) ? explode( ',', $pair->getAttribute( 'values' ) ) : array();
+			$mandatory	= $pair->hasAttribute( 'mandatory' ) ? $pair->getAttribute( 'mandatory' ) : FALSE;
+			$protected	= $pair->hasAttribute( 'protected' ) ? $pair->getAttribute( 'protected' ) : FALSE;
 			$value	= trim( (string) $pair );
 			if( in_array( strtolower( $type ), array( 'boolean', 'bool' ) ) )						//  value is boolean
 				$value	= !in_array( strtolower( $value ), array( 'no', 'false', '0', '' ) );		//  value is not negative
 			$obj->config[$key]	= (object) array(
-				'key'	=> trim( $key ),
-				'type'	=> trim( strtolower( $type ) ),
-				'value'	=> $value,
+				'key'		=> trim( $key ),
+				'type'		=> trim( strtolower( $type ) ),
+				'value'		=> $value,
+				'values'	=> $values,
+				'mandatory'	=> $mandatory,
+				'protected'	=> $protected,
 			);
 		}
 		if( $xml->relations ){
@@ -102,12 +108,14 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 
 		foreach( $xml->link as $link ){
 			$access		= $link->hasAttribute( 'access' ) ? $link->getAttribute( 'access' ) : 'public';
-			$language	= $link->hasAttribute( 'lang', 'xml' ) ? $link->getAttribute( 'lang', 'xml' ) : 'en';
+			$language	= $link->hasAttribute( 'lang', 'xml' ) ? $link->getAttribute( 'lang', 'xml' ) : NULL;
 			$label		= (string) $link;
 			$path		= $link->hasAttribute( 'path' ) ? $link->getAttribute( 'path' ) : $label;
 			$rank		= $link->hasAttribute( 'rank' ) ? (int) $link->getAttribute( 'rank' ) : 10;
+			$parent		= $link->hasAttribute( 'parent' ) ? $link->getAttribute( 'parent' ) : NULL;
 			$link		= $link->hasAttribute( 'link' ) ? $link->getAttribute( 'link' ) : $path;
 			$obj->links[]	= (object) array(
+				'parent'	=> $parent,
 				'access'	=> $access,
 				'language'	=> $language,
 				'path'		=> $path,

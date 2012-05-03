@@ -66,27 +66,34 @@ class CMF_Hydrogen_Controller
 	{
 		$this->setEnv( $env );
 		$this->view	= $this->getViewObject( $this->controller );
-		$this->onInit();
+		$this->__onInit();
 	}
+
+	/**
+	 *	Empty method which is called after construction and can be customised.
+	 *	@access		protected
+	 *	@return		void
+	 */
+	protected function __onInit(){}
+	
 	
 	protected function addData( $key, $value, $topic = NULL )
 	{
 		return $this->view->setData( array( $key => $value ), $topic );
 	}
 
-        protected function compactFilterInput( $input ){
-                if( is_string( $input ) )
-                        if( strlen( $input ) )
-                                return $input;
-                if( !is_array( $input ) )
-                        return NULL;
-                foreach( $input as $nr => $chunk ){
-                        $chunk  = $this->compactFilterInput( $chunk );
-                        if( is_string( $chunk ) && strlen( $chunk ) || is_array( $chunk ) && count( $chunk ) )
-                                continue;
-                        unset( $input[$nr] );
-                }
-                return $input;
+	protected function compactFilterInput( $input ){
+		if( is_string( $input ) && strlen( $input ) )
+			return $input;
+		if( !is_array( $input ) )
+			return NULL;
+		foreach( $input as $nr => $chunk ){
+			$chunk  = $this->compactFilterInput( $chunk );
+			if( is_string( $chunk ) && strlen( $chunk ) || is_array( $chunk ) && count( $chunk ) )
+				continue;
+			unset( $input[$nr] );
+		}
+		return $input;
 	}
 	
 	/**
@@ -149,15 +156,6 @@ class CMF_Hydrogen_Controller
 		if( empty( $section ) )
 			return $this->env->getLanguage()->getWords( $topic );
 		return (object) $this->env->getLanguage()->getSection( $topic, $section );
-	}
-
-	/**
-	 *	Empty method which is called after construction and can be customised.
-	 *	@access		protected
-	 *	@return		void
-	 */
-	protected function onInit()
-	{
 	}
 
 	/**

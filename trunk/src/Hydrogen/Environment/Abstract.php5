@@ -43,6 +43,8 @@
  */
 abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environment, ArrayAccess
 {
+	/** @var	CMF_Hydrogen_Environment_Resource_Acl_Abstract	$acl	Implementation of access control list */
+	protected $acl;
 	/**	@var	Alg_Time_Clock				$clock			Clock Object */
 	protected $clock;
 	/**	@var	ADT_List_Dictionary			$config			Configuration Object */
@@ -52,7 +54,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	
 	public static $configFile				= "config.ini.inc";
 
-	protected $acl							= NULL;
+	/**	@var	CMF_Hydrogen_Environment_Resource_Module_Library_Local	$modules	Handler for local modules */
 	protected $modules						= NULL;
 	/**	@var	array						$options		Set options to override static properties */
 	protected $options						= array();
