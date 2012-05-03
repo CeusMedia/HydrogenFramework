@@ -61,12 +61,11 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_H
 		foreach( $linkMap as $key => $label )
 			if( $path == $key )
 				return $key;
-		foreach( $linkMap as $key => $label ){
-			$pathSub	= substr( $path, 0, strlen( $key ) + 1 );
-			if( $pathSub == $key.'/' )
-				return $key;
-		}
-		return NULL;#'index';
+		$list	= array();
+		foreach( $linkMap as $key => $label )
+			$list[$key]	= levenshtein( $key, $current );
+		asort( $list );
+		return array_shift( array_keys( $list ) );
 	}
 
 	public function render( $current = NULL, $niceUrls = FALSE )
