@@ -1,9 +1,10 @@
 <?php
 class CMF_Hydrogen_Environment_Resource_Module_Reader{
 	
-	static public function load( $fileName ){
+	static public function load( $fileName, $id ){
 		$xml	= XML_ElementReader::readFile( $fileName );
 		$obj	= new stdClass();
+		$obj->id					= $id;
 		$obj->title					= (string) $xml->title;
 		$obj->category				= (string) $xml->category;
 		$obj->description			= (string) $xml->description;
@@ -107,7 +108,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 		}
 
 		foreach( $xml->link as $link ){
-			$access		= $link->hasAttribute( 'access' ) ? $link->getAttribute( 'access' ) : 'public';
+			$access		= $link->hasAttribute( 'access' ) ? $link->getAttribute( 'access' ) : NULL;
 			$language	= $link->hasAttribute( 'lang', 'xml' ) ? $link->getAttribute( 'lang', 'xml' ) : NULL;
 			$label		= (string) $link;
 			$path		= $link->hasAttribute( 'path' ) ? $link->getAttribute( 'path' ) : $label;
