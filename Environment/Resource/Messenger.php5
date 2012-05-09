@@ -240,6 +240,8 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 	 */
 	protected function noteMessage( $type, $message)
 	{
+		if( is_array( $message ) || is_object( $message ) || is_resource( $message ) )
+			throw new InvalidArgumentException( 'Message must be a string or numeric' );
 		$messages	= (array) $this->env->getSession()->get( $this->keyMessages );
 		$messages[]	= array( "message" => $message, "type" => $type, "timestamp" => time() );
 		$this->env->getSession()->set( $this->keyMessages, $messages );

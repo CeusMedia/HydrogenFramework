@@ -48,7 +48,7 @@ class CMF_Hydrogen_Environment_Resource_Language
 	/**	@var		string								$language		Set Language */
 	protected $language;
 	/**	@var		array								$languages		List of allowed Languages */
-	protected $languages;
+	protected $languages								= array();
 	
 	/**
 	 *	Constructor.
@@ -62,11 +62,21 @@ class CMF_Hydrogen_Environment_Resource_Language
 		$this->env			= $env;
 		$config				= $env->getConfig();
 
-		$this->filePath		= (string) $config->get( 'path.locales' );
-		$languages			= $config->has( 'locale.allowed' ) ? $config['locale.allowed'] : 'en';
-		$language			= $config->has( 'locale.default' ) ? $config['locale.default'] : 'en';
-		$this->languages	= explode( ',', $languages );
+		$this->filePath		= 'locales';															//  assume default folder name
+		if( $config->get( 'path.locales' ) )														//  a locales folder has been configured
+			$this->filePath	= $config->get( 'path.locales' );										//  take the configured folder name
+		if( !file_exists( $this->filePath ) )														//  locales folder is not existing
+			throw new RuntimeException( 'Locales folder is missing' );								//  quit with exception
 
+		if( $config->get( 'locale.allowed' ) )														//  allowed languages have been set
+			foreach( explode( ',', $config['locale.allowed'] ) as $nr => $language )				//  iterate extracted languages
+				$this->languages[]	= trim( $language );											//  save language without surrounding spaces
+
+		else																						//  otherwise scan locales folder
+			foreach( Folder_Lister::getFolderList( $this->filePath ) as $folder )					//  iterate found locale folders
+				$this->languages[]	= $folder->getFilename();										//  save locale folder as language
+		
+		$language			= $config->has( 'locale.default' ) ? $config['locale.default'] : 'en';
 
 		if( $this->env->has( 'session' ) )
 		{
