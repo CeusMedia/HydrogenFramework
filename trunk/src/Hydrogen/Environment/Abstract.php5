@@ -55,7 +55,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	public static $configFile				= "config.ini.inc";
 
 	/**	@var	CMF_Hydrogen_Environment_Resource_Module_Library_Local	$modules	Handler for local modules */
-	protected $modules						= NULL;
+	protected $modules						= array();
 	/**	@var	array						$options		Set options to override static properties */
 	protected $options						= array();
 	/**	@var	string						$path			Absolute folder path of application */
@@ -212,6 +212,9 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 
 		$data			= parse_ini_file( $configFile, FALSE );										//  parse configuration file (without section support)
 
+		$configHost	= 'config/'.getEnv( 'HTTP_HOST' ).'.ini';
+		if( file_exists( $configHost ) )
+			$data	= array_merge( $data, parse_ini_file( $configHost, FALSE ) );
 		foreach( $data as $key => $value ){															//  iterate config pairs for evaluation
 			$data[$key]	= trim( $value );															//  trim value string
 			if( in_array( strtolower( $data[$key] ), array( "yes", "ja" ) ) )						//  value *means* yes
@@ -238,6 +241,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 #		$modules		= $this->modules->getInstalled();
 		$this->modules	= new CMF_Hydrogen_Environment_Resource_Module_Library_Local( $this );
 		$modules		= $this->modules->getAll();
+		$public			= explode( ',', $this->config->get( 'module.acl.public' ) );					//  get current public link list
 		foreach( $modules as $moduleId => $module ){
 			
 			$prefix	= 'module.'.strtolower( $moduleId );											//  build config key prefix of module
@@ -251,7 +255,6 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 					$this->config->set( $prefix.'.'.$key, $value );									//  
 			}
 			
-			$public	= explode( ',', $this->config->get( 'module.acl.public' ) );					//  get current public link list
 			foreach( $module->links as $link ){														//  iterate module links
 				if( $link->access == "public" ){													//  link is public
 					$path	= str_replace( '/', '_', $link->path );									//  get link path
@@ -259,8 +262,8 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 						$public[]	= $path;														//  add link to public link list
 				}
 			}
-			$this->config->set( 'module.acl.public', implode( ',', $public ) );						//  save public link list
 		}
+		$this->config->set( 'module.acl.public', implode( ',', $public ) );						//  save public link list
 	}
 
 	public function offsetExists( $key )
