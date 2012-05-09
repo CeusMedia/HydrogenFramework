@@ -15,11 +15,11 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydr
 		$this->path		= $env->path.$this->path;
 		if( !file_exists( $this->path ) )
 			return;
-		$index	= new File_RegexFilter( $this->path, '/^[a-z_]+\.xml$/i' );
+		$index	= new File_RegexFilter( $this->path, '/^[a-z0-9_]+\.xml$/i' );
 		foreach( $index as $entry ){
 			$moduleId		= preg_replace( '/\.xml$/i', '', $entry->getFilename() );
 			$moduleFile		= $this->path.$moduleId.'.xml';
-			$module			= CMF_Hydrogen_Environment_Resource_Module_Reader::load( $moduleFile );
+			$module			= CMF_Hydrogen_Environment_Resource_Module_Reader::load( $moduleFile, $moduleId );
 			$module->source	= 'local';
 			$module->id		= $moduleId;
 			$module->versionInstalled	= $module->version;

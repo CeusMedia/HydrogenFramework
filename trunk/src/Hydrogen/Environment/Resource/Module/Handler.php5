@@ -61,7 +61,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Handler{
 		}
 		if( !file_exists( $fileName ) )
 			throw new RuntimeException( 'Module "'.$moduleId.'" is not available in source "'.$sourceId.'"' );
-		return CMF_Hydrogen_Environment_Resource_Module_Reader::load( $fileName );
+		return CMF_Hydrogen_Environment_Resource_Module_Reader::load( $fileName, $moduleId );
 	}
 }
 ?>
