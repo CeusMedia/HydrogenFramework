@@ -50,6 +50,7 @@ class CMF_Hydrogen_Environment_Resource_Database_PDO extends Database_PDO_Connec
 	protected function setUp()
 	{
 		$config			= $this->env->getConfig();
+		
 		$driver			= $config->get( 'database.driver' );
 		$host			= $config->get( 'database.host' );
 		$port			= $config->get( 'database.port' );
@@ -59,7 +60,7 @@ class CMF_Hydrogen_Environment_Resource_Database_PDO extends Database_PDO_Connec
 		$prefix			= $config->get( 'database.prefix' );
 		$logfile		= $config->get( 'database.log' );
 #		$lazy			= $config->get( 'database.lazy' );
-		$charset		= $config->get( 'database.charset' );
+#		$charset		= $config->get( 'database.charset' );
 		$logStatements	= $config->get( 'database.log.statements' );
 		$logErrors		= $config->get( 'database.log.errors' );
 
@@ -76,16 +77,24 @@ class CMF_Hydrogen_Environment_Resource_Database_PDO extends Database_PDO_Connec
 		if( $password )
 			$dsn->setPassword( $password );
 
-		$driverOptions	= array();																	// to be implemented
+		//  --  DATABASE OPTIONS  --  //
+		$driverOptions	= array();																	//  @todo: to be implemented
+		foreach( $config->getAll( 'database.option.' ) as $key => $value ){							//  iterate all database options
+			if( !defined( "PDO::".$key ) )															//  no PDO constant for for option key
+				throw new InvalidArgumentException( 'Unknown constant PDO::'.$key );				//  quit with exception
+			if( is_string( $value ) && preg_match( "/^[A-Z][A-Z0-9_:]+$/", $value ) )				//  option value is a constant name
+				$value	= constant( $value );														//  replace option value string by constant value 
+			$driverOptions[constant( "PDO::".$key )]	= $value;									//  note option
+		}
 
-		parent::__construct( $dsn, $username, $password, $driverOptions );
+		parent::__construct( $dsn, $username, $password, $driverOptions );							//  connect to database
+
 		if( $logStatements )
 			$this->setStatementLogFile( $config->get( 'path.logs' ).$logStatements );
 		if( $logErrors )
 			$this->setErrorLogFile( $config->get( 'path.logs' ).$logErrors );
-
-#		if( $charset )
-#			$this->exec( "SET NAMES '".$charset."';" );
+#		if( $charset && $this->driver == 'mysql' )													//  a character set is configured on a MySQL database
+#			$this->exec( "SET NAMES '".$charset."';" );												//  set character set
 	}
 
 	public function tearDown(){}
