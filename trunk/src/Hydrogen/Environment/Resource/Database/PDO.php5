@@ -77,9 +77,19 @@ class CMF_Hydrogen_Environment_Resource_Database_PDO extends Database_PDO_Connec
 		if( $password )
 			$dsn->setPassword( $password );
 
+		$defaultOptions	= array(
+			'ATTR_PERSISTENT'				=> TRUE,
+			'ATTR_ERRMODE'					=> "PDO::ERRMODE_EXCEPTION",
+			'ATTR_DEFAULT_FETCH_MODE'		=> "PDO::FETCH_OBJ",
+			'ATTR_CASE'						=> "PDO::CASE_NATURAL",
+			'MYSQL_ATTR_USE_BUFFERED_QUERY'	=> TRUE,
+			'MYSQL_ATTR_INIT_COMMAND'		=> "SET NAMES 'utf8';",
+		);
+		$options	= $config->getAll( 'database.option.' ) + $defaultOptions;
+		
 		//  --  DATABASE OPTIONS  --  //
 		$driverOptions	= array();																	//  @todo: to be implemented
-		foreach( $config->getAll( 'database.option.' ) as $key => $value ){							//  iterate all database options
+		foreach( $options as $key => $value ){														//  iterate all database options
 			if( !defined( "PDO::".$key ) )															//  no PDO constant for for option key
 				throw new InvalidArgumentException( 'Unknown constant PDO::'.$key );				//  quit with exception
 			if( is_string( $value ) && preg_match( "/^[A-Z][A-Z0-9_:]+$/", $value ) )				//  option value is a constant name
