@@ -158,9 +158,9 @@ class CMF_Hydrogen_Environment_Resource_Language
 	 */
 	public function getSection( $topic, $section, $strict = TRUE, $force = TRUE )
 	{
-		$topic	= $this->getWords( $topic, $strict, $force );
-		if( isset( $topic[$section] ) )
-			return $topic[$section];
+		$sections	= $this->getWords( $topic, $strict, $force );
+		if( isset( $sections[$section] ) )
+			return $sections[$section];
 		$message	= 'Invalid language section "'.$section.'" in topic "'.$topic.'"';
 		if( $strict )
 			throw new RuntimeException( $message, 221 );
@@ -168,7 +168,7 @@ class CMF_Hydrogen_Environment_Resource_Language
 			$this->env->getMessenger()->noteFailure( $message );
 		return array();
 	}
-	
+
 	/**
 	 *	Returns File Name of Language Topic.
 	 *	@access		protected
@@ -191,9 +191,20 @@ class CMF_Hydrogen_Environment_Resource_Language
 	public function load( $topic, $strict = FALSE, $force = FALSE )
 	{
 		$fileName	= $this->getFilenameOfLanguage( $topic );
-		if( file_exists( $fileName ) )
+		$reader		= new File_Reader($fileName);
+		if( $reader->exists() )
 		{
-			$data	= parse_ini_file( $fileName, TRUE );
+			$data	= FALSE;
+			$string	= $reader->readString();
+			if( !preg_match( '/".+;"/U', $string ) ){
+				$data	= @parse_ini_string( $string, TRUE, INI_SCANNER_RAW );
+				if( $data !== FALSE )
+					foreach( $data as $section => $pairs )
+						foreach( $pairs as $key => $value )
+							$data[$section][$key]	= preg_replace( '/^"(.*)"\s*$/', '\\1', $value );
+			}
+			if( $data === FALSE )
+				$data	= File_INI_Reader::load( $fileName, TRUE );
 			$this->data[$topic]	= $data;
 		}
 		else
