@@ -43,7 +43,7 @@ class CMF_Hydrogen_View
 {
 	/**	@var		array						$data			Collected Data for View */
 	protected $data			= array();
-	/**	@var		CMF_Hydrogen_Environment	$env			Environment Object */
+	/**	@var		CMF_Hydrogen_Environment_Web	$env			Environment Object */
 	protected $env;
 	/**	@var		string						$controller		Name of called Controller */
 	protected $controller	= NULL;
