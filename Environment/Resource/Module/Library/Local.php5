@@ -18,7 +18,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *	@category		cmFrameworks
- *	@package		Hydrogen.Environment.Resource.Module
+ *	@package		Hydrogen.Environment.Resource.Module.Library
  *	@author			Christian Würker <christian.wuerker@ceus-media.de>
  *	@copyright		2012 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -29,7 +29,7 @@
 /**
  *	Handler for local module library.
  *	@category		cmFrameworks
- *	@package		Hydrogen.Environment.Resource.Module
+ *	@package		Hydrogen.Environment.Resource.Module.Library
  *	@implements		CMF_Hydrogen_Environment_Resource_Module_Library
  *	@author			Christian Würker <christian.wuerker@ceus-media.de>
  *	@copyright		2012 Christian Würker

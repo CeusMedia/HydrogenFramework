@@ -21,7 +21,7 @@
  *	@package		Hydrogen.Environment.Resource
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2010-2012 Ceus Media
- *	@version		$Id: TokenStore.php 1670 2010-11-08 12:15:43Z christian.wuerker $
+ *	@version		$Id$
  */
 /**
  *	Token Store.
@@ -30,7 +30,7 @@
  *	@package		Hydrogen.Environment.Resource
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2010-2012 Ceus Media
- *	@version		$Id: TokenStore.php 1670 2010-11-08 12:15:43Z christian.wuerker $
+ *	@version		$Id$
  */
 class CMF_Hydrogen_Environment_Resource_TokenStore {
 
