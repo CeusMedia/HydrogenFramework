@@ -114,7 +114,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 			$path		= $link->hasAttribute( 'path' ) ? $link->getAttribute( 'path' ) : $label;
 			$rank		= $link->hasAttribute( 'rank' ) ? (int) $link->getAttribute( 'rank' ) : 10;
 			$parent		= $link->hasAttribute( 'parent' ) ? $link->getAttribute( 'parent' ) : NULL;
-			$link		= $link->hasAttribute( 'link' ) ? $link->getAttribute( 'link' ) : $path;
+			$link		= $link->hasAttribute( 'link' ) ? $link->getAttribute( 'link' ) : '';
 			$obj->links[]	= (object) array(
 				'parent'	=> $parent,
 				'access'	=> $access,

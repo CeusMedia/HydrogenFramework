@@ -83,6 +83,7 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 
 	/**
 	 *	Indicates whether access to a controller action is allowed for role of current user.
+	 *	Needs session resource. Works only if user is logged and assigned role is existing.
 	 *	@access		public
 	 *	@param		integer		$roleId			Role ID
 	 *	@param		string		$controller		Name of controller
@@ -91,7 +92,9 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 	 */
 	public function has( $controller = 'index', $action = 'index' ){
 		$roleId	= $this->env->getSession()->get( 'roleId' );
-		return $this->hasRight( $roleId, $controller, $action ) > 0;
+		$right	= $this->hasRight( $roleId, $controller, $action );
+#		remark( 'Controller: '.$controller.' | Action: '.$action.' | Right: '.$right );
+		return $right > 0;
 	}
 
 	/**
@@ -136,14 +139,16 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 	 */
 	public function hasRight( $roleId, $controller = 'index', $action = 'index' )
 	{
-#		remark( 'Role: '.$roleId );
-#		remark( 'Public' );
-#		print_m( $this->linksPublic );
-#		remark( 'Public Outside' );
-#		print_m( $this->linksPublicOutside );
-#		remark( 'Public Inside' );
-#		print_m( $this->linksPublicInside );
-#		die;
+		if( 0 ){
+			remark( 'Role: '.$roleId );
+			remark( 'Public' );
+			print_m( $this->linksPublic );
+			remark( 'Public Outside' );
+			print_m( $this->linksPublicOutside );
+			remark( 'Public Inside' );
+			print_m( $this->linksPublicInside );
+			die;
+		}
 		
 		$linkPath	= $controller.'_'.$action;
 		if( in_array( $linkPath, $this->linksPublic ) )
