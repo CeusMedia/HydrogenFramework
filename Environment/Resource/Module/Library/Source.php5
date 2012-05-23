@@ -2,7 +2,7 @@
 /**
  *	Handler for module source library. Can read local folder or HTTP resource.
  *
- *	Copyright (c) 2012 Christian Würker (ceus-media.de)
+ *	Copyright (c) 2012 Christian Würker (ceusmedia.com)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -18,8 +18,8 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *	@category		cmFrameworks
- *	@package		Hydrogen.Environment.Resource.Module
- *	@author			Christian Würker <christian.wuerker@ceus-media.de>
+ *	@package		Hydrogen.Environment.Resource.Module.Library
+ *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2012 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
@@ -29,13 +29,13 @@
 /**
  *	Handler for module source library.
  *	@category		cmFrameworks
- *	@package		Hydrogen.Environment.Resource.Module
+ *	@package		Hydrogen.Environment.Resource.Module.Library
  *	@implements		CMF_Hydrogen_Environment_Resource_Module_Library
  *	@uses			CMF_Hydrogen_Environment_Resource_Module_Reader
  *	@uses			File_RecursiveNameFilter
  *	@uses			Net_HTTP_Request_Sender
  *	@uses			Net_Reader
- *	@author			Christian Würker <christian.wuerker@ceus-media.de>
+ *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2012 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/

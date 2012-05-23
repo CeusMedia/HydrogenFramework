@@ -3,7 +3,7 @@
  *	Builds Language Menu using Tree Menu and CSS only.
  *	@category		cmFrameworks
  *	@package		Hydrogen.View.Helper
- *	@author			Christian Würker <christian.wuerker@ceus-media.de>
+ *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@since			01.02.2009
  *	@version		0.2
  *	@version		$Id$
@@ -14,7 +14,7 @@
  *	@package		Hydrogen.View.Helper
  *	@extends		CMF_Hydrogen_View_Helper_Abstract
  *	@uses			UI_HTML_CSS_LinkSelect
- *	@author			Christian Würker <christian.wuerker@ceus-media.de>
+ *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@since			01.02.2009
  *	@version		$Id$
  */
