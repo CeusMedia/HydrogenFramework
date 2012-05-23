@@ -1,8 +1,8 @@
 <?php
 /**
- *	Interface for view helpers.
+ *	Interface for module libraries.
  *
- *	Copyright (c) 20010-2012 Christian Würker (ceus-media.de)
+ *	Copyright (c) 2012 Christian Würker (ceusmedia.com)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -18,30 +18,30 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *	@category		cmFrameworks
- *	@package		Hydrogen.View
- *	@author			Christian Würker <christian.wuerker@ceus-media.de>
- *	@copyright		2010-2012 Christian Würker
+ *	@package		Hydrogen.Environment.Resource.Module
+ *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
+ *	@copyright		2012 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
- *	@since			0.3
+ *	@since			0.6
  *	@version		$Id$
  */
 /**
- *	Interface for view helpers.
- *
+ *	Interface for module libraries.
  *	@category		cmFrameworks
- *	@package		Hydrogen.View
- *	@author			Christian Würker <christian.wuerker@ceus-media.de>
- *	@copyright		2010-2012 Christian Würker
+ *	@package		Hydrogen.Environment.Resource.Module
+ *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
+ *	@copyright		2012 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
- *	@since			0.3
+ *	@since			0.6
  *	@version		$Id$
- */
-interface CMF_Hydrogen_View_Helper
-{
-	public function hasEnv();
-	public function needsEnv();
-	public function setEnv( CMF_Hydrogen_Environment $env );
+*/
+interface CMF_Hydrogen_Environment_Resource_Module_Library{
+
+	public function get( $moduleId );
+	public function getAll();
+	public function has( $moduleId );
+	public function scan();
 }
 ?>

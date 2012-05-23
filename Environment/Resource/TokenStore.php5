@@ -1,18 +1,35 @@
 <?php
 /**
  *	Token Store.
- *	@category		cmApps
- *	@package		Chat.Server.Resource
+ *
+ *	Copyright (c) 2010-2012 Christian Würker (ceus-media.de)
+ *
+ *	This program is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU General Public License as published by
+ *	the Free Software Foundation, either version 3 of the License, or
+ *	(at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU General Public License for more details.
+ *
+ *	You should have received a copy of the GNU General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *	@category		cmFrameworks
+ *	@package		Hydrogen.Environment.Resource
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2010 Ceus Media
+ *	@copyright		2010-2012 Ceus Media
  *	@version		$Id: TokenStore.php 1670 2010-11-08 12:15:43Z christian.wuerker $
  */
 /**
  *	Token Store.
- *	@category		cmApps
- *	@package		Chat.Server.Resource
+ *
+ *	@category		cmFrameworks
+ *	@package		Hydrogen.Environment.Resource
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2010 Ceus Media
+ *	@copyright		2010-2012 Ceus Media
  *	@version		$Id: TokenStore.php 1670 2010-11-08 12:15:43Z christian.wuerker $
  */
 class CMF_Hydrogen_Environment_Resource_TokenStore {
@@ -109,4 +126,3 @@ class CMF_Hydrogen_Environment_Resource_TokenStore {
 	}
 }
 ?>
-

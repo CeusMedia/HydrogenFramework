@@ -18,7 +18,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *	@category		cmFrameworks
- *	@package		Hydrogen.Resource
+ *	@package		Hydrogen.Environment.Resource
  *	@author			Christian Würker <christian.wuerker@ceus-media.de>
  *	@copyright		2007-2010 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -29,7 +29,7 @@
 /**
  *	Setup for Resource Environment for Hydrogen Applications.
  *	@category		cmFrameworks
- *	@package		Hydrogen.Resource
+ *	@package		Hydrogen.Environment.Resource
  *	@abstract		Must be extended for application needs.
  *	@implements		CMF_Hydrogen_Environment
  *	@implements		ArrayAccess
