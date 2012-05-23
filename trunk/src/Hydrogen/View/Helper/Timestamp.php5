@@ -2,17 +2,19 @@
 class CMF_Hydrogen_View_Helper_Timestamp extends CMF_Hydrogen_View_Helper_Abstract{
 
 	protected $timestamp			= NULL;
+	protected $stringEmpty			= "";
 	public static $formatDatetime	= 'Y-m-d H:i:s';
 	public static $formatDate		= 'Y-m-d';
 	public static $formatTime		= 'H:i:s';
 
-	public function __construct( $timestamp ){
+	public function __construct( $timestamp, $stringEmpty = "---" ){
 		$this->timestamp	= $timestamp;
+		$this->stringEmpty	= $stringEmpty;
 	}
 
 	public function toDatetime( $format = NULL, $html = FALSE ){
 		if( !$this->timestamp )
-			return '-';
+			return $this->stringEmpty;
 		$format	= $format ? $format : self::$formatDatetime;
 		$date	= date( $format, $this->timestamp );
 		if( $html ){
