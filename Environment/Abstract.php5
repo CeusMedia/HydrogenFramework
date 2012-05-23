@@ -107,7 +107,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	/**
 	 *	Initialize remote access control list.
 	 *	@access		public
-	 *	@return		void
+	 *	@return		CMF_Hydrogen_Environment_Resource_Acl_Abstract	Instance of access control list object
 	 */
 	public function getAcl()
 	{
