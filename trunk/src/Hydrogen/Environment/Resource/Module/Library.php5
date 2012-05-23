@@ -36,7 +36,7 @@
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.6
  *	@version		$Id$
-*/
+ */
 interface CMF_Hydrogen_Environment_Resource_Module_Library{
 
 	public function get( $moduleId );

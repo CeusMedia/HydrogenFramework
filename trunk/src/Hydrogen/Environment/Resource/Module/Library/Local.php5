@@ -54,9 +54,9 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydr
 	}
 
 	public function get( $moduleId ){
-		if( $this->has( $moduleId ) )
-			return $this->modules[$moduleId];
-		throw new RuntimeException( 'Module "'.$moduleId.'" is not installed' );
+		if( !$this->has( $moduleId ) )
+			throw new RuntimeException( 'Module "'.$moduleId.'" is not installed' );
+		return $this->modules[$moduleId];
 	}
 
 	public function getAll(){
@@ -75,6 +75,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydr
 			$moduleId		= preg_replace( '/\.xml$/i', '', $entry->getFilename() );
 			$moduleFile		= $this->path.$moduleId.'.xml';
 			$module			= CMF_Hydrogen_Environment_Resource_Module_Reader::load( $moduleFile, $moduleId );
+			$module->uri	= $moduleFile;
 			$module->source	= 'local';
 			$module->id		= $moduleId;
 			$module->versionInstalled	= $module->version;
