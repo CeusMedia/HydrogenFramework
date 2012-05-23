@@ -2,7 +2,7 @@
 /**
  *	Application class for a MVC web site.
  *
- *	Copyright (c) 2007-2010 Christian Würker (ceus-media.de)
+ *	Copyright (c) 2007-2012 Christian Würker (ceus-media.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,22 +20,22 @@
  *	@category		cmFrameworks
  *	@package		Hydrogen.Application.Web
  *	@author			Christian Würker <christian.wuerker@ceus-media.de>
- *	@copyright		2007-2010 Christian Würker
+ *	@copyright		2007-2012 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.1
- *	@version		$Id: Application.php5 99 2010-09-24 05:48:59Z christian.wuerker $
+ *	@version		$Id$
  */
 /**
  *	Application class for a MVC web site.
  *	@category		cmFrameworks
  *	@package		Hydrogen.Application.Web
  *	@author			Christian Würker <christian.wuerker@ceus-media.de>
- *	@copyright		2007-2010 Christian Würker
+ *	@copyright		2007-2012 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.1
- *	@version		$Id: Application.php5 99 2010-09-24 05:48:59Z christian.wuerker $
+ *	@version		$Id$
  *	@todo			Code Documentation
  */
 class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abstract

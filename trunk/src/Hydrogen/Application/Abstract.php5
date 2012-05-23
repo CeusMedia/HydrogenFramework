@@ -24,7 +24,7 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.1
- *	@version		$Id: Application.php5 99 2010-09-24 05:48:59Z christian.wuerker $
+ *	@version		$Id$
  */
 /**
  *	Base application class for Hydrogen application.
@@ -36,7 +36,7 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.1
- *	@version		$Id: Application.php5 99 2010-09-24 05:48:59Z christian.wuerker $
+ *	@version		$Id$
  *	@todo			Code Documentation
  */
 abstract class CMF_Hydrogen_Application_Abstract{
