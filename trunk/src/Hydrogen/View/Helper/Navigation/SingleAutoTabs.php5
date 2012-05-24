@@ -87,7 +87,8 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAutoTabs extends CMF_Hydrogen_Vi
 			$class	= 'ui-state-default '.$cornerTabs.' access-'.$link->access;
 			$class	.= $active == $link->path ? ' ui-tabs-selected ui-state-active' : '';
 			$label	= $link->label;
-			$anchor	= UI_HTML_Tag::create( 'a', $label, array( 'href' => './'.$link->link ) );
+			$uri	= $link->link ? $link->link : $link->path;
+			$anchor	= UI_HTML_Tag::create( 'a', $label, array( 'href' => './'.$uri ) );
 			$item	= UI_HTML_Tag::create( 'li', $anchor, array( 'class' => $class ) );
 			if( !isset( $rankedLinkItemList[$link->rank] ) )
 				$rankedLinkItemList[$link->rank]	= array();
