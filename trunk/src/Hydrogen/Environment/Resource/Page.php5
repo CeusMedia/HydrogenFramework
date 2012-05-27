@@ -39,12 +39,16 @@
  */
 class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 {
+	/**	@var	CMF_Hydrogen_Environment_Abstract		$env			Environment object */
+	public $env;
 	protected $packJavaScripts	= FALSE;
 	protected $packStyleSheets	= FALSE;
 	protected $pathPrimer;
 	protected $pathTheme;
+	/**	@var		CMM_TEA_Factory						$tea			Instance of TEA (Template Engine Abstraction) Factory (from cmModules) OR empty if TEA is not available */
+	public $tea					= NULL;
 
-	/**	@var	CMF_Hydrogen_View_Helper_JavaScript		$js		JavaScript Collector Helper */
+	/**	@var	CMF_Hydrogen_View_Helper_JavaScript		$js				JavaScript Collector Helper */
 	public $js;
 	
 	public function __construct( CMF_Hydrogen_Environment_Abstract $env )
@@ -117,6 +121,7 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 				}
 			}
 		}
+		$modules->callHook( 'Page', 'applyModules', $this );
 		$this->addHead( '<script type="text/javascript">var config = '.json_encode( $listConfig ).';</script>' );
 	}
 

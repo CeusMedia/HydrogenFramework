@@ -41,6 +41,7 @@
  */
 class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydrogen_Environment_Resource_Module_Library{
 
+	protected $env;
 	protected $modules		= array();
 
 	public function __construct( CMF_Hydrogen_Environment_Abstract $env ){
@@ -51,6 +52,34 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydr
 			$this->path	= $config->get( 'path.module.config' );
 		$this->path		= $env->path.$this->path;
 		$this->scan();
+	}
+
+	public function callHook( $resource, $event, $context, $arguments = array() ){
+		$count	= 0;
+		foreach( $this->modules as $module ){
+			if( empty( $module->hooks[$resource][$event] ) )
+				continue;
+			$function = create_function( '$module, $context', $module->hooks[$resource][$event]
+			);
+			try{
+				$count++;
+				ob_start();
+				call_user_func_array( $function, array( $module, $context ) + $arguments );
+				$stdout	= ob_get_clean();
+				if( strlen( $stdout ) )
+					if( $this->env->has( 'messenger' ) )
+						$this->env->getMessenger()->noteNotice( 'Call on event '.$event.'@'.$resource.' hooked by module '.$module->id.' reported: '.$stdout );
+					else
+						throw new RuntimeException( $stdout );
+			}
+			catch( Exception $e ){
+				if( $this->env->has( 'messenger' ) )
+					$this->env->getMessenger()->noteFailure( 'Call on event '.$event.'@'.$resource.' hooked by module '.$module->id.' failed: '.$e->getMessage() );
+				else
+					throw new RuntimeException( 'Hook '.$module->id.'::'.$resource.'@'.$event.' failed', 0, $e );
+			}
+		}
+		return $count;
 	}
 
 	public function get( $moduleId ){
@@ -66,7 +95,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydr
 	public function has( $moduleId ){
 		return array_key_exists( $moduleId, $this->modules );
 	}
-
+	
 	public function scan(){
 		if( !file_exists( $this->path ) )
 			return;

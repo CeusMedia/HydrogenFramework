@@ -162,7 +162,7 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 		$response	= $reader->get( $url, $headers, $options );
 		$json		= $response->getBody();
 
-		$statusCode	= $reader->getCurlInfo( Net_CURL::STATUS_HTTP_CODE );
+		$statusCode	= $reader->getCurlInfo( Net_CURL::INFO_HTTP_CODE );
 		$logPath	= $this->env->config->get( 'path.logs' );
 		$logFile	= $this->env->config->get( 'server.log' );
 		if( $logFile )
@@ -214,7 +214,7 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 		$response	= $reader->post( $url, $data, $headers, $options );
 		$json		= $response->getBody();
 
-		$statusCode	= $reader->getCurlInfo( Net_CURL::STATUS_HTTP_CODE );
+		$statusCode	= $reader->getCurlInfo( Net_CURL::INFO_HTTP_CODE );
 		$logPath	= $this->env->config->get( 'path.logs' );
 		$logFile	= $this->env->config->get( 'server.log' );
 		if( $logFile )
