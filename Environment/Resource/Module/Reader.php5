@@ -68,6 +68,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 		$obj->relations->supports	= array();
 		$obj->sql					= array();
 		$obj->links					= array();
+		$obj->hooks					= array();
 		
 		$map	= array(
 			'class'		=> 'classes',
@@ -164,6 +165,13 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 			);
 			(string) $link;
 		}
+
+		foreach( $xml->hook as $hook ){
+			$resource	= $hook->getAttribute( 'resource' );
+			$event		= $hook->getAttribute( 'event' );
+			$obj->hooks[$resource][$event]	= (string) $hook;
+		}
+
 		return $obj;
 	}
 }

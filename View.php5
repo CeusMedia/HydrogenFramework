@@ -55,7 +55,9 @@ class CMF_Hydrogen_View
 	protected $time;
 	/**	@var		string						$html			Instance of HTML library class */
 	protected $html;
-
+	/**	@var		CMM_TEA_Factory				$tea			Instance of TEA (Template Engine Abstraction) Factory (from cmModules) OR empty if TEA is not available */
+	protected $tea			= NULL;
+	
 	/**
 	 *	Constructor.
 	 *	@access		public
@@ -68,6 +70,22 @@ class CMF_Hydrogen_View
 		$this->html		= new UI_HTML_Elements;
 		$this->time		= new Alg_Time_Converter();
 		$this->helpers	= new ADT_List_Dictionary;
+		
+/*		if( class_exists( 'CMM_TEA_Factory' ) ){
+			
+			$config	= 'config/TEA.ini';
+			if( !file_exists( 'config/TEA.ini' ) )
+				$config	= array( 'CMC' => array( 'active' => TRUE ) );
+			$this->tea		= new CMM_TEA_Factory( $config );
+			$this->tea->setDefaultType( 'PHP' );
+#			$this->tea->hasEngine( 'STE' ){
+				$this->tea->setDefaultType( 'STE' );
+				CMM_STE_Template::addPlugin( new CMM_STE_Plugin_Comments() );
+#			}
+			$this->tea->setTemplatePath( '' );
+			$this->tea->setCachePath( 'tmp/cache/templates/' );
+			$this->tea->setCompilePath( 'tmp/cache/templates_c/' );
+		}*/
 		$this->__onInit();
 	}
 
@@ -176,15 +194,24 @@ class CMF_Hydrogen_View
 		return $this->loadContentFile( $fileKey, $data );
 	}
 
+	/**
+	 *	@todo	remove use of UI_Template 
+	 */
 	public function loadContentFile( $fileKey, $data = array(), $path = NULL )
 	{
-		if( !is_array( $data ) )
-			$data	= array();
-		if( !$this->hasContentFile( $fileKey, $path ) )
-			throw new RuntimeException( 'Locale content file "'.$fileKey.'" is missing.', 321 );
-		$uri	= $this->getContentUri( $fileKey, $path );
+		if( !is_array( $data ) )																	//  no data given
+			$data	= array();																		//  ensure empty array
+		$uri	= $this->getContentUri( $fileKey, $path );											//  calculate file pathname
+		if( !file_exists( $uri ) )																	//  content file is not existing
+			throw new RuntimeException( 'Locale content file "'.$fileKey.'" is missing.', 321 );	//  throw exception
 //		$data	= array_merge( $this->data, $data );
-		return UI_Template::render( $uri, $data );
+		if( $this->env->getPage()->tea ){															//  template engine abstraction is enabled
+			$this->env->getPage()->tea->setDefaultType( 'STE' );									//  
+			$template	= $this->env->getPage()->tea->getTemplate( $uri );							//  create template object for content file
+			$template->setData( $data );															//  set given data
+			return $template->render();																//  render template and return content
+		}
+		return UI_Template::render( $uri, $data );													//  render template with simple integrated but soon deprecated template engine
 	}
 
 	/**
@@ -210,31 +237,49 @@ class CMF_Hydrogen_View
 		if( !file_exists( $uri ) )
 			throw new RuntimeException( 'Template "'.$fileName.'" is not existing', 311 );
 
-		$content	= '';
-		ob_start();
-		$config		= $___config	= $this->env->getConfig();
-		$request	= $___request	= $this->env->getRequest();
-		$session	= $___session	= $this->env->getSession();
-		$___data	= $data;
-		extract( $this->data );
-		extract( $___data );
-		$helpers	= $this->helpers;
-		$result		= require( $uri );
-		$buffer		= ob_get_clean();
-		$content	= $result;
-		if( trim( $buffer ) )
-		{
-			if( !is_string( $content ) )
-				$content	= $buffer;
-			else if( $this->env->getMessenger() )
-				$this->env->getMessenger()->noteFailure( nl2br( $buffer ) );
-			else
-				throw new RuntimeException( $buffer );
+		if( $this->env->getPage()->tea ){
+			$data['this']		= $this;															//  
+			$data['view']		= $this;															//  
+			$data['env']		= $this->env;														//  
+			$data['config']		= $this->env->getConfig();											//  
+			$data['request']	= $this->env->getRequest();											//  
+			$data['session']	= $this->env->getSession();											//  
+			$data['helpers']	= $this->helpers;													//  
+			$data	+= $this->data;																	//  
+			$this->env->getPage()->tea->setDefaultType( 'PHP' );									//  
+			$template	= $this->env->getPage()->tea->getTemplate( $uri );							//  
+			$template->setData( $data );															//  
+			return $template->render();																//  
+		}
+		else{
+			$content	= '';
+			ob_start();
+			$view		= $___view		= $this;													//  
+			$env		= $___env		= $this->env;												//  
+			$config		= $___config	= $this->env->getConfig();									//  
+			$request	= $___request	= $this->env->getRequest();									//  
+			$session	= $___session	= $this->env->getSession();									//  
+			$___data	= $data;																	//  
+			extract( $this->data );																	//  
+			extract( $___data );																	//  
+			$helpers	= $this->helpers;															//  
+			$result		= require( $uri );															//  
+			$buffer		= ob_get_clean();															//  
+			$content	= $result;
+			if( trim( $buffer ) )
+			{
+				if( !is_string( $content ) )
+					$content	= $buffer;
+				else if( $this->env->getMessenger() )
+					$this->env->getMessenger()->noteFailure( nl2br( $buffer ) );
+				else
+					throw new RuntimeException( $buffer );
+			}
 		}
 		return $content;
 	}
 
-	protected function populateTexts( $keys, $path ){
+	public function populateTexts( $keys, $path ){
 		$list	= array();
 		foreach( $keys as $key ){
 			$uri	= $path.$key.'.html';
