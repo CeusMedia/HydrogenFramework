@@ -108,6 +108,13 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydr
 			$module->source	= 'local';
 			$module->id		= $moduleId;
 			$module->versionInstalled	= $module->version;
+
+			$icon	= $entry->getPath().'/'.$moduleId;
+			if( file_exists( $icon.'.png' ) )
+				$module->icon	= 'data:image/png;base64,'.base64_encode( File_Reader::load( $icon.'.png' ) );
+			else if( file_exists( $icon.'.ico' ) )
+				$module->icon	= 'data:image/ico;base64,'.base64_encode( File_Reader::load( $icon.'.ico' ) );
+			
 			$this->modules[$moduleId]	= $module;
 		}
 		ksort( $this->modules );
