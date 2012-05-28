@@ -40,6 +40,8 @@
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.1
  *	@version		$Id$
+ *	@todo			decide whether to use onInit or onLoad and remove the other
+ *	@todo		call to onInit is to soon of another environment is existing
  */
 abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environment, ArrayAccess
 {
@@ -65,6 +67,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	 *	Constructor, sets up Resource Environment.
 	 *	@access		public
 	 *	@return		void
+	 *	@todo		call to onInit is to soon of another environment is existing
 	 */
 	public function __construct( $options = array() )
 	{
@@ -73,8 +76,9 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$this->initClock();																			//  setup clock
 		$this->initConfiguration();																	//  setup configuration
 		$this->initModules();																		//  setup module support
+		$this->initDatabase();																		//  setup database connection
 		$this->onInit();																			//  
-		$this->onLoad();
+		$this->onLoad();																			//  @todo	remove call and method
 	}
 
 	public function onInit(){}
@@ -230,6 +234,20 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$this->config	= new ADT_List_Dictionary( $data );											//  create dictionary from array
 		if( $this->config->has( 'config.error.reporting' ) )										//  error reporting is defined
 			error_reporting( $this->config->get( 'config.error.reporting' ) );						//  set error reporting level
+	}
+
+	/**
+	 *	Sets up database support.
+	 *	@access		protected
+	 *	@todo		remove deprecation in 0.7.0
+	 *	@return		void
+	 */
+	protected function initDatabase()
+	{
+		$hasModule	= $this->getModules()->has( 'Database' );										//  module for database connection is enabled
+		$hasConfig	= $this->config->get( 'database.driver' );										//  database connection is configured in main config (deprecated)
+		if( $hasModule || $hasConfig )																//  database connection has been configured
+			$this->dbc	= new CMF_Hydrogen_Environment_Resource_Database_PDO( $this );				//  try to configure and connect database
 	}
 
 	protected function initDisclosure()
