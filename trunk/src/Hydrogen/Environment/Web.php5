@@ -76,7 +76,6 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 			parent::__construct( $options );
 			$this->initSession();																		//  --  SESSION HANDLING  --  //
 			$this->initMessenger();																		//  --  UI MESSENGER  --  //
-			$this->initDatabase();																		//  --  DATABASE CONNECTION  --  //
 			$this->initRequest();																		//  --  HTTP REQUEST HANDLER  --  //
 			$this->initResponse();																		//  --  HTTP RESPONSE HANDLER  --  //
 			$this->initRouter();																		//  --  HTTP REQUEST HANDLER  --  //
@@ -175,19 +174,6 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	public function getSession()
 	{
 		return $this->session;
-	}
-
-	/**
-	 *	Sets up database support.
-	 *	@todo		implement pdo driver options (in config also)
-	 */
-	protected function initDatabase()
-	{
-#		if( in_array( $this->config->get( 'database' ), array( '', 'no' ) ) )
-#			return;
-		if( !strlen( trim( $this->config->get( 'database.name' ) ) ) )								//  no database name configured
-			return;																					//  quit without database connect attempt
-		$this->dbc	= new CMF_Hydrogen_Environment_Resource_Database_PDO( $this );					//  try to configure and connect database
 	}
 
 /*	protected function initFieldDefinition()
