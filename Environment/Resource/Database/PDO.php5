@@ -47,34 +47,53 @@ class CMF_Hydrogen_Environment_Resource_Database_PDO extends Database_PDO_Connec
 		$this->setUp();
 	}
 
+	/**
+	 *	Sets up connection to database, if configured with database module or main config (deprecated).
+	 *
+	 *	Attention: If using MySQL and UTF-8 the charset must bet set after connection established.
+	 *	Therefore the option MYSQL_ATTR_INIT_COMMAND is set by default, which hinders lazy connection mode (which is not implemented yet).
+	 *	In future, having lazy mode, the config pair "charset" will be realized by implementing a statement queue, which is run before a lazy connection is used the first time.
+	 *
+	 *	Attention: Using statement log means that EVERY statement send to database will be logged.
+	 *	Applications with heavy database use will slow down and create large log files.
+	 *	Be sure to rotate the logs or remove them frequently to avoid low hard disk space.
+	 *	Disable this feature after development/debugging!
+	 *
+	 *	@todo		implement lazy mode
+	 *	@todo		0.7: clean deprecated code
+	 */
 	protected function setUp()
 	{
 		$config			= $this->env->getConfig();
+		if( $this->env->getModules()->has( 'Database' ) ){											//  module for database support is installed
+			extract( $config->getAll( 'module.database.access.' ) );								//  extract connection access configuration
+			$logStatements	= $config->get( 'module.database.log.statements' );						//  
+			$logErrors		= $config->get( 'module.database.log.errors' );							//  
+			$options		= $config->getAll( 'module.database.option.' );							//  get connection options
+		}
+		else{																						//  @deprecated	use database module instead
+			$dba	= array( 'driver', 'host', 'port', 'name', 'username', 'password', 'prefix' );	//  list of access configuration pair keys
+			foreach( $dba as $key )																	//  iterate keys
+				$$key	= $config->get( 'database.'.$key );											//  realize access configuration setting
+	#		$logfile		= $config->get( 'database.log' );										//  @deprecated
+	#		$lazy			= $config->get( 'database.lazy' );										//  @todo		implement
+	#		$charset		= $config->get( 'database.charset' );									//  @todo		implement, for lazy mode too
+			$logStatements	= $config->get( 'database.log.statements' );
+			$logErrors		= $config->get( 'database.log.errors' );
+			$options		= $config->getAll( 'database.option.' );
+		}
 		
-		$driver			= $config->get( 'database.driver' );
-		$host			= $config->get( 'database.host' );
-		$port			= $config->get( 'database.port' );
-		$name			= $config->get( 'database.name' );
-		$username		= $config->get( 'database.username' );
-		$password		= $config->get( 'database.password' );
-		$prefix			= $config->get( 'database.prefix' );
-		$logfile		= $config->get( 'database.log' );
-#		$lazy			= $config->get( 'database.lazy' );
-#		$charset		= $config->get( 'database.charset' );
-		$logStatements	= $config->get( 'database.log.statements' );
-		$logErrors		= $config->get( 'database.log.errors' );
-
 		if( empty( $driver ) )
 			throw new RuntimeException( 'Database driver must be set in config:database.driver' );
 
 		$dsn		= new Database_PDO_DataSourceName( $driver, $name );
-		if( $host )
+		if( !empty( $host ) )
 			$dsn->setHost( $host );
-		if( $port )
+		if( !empty( $port ) )
 			$dsn->setPort( $port );
-		if( $username )
+		if( !empty( $username ) )
 			$dsn->setUsername( $username );
-		if( $password )
+		if( !empty( $password ) )
 			$dsn->setPassword( $password );
 
 		$defaultOptions	= array(
@@ -85,7 +104,7 @@ class CMF_Hydrogen_Environment_Resource_Database_PDO extends Database_PDO_Connec
 			'MYSQL_ATTR_USE_BUFFERED_QUERY'	=> TRUE,
 			'MYSQL_ATTR_INIT_COMMAND'		=> "SET NAMES 'utf8';",
 		);
-		$options	= $config->getAll( 'database.option.' ) + $defaultOptions;
+		$options	+= $defaultOptions;
 		
 		//  --  DATABASE OPTIONS  --  //
 		$driverOptions	= array();																	//  @todo: to be implemented

@@ -70,20 +70,22 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 		$obj->links					= array();
 		$obj->hooks					= array();
 		
-		$map	= array(
-			'class'		=> 'classes',
-			'locale'	=> 'locales',
-			'template'	=> 'templates',
-			'style'		=> 'styles',
-			'script'	=> 'scripts',
-			'image'		=> 'images',
-		);
-		foreach( $map as $source => $target ){
-			foreach( $xml->files->$source as $file ){
-				$object	= (object) array( 'file' => (string) $file );
-				foreach( $file->getAttributes() as $key => $value )
-					$object->$key	= $value;
-				$obj->files->{$target}[]	= $object;
+		if( $xml->files ){
+			$map	= array(
+				'class'		=> 'classes',
+				'locale'	=> 'locales',
+				'template'	=> 'templates',
+				'style'		=> 'styles',
+				'script'	=> 'scripts',
+				'image'		=> 'images',
+			);
+			foreach( $map as $source => $target ){
+				foreach( $xml->files->$source as $file ){
+					$object	= (object) array( 'file' => (string) $file );
+					foreach( $file->getAttributes() as $key => $value )
+						$object->$key	= $value;
+					$obj->files->{$target}[]	= $object;
+				}
 			}
 		}
 
