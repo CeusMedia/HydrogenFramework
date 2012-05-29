@@ -47,12 +47,14 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 {
 	/** @var	CMF_Hydrogen_Environment_Resource_Acl_Abstract	$acl	Implementation of access control list */
 	protected $acl;
+	/**	@var	CMF_Hydrogen_Application	$application	Instance of Application */
+	protected $application;
 	/**	@var	Alg_Time_Clock				$clock			Clock Object */
 	protected $clock;
 	/**	@var	ADT_List_Dictionary			$config			Configuration Object */
 	protected $config;
-	/**	@var	CMF_Hydrogen_Application	$application	Instance of Application */
-	protected $application;
+	/**	@var	CMF_Hydrogen_Environment_Resource_Database_PDO	$dbc		Database Connection Object */
+	protected $dbc;
 	
 	public static $configFile				= "config.ini.inc";
 
@@ -131,6 +133,11 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	public function getConfig()
 	{
 		return $this->config;
+	}
+
+	public function getDatabase()
+	{
+		return $this->dbc;
 	}
 
 	public function getDisclosure()
