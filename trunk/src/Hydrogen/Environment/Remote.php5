@@ -38,30 +38,32 @@
  *	@since			0.1
  *	@version		$Id$
  *	@todo			is a web environment needed instead? try to avoid this - maybe a console messenger needs to be implemented therefore
+ *	@todo			finish path resolution (path is set twice at the moment)
  */
 class CMF_Hydrogen_Environment_Remote extends CMF_Hydrogen_Environment_Abstract {
 
+	/**	@var	boolean		$hasDatabase		Flag: indicates availability of a database connection */
 	public $hasDatabase		= FALSE;
 	
+	/**
+	 *	Constructor.
+	 *	@access		public
+	 *	@param		array		$options		Map of environment options
+	 *	@return		void
+	 */
 	public function __construct( $options ){
 		$this->options	= $options;
-		$this->path			= isset( $options['pathApp'] ) ? $options['pathApp'] : getCwd().'/';
-		$this->initClock();
+		$this->path		= isset( $options['pathApp'] ) ? $options['pathApp'] : getCwd().'/';
+
+		$this->initClock();																			//  setup clock
 #		$this->initMessenger();
-		$this->initConfiguration();
-		$this->initModules( $options['pathApp'] );
-	
-		try{
-			$hasModule	= $this->getModules()->has( 'Database' );
-			$hasConfig	= $this->config->get( 'database.driver' );
-			if( $hasModule || $hasConfig ){
-				$this->initDatabase();
-				$this->hasDatabase	= TRUE;
-			}
-		}
-		catch( Exception $e ){
-		}
-		$this->path	= $options['pathApp'];
+		$this->initConfiguration();																	//  setup configuration
+		$this->initModules( $options['pathApp'] );													//  setup module support
+		$this->initCache();																			//  setup cache support
+		$this->initDatabase();
+
+		$this->hasDatabase	= (bool) $this->dbc;													//  note if database is available
+		$this->path	= $options['pathApp'];															//  
 	}
 }
 ?>

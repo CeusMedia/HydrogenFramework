@@ -49,6 +49,8 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	protected $acl;
 	/**	@var	CMF_Hydrogen_Application	$application	Instance of Application */
 	protected $application;
+	/**	@var	CMM_SEA_Adapter_Interface	$cache		Instance of cache adapter */
+	protected $cache;
 	/**	@var	Alg_Time_Clock				$clock			Clock Object */
 	protected $clock;
 	/**	@var	ADT_List_Dictionary			$config			Configuration Object */
@@ -79,6 +81,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$this->initConfiguration();																	//  setup configuration
 		$this->initModules();																		//  setup module support
 		$this->initDatabase();																		//  setup database connection
+		$this->initCache();																			//  setup cache support
 		$this->onInit();																			//  
 		$this->onLoad();																			//  @todo	remove call and method
 	}
@@ -118,6 +121,10 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	public function getAcl()
 	{
 		return $this->acl;
+	}
+
+	public function getCache(){
+		return $this->cache;
 	}
 
 	public function getClock()
@@ -206,6 +213,23 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$this->acl->setPublicLinks( explode( ',', $config->get( 'module.acl.public' ) ) );
 		$this->acl->setPublicInsideLinks( explode( ',', $config->get( 'module.acl.inside' ) ) );
 		$this->acl->setPublicOutsideLinks( explode( ',', $config->get( 'module.acl.outside' ) ) );
+	}
+	
+	protected function initCache(){
+		$cache	= NULL;
+		if( class_exists( 'CMM_SEA_Factory' ) ){
+			$factory	= new CMM_SEA_Factory();
+			$cache		= $factory->newStorage( 'Noop' );
+			if( $this->modules->has( 'Resource_Cache' ) ){
+				$config		= (object) $this->config->getAll( 'module.resource_cache.' );
+				$type		= $config->type;
+				$resource	= $config->resource ? $config->resource : NULL;
+				$context	= $config->context ? $config->context : NULL;
+				$expiration	= $config->expiration ? (int) $config->expiration : 0;
+				$cache	= $factory->newStorage( $type, $resource, $context, $expiration );
+			}
+		}
+		$this->cache	= $cache;
 	}
 
 	protected function initClock()
