@@ -72,13 +72,13 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 		try
 		{
 			parent::__construct( $options );
-			$this->initSession();																	//  --  SESSION HANDLING  --  //
-			$this->initMessenger();																	//  --  UI MESSENGER  --  //
-			$this->initRequest();																	//  --  HTTP REQUEST HANDLER  --  //
-			$this->initResponse();																	//  --  HTTP RESPONSE HANDLER  --  //
-			$this->initRouter();																	//  --  REQUEST ROUTER  --  //
+			$this->initSession();																	//  setup session support
+			$this->initMessenger();																	//  setup user interface messenger
+			$this->initRequest();																	//  setup HTTP request handler
+			$this->initResponse();																	//  setup HTTP response handler
+			$this->initRouter();																	//  setup request router
 	//		$this->initFieldDefinition();															//  --  FIELD DEFINITION SUPPORT  --  //
-			$this->initLanguage();																	//  --  LANGUAGE SUPPORT  --  //
+			$this->initLanguage();																	//  setup language support
 			$this->initPage();																		//  
 			$this->initAcl();
 		}

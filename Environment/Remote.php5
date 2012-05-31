@@ -56,11 +56,11 @@ class CMF_Hydrogen_Environment_Remote extends CMF_Hydrogen_Environment_Abstract 
 		$this->path		= isset( $options['pathApp'] ) ? $options['pathApp'] : getCwd().'/';
 
 		$this->initClock();																			//  setup clock
-#		$this->initMessenger();
+#		$this->initMessenger();																		//  setup user interface messenger
 		$this->initConfiguration();																	//  setup configuration
 		$this->initModules( $options['pathApp'] );													//  setup module support
 		$this->initCache();																			//  setup cache support
-		$this->initDatabase();
+		$this->initDatabase();																		//  setup database connection
 
 		$this->hasDatabase	= (bool) $this->dbc;													//  note if database is available
 		$this->path	= $options['pathApp'];															//  
