@@ -226,6 +226,12 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 				$resource	= $config->resource ? $config->resource : NULL;
 				$context	= $config->context ? $config->context : NULL;
 				$expiration	= $config->expiration ? (int) $config->expiration : 0;
+				
+				if( $type == 'PDO' ){
+					if( !$this->dbc )
+						throw new RuntimeException( 'A database connection is needed for PDO cache adapter' );
+					$resource	= array( $this->dbc, $this->dbc->getPrefix().$resource );
+				}
 				$cache	= $factory->newStorage( $type, $resource, $context, $expiration );
 			}
 		}

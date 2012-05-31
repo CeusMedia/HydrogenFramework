@@ -46,6 +46,7 @@ class CMF_Hydrogen_Environment_Dummy extends CMF_Hydrogen_Environment_Abstract {
 		$this->options	= $options;
 		$this->path			= isset( $options['pathApp'] ) ? $options['pathApp'] : getCwd().'/';
 		$this->initClock();
+		$this->config		= new ADT_List_Dictionary();											//  create empty configuration object
 		$this->path	= $options['pathApp'];
 	}
 }
