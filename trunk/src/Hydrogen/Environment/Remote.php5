@@ -59,8 +59,8 @@ class CMF_Hydrogen_Environment_Remote extends CMF_Hydrogen_Environment_Abstract 
 #		$this->initMessenger();																		//  setup user interface messenger
 		$this->initConfiguration();																	//  setup configuration
 		$this->initModules( $options['pathApp'] );													//  setup module support
-		$this->initCache();																			//  setup cache support
 		$this->initDatabase();																		//  setup database connection
+		$this->initCache();																			//  setup cache support
 
 		$this->hasDatabase	= (bool) $this->dbc;													//  note if database is available
 		$this->path	= $options['pathApp'];															//  
