@@ -48,6 +48,17 @@ class CMF_Hydrogen_Environment_Resource_Database_PDO extends Database_PDO_Connec
 	}
 
 	/**
+	 *	Returns table prefix from configuration.
+	 *	@access		public
+	 *	@return		string
+	 */
+	public function getPrefix(){
+		if( $this->env->getModules()->has( 'Database' ) )											//  module for database support is installed
+			return $this->env->getConfig()->get( 'module.database.prefix' );						//  extract prefix from module configuration
+		return $this->env->getConfig()->get( 'database.prefix' );									//  extract prefix from main configuration
+	}
+	
+	/**
 	 *	Sets up connection to database, if configured with database module or main config (deprecated).
 	 *
 	 *	Attention: If using MySQL and UTF-8 the charset must bet set after connection established.
