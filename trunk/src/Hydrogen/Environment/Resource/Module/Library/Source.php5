@@ -73,12 +73,20 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source implements CMF_Hyd
 	protected function scanFolder(){
 		if( !file_exists( $this->source->path ) )
 			throw new RuntimeException( 'Source path "'.$this->source->path.'" is not existing' );
+
+		$cache	= $this->env->getCache();
 		
 		$list	= array();
 		$index	= new File_RecursiveNameFilter( $this->source->path, 'module.xml' );
 		foreach( $index as $entry ){
 			$id		= preg_replace( '@^'.$this->source->path.'@', '', $entry->getPath() );
 			$id		= str_replace( '/', '_', $id );
+
+			$cacheKey	= 'Modules/'.$this->source->id.'/'.$id;
+			if( $cache && $cache->has( $cacheKey ) ){
+				$list[$id]	= unserialize( $cache->get( $cacheKey ) );
+				continue;
+			}
 			$icon	= $entry->getPath().'/icon';
 			try{
 				$obj	= CMF_Hydrogen_Environment_Resource_Module_Reader::load( $entry->getPathname(), $id );
@@ -97,6 +105,8 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source implements CMF_Hyd
 			catch( Exception $e ){
 				$this->env->messenger->noteFailure( 'XML of available Module "'.$id.'" is broken ('.$e->getMessage().').' );
 			}
+			if( $cache )
+				$cache->set( $cacheKey, serialize( $obj ) );
 		}
 		ksort( $list );
 		$this->modules	= $list;
