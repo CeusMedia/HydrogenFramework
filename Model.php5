@@ -456,8 +456,8 @@ class CMF_Hydrogen_Model
 	 */
 	protected function setEnv( CMF_Hydrogen_Environment_Abstract $env )
 	{
-		$this->env			= $env;
-		$this->prefix		= $env->getConfig()->get( 'database.prefix' );
+		$this->env		= $env;
+		$this->prefix	= $env->getDatabase()->getPrefix();
 	}
 
 	/**
