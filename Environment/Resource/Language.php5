@@ -196,7 +196,7 @@ class CMF_Hydrogen_Environment_Resource_Language
 		{
 			$data	= FALSE;
 			$string	= $reader->readString();
-			if( !preg_match( '/".+;"/U', $string ) ){
+			if( !preg_match( '/".*;.*"/U', $string ) ){
 				$data	= @parse_ini_string( $string, TRUE, INI_SCANNER_RAW );
 				if( $data !== FALSE )
 					foreach( $data as $section => $pairs )
