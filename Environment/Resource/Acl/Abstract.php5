@@ -91,6 +91,8 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 	 *	@return		integer		Right state: -1: no access at all | 0: no access | 1: access | 2: access at all
 	 */
 	public function has( $controller = 'index', $action = 'index' ){
+		if( !$this->env->has( 'session' ) )
+			return 0;
 		$roleId	= $this->env->getSession()->get( 'roleId' );
 		$right	= $this->hasRight( $roleId, $controller, $action );
 #		remark( 'Controller: '.$controller.' | Action: '.$action.' | Right: '.$right );
