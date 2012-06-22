@@ -59,12 +59,13 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydr
 		foreach( $this->modules as $module ){
 			if( empty( $module->hooks[$resource][$event] ) )
 				continue;
-			$function = create_function( '$module, $context', $module->hooks[$resource][$event]
-			);
+			$function	= $module->hooks[$resource][$event];
+			$function	= create_function( '$env, $context, $module', $function );
 			try{
 				$count++;
 				ob_start();
-				call_user_func_array( $function, array( $module, $context ) + $arguments );
+				$args	= array( $this->env, $context, $module ) + $arguments;
+				call_user_func_array( $function, $args );
 				$stdout	= ob_get_clean();
 				if( strlen( $stdout ) )
 					if( $this->env->has( 'messenger' ) )
