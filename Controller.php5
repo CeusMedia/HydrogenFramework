@@ -83,15 +83,14 @@ class CMF_Hydrogen_Controller
 	}
 
 	protected function compactFilterInput( $input ){
-		if( is_string( $input ) && strlen( $input ) )
-			return $input;
-		if( !is_array( $input ) )
-			return NULL;
-		foreach( $input as $nr => $chunk ){
-			$chunk  = $this->compactFilterInput( $chunk );
-			if( is_string( $chunk ) && strlen( $chunk ) || is_array( $chunk ) && count( $chunk ) )
-				continue;
-			unset( $input[$nr] );
+		if( is_object( $input ) || is_resource( $input ) || is_null( $input ) )						//  input is of invalid type
+			return NULL;																			//  break with empty result
+		if( is_array( $input ) ){																	//  input is an array
+			foreach( $input as $nr => $chunk ){														//  iterate map pairs
+				$chunk	= $this->compactFilterInput( $chunk );										//  compact map pair data chunk
+				if( !( is_array( $chunk ) && count( $chunk ) ) && !strlen( $chunk ) )				//  chunk is empty
+					unset( $input[$nr] );															//  remove chunk pair from map
+			}
 		}
 		return $input;
 	}
