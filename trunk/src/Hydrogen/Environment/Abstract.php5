@@ -82,13 +82,14 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$this->initModules();																		//  setup module support
 		$this->initDatabase();																		//  setup database connection
 		$this->initCache();																			//  setup cache support
-		$this->onInit();																			//  
-		$this->onLoad();																			//  @todo	remove call and method
 	}
 
-	public function onInit(){}
+	public function __onInit(){
+		if( $this->modules )																		//  module support and modules available
+			$this->modules->callHook( 'Env', 'init', $this );										//  call related module event hooks
+	}
 	
-	public function onLoad(){}
+	public function __onLoad(){}
 	
 	public function __get( $key )
 	{
