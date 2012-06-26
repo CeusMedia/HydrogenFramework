@@ -103,14 +103,14 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 			}
 			foreach( $module->files->scripts as $script ){											//  iterate module script files
 				if( !empty( $script->load ) && $script->load == "auto" ){							//  script file is to be loaded always
-					$source	= !empty( $script->source ) ? $script->source : NULL;					//  get source attribute if possible
+					$source	= empty( $script->source ) ? 'local' : $script->source;
 					$top	= !empty( $script->top );												//  get flag attribute for appending on top
-					if( preg_match( "/^[a-z]+:\/\/.+$/", $script->file ) )							//  script file is absolute URL
-						$this->js->addUrl( $script->file, $source );								//  add script file URL
-					else if( !empty( $script->source ) && $script->source == 'lib' )				//  script file is in script library
+					if( $source == 'lib' )															//  script file is in script library
 						$this->js->addUrl( $pathScriptsLib.$script->file, $top );					//  load script file from script library
-					else																			//  script file is in app scripts folder
+					else if( $source == 'local' )													//  script file is in app scripts folder
 						$this->js->addUrl( $pathScripts.$script->file, $top );						//  load script file from app scripts folder
+					else if( $source == 'url' && preg_match( "/^[a-z]+:\/\/.+$/", $script->file ) )	//  script file is absolute URL
+						$this->js->addUrl( $script->file, $source );								//  add script file URL
 				}
 			}
 			foreach( $module->config as $pair ){													//  iterate module configuration pairs
@@ -121,7 +121,7 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 				}
 			}
 		}
-		$modules->callHook( 'Page', 'applyModules', $this );
+		$modules->callHook( 'Page', 'applyModules', $this );										//  call related module event hooks
 		$this->addHead( '<script type="text/javascript">var config = '.json_encode( $listConfig ).';</script>' );
 	}
 

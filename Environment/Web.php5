@@ -81,6 +81,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 			$this->initLanguage();																	//  setup language support
 			$this->initPage();																		//  
 			$this->initAcl();
+			$this->__onInit();																		//  
 		}
 		catch( Exception $e )
 		{
