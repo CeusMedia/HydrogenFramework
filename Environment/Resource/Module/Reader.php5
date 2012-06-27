@@ -62,6 +62,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 		$obj->files->styles			= array();
 		$obj->files->scripts		= array();
 		$obj->files->images			= array();
+		$obj->files->files			= array();
 		$obj->config				= array();
 		$obj->relations				= new stdClass();
 		$obj->relations->needs		= array();
@@ -78,6 +79,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 				'style'		=> 'styles',
 				'script'	=> 'scripts',
 				'image'		=> 'images',
+				'file'		=> 'files',
 			);
 			foreach( $map as $source => $target ){
 				foreach( $xml->files->$source as $file ){
