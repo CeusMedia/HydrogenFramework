@@ -41,8 +41,7 @@ class CMF_Hydrogen_Environment_Resource_Database_PDO extends Database_PDO_Connec
 {
 	protected $env;
 	
-	public function __construct( CMF_Hydrogen_Environment_Abstract $env )
-	{
+	public function __construct( CMF_Hydrogen_Environment_Abstract $env ){
 		$this->env	= $env;
 		$this->setUp();
 	}
@@ -53,7 +52,7 @@ class CMF_Hydrogen_Environment_Resource_Database_PDO extends Database_PDO_Connec
 	 *	@return		string
 	 */
 	public function getPrefix(){
-		if( $this->env->getModules()->has( 'Database' ) )											//  module for database support is installed
+		if( $this->env->getModules()->has( 'Resource_Database' ) )									//  module for database support is installed
 			return $this->env->getConfig()->get( 'module.database.prefix' );						//  extract prefix from module configuration
 		return $this->env->getConfig()->get( 'database.prefix' );									//  extract prefix from main configuration
 	}
@@ -73,14 +72,13 @@ class CMF_Hydrogen_Environment_Resource_Database_PDO extends Database_PDO_Connec
 	 *	@todo		implement lazy mode
 	 *	@todo		0.7: clean deprecated code
 	 */
-	protected function setUp()
-	{
+	protected function setUp(){
 		$config			= $this->env->getConfig();
-		if( $this->env->getModules()->has( 'Database' ) ){											//  module for database support is installed
-			extract( $config->getAll( 'module.database.access.' ) );								//  extract connection access configuration
-			$logStatements	= $config->get( 'module.database.log.statements' );						//  
-			$logErrors		= $config->get( 'module.database.log.errors' );							//  
-			$options		= $config->getAll( 'module.database.option.' );							//  get connection options
+		if( $this->env->getModules()->has( 'Resource_Database' ) ){									//  module for database support is installed
+			extract( $config->getAll( 'module.resource_database.access.' ) );						//  extract connection access configuration
+			$logStatements	= $config->get( 'module.resource_database.log.statements' );			//  
+			$logErrors		= $config->get( 'module.resource_database.log.errors' );				//  
+			$options		= $config->getAll( 'module.resource_database.option.' );				//  get connection options
 		}
 		else{																						//  @deprecated	use database module instead
 			$dba	= array( 'driver', 'host', 'port', 'name', 'username', 'password', 'prefix' );	//  list of access configuration pair keys
