@@ -53,7 +53,7 @@ class CMF_Hydrogen_Environment_Resource_Database_PDO extends Database_PDO_Connec
 	 */
 	public function getPrefix(){
 		if( $this->env->getModules()->has( 'Resource_Database' ) )									//  module for database support is installed
-			return $this->env->getConfig()->get( 'module.database.prefix' );						//  extract prefix from module configuration
+			return $this->env->getConfig()->get( 'module.resource_database.access.prefix' );		//  extract prefix from module configuration
 		return $this->env->getConfig()->get( 'database.prefix' );									//  extract prefix from main configuration
 	}
 	
