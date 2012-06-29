@@ -51,7 +51,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydr
 		if( $config->get( 'path.module.config' ) )
 			$this->path	= $config->get( 'path.module.config' );
 		$this->path		= $env->path.$this->path;
-		$this->scan();
+		$this->scan( $config->get( 'system.cache.modules' ) );
 	}
 
 	public function callHook( $resource, $event, $context, $arguments = array() ){
@@ -100,18 +100,18 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydr
 	public function scan( $useCache = FALSE ){
 		if( !file_exists( $this->path ) )
 			return;
+
+		$cacheFile	= $this->path.'../modules.cache.serial';
+		if( $useCache && file_exists( $cacheFile ) ){
+			$this->modules	= unserialize( File_Reader::load( $cacheFile ) );
+			return;
+		}
+		
+		
 		$index	= new File_RegexFilter( $this->path, '/^[a-z0-9_]+\.xml$/i' );
 		foreach( $index as $entry ){
 
 			$moduleId		= preg_replace( '/\.xml$/i', '', $entry->getFilename() );
-			
-#			$cacheFile		= 'tmp/cache/Public/'.$moduleId;
-#			remark( 'File: '.$cacheFile );
-#			if( $useCache && file_exists( $cacheFile ) ){
-#				echo " ... from cache";
-#				return unserialize( File_Reader::load( $cacheFile ) );
-#			}
-#			echo " ... from xml";
 			
 			$moduleId		= preg_replace( '/\.xml$/i', '', $entry->getFilename() );
 			$moduleFile		= $this->path.$moduleId.'.xml';
@@ -128,12 +128,10 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydr
 				$module->icon	= 'data:image/ico;base64,'.base64_encode( File_Reader::load( $icon.'.ico' ) );
 			
 			$this->modules[$moduleId]	= $module;
-#			if( $useCache ){
-#				Folder_Editor::createFolder( dirname( $cacheFile ) );
-#				File_Writer::save( $cacheFile, serialize( $module ) );
-#			}
 		}
 		ksort( $this->modules );
+		if( $useCache )
+			File_Writer::save( $cacheFile, serialize( $this->modules ) );
 	}
 }
 ?>

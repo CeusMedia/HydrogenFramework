@@ -282,7 +282,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	 */
 	protected function initDatabase()
 	{
-		$hasModule	= $this->getModules()->has( 'Database' );										//  module for database connection is enabled
+		$hasModule	= $this->getModules()->has( 'Resource_Database' );								//  module for database connection is enabled
 		$hasConfig	= $this->config->get( 'database.driver' );										//  database connection is configured in main config (deprecated)
 		if( $hasModule || $hasConfig )																//  database connection has been configured
 			$this->dbc	= new CMF_Hydrogen_Environment_Resource_Database_PDO( $this );				//  try to configure and connect database
@@ -297,7 +297,6 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	}
 	
 	protected function initModules(){
-		$config			= $this->getConfig();
 #		$this->modules	= new CMF_Hydrogen_Environment_Resource_Module_Handler( $this );
 #		$modules		= $this->modules->getInstalled();
 		$this->modules	= new CMF_Hydrogen_Environment_Resource_Module_Library_Local( $this );
