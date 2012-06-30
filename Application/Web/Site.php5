@@ -88,8 +88,7 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 			}
 			else if( !$this->env->getMessenger() )
 				throw $e;
-			else
-				$this->env->getMessenger()->noteFailure( $e->getMessage() );
+			$this->env->getMessenger()->noteFailure( $e->getMessage() );
 		}
 	}
 
