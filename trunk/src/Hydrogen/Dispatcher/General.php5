@@ -63,8 +63,6 @@ class CMF_Hydrogen_Dispatcher_General
 	{
 		if( !class_exists( $className ) )															// class is neither loaded nor loadable
 		{
-			remark( $className );
-			die;
 			$message	= 'Invalid Controller "'.$className.'"';
 			throw new RuntimeException( $message, 201 );											// break with internal error
 		}
