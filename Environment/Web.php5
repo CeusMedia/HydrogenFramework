@@ -201,8 +201,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	{
 		$this->page	= new CMF_Hydrogen_Environment_Resource_Page( $this );
 		$this->page->setPackaging( $pageJavaScripts, $packStyleSheets );
-		if( $this->getConfig()->get( self::$configKeyBaseHref ) )
-			$this->page->setBaseHref( $this->getConfig()->get( self::$configKeyBaseHref ) );
+		$this->page->setBaseHref( $this->getBaseUrl( self::$configKeyBaseHref ) );
 	}
 
 	protected function initRequest()

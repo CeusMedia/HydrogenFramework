@@ -39,6 +39,7 @@
  */
 abstract class CMF_Hydrogen_Environment_Router_Abstract implements CMF_Hydrogen_Environment_Router_Interface
 {
+	/**	@var	CMF_Hydrogen_Environment_Abstract	$env		Environment object */
 	protected $env;
 #	public $configKeyBaseHref	= 'app.base.url';
 #	public $configKeyBaseHref	= 'app.base.href';

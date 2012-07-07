@@ -119,9 +119,20 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	 *	@access		public
 	 *	@return		CMF_Hydrogen_Environment_Resource_Acl_Abstract	Instance of access control list object
 	 */
-	public function getAcl()
-	{
+	public function getAcl(){
 		return $this->acl;
+	}
+
+	public function getBaseUrl( $keyConfig = 'app.base.url' ){
+		$host	= getEnv( 'HTTP_HOST' );
+		if( $host ){
+			$path	= dirname( getEnv( 'SCRIPT_NAME' ) ).'/';
+			$schema	= getEnv( 'HTTPS' ) ? 'https' : 'http';
+			return $schema.'://'.$host.$path;
+		}
+		else if( $this->config && $this->config->get( $keyConfig ) )
+			return $this->config->get( $keyConfig );
+		return NULL;
 	}
 
 	public function getCache(){
