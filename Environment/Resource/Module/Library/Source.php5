@@ -99,7 +99,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source implements CMF_Hyd
 				if( file_exists( $icon.'.png' ) )
 					$obj->icon	= 'data:image/png;base64,'.base64_encode( File_Reader::load( $icon.'.png' ) );
 				else if( file_exists( $icon.'.ico' ) )
-					$obj->icon	= 'data:image/ico;base64,'.base64_encode( File_Reader::load( $icon.'.ico' ) );
+					$obj->icon	= 'data:image/x-icon;base64,'.base64_encode( File_Reader::load( $icon.'.ico' ) );
 				$list[$id]	= $obj;
 			}
 			catch( Exception $e ){
