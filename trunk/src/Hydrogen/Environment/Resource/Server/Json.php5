@@ -65,8 +65,8 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 		$this->serverPassword	= $env->config->get( 'server.password' );
 		$this->setCurlOption( CURLOPT_USERPWD, $this->serverUsername.':'.$this->serverPassword );
 
-		if( $env->config->get( 'app.base.url' ) ) {
-			$parts		= parse_url( $env->config->get( 'app.base.url' ) );
+		if( $env->getBaseUrl() ) {
+			$parts		= parse_url( $env->getBaseUrl() );
 			$referer	= $parts['scheme'].'://'.$parts['host'].getEnv( 'REQUEST_URI' );
 			$this->setCurlOption( CURLOPT_REFERER, $referer );
 		}
