@@ -114,7 +114,7 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 				}
 			}
 			foreach( $module->config as $pair ){													//  iterate module configuration pairs
-				if( empty( $pair->protected ) ){
+				if( empty( $pair->protected ) || $pair->protected == 'no' ){
 					$key	= 'module.'.strtolower( $module->id ).'.'.$pair->key;
 					$key	= str_replace( '.', '_', $key );
 					$listConfig[$key]	 = $pair->value;
