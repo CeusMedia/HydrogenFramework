@@ -56,16 +56,29 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_H
 			$this->innerId		= $innerId;
 	}
 
-	protected function getCurrentKey( $linkMap, $current ){
-		$path	= empty( $_REQUEST['path'] ) ? $current : $_REQUEST['path'];
-		foreach( $linkMap as $key => $label )
-			if( $path == $key )
-				return $key;
-		$list	= array();
-		foreach( $linkMap as $key => $label )
-			$list[$key]	= levenshtein( $key, $current );
-		asort( $list );
-		return array_shift( array_keys( $list ) );
+	/**
+	 *	...
+	 *	@access		public
+	 *	@param		array		$linkMap		Map of links paths and labels
+	 *	@param		string		$current		Currently requested path
+	 *	@todo		correct implementation: rank by depth, not length, see todo below
+	 *	@return		string
+	 */
+	public function getCurrentKey( $linkMap, $current ){
+		$path		= empty( $_REQUEST['path'] ) ? $current : $_REQUEST['path'];
+		$matches	= array();																		//  empty array to regular matching
+		$selected	= array();																		//  list of possibly selected links
+		foreach( $linkMap as $key => $label ){														//  iterate link map
+			$regExp	= '';																			//  prepare empty regular expression
+			$parts	= explode( '/', $path );														//  split currently requested path into parts
+			while( $part = array_pop( $parts ) )													//  iterate parts backwards
+				$regExp	= count( $parts ) ? '(/'.$part.$regExp.')?' : '('.$part.$regExp.')';													//  insert part into regular expression
+			$match	= preg_match_all( '@^'.str_replace( '@', '\@', $regExp ).'@', $key, $matches );	//  match expression against link path
+			if( isset( $matches[0] ) && !empty( $matches[0] ) )										//  found something
+				$selected[$matches[0][0]]	= strlen( $matches[0][0] );								//  note link path and its length @todo WRONG! note DEPTH, not length
+		}
+		arsort( $selected );																		//  sort link paths by its length, longest on top
+		return array_shift( array_keys( $selected ) );												//  return longest link path
 	}
 
 	public function render( $current = NULL, $niceUrls = FALSE )
