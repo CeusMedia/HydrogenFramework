@@ -124,14 +124,14 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	}
 
 	public function getBaseUrl( $keyConfig = 'app.base.url' ){
+		if( $this->config && $this->config->get( $keyConfig ) )
+			return $this->config->get( $keyConfig );
 		$host	= getEnv( 'HTTP_HOST' );
 		if( $host ){
 			$path	= dirname( getEnv( 'SCRIPT_NAME' ) ).'/';
 			$scheme	= getEnv( 'HTTPS' ) ? 'https' : 'http';
 			return $scheme.'://'.$host.$path;
 		}
-		else if( $this->config && $this->config->get( $keyConfig ) )
-			return $this->config->get( $keyConfig );
 		return NULL;
 	}
 

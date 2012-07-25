@@ -44,18 +44,18 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAclList extends CMF_Hydrogen_Vie
 {
 	protected $needsEnv			= TRUE;
 
-	protected function getFilteredLinkMap(){
+	public function getFilteredLinkMap( $linkMap ){
 		$roleId		= $this->env->session->get( 'roleId' );
 		if( !$roleId )
-			return $this->linkMap;
+			return $linkMap;
 
 		$map	= array();
-		foreach( $this->linkMap as $key => $label ){
+		foreach( $linkMap as $key => $label ){
 			$key	= strlen( trim( $key ) ) ? $key : 'index';
 			if( $this->env->acl->hasRight( $roleId, str_replace( '/', '_', $key ), 'index' ) )
 				$map[$key]	= $label;
 			else{
-				$parts	= explode( '/', str_replace( '_', '/', $key ) );
+				$parts	= explode( '_', str_replace( '/', '_', $key ) );
 				$last	= array_pop( $parts );
 				$first	= join( '/', $parts );
 				if( $this->env->acl->hasRight( $roleId, $first, $last ) )
@@ -68,7 +68,7 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAclList extends CMF_Hydrogen_Vie
 	public function render( $current = NULL )
 	{
 		$path		= empty( $_REQUEST['path'] ) ? $current : $_REQUEST['path'];
-		$linkMap	= $this->getFilteredLinkMap();
+		$linkMap	= $this->getFilteredLinkMap( $this->linkMap );
 		$active		= $this->getCurrentKey( $linkMap, $current );
 		$list		= array();
 		foreach( $linkMap as $key => $label )
