@@ -46,6 +46,8 @@ abstract class CMF_Hydrogen_Application_Abstract{
 	/**	@var		CMF_Hydrogen_Environment_Abstract	$env					Application Environment Object */
 	protected $env;
 
+	public static $modulesNeeded						= array();				//  @todo for PHP 5.3+: make protected and use static:: instead of self:: on use -> now you can set value on App class construction
+
 	/**
 	 *	Constructor.
 	 *	@access		public
@@ -59,8 +61,34 @@ abstract class CMF_Hydrogen_Application_Abstract{
 		else if( is_string( $env ) )
 			$env		= Alg_Object_Factory::createObject( $env );
 		$this->env		= $env;
+		if( self::$modulesNeeded )																	//  needed modules are defined
+			$this->checkNeededModules();															//  check for missing modules
 	}
 
+	/**
+	 *	Finds missing modules if needed modules are defined.
+	 *	Having such, the application will quit with a report.
+	 *	@access		protected
+	 *	@return		void
+	 */
+	protected function checkNeededModules(){
+		$modulesGot	= array_keys( $this->env->getModules()->getAll() );								//  get installed modules
+		$missing	= array_diff( self::$modulesNeeded, $modulesGot );								//  find missing modules
+		if( $missing )																				//  there are missing modules
+			die( $this->reportMissingModules( $missing ) );											//  quit execution with report
+	}
+
+	/**
+	 *	Display report of missing modules.
+	 *	This method can be customized in applications, see CMF_Hydrogen_Application_Web_Abstract.
+	 *	@access		protected
+	 *	@param		array		$modules		List of module IDs
+	 *	@return		void
+	 */
+	protected function reportMissingModules( $modules ){
+		print( 'Missing modules: '.join( ', ', $modules ) );
+	}
+	
 	abstract public function run();
 }
 ?>
