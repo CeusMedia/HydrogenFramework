@@ -309,6 +309,10 @@ class CMF_Hydrogen_Model
 		return $this->table->getColumns();
 	}
 
+	public function getLastQuery(){
+		return $this->table->getLastQuery();
+	}
+	
 	/**
 	 *	Returns table name with or without index.
 	 *	@access		public
