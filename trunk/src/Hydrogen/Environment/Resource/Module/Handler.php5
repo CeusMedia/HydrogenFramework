@@ -54,13 +54,16 @@ class CMF_Hydrogen_Environment_Resource_Module_Handler{
 #		}
 #		
 		$this->path		= 'config/modules/';
-		$this->pathlib	= 'modules/';
 		if( $config->get( 'path.module.config' ) )
 			$this->path	= $config->get( 'path.module.config' );
 		if( !file_exists( $this->path ) )
 			return;
 
 		$this->modulesInstalled	= new CMF_Hydrogen_Environment_Resource_Module_LibraryLocal( $env );
+	}
+
+	public function clearCache(){
+		$this->modulesInstalled->clearCache();
 	}
 
 	public function get( $moduleId, $installed = FALSE ){
