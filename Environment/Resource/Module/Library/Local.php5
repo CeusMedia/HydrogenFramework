@@ -83,6 +83,13 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydr
 		return $count;
 	}
 
+	public function clearCache(){
+		$useCache	= $this->env->getConfig()->get( 'system.cache.modules' );
+		$cacheFile	= $this->path.'../modules.cache.serial';
+		if( $useCache && file_exists( $cacheFile ) )
+			@unlink( $cacheFile );
+	}
+
 	public function get( $moduleId ){
 		if( !$this->has( $moduleId ) )
 			throw new RuntimeException( 'Module "'.$moduleId.'" is not installed' );
@@ -97,11 +104,13 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydr
 		return array_key_exists( $moduleId, $this->modules );
 	}
 	
-	public function scan( $useCache = FALSE ){
+	public function scan( $useCache = FALSE, $forceReload = FALSE ){
 		if( !file_exists( $this->path ) )
 			return;
 
 		$cacheFile	= $this->path.'../modules.cache.serial';
+		if( $forceReload )
+			$this->clearCache();
 		if( $useCache && file_exists( $cacheFile ) ){
 			$this->modules	= unserialize( File_Reader::load( $cacheFile ) );
 			return;
