@@ -96,7 +96,7 @@ class CMF_Hydrogen_Environment_Resource_Acl_Database extends CMF_Hydrogen_Enviro
 			return -2;
 		$data	= array(
 			'roleId'		=> $roleId,
-			'controller'	=> $controller,
+			'controller'	=> Model_Role_Right::minifyController( $controller ),
 			'action'		=> $action,
 			'timestamp'		=> time()
 		);
