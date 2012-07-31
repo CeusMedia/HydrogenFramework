@@ -151,8 +151,9 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 			print_m( $this->linksPublicInside );
 			die;
 		}
+		$controller	= str_replace( '/', '_', strtolower( $controller ) );
 		
-		$linkPath	= str_replace( '/', '_', strtolower( $controller ) ).'_'.$action;
+		$linkPath	= $controller.'_'.$action;
 		if( in_array( $linkPath, $this->linksPublic ) )
 			return 3;
 		if( !$roleId ){
@@ -170,7 +171,7 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 			return -1;
 		$rights	= $this->getRights( $roleId );
 		foreach( $rights as $right )
-			if( strtolower( $right->controller ) == str_replace( '/', '_', strtolower( $controller ) ) )
+			if( strtolower( $right->controller ) == $controller )
 				if( $right->action == $action )
 					return 1;
 		return 0;
