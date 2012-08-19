@@ -100,9 +100,9 @@ class CMF_Hydrogen_Controller
 	 *	@access		protected
 	 *	@return		array
 	 */
-	protected function getData()
+	protected function getData( $key = NULL )
 	{
-		return $this->view->getData();
+		return $this->view->getData( $key );
 	}
 	
 	//  --  PUBLIC METHODS  --  //
@@ -154,7 +154,7 @@ class CMF_Hydrogen_Controller
 			$topic = $this->controller;
 		if( empty( $section ) )
 			return $this->env->getLanguage()->getWords( $topic );
-		return (object) $this->env->getLanguage()->getSection( $topic, $section );
+		return $this->env->getLanguage()->getSection( $topic, $section );
 	}
 
 	/**
