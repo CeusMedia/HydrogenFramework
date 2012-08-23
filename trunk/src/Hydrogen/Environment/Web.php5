@@ -183,11 +183,13 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	protected function initLanguage()
 	{
 		$this->language		= new CMF_Hydrogen_Environment_Resource_Language( $this );
+		$this->clock->profiler->tick( 'env: language' );
 	}
 
 	protected function initMessenger()
 	{
 		$this->messenger	= new CMF_Hydrogen_Environment_Resource_Messenger( $this );
+		$this->clock->profiler->tick( 'env: messenger' );
 	}
 
 	/**
@@ -202,23 +204,27 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 		$this->page	= new CMF_Hydrogen_Environment_Resource_Page( $this );
 		$this->page->setPackaging( $pageJavaScripts, $packStyleSheets );
 		$this->page->setBaseHref( $this->getBaseUrl( self::$configKeyBaseHref ) );
+		$this->clock->profiler->tick( 'env: page' );
 	}
 
 	protected function initRequest()
 	{
 		$this->request		= new Net_HTTP_Request();
 		$this->request->fromEnv( $this->has( 'session' ) );
+		$this->clock->profiler->tick( 'env: request' );
 	}
 
 	protected function initResponse()
 	{
 		$this->response	= new Net_HTTP_Response();
+		$this->clock->profiler->tick( 'env: response' );
 	}
 
 	protected function initRouter( $routerClass = NULL )
 	{
 		$classRouter	= $routerClass ? $routerClass : self::$classRouter;
 		$this->router	= Alg_Object_Factory::createObject( $classRouter, array( $this ) );
+		$this->clock->profiler->tick( 'env: router' );
 	}
 
 	protected function initSession( $keyPartitionName = NULL, $keySessionName = NULL )
@@ -256,6 +262,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 			$this->config->set( 'module.acl.inside', implode( ',', $inside ) );						//  save public link list
 			$this->config->set( 'module.acl.outside', implode( ',', $outside ) );					//  save public link list
 		}
+		$this->clock->profiler->tick( 'env: session' );
 	}
 }
 ?>

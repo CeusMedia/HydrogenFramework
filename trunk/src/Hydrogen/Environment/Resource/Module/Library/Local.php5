@@ -51,7 +51,9 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydr
 		if( $config->get( 'path.module.config' ) )
 			$this->path	= $config->get( 'path.module.config' );
 		$this->path		= $env->path.$this->path;
+		$this->env->clock->profiler->tick( 'Resource_Module_Library_Local::init' );
 		$this->scan( $config->get( 'system.cache.modules' ) );
+		$this->env->clock->profiler->tick( 'Resource_Module_Library_Local::scan' );
 	}
 
 	public function callHook( $resource, $event, $context, $arguments = array() ){
@@ -80,6 +82,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydr
 					throw new RuntimeException( 'Hook '.$module->id.'::'.$resource.'@'.$event.' failed', 0, $e );
 			}
 		}
+		$this->env->clock->profiler->tick( 'Resource_Module_Library_Local::callHook' );
 		return $count;
 	}
 

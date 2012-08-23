@@ -190,21 +190,29 @@ class CMF_Hydrogen_Environment_Resource_Language
 	 */
 	public function load( $topic, $strict = FALSE, $force = FALSE )
 	{
+		$this->env->clock->profiler->tick( 'Resource_Language::load('.$topic.')' );
 		$fileName	= $this->getFilenameOfLanguage( $topic );
 		$reader		= new File_Reader($fileName);
 		if( $reader->exists() )
 		{
 			$data	= FALSE;
 			$string	= $reader->readString();
-			if( !preg_match( '/".*;.*"/U', $string ) ){
+			$this->env->clock->profiler->tick( 'Resource_Language::load('.$topic.'): loaded file' );
+			$string	= preg_replace( "/\s;[^\n]+\n+/", "\n", $string );
+			$string	= preg_replace( "/\n;[^\n]+\n/Us", "\n", $string );
+			$plain	= preg_replace( '/".+"/U', "", $string );
+			if( !preg_match( '/".*;.*"/U', $plain ) ){
 				$data	= @parse_ini_string( $string, TRUE, INI_SCANNER_RAW );
 				if( $data !== FALSE )
 					foreach( $data as $section => $pairs )
 						foreach( $pairs as $key => $value )
 							$data[$section][$key]	= preg_replace( '/^"(.*)"\s*$/', '\\1', $value );
+				$this->env->clock->profiler->tick( 'Resource_Language::load: '.$topic.' @mode1' );
 			}
-			if( $data === FALSE )
+			if( $data === FALSE ){
 				$data	= File_INI_Reader::load( $fileName, TRUE );
+				$this->env->clock->profiler->tick( 'Resource_Language::load: '.$topic.' @mode2' );
+			}
 			$this->data[$topic]	= $data;
 		}
 		else
@@ -215,6 +223,7 @@ class CMF_Hydrogen_Environment_Resource_Language
 			if( $force )
 				$this->env->getMessenger()->noteFailure( $message );
 		}
+		$this->env->clock->profiler->tick( 'Resource_Language: end' );
 	}
 
 	/**
