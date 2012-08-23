@@ -137,6 +137,7 @@ class CMF_Hydrogen_Dispatcher_General
 
 	public function dispatch()
 	{
+		$this->env->clock->profiler->tick( 'Dispatcher_General::dispatch' );
 		do
 		{
 			$this->realizeCall();
@@ -148,20 +149,23 @@ class CMF_Hydrogen_Dispatcher_General
 
 			$className	= self::getControllerClassFromPath( $controller );							// get controller class name from requested controller path
 			$this->checkClass( $className );
-			$factory	= new Alg_Object_Factory( array( $this->env ) );							// raise object factory
-			$instance	= $factory->create( $className );											// build controller instance
+			$this->env->clock->profiler->tick( 'Dispatcher_General::dispatch: check: controller' );
+			$instance	= Alg_Object_Factory::createObject( $className, array( $this->env ) );		// build controller instance
+			$this->env->clock->profiler->tick( 'Dispatcher_General::dispatch: factorized controller' );
 			$this->checkClassAction( $className, $instance, $action );
 			$this->checkAccess( $controller, $action);
-			
 			if( $this->checkClassActionArguments )
 				$this->checkClassActionArguments( $className, $instance, $action );
-
+			$this->env->clock->profiler->tick( 'Dispatcher_General::dispatch: check@'.$controller.'/'.$action );
 			Alg_Object_MethodFactory::callObjectMethod( $instance, $action, $arguments );			// call action method in controller class with arguments
 
 			$this->noteLastCall( $instance );
 		}
 		while( $instance->redirect );
-		return $instance->getView();
+		$this->env->clock->profiler->tick( 'Dispatcher_General::dispatch: done' );
+		$view	= $instance->getView();
+		$this->env->clock->profiler->tick( 'Dispatcher_General::dispatch: view' );
+		return $view;
 	}
 
 	static protected function getControllerClassFromPath( $path ){
