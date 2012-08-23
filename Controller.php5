@@ -64,9 +64,12 @@ class CMF_Hydrogen_Controller
 	 */
 	public function __construct( CMF_Hydrogen_Environment_Abstract $env )
 	{
+		$env->clock->profiler->tick( 'CMF_Controller('.get_class( $this ).')' );
 		$this->setEnv( $env );
+		$env->clock->profiler->tick( 'CMF_Controller('.get_class( $this ).'): env set' );
 		$this->view	= $this->getViewObject( $this->controller );
 		$this->__onInit();
+		$env->clock->profiler->tick( 'CMF_Controller('.get_class( $this ).'): done' );
 	}
 
 	/**
@@ -113,21 +116,31 @@ class CMF_Hydrogen_Controller
 	 */
 	public function getView()
 	{
+		$this->env->clock->profiler->tick( 'Controller::getView: start' );
 		if( !$this->view )
 			throw new RuntimeException( 'No view object created in Constructor' );
 		if( !method_exists( $this->view, $this->action ) )
 			throw new RuntimeException( 'View Action "'.$this->action.'" not defined yet', 302 );
 		$language		= $this->env->getLanguage();
+		$this->env->clock->profiler->tick( 'Controller::getView: got language' );
 		if( $language->hasWords( $this->controller ) )
 			$this->view->setData( $language->getWords( $this->controller ), 'words' );
+		$this->env->clock->profiler->tick( 'Controller::getView: set words' );
 		$result			= Alg_Object_MethodFactory::callObjectMethod( $this->view, $this->action );
-		if( is_string( $result ) )
-			return $result;
-		if( $this->view->hasTemplate( $this->controller, $this->action ) )
-			return $this->view->loadTemplate( $this->controller, $this->action );
-		if( $this->view->hasContent( $this->controller, $this->action, 'html/' ) )
-			return $this->view->loadContent( $this->controller, $this->action, NULL, 'html/' );
-		throw new Exception( 'Neither view template nor content file defined' );
+		if( is_string( $result ) ){
+			$this->env->clock->profiler->tick( 'Controller::getView: Action called' );
+		}
+		else if( $this->view->hasTemplate( $this->controller, $this->action ) ){
+			$result	= $this->view->loadTemplate( $this->controller, $this->action );
+			$this->env->clock->profiler->tick( 'Controller::getView: loadTemplate' );
+		}
+		else if( $this->view->hasContent( $this->controller, $this->action, 'html/' ) ){
+			$result	= $this->view->loadContent( $this->controller, $this->action, NULL, 'html/' );
+			$this->env->clock->profiler->tick( 'Controller::getView: loadContent' );
+		}
+		else
+			throw new Exception( 'Neither view template nor content file defined' );
+		return $result;
 	}
 
 	/**
@@ -241,7 +254,8 @@ class CMF_Hydrogen_Controller
 		$this->action		= $env->getRequest()->get( 'action' );
 		if( $this->env->has( 'language' ) )
 		{
-			$this->env->getLanguage()->load( $this->controller, FALSE, FALSE );
+			$language	= $this->env->getLanguage();
+			$language->load( $this->controller, FALSE, FALSE );
 		}
 	}
 }
