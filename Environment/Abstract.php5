@@ -225,6 +225,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$this->acl->setPublicLinks( explode( ',', $config->get( 'module.acl.public' ) ) );
 		$this->acl->setPublicInsideLinks( explode( ',', $config->get( 'module.acl.inside' ) ) );
 		$this->acl->setPublicOutsideLinks( explode( ',', $config->get( 'module.acl.outside' ) ) );
+		$this->clock->profiler->tick( 'env: acl' );
 	}
 	
 	protected function initCache(){
@@ -248,11 +249,13 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 			}
 		}
 		$this->cache	= $cache;
+		$this->clock->profiler->tick( 'env: cache' );
 	}
 
 	protected function initClock()
 	{
 		$this->clock	= new Alg_Time_Clock();
+		$this->clock->profiler	= new CMF_Hydrogen_Environment_Resource_Profiler();
 	}
 
 	/**
@@ -283,6 +286,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$this->config	= new ADT_List_Dictionary( $data );											//  create dictionary from array
 		if( $this->config->has( 'config.error.reporting' ) )										//  error reporting is defined
 			error_reporting( $this->config->get( 'config.error.reporting' ) );						//  set error reporting level
+		$this->clock->profiler->tick( 'env: config' );
 	}
 
 	/**
@@ -297,6 +301,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$hasConfig	= $this->config->get( 'database.driver' );										//  database connection is configured in main config (deprecated)
 		if( $hasModule || $hasConfig )																//  database connection has been configured
 			$this->dbc	= new CMF_Hydrogen_Environment_Resource_Database_PDO( $this );				//  try to configure and connect database
+		$this->clock->profiler->tick( 'env: database' );
 	}
 
 	protected function initDisclosure()
@@ -305,6 +310,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$disclosure	= new CMF_Hydrogen_Environment_Resource_Disclosure( array() );
 		$this->disclosure	= $disclosure->reflect( 'classes/Controller/', array( 'classPrefix' => 'Controller_' ) );
 //	remark( $clock->stop() );
+		$this->clock->profiler->tick( 'env: disclosure' );
 	}
 	
 	protected function initModules(){
@@ -335,6 +341,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 			}
 		}
 		$this->config->set( 'module.acl.public', implode( ',', $public ) );						//  save public link list
+		$this->clock->profiler->tick( 'env: modules' );
 	}
 
 	public function offsetExists( $key )

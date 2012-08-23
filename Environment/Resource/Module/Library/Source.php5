@@ -74,10 +74,16 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source implements CMF_Hyd
 		if( !file_exists( $this->source->path ) )
 			throw new RuntimeException( 'Source path "'.$this->source->path.'" is not existing' );
 
-		$cache	= $this->env->getCache();
+		$cache			= $this->env->getCache();
+		$cacheKeySource	= 'Sources/'.$this->source->id;
+		if( $cache && $cache->has( $cacheKeySource ) ){
+			$this->modules	= unserialize( $cache->get( $cacheKeySource ) );
+			return;
+		}
 		
 		$list	= array();
 		$index	= new File_RecursiveNameFilter( $this->source->path, 'module.xml' );
+		$this->env->clock->profiler->tick( 'CMFR_Library_Source::scanFolder: init' );
 		foreach( $index as $entry ){
 			$id		= preg_replace( '@^'.$this->source->path.'@', '', $entry->getPath() );
 			$id		= str_replace( '/', '_', $id );
@@ -85,6 +91,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source implements CMF_Hyd
 			$cacheKey	= 'Modules/'.$this->source->id.'/'.$id;
 			if( $cache && $cache->has( $cacheKey ) ){
 				$list[$id]	= unserialize( $cache->get( $cacheKey ) );
+#				$this->env->clock->profiler->tick( 'CMFR_Library_Source::scanFolder: Module #'.$id.':cache' );
 				continue;
 			}
 			$icon	= $entry->getPath().'/icon';
@@ -107,9 +114,12 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source implements CMF_Hyd
 			}
 			if( $cache )
 				$cache->set( $cacheKey, serialize( $obj ) );
+#			$this->env->clock->profiler->tick( 'CMFR_Library_Source::scanFolder: Module #'.$id.':file' );
 		}
 		ksort( $list );
 		$this->modules	= $list;
+		if( $cache )
+			$cache->set( $cacheKeySource, serialize( $list ) );
 	}
 
 	protected function scanHttp(){
