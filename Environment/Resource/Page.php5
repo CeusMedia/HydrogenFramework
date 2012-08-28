@@ -50,6 +50,9 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 
 	/**	@var	CMF_Hydrogen_View_Helper_JavaScript		$js				JavaScript Collector Helper */
 	public $js;
+
+	/**	@var	stdClass								$css			CSS containers (primer, theme) */
+	public $css;
 	
 	public function __construct( CMF_Hydrogen_Environment_Abstract $env )
 	{
