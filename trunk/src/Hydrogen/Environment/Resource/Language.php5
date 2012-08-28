@@ -200,8 +200,8 @@ class CMF_Hydrogen_Environment_Resource_Language
 			$this->env->clock->profiler->tick( 'Resource_Language::load('.$topic.'): loaded file' );
 			$string	= preg_replace( "/\s;[^\n]+\n+/", "\n", $string );
 			$string	= preg_replace( "/\n;[^\n]+\n/Us", "\n", $string );
-			$plain	= preg_replace( '/".+"/U', "", $string );
-			if( !preg_match( '/".*;.*"/U', $plain ) ){
+#			$plain	= preg_replace( '/".+"/U', "", $string );
+			if( !preg_match( '/".*;.*"/U', $string ) ){
 				$data	= @parse_ini_string( $string, TRUE, INI_SCANNER_RAW );
 				if( $data !== FALSE )
 					foreach( $data as $section => $pairs )
