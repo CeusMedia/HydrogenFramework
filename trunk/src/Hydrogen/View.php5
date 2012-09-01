@@ -133,6 +133,8 @@ class CMF_Hydrogen_View
 	/**
 	 *	Loads View Class of called Controller.
 	 *	@access		protected
+	 *	@param		string		$section	Section in locale file
+	 *	@param		string		$topic		Locale file key, eg. test/my, default: current controller
 	 *	@return		void
 	 */
 	protected function getWords( $section = NULL, $topic = NULL ){
