@@ -39,30 +39,29 @@
  */
 class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 {
-	/**	@var	CMF_Hydrogen_Environment_Abstract		$env			Environment object */
+	/**	@var	CMF_Hydrogen_Environment_Abstract		$env				Environment object */
 	public $env;
 	protected $packJavaScripts	= FALSE;
 	protected $packStyleSheets	= FALSE;
 	protected $pathPrimer;
 	protected $pathTheme;
-	/**	@var		CMM_TEA_Factory						$tea			Instance of TEA (Template Engine Abstraction) Factory (from cmModules) OR empty if TEA is not available */
-	public $tea					= NULL;
-
-	/**	@var	CMF_Hydrogen_View_Helper_JavaScript		$js				JavaScript Collector Helper */
+	/**	@var	CMF_Hydrogen_View_Helper_JavaScript		$js					JavaScript Collector Helper */
 	public $js;
-
-	/**	@var	stdClass								$css			CSS containers (primer, theme) */
+	/**	@var	stdClass								$css				CSS containers (primer, theme) */
 	public $css;
+	/**	@var	array									$scriptsOnReady		List if JavaScripts to run on load if browser is ready */
+	protected $scriptsOnReady	= array();
+	/**	@var		CMM_TEA_Factory						$tea				Instance of TEA (Template Engine Abstraction) Factory (from cmModules) OR empty if TEA is not available */
+	public $tea					= NULL;
 	
-	public function __construct( CMF_Hydrogen_Environment_Abstract $env )
-	{
+	public function __construct( CMF_Hydrogen_Environment_Abstract $env ){
 		$language	= 'en';
 		$this->env	= $env;
 		if( $this->env->has( 'language' ) )
 			$language	= $this->env->getLanguage()->getLanguage();
 		
 		parent::__construct( $language );
-		$this->js	= CMF_Hydrogen_View_Helper_JavaScript::getInstance();
+		$this->js			= CMF_Hydrogen_View_Helper_JavaScript::getInstance();
 		$this->css			= new stdClass;
 		$this->css->primer	= new CMF_Hydrogen_View_Helper_StyleSheet;
 		$this->css->theme	= new CMF_Hydrogen_View_Helper_StyleSheet;
@@ -136,10 +135,12 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 		$this->css->theme->addUrl( $this->pathTheme.'css/'.$fileName );
 	}
 
-	public function build( $bodyAttributes = array() )
-	{
+	public function build( $bodyAttributes = array() ){
 		$this->addHead( $this->css->primer->render( $this->packStyleSheets ) );
 		$this->addHead( $this->css->theme->render( $this->packStyleSheets ) );
+		
+		if( $this->scriptsOnReady ) $this->js->addScript( $this->renderScriptsOnReady() );			//  append collect onReady-JavaScripts to page
+		
 		$this->addBody( $this->js->render( $this->packJavaScripts ) );
 		
 		$controller	= str_replace( '/', '-', $this->env->getRequest()->get( 'controller' ) );
@@ -157,8 +158,53 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 		return parent::build( $bodyAttributes );
 	}
 
-	public function setPackaging( $packJavaScripts = FALSE, $packStyleSheets = FALSE )
-	{
+	/**
+	 *	Notes to load a JavaScript in local scripts folder.
+	 *	@access		public
+	 *	@param		string		$filePath		Script file path within scripts folder
+	 *	@return		void
+	 *	@throws		RuntimeException			if script file is not existint
+	 */
+	public function loadLocalScript( $filePath ){
+		$path	= $this->env->getConfig()->get( 'path.scripts' );
+		if( !file_exists( $path.$filePath ) )
+			throw new RuntimeException( 'Local script "'.$filePath.'" not found in folder "'.$path.'"' );
+		$this->js->addUrl( $path.$filePath );
+	}
+
+	/**
+	 *	Inserts collected JavaScript code into page bottom with directive to run if Browser finished loading (using jQuery event document.ready).
+	 *	@access		protected
+	 *	@param		boolean		$compress		Flag: compress code
+	 *	@param		boolean		$wrapInTag		Flag: wrap code in HTML script tag
+	 *	@return		string		Combinded JavaScript code to run if Browser is ready
+	 */
+	protected function renderScriptsOnReady( $compress = FALSE, $wrapInTag = FALSE ){
+		$list	= array();
+		foreach( $this->scriptsOnReady as $level => $scripts )
+			foreach( $scripts as $script )
+				$list[]	= preg_replace( "/;?$/", ";", trim( $script ) );
+		$list	= join( "\n\t", $list );
+		$script		= "$(document).ready(function(){\n\t".$list."\n});";
+		if( !$wrapInTag )
+			return $script;
+		return UI_HTML_Tag::create( 'script', $script, array( 'type' => 'text/javascript' ) );
+	}
+
+	/**
+	 *	Appends JavaScript code to be run after Browser finished rendering (document.ready).
+	 *	@access		public
+	 *	@param		string		$script			JavaScript code to execute on ready
+	 *	@param		integer		$runlevel		Run order level of JavaScript code, default: 5, less: earlier, more: later
+	 *	@return		void
+	 */
+	public function runScript( $script, $runlevel = 5 ){
+		if( !isset( $this->scriptsOnReady[(int) $runlevel] ) )										//  runlevel is not yet defined in scripts list
+			$this->scriptsOnReady[(int) $runlevel]	= array();										//  create empty scripts list for runlevel
+		$this->scriptsOnReady[(int) $runlevel][]	= $script;										//  note JavaScript code on runlevel
+	}
+
+	public function setPackaging( $packJavaScripts = FALSE, $packStyleSheets = FALSE ){
 		$this->packJavaScripts	= $packJavaScripts;
 		$this->packStyleSheets	= $packStyleSheets;
 	}
