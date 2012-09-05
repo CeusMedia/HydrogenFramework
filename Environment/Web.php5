@@ -123,7 +123,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	/**
 	 *	Get resource to communicate with chat server.
 	 *	@access		public
-	 *	@return		Server			Resource to communicate with chat server
+	 *	@return		CMF_Hydrogen_Environment_Resource_Page
 	 */
 	public function getPage()
 	{
