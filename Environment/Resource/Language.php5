@@ -185,7 +185,7 @@ class CMF_Hydrogen_Environment_Resource_Language
 	 *	@access		public
 	 *	@param		string		$topic			Topic of Language
 	 *	@param		bool		$strict			Flag: throw Exception if language file is not existing
-	 *	@return		void
+	 *	@return		array		Map of loaded words
 	 *	@throws		RuntimeException if language file is not existing (and strict is on)
 	 */
 	public function load( $topic, $strict = FALSE, $force = FALSE )
@@ -214,6 +214,7 @@ class CMF_Hydrogen_Environment_Resource_Language
 				$this->env->clock->profiler->tick( 'Resource_Language::load: '.$topic.' @mode2' );
 			}
 			$this->data[$topic]	= $data;
+			return $data;
 		}
 		else
 		{
@@ -222,6 +223,7 @@ class CMF_Hydrogen_Environment_Resource_Language
 				throw new RuntimeException( $message, 221 );
 			if( $force )
 				$this->env->getMessenger()->noteFailure( $message );
+			return array();
 		}
 		$this->env->clock->profiler->tick( 'Resource_Language: end' );
 	}
