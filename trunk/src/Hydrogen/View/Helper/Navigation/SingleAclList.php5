@@ -69,22 +69,11 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAclList extends CMF_Hydrogen_Vie
 	{
 		$path		= empty( $_REQUEST['path'] ) ? $current : $_REQUEST['path'];
 		$linkMap	= $this->getFilteredLinkMap( $this->linkMap );
-		$active		= $this->getCurrentKey( $linkMap, $current );
+		$active		= $this->getCurrentKey( $linkMap, $path );
 		$list		= array();
 		foreach( $linkMap as $key => $label )
 		{
 			$key		= str_replace( '_', '/', $key );
-
-/*			$levelPath	= count( explode( '/', $path ) );
-			$levelKey	= count( explode( '/', $key ) );
-			if( $levelPath == $levelKey )
-				$active		= $path == $key;
-			else if( $levelPath < $levelKey )
-				$active		= $path.'/index' == $key;
-			else
-				 $active	= substr( $path, 0, strlen( $key ) + 1 ) == $key.'/';
-			$class		= $active == $key ? 'active' : NULL;
-*/
 			$class		= $active == $key ? 'active' : NULL;
 			$url		= $key == "index" ? "./" : './'.$key;
 			$link		= UI_HTML_Elements::Link( $url, $label, $class );

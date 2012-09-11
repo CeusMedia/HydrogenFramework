@@ -64,7 +64,7 @@ class CMF_Hydrogen_View
 	 *	@param		CMF_Hydrogen_Environment_Abstract	$env			Framework Resource Environment Object
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment $env )
+	public function __construct( CMF_Hydrogen_Environment_Web $env )
 	{
 		$this->setEnv( $env );
 		$this->html		= new UI_HTML_Elements;
