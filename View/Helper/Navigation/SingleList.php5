@@ -73,8 +73,10 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_H
 		foreach( $linkMap as $key => $label ){														//  iterate link map
 			$regExp	= '';																			//  prepare empty regular expression
 			$parts	= explode( '/', $path );														//  split currently requested path into parts
-			while( $part = array_pop( $parts ) )													//  iterate parts backwards
+			while( count( $parts ) ){																//  iterate parts
+				$part = array_pop( $parts );														//  backwards
 				$regExp	= count( $parts ) ? '(/'.$part.$regExp.')?' : '('.$part.$regExp.')';		//  insert part into regular expression
+			}
 			preg_match_all( '@^'.str_replace( '@', '\@', $regExp ).'@', $key, $matches );			//  match expression against link path
 			if( isset( $matches[0] ) && !empty( $matches[0] ) )										//  found something
 				$selected[$matches[0][0]]	= strlen( $matches[0][0] );								//  note link path and its length @todo WRONG! note DEPTH, not length
