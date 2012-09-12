@@ -189,12 +189,13 @@ class CMF_Hydrogen_Model
 	 *	@param		array			$conditions		Map of Conditions to include in SQL Query
 	 *	@param		array			$orders			Map of Orders to include in SQL Query
 	 *	@param		array			$limits			Map of Limits to include in SQL Query
+	 *	@param		array			$groupings		List of columns to group by
+	 *	@param		array			$havings		List of conditions to apply after grouping
 	 *	@return		array
 	 */
-	public function getAll( $conditions = array(), $orders = array(), $limits = array(), $columns = array(), $groupings = array() )
+	public function getAll( $conditions = array(), $orders = array(), $limits = array(), $columns = array(), $groupings = array(), $havings = array() )
 	{
-		$data	= $this->table->find( $columns, $conditions, $orders, $limits );
-		return $data;
+		return $this->table->find( $columns, $conditions, $orders, $limits, $groupings, $havings );
 	}
 
 	/**
