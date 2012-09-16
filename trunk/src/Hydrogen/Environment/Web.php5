@@ -85,7 +85,14 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 		}
 		catch( Exception $e )
 		{
-			die( UI_HTML_Exception_Page::render( $e ) );
+			if( getEnv( 'HTTP_HOST' ) )
+				die( UI_HTML_Exception_Page::render( $e ) );
+			else
+				
+				remark( $e->getMessage() );
+				remark( $e->getTraceAsString() );
+				remark();
+				exit;
 		}
 	}
 
