@@ -74,6 +74,20 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 		}
 		catch( Exception $e )
 		{
+			if( $e->getCode() == 403 && $this->env->getModules()->has( 'Auth' ) ){
+				if( !$this->env->getSession()->get( 'userId' ) ){
+					$forwardUrl	= $request->get( 'controller' );
+					if( $request->get( 'action' ) )
+						$forwardUrl	.= '/'.$request->get( 'action' );
+					if( $request->get( 'arguments' ) )
+						foreach( $request->get( 'arguments' ) as $argument )
+							$forwardUrl	.= '/'.$argument;
+					$baseUrl	= $this->env->getConfig()->get( 'app.base.url' );
+					$url		= $baseUrl.'auth/login?from='.$forwardUrl;
+					header( 'Location: '.$url );
+					exit;
+				}
+			}
 			if( class_exists( 'Controller_Error' ) )
 			{
 				$controller	= new Controller_Error( $this->env );
