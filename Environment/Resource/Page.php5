@@ -70,6 +70,8 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 		if( $env->config->get( 'layout.primer' ) )
 			$this->pathPrimer	= $path.$env->config->get( 'layout.primer' ).'/';
 		$this->pathTheme	= $path.$env->config->get( 'layout.theme' ).'/';
+		if( strlen( $title	= $env->config->get( 'app.name' ) ) )
+			$this->setTitle( $title );
 
 		$this->applyModules();
 	}
