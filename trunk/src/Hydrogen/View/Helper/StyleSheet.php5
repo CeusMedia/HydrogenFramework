@@ -108,6 +108,7 @@ class CMF_Hydrogen_View_Helper_StyleSheet
 	 *	@return		string
 	 */
 	protected function getPackageFileName( $forceFresh = FALSE ){
+		require_once 'classes/CssUrlRewriter.php';
 		$combiner	= new File_CSS_Combiner();
 		$compressor	= new File_CSS_Compressor();
 		$fileCss	= $this->getPackageCacheFileName();
@@ -122,8 +123,18 @@ class CMF_Hydrogen_View_Helper_StyleSheet
 					throw new RuntimeException( 'Style file "'.$url.'" not existing' );
 				if( !preg_match( '@://@', $url ) ){
 					$path		= dirname( $url ).'/';
+
+					if( preg_match( "/\/[a-z]+/", $content ) ){
+#						xmp( $content );
+						$content	= Minify_CSS_UriRewriter::rewrite( $content, $path );
+#						xmp( $content );
+#						die;
+					}
+					
 					$content	= $combiner->combineString( $path, $content, TRUE );
 				}
+				
+/*				
 				$pathCacheReal	= realpath( dirname( $url ) );
 				$pathFileReal	= str_replace( '\\', '/', realpath( $this->pathCache ) );
 				$diff		= preg_replace( '/^'.str_replace( '/', '\/', $pathFileReal ).'/', '', $pathCacheReal );
@@ -152,7 +163,7 @@ class CMF_Hydrogen_View_Helper_StyleSheet
 //							throw new RuntimeException( 'Image "'.$imageUrl.'" is missing' );
 						$content	= str_replace( $match, $imageUrl, $content );
 					}
-				}
+				}*/
 				$contents[]	= $content;
 			}
 			$content	= implode( "\n\n", $contents );
