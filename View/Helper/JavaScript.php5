@@ -53,8 +53,7 @@ class CMF_Hydrogen_View_Helper_JavaScript
 	 *	@access		protected
 	 *	@return		void
 	 */
-	protected function __construct(){
-	}
+	protected function __construct(){}
 
 	/**
 	 *	Cloning this object is not allowed.
@@ -100,7 +99,7 @@ class CMF_Hydrogen_View_Helper_JavaScript
 	 *	Returns a single instance of this Singleton class.
 	 *	@static
 	 *	@access		public
-	 *	@return		ADT_Singleton	Single instance of this Singleton class
+	 *	@return		ADT_Singleton						Single instance of this Singleton class
 	 */
 	public static function getInstance(){
 		if( !self::$instance )
@@ -149,6 +148,8 @@ class CMF_Hydrogen_View_Helper_JavaScript
 				$contents[]	= $content;
 			}
 			$content	= implode( "\n\n", $contents );
+			if( class_exists( 'JSMin' ) )
+				$content	= JSMin::minify( $content );
 			File_Writer::save( $fileJs, $content );
 		}
 		return $fileJs;
@@ -178,6 +179,8 @@ class CMF_Hydrogen_View_Helper_JavaScript
 			if( $enablePackage )
 			{
 				$fileJs	= $this->getPackageFileName( $forceFresh );
+				if( $this->revision )
+					$fileJs	.= '?'.$this->revision;
 				$attributes	= array(
 					'type'		=> 'text/javascript',
 		//			'language'	=> 'JavaScript',
@@ -191,7 +194,6 @@ class CMF_Hydrogen_View_Helper_JavaScript
 				foreach( $this->urls as $url )
 				{
 					if( $this->revision )
-						
 						$url	.= ( preg_match( '/\?/', $url ) ? '&amp;' : '?' ).$this->revision;
 					$attributes	= array(
 						'type'		=> 'text/javascript',
@@ -209,6 +211,8 @@ class CMF_Hydrogen_View_Helper_JavaScript
 			array_unshift( $this->scripts, '' );
 			array_push( $this->scripts, $indentEndTag ? "\t\t" : '' );
 			$content	= implode( "\n", $this->scripts );
+			if( $enablePackage && class_exists( 'JSMin' ) )
+				$content	= JSMin::minify( $content );
 			$attributes	= array(
 				'type'		=> 'text/javascript',
 	//			'language'	=> 'JavaScript',
