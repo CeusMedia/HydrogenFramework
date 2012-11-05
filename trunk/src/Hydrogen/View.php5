@@ -57,7 +57,7 @@ class CMF_Hydrogen_View
 	protected $html;
 	/**	@var		CMM_TEA_Factory				$tea			Instance of TEA (Template Engine Abstraction) Factory (from cmModules) OR empty if TEA is not available */
 	protected $tea			= NULL;
-	
+
 	/**
 	 *	Constructor.
 	 *	@access		public
@@ -70,9 +70,8 @@ class CMF_Hydrogen_View
 		$this->html		= new UI_HTML_Elements;
 		$this->time		= new Alg_Time_Converter();
 		$this->helpers	= new ADT_List_Dictionary;
-		
+
 /*		if( class_exists( 'CMM_TEA_Factory' ) ){
-			
 			$config	= 'config/TEA.ini';
 			if( !file_exists( 'config/TEA.ini' ) )
 				$config	= array( 'CMC' => array( 'active' => TRUE ) );
@@ -197,7 +196,7 @@ class CMF_Hydrogen_View
 	}
 
 	/**
-	 *	@todo	remove use of UI_Template 
+	 *	@todo	remove use of UI_Template
 	 */
 	public function loadContentFile( $fileKey, $data = array(), $path = NULL )
 	{
@@ -320,7 +319,7 @@ class CMF_Hydrogen_View
 				$this->data[$key]	= $value;
 		}
 	}
-	
+
 	/**
 	 *	Sets Environment of Controller by copying Framework Member Variables.
 	 *	@access		protected

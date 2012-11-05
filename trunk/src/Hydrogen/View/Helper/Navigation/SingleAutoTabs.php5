@@ -45,16 +45,15 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAutoTabs extends CMF_Hydrogen_Vi
 	public function __construct( CMF_Hydrogen_Environment_Abstract $env ){
 		$this->env	= $env;
 	}
-	
+
 	public function render( $cornerTabs = "ui-corner-top", $cornerHelper = "ui-corner-all", $cornerWidget = "ui-corner-all" ){
-		
 		$request	= $this->env->getRequest();
 		$acl		= $this->env->getAcl();
 		$userId		= $this->env->getSession()->get( 'userId' );
 		$language	= $this->env->getLanguage()->getLanguage();
 
 		$current	= $request->get( 'controller' ).'/'.$request->get( 'action' );
-	
+
 		$linkMap	= array();
 		foreach( $this->env->getModules()->getAll() as $module ){
 			foreach( $module->links as $link ){
@@ -81,8 +80,7 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAutoTabs extends CMF_Hydrogen_Vi
 		$active				= $this->getCurrentKey( $linkMap, $current );
 		$linkItemList		= array();
 		$rankedLinkItemList	= array();
-		
-	
+
 		foreach( $linkMap as $link ){
 			$class	= 'ui-state-default '.$cornerTabs.' access-'.$link->access;
 			$class	.= $active == $link->path ? ' ui-tabs-selected ui-state-active' : '';
@@ -101,7 +99,7 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAutoTabs extends CMF_Hydrogen_Vi
 
 		$attributes	= array(
 			'class'	=> 'ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header '.$cornerHelper,
-			'style'	=> 'float: left; width: 100%; height: auto;'
+			'style'	=> 'float: left; height: auto;'
 		);
 		$list		= UI_HTML_Tag::create( 'ul', join( $linkItemList ), $attributes	);
 		return UI_HTML_Tag::create( 'div', $list, array( 'class' => 'ui-tabs ui-widget '.$cornerWidget ) );
