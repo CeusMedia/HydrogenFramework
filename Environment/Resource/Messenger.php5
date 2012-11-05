@@ -51,7 +51,7 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 		'2'	=> 'notice',
 		'3'	=> 'success',
 	);
-	
+
 	protected $keyHeadings	= 'messenger_headings';
 	protected $keyMessages	= 'messenger_messages';
 
@@ -80,7 +80,7 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 		$headings[]	= $heading;
 		$this->env->getSession()->set( $this->keyHeadings, $headings );
 	}
-	
+
 	/**
 	 *	Inserts arguments into a Message.
 	 *	@access		protected
@@ -142,6 +142,15 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 					$time		= UI_HTML_Tag::create( 'span', $time, array( 'class' => 'time' ) );
 					$message	= $time.$message;
 				}
+				if( $this->env->getModules()->has( 'UI_JS_Messenger' ) ){
+					$button		= UI_HTML_Tag::create( "div", '<span></span>', array(
+						'class'		=> 'button discard',
+						'onclick'	=> "UI.Messenger.discardMessage($(this).parent());",
+						'alt'		=> 'ausblenden',
+						'title'		=> 'ausblenden',
+					 ) );
+					$message	= $message.$button;
+				}
 				$list[] 	= UI_HTML_Elements::ListItem( $message, 0, array( 'class' => $class ) );
 			}
 			$list	= UI_HTML_Elements::unorderedList( $list, 0 );
@@ -150,7 +159,7 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 		}
 		return $list;
 	}
-	
+
 	/**
 	 *	Clears stack of Messages.
 	 *	@access		public
@@ -187,7 +196,7 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 		$message	= $this->applyParametersToMessage( func_get_args() );
 		$this->noteMessage( 0, $message);
 	}
-	
+
 	/**
 	 *	Saves a Notice Message on the Message Stack.
 	 *	@access		public
@@ -201,7 +210,7 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 		$message	= $this->applyParametersToMessage( func_get_args() );
 		$this->noteMessage( 2, $message);
 	}
-	
+
 	/**
 	 *	Saves a Success Message on the Message Stack.
 	 *	@access		public
@@ -215,7 +224,7 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 		$message	= $this->applyParametersToMessage( func_get_args() );
 		$this->noteMessage( 3, $message);
 	}
-	
+
 	/**
 	 *	Indicates wheteher an Error or a Failure has been noted.
 	 *	@access		public
@@ -230,7 +239,7 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 				$count++;
 		return $count;
 	}
-	
+
 	/**
 	 *	Saves a Message on the Message Stack.
 	 *	@access		protected
