@@ -61,12 +61,12 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	/**	@var	CMF_Hydrogen_Environment_Resource_Page			$page		Page Object */
 	protected $page;
 
-	protected $url;
-	protected $scheme;
-	protected $host;
-	protected $path;
-	protected $root;
-	protected $uri;
+	public $url;
+	public $scheme;
+	public $host;
+	public $path;
+	public $root;
+	public $uri;
 
 	/**
 	 *	Constructor, sets up Resource Environment.
