@@ -61,6 +61,13 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	/**	@var	CMF_Hydrogen_Environment_Resource_Page			$page		Page Object */
 	protected $page;
 
+	protected $url;
+	protected $scheme;
+	protected $host;
+	protected $path;
+	protected $root;
+	protected $uri;
+
 	/**
 	 *	Constructor, sets up Resource Environment.
 	 *	@access		public
@@ -72,6 +79,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 		try
 		{
 			parent::__construct( $options );
+			$this->detectSelf();
 			$this->initSession();																	//  setup session support
 			$this->initMessenger();																	//  setup user interface messenger
 			$this->initRequest();																	//  setup HTTP request handler
@@ -105,6 +113,15 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 		unset( $this->messenger );																	//
 		unset( $this->language );																	//
 		parent::close();
+	}
+
+	protected function detectSelf(){
+		$this->host		= getEnv( 'HTTP_HOST' );
+		$this->root		= getEnv( 'DOCUMENT_ROOT' );
+		$this->path		= dirname( getEnv( 'SCRIPT_NAME' ) ).'/';
+		$this->uri		= $this->root.$this->path;
+		$this->scheme	= getEnv( "HTTPS" ) ? 'https' : 'http';
+		$this->url		= $this->scheme.'://'.$this->host.$this->path;
 	}
 
 	/**
