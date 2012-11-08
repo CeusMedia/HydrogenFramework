@@ -82,7 +82,9 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_H
 				$selected[$matches[0][0]]	= strlen( $matches[0][0] );								//  note link path and its length @todo WRONG! note DEPTH, not length
 		}
 		arsort( $selected );																		//  sort link paths by its length, longest on top
-		return array_shift( array_keys( $selected ) );												//  return longest link path
+		$selected	= array_keys( $selected );
+		$selected	= array_shift( $selected );
+		return $selected;												//  return longest link path
 	}
 
 	public function render( $current = NULL, $niceUrls = FALSE )
