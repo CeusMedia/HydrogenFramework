@@ -109,12 +109,25 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 				if( !empty( $script->load ) && $script->load == "auto" ){							//  script file is to be loaded always
 					$source	= empty( $script->source ) ? 'local' : $script->source;
 					$top	= !empty( $script->top );												//  get flag attribute for appending on top
-					if( $source == 'lib' )															//  script file is in script library
-						$this->js->addUrl( $pathScriptsLib.$script->file, $top );					//  load script file from script library
-					else if( $source == 'local' )													//  script file is in app scripts folder
-						$this->js->addUrl( $pathScripts.$script->file, $top );						//  load script file from app scripts folder
-					else if( $source == 'url' && preg_match( "/^[a-z]+:\/\/.+$/", $script->file ) )	//  script file is absolute URL
+					if( $source == 'lib' ){															//  script file is in script library
+						if( $top )																	//  
+							$this->addJavaScript( $pathScriptsLib.$script->file );					//  
+						else																		//  
+							$this->js->addUrl( $pathScriptsLib.$script->file, $top );				//  load script file from script library
+					}
+					else if( $source == 'local' ){													//  script file is in app scripts folder
+						if( $top )																	//  
+							$this->addJavaScript( $pathScripts.$script->file );						//	
+						else																		//  
+							$this->js->addUrl( $pathScripts.$script->file, $top );					//  load script file from app scripts folder
+					}
+					else if( $source == 'url' ){													//  script file is absolute URL
+						if( !preg_match( "/^[a-z]+:\/\/.+$/", $script->file ) ){
+							$msg	= 'Invalid script URL: '.$script->file;
+							throw new InvalidArgumentException( $msg );
+						}
 						$this->js->addUrl( $script->file, $source );								//  add script file URL
+					}
 				}
 			}
 			foreach( $module->config as $pair ){													//  iterate module configuration pairs
