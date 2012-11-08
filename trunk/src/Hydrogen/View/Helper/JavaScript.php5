@@ -41,10 +41,13 @@ class CMF_Hydrogen_View_Helper_JavaScript
 {
 	protected static $instance;
 	protected $pathCache			= "contents/cache/";
+	protected $prefix				= "";
+	protected $suffix				= "";
 	protected $revision;
 	/**	@var	array				$scripts		List of JavaScript blocks */
 	protected $scripts				= array();
 	protected $urls					= array();
+	protected $useCompression		= FALSE;
 	public $indent					= "\t\t";
 
 	/**
@@ -90,9 +93,17 @@ class CMF_Hydrogen_View_Helper_JavaScript
 	 *	@return		void
 	 */
 	public function clearCache(){
-		$index	= new File_RegexFilter( $this->pathCache, '/pack\.\w+\.js$/' );
-		foreach( $index as $file )
+		$index			= new File_Iterator( $this->pathCache );
+		$lengthPrefix	= strlen( $this->prefix );
+		$lengthSuffix	= strlen( $suffix = $this->suffix.'.js' );
+		foreach( $index as $item ){
+			$fileName	= $item->getFilename();
+			if( $this->prefix && substr( $fileName, 0, $lengthPrefix ) != $this->prefix )
+				continue;
+			if( substr( $fileName, -1 * $lengthSuffix ) != $suffix )
+				continue;
 			unlink( $file->getPathname() );
+		}
 	}
 
 	/**
@@ -126,7 +137,7 @@ class CMF_Hydrogen_View_Helper_JavaScript
 	 */
 	protected function getPackageCacheFileName(){
 		$hash	= $this->getPackageHash();
-		return $this->pathCache.'pack.'.$hash.'.js';
+		return $this->pathCache.$this->prefix.$hash.$this->suffix.'.js';
 	}
 
 	/**
@@ -171,13 +182,11 @@ class CMF_Hydrogen_View_Helper_JavaScript
 	 *	@param		bool		$forceFresh		Flag: force fresh creation instead of using cache
 	 *	@return		string
 	 */
-	public function render( $enablePackage = TRUE, $indentEndTag = FALSE, $forceFresh = FALSE ){
+	public function render( $indentEndTag = FALSE, $forceFresh = FALSE ){
 		$links		= '';
 		$scripts	= '';
-		if( $this->urls )
-		{
-			if( $enablePackage )
-			{
+		if( $this->urls ){
+			if( $this->useCompression ){
 				$fileJs	= $this->getPackageFileName( $forceFresh );
 				if( $this->revision )
 					$fileJs	.= '?'.$this->revision;
@@ -188,11 +197,9 @@ class CMF_Hydrogen_View_Helper_JavaScript
 				);
 				$links	= UI_HTML_Tag::create( 'script', NULL, $attributes );
 			}
-			else
-			{
+			else{
 				$list	= array();
-				foreach( $this->urls as $url )
-				{
+				foreach( $this->urls as $url ){
 					if( $this->revision )
 						$url	.= ( preg_match( '/\?/', $url ) ? '&amp;' : '?' ).$this->revision;
 					$attributes	= array(
@@ -206,12 +213,11 @@ class CMF_Hydrogen_View_Helper_JavaScript
 			}
 		}
 
-		if( $this->scripts )
-		{
+		if( $this->scripts ){
 			array_unshift( $this->scripts, '' );
 			array_push( $this->scripts, $indentEndTag ? "\t\t" : '' );
 			$content	= implode( "\n", $this->scripts );
-			if( $enablePackage && class_exists( 'JSMin' ) )
+			if( $this->useCompression && class_exists( 'JSMin' ) )
 				$content	= JSMin::minify( $content );
 			$attributes	= array(
 				'type'		=> 'text/javascript',
@@ -230,6 +236,18 @@ class CMF_Hydrogen_View_Helper_JavaScript
 	 */
 	public function setRevision( $revision ) {
 		$this->revision	= $revision;
+	}
+
+	public function setCompression( $compression ) {
+		$this->useCompression	= (bool) $compression;
+	}
+
+	public function setPrefix( $prefix ) {
+		$this->prefix	= $prefix;
+	}
+
+	public function setSuffix( $suffix ) {
+		$this->suffix	= $suffix;
 	}
 
 	/**

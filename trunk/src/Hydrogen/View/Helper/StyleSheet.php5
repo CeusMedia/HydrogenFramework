@@ -37,13 +37,16 @@
  *	@since			0.1
  *	@version		$Id$
  */
-class CMF_Hydrogen_View_Helper_StyleSheet
-{
-	protected $pathCache			= "contents/cache/";
+class CMF_Hydrogen_View_Helper_StyleSheet{
+
+	protected $pathCache			= "";
+	protected $prefix				= "";
+	protected $suffix				= "";
 	protected $revision;
 	/**	@var	array				$styles		List of StyleSheet blocks */
 	protected $styles				= array();
 	protected $urls					= array();
+	protected $useCompression		= FALSE;
 	public $indent					= "\t\t";
 
 	/**
@@ -84,7 +87,7 @@ class CMF_Hydrogen_View_Helper_StyleSheet
 	 *	@access		public
 	 *	@return		string
 	 */
-	public function getPackageHash() {
+	public function getPackageHash(){
 		$copy	= $this->urls;
 		sort( $copy );
 		$key	= implode( '_', $copy );
@@ -98,7 +101,7 @@ class CMF_Hydrogen_View_Helper_StyleSheet
 	 */
 	protected function getPackageCacheFileName(){
 		$hash	= $this->getPackageHash();
-		return $this->pathCache.'pack.'.$hash.'.css';
+		return $this->pathCache.$this->prefix.$hash.$this->suffix.'.css';
 	}
 
 	/**
@@ -111,52 +114,25 @@ class CMF_Hydrogen_View_Helper_StyleSheet
 		$combiner	= new File_CSS_Combiner();
 		$compressor	= new File_CSS_Compressor();
 		$fileCss	= $this->getPackageCacheFileName();
-		if( !file_exists( $fileCss ) || $forceFresh ) {
+		if( !file_exists( $fileCss ) || $forceFresh || 1 ) {
 			$contents	= array();
 			if( $this->revision )
 				$content	= "/* @revision ".$this->revision." */\n";
 
 			foreach( $this->urls as $url ){
-				$content	= @file_get_contents( $url );
+				if( preg_match( "/^http/", $url ) )
+					$content	= Net_Reader::readUrl( $url );
+				else
+					$content	= @file_get_contents( $url );
 				if( $content === FALSE )
 					throw new RuntimeException( 'Style file "'.$url.'" not existing' );
 				if( !preg_match( '@://@', $url ) ){
 					$path		= dirname( $url ).'/';
 					if( preg_match( "/\/[a-z]+/", $content ) ){
-						if( class_exists( 'CSSUriRewriter' ) )
-							$content	= CSSUriRewriter::rewrite( $content, $path );
+						$content	= File_CSS_Relocator::rewrite( $content, $path );
 					}
 					$content	= $combiner->combineString( $path, $content, TRUE );
 				}
-/*				$pathCacheReal	= realpath( dirname( $url ) );
-				$pathFileReal	= str_replace( '\\', '/', realpath( $this->pathCache ) );
-				$diff		= preg_replace( '/^'.str_replace( '/', '\/', $pathFileReal ).'/', '', $pathCacheReal );
-				$diffParts	= explode( '/', preg_replace( '/^\//', '', $diff ) );
-				$levels		= count( $diffParts );
-				$matches	= array();
-				preg_match_all( '/url\((.+)\)/U', $content, $matches );
-				if( $matches = array_pop( $matches ) )
-				{
-					foreach( $matches as $match )
-					{
-						$match	= trim( $match );
-						if( preg_match( '/^([a-z]+\:)?\/\//', $match ) )
-							continue;
-						$parts		= explode( '/', $match );
-						$prefixParts	= array();
-						for( $i=0; $i<$levels; $i++ ){
-							$part = array_shift( $parts );
-							if( $part !== '..' )
-								$prefixParts[]	= $part;
-						}
-						if( $prefixParts )
-							$prefixParts[]	= '';
-						$imageUrl	= implode( '/', $prefixParts ).implode( '/', $parts );
-//						if( !file_get_contents(  $imageUrl ) )
-//							throw new RuntimeException( 'Image "'.$imageUrl.'" is missing' );
-						$content	= str_replace( $match, $imageUrl, $content );
-					}
-				}*/
 				$contents[]	= $content;
 			}
 			$content	= implode( "\n\n", $contents );
@@ -167,19 +143,26 @@ class CMF_Hydrogen_View_Helper_StyleSheet
 	}
 
 	/**
+	 *	Returns a list of collected StyleSheet URLs.
+	 *	@access		public
+	 *	@return		array
+	 */
+	public function getUrlList(){
+		return $this->urls;
+	}
+
+	/**
 	 *	Renders an HTML scrtipt tag with all collected StyleSheet URLs and blocks.
 	 *	@access		public
 	 *	@param		bool		$indentEndTag	Flag: indent end tag by 2 tabs
 	 *	@param		bool		$forceFresh		Flag: force fresh creation instead of using cache
 	 *	@return		string
 	 */
-	public function render( $enablePackage = TRUE, $indentEndTag = FALSE, $forceFresh = FALSE ){
+	public function render( $indentEndTag = FALSE, $forceFresh = FALSE ){
 		$links		= '';
 		$styles		= '';
-		if( $this->urls )
-		{
-			if( $enablePackage )
-			{
+		if( $this->urls ){
+			if( $this->useCompression ){
 				$fileCss	= $this->getPackageFileName( $forceFresh );
 				$attributes	= array(
 					'type'		=> 'text/css',
@@ -189,8 +172,7 @@ class CMF_Hydrogen_View_Helper_StyleSheet
 				);
 				$links	= UI_HTML_Tag::create( 'link', NULL, $attributes );
 			}
-			else
-			{
+			else{
 				$list	= array();
 				foreach( $this->urls as $url )
 				{
@@ -208,8 +190,7 @@ class CMF_Hydrogen_View_Helper_StyleSheet
 			}
 		}
 
-		if( $this->styles )
-		{
+		if( $this->styles ){
 			array_unshift( $this->styles, '' );
 			array_push( $this->styles, $indentEndTag ? "\t\t" : '' );
 			$content	= implode( "\n", $this->styles );
@@ -222,12 +203,25 @@ class CMF_Hydrogen_View_Helper_StyleSheet
 	}
 
 	/**
-	 *	Returns a list of collected StyleSheet URLs.
+	 *	Set path to file cache.
 	 *	@access		public
-	 *	@return		array
+	 *	@param		string		$path		Path to file cache
+	 *	@return		void
 	 */
-	public function getUrlList(){
-		return $this->urls;
+	public function setCachePath( $path ){
+		$this->pathCache = $path;
+	}
+
+	public function setCompression( $compression ){
+		$this->useCompression	= (bool) $compression;
+	}
+
+	public function setPrefix( $prefix ){
+		$this->prefix	= $prefix;
+	}
+
+	public function setSuffix( $suffix ){
+		$this->suffix	= $suffix;
 	}
 
 	/**
@@ -236,18 +230,8 @@ class CMF_Hydrogen_View_Helper_StyleSheet
 	 *	@param		mixed		$revision	Revision number or version string
 	 *	@return		void
 	 */
-	public function setRevision( $revision ) {
+	public function setRevision( $revision ){
 		$this->revision	= $revision;
-	}
-
-	/**
-	 *	Set path to file cache.
-	 *	@access		public
-	 *	@param		string		$path		Path to file cache
-	 *	@return		void
-	 */
-	public function setCachePath( $path ) {
-		$this->pathCache = $path;
 	}
 }
 ?>
