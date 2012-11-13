@@ -114,7 +114,7 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 		$combiner	= new File_CSS_Combiner();
 		$compressor	= new File_CSS_Compressor();
 		$fileCss	= $this->getPackageCacheFileName();
-		if( !file_exists( $fileCss ) || $forceFresh || 1 ) {
+		if( !file_exists( $fileCss ) || $forceFresh ) {
 			$contents	= array();
 			if( $this->revision )
 				$content	= "/* @revision ".$this->revision." */\n";
@@ -128,8 +128,10 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 					throw new RuntimeException( 'Style file "'.$url.'" not existing' );
 				if( !preg_match( '@://@', $url ) ){
 					$path		= dirname( $url ).'/';
+					$symlinks	= array( '//themes/petrol' => CMF_PATH.'themes/Hydrogen/petrol' );		//   @todo kriss: find a dynamic solution
+					$docRoot	= getEnv( "DOCUMENT_ROOT" );
 					if( preg_match( "/\/[a-z]+/", $content ) ){
-						$content	= File_CSS_Relocator::rewrite( $content, $path );
+						$content	= File_CSS_Relocator::rewrite( $content, $path, $docRoot, $symlinks );
 					}
 					$content	= $combiner->combineString( $path, $content, TRUE );
 				}

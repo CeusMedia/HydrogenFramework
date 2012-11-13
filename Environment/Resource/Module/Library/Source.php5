@@ -80,7 +80,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source implements CMF_Hyd
 			$this->modules	= unserialize( $cache->get( $cacheKeySource ) );
 			return;
 		}
-		
+
 		$list	= array();
 		$index	= new File_RecursiveNameFilter( $this->source->path, 'module.xml' );
 		$this->env->clock->profiler->tick( 'CMFR_Library_Source::scanFolder: init' );
@@ -126,7 +126,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source implements CMF_Hyd
 		$host		= parse_url( $this->source->path, PHP_URL_HOST );
 		$path		= parse_url( $this->source->path, PHP_URL_PATH );
 		$request	= new Net_HTTP_Request_Sender( $host, $path.'?do=list' );
-		
+
 		$request->addHeaderPair( 'Accept', 'application/json' );
 		$response	= $request->send();
 		if( !in_array( $response->getStatus(), array( 200 ) ) )										//  @todo		extend by more HTTP codes, like 30X
@@ -154,19 +154,17 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source implements CMF_Hyd
 			}
 			catch( Exception $e ){}
 
-#			print_m( $module );
+#			print_m( $modules );
 #			die;
 
 /*				$obj->file		= $entry->getPathname();
 				$obj->icon	= NULL;
-*/			
-			
+*/
 		}
 		$this->modules	= $modules;
 	}
-	
+
 	public function scan(){
-		
 		switch( $this->source->type ){
 			case 'folder':
 				$this->scanFolder();

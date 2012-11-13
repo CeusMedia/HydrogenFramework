@@ -234,8 +234,8 @@ class CMF_Hydrogen_View
 
 	public function loadTemplateFile( $fileName, $data = array() )
 	{
-		$uri	= $this->getTemplateUriFromFile( $fileName );
-		if( !file_exists( $uri ) )
+		$___templateUri	= $this->getTemplateUriFromFile( $fileName );
+		if( !file_exists( $___templateUri ) )
 			throw new RuntimeException( 'Template "'.$fileName.'" is not existing', 311 );
 
 		if( $this->env->getPage()->tea ){
@@ -248,7 +248,7 @@ class CMF_Hydrogen_View
 			$data['helpers']	= $this->helpers;													//  
 			$data	+= $this->data;																	//  
 			$this->env->getPage()->tea->setDefaultType( 'PHP' );									//  
-			$template	= $this->env->getPage()->tea->getTemplate( $uri );							//  
+			$template	= $this->env->getPage()->tea->getTemplate( $__templateUri );				//  
 			$template->setData( $data );															//  
 			return $template->render();																//  
 		}
@@ -264,7 +264,7 @@ class CMF_Hydrogen_View
 			extract( $this->data );																	//  
 			extract( $___data );																	//  
 			$helpers	= $this->helpers;															//  
-			$result		= require( $uri );															//  
+			$result		= require( $___templateUri );												//  
 			$buffer		= ob_get_clean();															//  
 			$content	= $result;
 			if( trim( $buffer ) )
