@@ -102,7 +102,7 @@ class CMF_Hydrogen_View_Helper_JavaScript
 				continue;
 			if( substr( $fileName, -1 * $lengthSuffix ) != $suffix )
 				continue;
-			unlink( $file->getPathname() );
+			unlink( $item->getPathname() );
 		}
 	}
 
@@ -156,11 +156,12 @@ class CMF_Hydrogen_View_Helper_JavaScript
 				$content	= @file_get_contents( $url );
 				if( $content === FALSE )
 					throw new RuntimeException( 'Script file "'.$url.'" not existing' );
+				if( !preg_match( "/\.min\.js$/", $url ) )
+					if( class_exists( 'JSMin' ) )
+						$content	= JSMin::minify( $content );
 				$contents[]	= $content;
 			}
 			$content	= implode( "\n\n", $contents );
-			if( class_exists( 'JSMin' ) )
-				$content	= JSMin::minify( $content );
 			File_Writer::save( $fileJs, $content );
 		}
 		return $fileJs;
@@ -217,8 +218,15 @@ class CMF_Hydrogen_View_Helper_JavaScript
 			array_unshift( $this->scripts, '' );
 			array_push( $this->scripts, $indentEndTag ? "\t\t" : '' );
 			$content	= implode( "\n", $this->scripts );
-			if( $this->useCompression && class_exists( 'JSMin' ) )
-				$content	= JSMin::minify( $content );
+			if( $this->useCompression ){
+				try{
+					$content	= Net_API_Google_ClosureCompiler::minify( $content );
+				}
+				catch( Exception $e ){
+					if( class_exists( 'JSMin' ) )
+						$content	= JSMin::minify( $content );
+				}
+			}
 			$attributes	= array(
 				'type'		=> 'text/javascript',
 	//			'language'	=> 'JavaScript',
