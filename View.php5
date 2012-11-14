@@ -248,7 +248,7 @@ class CMF_Hydrogen_View
 			$data['helpers']	= $this->helpers;													//  
 			$data	+= $this->data;																	//  
 			$this->env->getPage()->tea->setDefaultType( 'PHP' );									//  
-			$template	= $this->env->getPage()->tea->getTemplate( $__templateUri );				//  
+			$template	= $this->env->getPage()->tea->getTemplate( $___templateUri );				//  
 			$template->setData( $data );															//  
 			return $template->render();																//  
 		}
