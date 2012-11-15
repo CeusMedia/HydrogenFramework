@@ -56,7 +56,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydr
 		$this->env->clock->profiler->tick( 'Resource_Module_Library_Local::scan' );
 	}
 
-	public function callHook( $resource, $event, $context, $arguments = array() ){
+	public function callHook( $resource, $event, &$context, $arguments = array() ){
 		$count	= 0;
 		foreach( $this->modules as $module ){
 			if( empty( $module->hooks[$resource][$event] ) )
