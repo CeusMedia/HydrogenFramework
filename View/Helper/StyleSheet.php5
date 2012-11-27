@@ -111,37 +111,38 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 	 *	@return		string
 	 */
 	protected function getPackageFileName( $forceFresh = FALSE ){
-		$combiner	= new File_CSS_Combiner();
-		$compressor	= new File_CSS_Compressor();
-		$fileCss	= $this->getPackageCacheFileName();
-		if( !file_exists( $fileCss ) || $forceFresh ) {
-			$contents	= array();
-			if( $this->revision )
-				$content	= "/* @revision ".$this->revision." */\n";
+		$fileCss	= $this->getPackageCacheFileName();												//  calculate CSS package file name for collected CSS files
+		if( file_exists( $fileCss ) && !$forceFresh )												//  CSS package file has been built before and is not to be rebuild
+			return $fileCss;																		//  return CSS package file name
+		$combiner	= new File_CSS_Combiner();														//  load CSS combiner for nested CSS files
+		$compressor	= new File_CSS_Compressor();													//  load CSS compressor
+		$relocator	= new File_CSS_Relocator();														//  load CSS relocator
+		$pathRoot	= getEnv( 'DOCUMENT_ROOT' );													//  get server document root path for CSS relocator
+		$pathSelf	= str_replace( $pathRoot, '', dirname( getEnv( 'SCRIPT_FILENAME' ) ) );			//  get path relative to document root for symbolic link map
 
-			foreach( $this->urls as $url ){
-				if( preg_match( "/^http/", $url ) )
-					$content	= Net_Reader::readUrl( $url );
-				else
-					$content	= @file_get_contents( $url );
-				if( $content === FALSE )
-					throw new RuntimeException( 'Style file "'.$url.'" not existing' );
-				if( !preg_match( '@://@', $url ) ){
-					$path		= dirname( $url ).'/';
-					$symlinks	= array( '//themes/petrol' => CMF_PATH.'themes/Hydrogen/petrol' );		//   @todo kriss: find a dynamic solution
-					$docRoot	= getEnv( "DOCUMENT_ROOT" );
-					if( preg_match( "/\/[a-z]+/", $content ) ){
-						$content	= File_CSS_Relocator::rewrite( $content, $path, $docRoot, $symlinks );
-					}
-					$content	= $combiner->combineString( $path, $content, TRUE );
-				}
-				$contents[]	= $content;
-			}
-			$content	= implode( "\n\n", $contents );
-			$content	= $compressor->compressString( $content );
-			File_Writer::save( $fileCss, $content );
+		$symlinks	= array();																		//  prepare map of symbolic links for CSS relocator
+		foreach( Folder_Lister::getFolderList( 'themes' ) as $item )								//  iterate theme folders
+			if( is_link( ( $path = $item->getPathname() ) ) )										//  if theme folder is a link
+				$symlinks['/'.$pathSelf.'/themes/'.$item->getFilename()] = realpath( $path );		//  not symbolic link
+
+		$contents	= array();																		//  prepare empty package content list
+		if( $this->revision )																		//  a revision is set
+			$contents[]	= "/* @revision ".$this->revision." */\n";									//  add revision header to content list
+
+		foreach( $this->urls as $url ){																//  iterate collected URLs
+			if( preg_match( "/^http/", $url ) ){													//  CSS resource is global (using HTTP)
+				$contents[]	= Net_Reader::readUrl( $url );											//  read global CSS content and append to content list
+				continue;																			//  skip to next without relocation etc.
+			}					
+			$pathFile	= dirname( $url ).'/';														//  get path to CSS file within app
+			$content	= $combiner->combineString( $pathFile, File_Reader::load( $url ), TRUE );	//  read local CSS content and insert imported CSS files within CSS content
+			if( preg_match( "/\/[a-z]+/", $content ) )												//  CSS content contains path notations
+				$content	= $relocator->rewrite( $content, $pathFile, $pathRoot, $symlinks );		//  relocate resources paths in CSS content
+			$contents[]	= $content;																	//  add CSS content after import and relocation
 		}
-		return $fileCss;
+		$content	= $compressor->compress( implode( "\n\n", $contents ) );						//  compress collected CSS contents
+		File_Writer::save( $fileCss, $content );													//  save CSS package file
+		return $fileCss;																			//  return CSS package file name
 	}
 
 	/**
