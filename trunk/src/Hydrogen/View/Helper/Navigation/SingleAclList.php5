@@ -65,7 +65,7 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAclList extends CMF_Hydrogen_Vie
 		return $map;
 	}
 
-	public function render( $current = NULL )
+	public function render( $current = NULL, $niceUrls = FALSE )
 	{
 		$path		= empty( $_REQUEST['path'] ) ? $current : $_REQUEST['path'];
 		$linkMap	= $this->getFilteredLinkMap( $this->linkMap );
