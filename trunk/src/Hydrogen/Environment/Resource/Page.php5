@@ -151,6 +151,12 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 	}
 
 	public function build( $bodyAttributes = array() ){
+
+		if( $this->packStyleSheets && $this->env->getRequest()->has( 'flushStyleCache') ){
+			$this->css->primer->clearCache();
+			$this->css->theme->clearCache();
+		}
+
 		$this->addHead( $this->css->primer->render( $this->packStyleSheets ) );
 		$this->addHead( $this->css->theme->render( $this->packStyleSheets ) );
 		
