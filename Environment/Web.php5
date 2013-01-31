@@ -228,6 +228,10 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 		$this->page	= new CMF_Hydrogen_Environment_Resource_Page( $this );
 		$this->page->setPackaging( $pageJavaScripts, $packStyleSheets );
 		$this->page->setBaseHref( $this->getBaseUrl( self::$configKeyBaseHref ) );
+
+		$words		= $this->getLanguage()->getWords( 'main' );
+		if( is_array( $words ) && isset( $words['main']['title'] ) )
+			$this->page->setTitle( $words['main']['title'] );
 		$this->clock->profiler->tick( 'env: page' );
 	}
 
