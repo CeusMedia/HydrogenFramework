@@ -49,7 +49,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	protected $acl;
 	/**	@var	CMF_Hydrogen_Application	$application	Instance of Application */
 	protected $application;
-	/**	@var	CMM_SEA_Adapter_Interface	$cache		Instance of cache adapter */
+	/**	@var	CMM_SEA_Adapter_Interface	$cache			Instance of cache adapter */
 	protected $cache;
 	/**	@var	Alg_Time_Clock				$clock			Clock Object */
 	protected $clock;
@@ -60,6 +60,8 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	
 	public static $configFile				= "config.ini.inc";
 
+	/**	@var	CMF_Hydrogen_Environment_Resource_LogicPool				$logic		Pool for logic class instances */
+	protected $logic						= array();
 	/**	@var	CMF_Hydrogen_Environment_Resource_Module_Library_Local	$modules	Handler for local modules */
 	protected $modules						= array();
 	/**	@var	array						$options		Set options to override static properties */
@@ -79,6 +81,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$this->path			= isset( $options['pathApp'] ) ? $options['pathApp'] : getCwd().'/';	//  detect application path
 		$this->initClock();																			//  setup clock
 		$this->initConfiguration();																	//  setup configuration
+		$this->initLogic();
 		$this->initModules();																		//  setup module support
 		$this->initDatabase();																		//  setup database connection
 		$this->initCache();																			//  setup cache support
@@ -162,6 +165,21 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	public function getDisclosure()
 	{
 		return $this->disclosure;
+	}
+
+#	public function getLog()
+#	{
+#		return $this->log;
+#	}
+
+	/**
+	 *	Returns Logic Pool Object.
+	 *	@access		public
+	 *	@return		CMF_Hydrogen_Environment_Resource_LogicPool
+	 */
+	public function getLogic()
+	{
+		return $this->logic;
 	}
 
 	/**
@@ -313,6 +331,15 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$this->clock->profiler->tick( 'env: disclosure' );
 	}
 	
+#	protected function initLog(){
+#		$this->log	= CMF_Hydrogen_Environment_Resource_Log( $this );
+#	}
+	
+	protected function initLogic()
+	{
+		$this->logic		= new CMF_Hydrogen_Environment_Resource_LogicPool( $this );
+		$this->clock->profiler->tick( 'env: logic' );
+	}
 	protected function initModules(){
 #		$this->modules	= new CMF_Hydrogen_Environment_Resource_Module_Handler( $this );
 #		$modules		= $this->modules->getInstalled();
@@ -340,6 +367,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 				}
 			}
 		}
+		$this->modules->callHook( 'Env', 'initModules', $this );										//  call related module event hooks
 		$this->config->set( 'module.acl.public', implode( ',', $public ) );						//  save public link list
 		$this->clock->profiler->tick( 'env: modules' );
 	}
