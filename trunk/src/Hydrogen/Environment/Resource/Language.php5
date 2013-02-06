@@ -52,6 +52,7 @@ class CMF_Hydrogen_Environment_Resource_Language
 	
 	/**
 	 *	Constructor.
+	 *	Uses config::path.locales and defaults to 'locales/'.
 	 *	@access		public
 	 *	@param		CMF_Hydrogen_Environment_Abstract	$env			Application Environment Object
 	 *	@param		string								$language		Language to select
@@ -62,7 +63,7 @@ class CMF_Hydrogen_Environment_Resource_Language
 		$this->env			= $env;
 		$config				= $env->getConfig();
 
-		$this->filePath		= 'locales';															//  assume default folder name
+		$this->filePath		= 'locales/';															//  assume default folder name
 		if( $config->get( 'path.locales' ) )														//  a locales folder has been configured
 			$this->filePath	= $config->get( 'path.locales' );										//  take the configured folder name
 		if( !file_exists( $this->filePath ) )														//  locales folder is not existing
@@ -111,6 +112,16 @@ class CMF_Hydrogen_Environment_Resource_Language
 	}
 
 	/**
+	 *	Returns selected Language.
+	 *	@access		public
+	 *	@return		string
+	 */
+	public function getLanguagePath()
+	{
+		return $this->filePath.$this->language.'/';
+	}
+
+	/**
 	 *	Returns list of allowed languages.
 	 *	@access		public
 	 *	@return		string
@@ -131,8 +142,11 @@ class CMF_Hydrogen_Environment_Resource_Language
 	 */
 	public function getWords( $topic, $strict = TRUE, $force = TRUE )
 	{
+		if( !isset( $this->data[$topic] ) )
+			$this->load( $topic, $strict, $force );
 		if( isset( $this->data[$topic] ) )
 			return $this->data[$topic];
+		
 		$message	= 'Invalid language topic "'.$topic.'"';
 		if( $strict )
 			throw new RuntimeException( $message, 221 );
