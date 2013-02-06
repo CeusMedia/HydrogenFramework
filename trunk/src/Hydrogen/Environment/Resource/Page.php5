@@ -151,6 +151,8 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 	}
 
 	public function build( $bodyAttributes = array() ){
+		if( ( $modules = $this->env->getModules() ) )												//  get module handler resource if existing
+			$modules->callHook( 'Page', 'build', $this );											//  call related module event hooks
 
 		if( $this->packStyleSheets && $this->env->getRequest()->has( 'flushStyleCache') ){
 			$this->css->primer->clearCache();
@@ -176,6 +178,8 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 		$bodyAttributes['class']	= join( ' ', $classes );
 #		if( empty( $bodyAttributes['id'] ) )
 #			$bodyAttributes['id']	= 
+		if( ( $modules = $this->env->getModules() ) )												//  get module handler resource if existing
+			$modules->callHook( 'App', 'respond', $this );											//  call related module event hooks
 		return parent::build( $bodyAttributes );
 	}
 
