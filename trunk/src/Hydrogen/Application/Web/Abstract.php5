@@ -51,6 +51,23 @@ abstract class CMF_Hydrogen_Application_Web_Abstract extends CMF_Hydrogen_Applic
 		// ...
 	}
 
+	protected function reportMissingModules( $modules ){
+		$config	= $this->env->getConfig();
+		if( !$config->get( 'app.setup.url' ) )
+			print( 'Module(s) missing: <ul><li>'.join( '</li><li>', $modules ).'</li></ul>' );
+
+		$instanceId	= $config->get( 'app.setup.instanceId' );
+		$baseUrl	= $config->get( 'app.setup.url' );
+		$baseUrl	.= 'admin/module/installer/view/';
+		$list	= array();
+		foreach( $modules as $moduleId ){
+			$url	= $baseUrl.$moduleId.'?selectInstanceId='.$instanceId;
+			$list[]	= '<li><a href="'.$url.'">'.$moduleId.'</a></li>';
+		}
+		$list	= '<ul>'.join( $list ).'</ul>';
+		print( 'Module(s) missing: '.$list );
+	}
+
 	/**
 	 *	Sets collacted View Components for Master View.
 	 *	@access		protected
@@ -76,23 +93,5 @@ abstract class CMF_Hydrogen_Application_Web_Abstract extends CMF_Hydrogen_Applic
 		$view	= new CMF_Hydrogen_View( $this->env );
 		return $view->loadTemplateFile( $templateFile, $this->components );
 	}
-
-	protected function reportMissingModules( $modules ){
-		$config	= $this->env->getConfig();
-		if( !$config->get( 'app.setup.url' ) )
-			print( 'Module(s) missing: <ul><li>'.join( '</li><li>', $modules ).'</li></ul>' );
-
-		$instanceId	= $config->get( 'app.setup.instanceId' );
-		$baseUrl	= $config->get( 'app.setup.url' );
-		$baseUrl	.= 'admin/module/installer/view/';
-		$list	= array();
-		foreach( $modules as $moduleId ){
-			$url	= $baseUrl.$moduleId.'?selectInstanceId='.$instanceId;
-			$list[]	= '<li><a href="'.$url.'">'.$moduleId.'</a></li>';
-		}
-		$list	= '<ul>'.join( $list ).'</ul>';
-		print( 'Module(s) missing: '.$list );
-	}
-
 }
 ?>
