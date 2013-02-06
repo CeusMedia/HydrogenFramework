@@ -57,6 +57,8 @@ class CMF_Hydrogen_View
 	protected $html;
 	/**	@var		CMM_TEA_Factory				$tea			Instance of TEA (Template Engine Abstraction) Factory (from cmModules) OR empty if TEA is not available */
 	protected $tea			= NULL;
+	/**	@var		string						$pathTemplates	Path to template file, can be set by config::path.templates */
+	protected $pathTemplates	= 'templates/';
 
 	/**
 	 *	Constructor.
@@ -70,6 +72,11 @@ class CMF_Hydrogen_View
 		$this->html		= new UI_HTML_Elements;
 		$this->time		= new Alg_Time_Converter();
 		$this->helpers	= new ADT_List_Dictionary;
+
+		$path	= $this->env->getConfig()->get( 'path.templates' );									//  get template path from config
+		$this->pathTemplates	= strlen( $path ) ? $path : $this->pathTemplates;					//  use configured template path is set, else keep default path
+		if( !file_exists( $this->pathTemplates ) )													//  templates folder is not existing
+			throw new RuntimeException( 'Templates folder "'.$this->pathTemplates.'" is missing' );	//  quit with exception
 
 /*		if( class_exists( 'CMM_TEA_Factory' ) ){
 			$config	= 'config/TEA.ini';
@@ -123,9 +130,8 @@ class CMF_Hydrogen_View
 	public function getContentUri( $fileKey, $path = NULL )
 	{
 		$path		= preg_replace( '/^(.+)(\/)*$/U', '\\1/', $path );
-		$pathLocale	= $this->env->getConfig()->get( 'path.locales' );
- 		$language	= $this->env->getLanguage()->getLanguage();
-		$uri		= $pathLocale.$language.'/'.$path.$fileKey;
+		$pathLocale	= $this->env->getLanguage()->getLanguagePath();
+		$uri		= $pathLocale.$path.$fileKey;
 		return $uri;
 	}
 
@@ -152,6 +158,7 @@ class CMF_Hydrogen_View
 
 	/**
 	 *	Returns File Name of Template.
+	 *	Uses config::path.templates and defaults to 'templates/'.
 	 *	@access		protected
 	 *	@param		string		$controller		Name of Controller
 	 *	@param		string		$action			Name of Action
@@ -159,8 +166,7 @@ class CMF_Hydrogen_View
 	 */
 	protected function getTemplateUriFromFile( $fileKey )
 	{
-		$path		= $this->env->getConfig()->get( 'path.templates' );
-		return $path.$fileKey;
+		return $this->pathTemplates.$fileKey;
 	}
 
 	public function hasContent( $controller, $action, $path = NULL )
