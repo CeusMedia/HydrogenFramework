@@ -35,7 +35,7 @@ class CMF_Hydrogen_Environment_Router_Single extends CMF_Hydrogen_Environment_Ro
 		if( !$this->env->request )
 			throw new RuntimeException( 'Routing needs a registered request resource' );
 		$request	= $this->env->getRequest();
-		$path		= $request->getFromSource( 'path', 'get' );
+		$path		= $request->getFromSource( self::$pathKey, 'get' );
 		if( !trim( $path ) )
 			return;
 

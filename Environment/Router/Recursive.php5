@@ -46,7 +46,7 @@ class CMF_Hydrogen_Environment_Router_Recursive extends CMF_Hydrogen_Environment
 
 		$request	= $this->env->getRequest();
 
-		$path	= $request->getFromSource( 'path', 'get' );
+		$path	= $request->getFromSource( self::$pathKey, 'get' );
 		$path	= preg_replace( '@^(.*)/?$@U', '\\1', trim( $path ) );
 		$parts	= explode( '/', $path );
 		$right	= array();

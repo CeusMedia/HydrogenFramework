@@ -39,6 +39,9 @@
  */
 abstract class CMF_Hydrogen_Environment_Router_Abstract implements CMF_Hydrogen_Environment_Router_Interface
 {
+	/**	@var		string		Key of path in request, default: path */
+	static public $pathKey		= "path";
+	
 	/**	@var	CMF_Hydrogen_Environment_Abstract	$env		Environment object */
 	protected $env;
 #	public $configKeyBaseHref	= 'app.base.url';
