@@ -68,6 +68,8 @@ class CMF_Hydrogen_Controller
 		$this->setEnv( $env );
 		$env->clock->profiler->tick( 'CMF_Controller('.get_class( $this ).'): env set' );
 		$this->view	= $this->getViewObject( $this->controller );
+//		$arguments		= array_slice( func_get_args(), 1 );										//  collect additional arguments for extended logic classes
+//		Alg_Object_MethodFactory::callObjectMethod( $this, '__onInit', $arguments, TRUE, TRUE );	//  invoke possibly extended init method
 		$this->__onInit();
 		$env->clock->profiler->tick( 'CMF_Controller('.get_class( $this ).'): done' );
 	}
