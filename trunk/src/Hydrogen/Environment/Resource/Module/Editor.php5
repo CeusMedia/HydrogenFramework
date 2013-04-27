@@ -91,9 +91,10 @@ class CMF_Hydrogen_Environment_Resource_Module_Editor{
 	 *	@param		string		$values		List of possible values
 	 *	@param		string		$mandatory	Flag: this pair needs to be set
 	 *	@param		string		$protected	Flag: do not deliver this pair to frontend
+	 *	@param		string		$title		Description
 	 *	@return		void
 	 */
-	public function addConfig( $moduleId, $name, $type, $value, $values, $mandatory, $protected ){
+	public function addConfig( $moduleId, $name, $type, $value, $values, $mandatory, $protected, $title = NULL ){
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
 		$link		= $xml->addChild( 'config', $value );											//  add pair node
 		$link->addAttribute( 'name', $name );														//  set name attribute
@@ -105,6 +106,8 @@ class CMF_Hydrogen_Environment_Resource_Module_Editor{
 			$link->addAttribute( 'mandatory', trim( $mandatory ) );									//  set mandatory attribute
 		if( strlen( trim( $protected ) ) )															//  protected attribute is given
 			$link->addAttribute( 'protected', trim( $protected ) );									//  set protected attribute
+		if( strlen( trim( $title ) ) )																//  title attribute is given
+			$link->addAttribute( 'title', trim( addslashes( $title ) ) );							//  set title attribute
 		$this->saveModuleXml( $moduleId, $xml );													//  save modified module XML
 	}
 	
