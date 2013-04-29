@@ -53,13 +53,13 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 	protected $scriptsOnReady	= array();
 	/**	@var		CMM_TEA_Factory						$tea				Instance of TEA (Template Engine Abstraction) Factory (from cmModules) OR empty if TEA is not available */
 	public $tea					= NULL;
-	
+
 	public function __construct( CMF_Hydrogen_Environment_Abstract $env ){
 		$language	= 'en';
 		$this->env	= $env;
 		if( $this->env->has( 'language' ) )
 			$language	= $this->env->getLanguage()->getLanguage();
-		
+
 		parent::__construct( $language );
 		$this->js			= CMF_Hydrogen_View_Helper_JavaScript::getInstance();
 		$this->css			= new stdClass;
@@ -161,14 +161,15 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 
 		$this->addHead( $this->css->primer->render( $this->packStyleSheets ) );
 		$this->addHead( $this->css->theme->render( $this->packStyleSheets ) );
-		
-		if( $this->scriptsOnReady ) $this->js->addScript( $this->renderScriptsOnReady() );			//  append collect onReady-JavaScripts to page
-		
-		$this->addBody( $this->js->render( $this->packJavaScripts ) );
-		
+
+		if( $this->scriptsOnReady )																	//  JavaScripts to call on start have been collected
+			$this->js->addScript( $this->renderScriptsOnReady() );									//  append collected onReady-JavaScripts to page
+
+		$this->addBody( $this->js->render() );
+
 		$controller	= str_replace( '/', '-', $this->env->getRequest()->get( 'controller' ) );
 		$action		= str_replace( '/', '-', $this->env->getRequest()->get( 'action' ) );
-		
+
 		$classes	= isset( $bodyAttributes['class'] ) ? $bodyAttributes['class'] : NULL;
 		$classes	= strlen( trim( $classes ) ) ? explode( ' ', $classes) : array();
 		$classes[]	= 'module'.join( explode( ' ', ucwords( str_replace( '-', ' ', $controller ) ) ) );
