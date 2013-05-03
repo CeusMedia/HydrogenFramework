@@ -95,10 +95,16 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 						$this->css->theme->addUrl( $style->file, $top );							//  add style file URL
 					else if( $source == 'primer' )													//  style file is in primer theme
 						$this->addPrimerStyle( $style->file, $top );								//  load style file from primer theme folder
-					else if( $source == 'lib' && $pathStylesLib )									//  style file is in styles library, which is enabled by configured path
+					else if( $source == 'lib' ){													//  style file is in styles library, which is enabled by configured path
+						if( !strlen( trim( $pathStylesLib ) ) )
+							throw new RuntimeException( 'Path to style library "path.styles.lib" is not configured' );
 						$this->css->primer->addUrl( $pathStylesLib.$style->file, $top );			//  load style file from styles library
-					else if( $source == 'scripts-lib' && $pathScriptsLib )							//  style file is in scripts library, which is enabled by configured path
+					}	
+					else if( $source == 'scripts-lib' && $pathScriptsLib ){							//  style file is in scripts library, which is enabled by configured path
+						if( !strlen( trim( $pathScriptsLib ) ) )
+							throw new RuntimeException( 'Path to script library "path.scripts.lib" is not configured' );
 						$this->css->primer->addUrl( $pathScriptsLib.$style->file, $top );			//  load style file from scripts library
+					}
 					else if( $source == 'theme' || !$source )										//  style file is in custom theme
 						$this->addThemeStyle( $style->file );										//  load style file from custom theme folder
 					else																			//  style file is in an individual source folder within themes folder
