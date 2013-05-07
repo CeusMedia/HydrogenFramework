@@ -41,6 +41,7 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 {
 	/**	@var	CMF_Hydrogen_Environment_Abstract		$env				Environment object */
 	public $env;
+	protected $bodyClasses		= array();
 	protected $packJavaScripts	= FALSE;
 	protected $packStyleSheets	= FALSE;
 	protected $pathPrimer;
@@ -72,11 +73,25 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 		$this->pathTheme	= $path.$env->config->get( 'layout.theme' ).'/';
 		if( strlen( $title	= $env->config->get( 'app.name' ) ) )
 			$this->setTitle( $title );
-
-		$this->applyModules();
+		if( ( $modules = $this->env->getModules() ) )												//  get module handler resource if existing
+			$modules->callHook( 'Page', 'init', $this );											//  call related module event hooks
+//		$this->applyModules();																		//  @todo kriss: remove, is called by environment now
 	}
 
-	protected function applyModules(){
+	public function addBodyClass( $class ){
+		if( strlen( trim( $class ) ) )
+			$this->bodyClasses[]	= trim( htmlentities( $class, ENT_QUOTES, 'UTF-8' ) );
+	}
+
+	public function addPrimerStyle( $fileName, $onTop = FALSE ){
+		$this->css->primer->addUrl( $this->pathPrimer.'css/'.$fileName, $onTop );
+	}
+
+	public function addThemeStyle( $fileName ){
+		$this->css->theme->addUrl( $this->pathTheme.'css/'.$fileName );
+	}
+
+	public function applyModules(){
 		$modules	= $this->env->getModules();														//  get module handler resource
 		if( !$modules )																				//  module handler resource is not existing
 			return;
@@ -148,14 +163,6 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 		$this->addHead( '<script type="text/javascript">var config = '.json_encode( $listConfig ).';</script>' );
 	}
 
-	public function addPrimerStyle( $fileName, $onTop = FALSE ){
-		$this->css->primer->addUrl( $this->pathPrimer.'css/'.$fileName, $onTop );
-	}
-
-	public function addThemeStyle( $fileName ){
-		$this->css->theme->addUrl( $this->pathTheme.'css/'.$fileName );
-	}
-
 	public function build( $bodyAttributes = array() ){
 		if( ( $modules = $this->env->getModules() ) )												//  get module handler resource if existing
 			$modules->callHook( 'Page', 'build', $this );											//  call related module event hooks
@@ -173,15 +180,13 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 
 		$this->addBody( $this->js->render() );
 
-		$controller	= str_replace( '/', '-', $this->env->getRequest()->get( 'controller' ) );
-		$action		= str_replace( '/', '-', $this->env->getRequest()->get( 'action' ) );
-
-		$classes	= isset( $bodyAttributes['class'] ) ? $bodyAttributes['class'] : NULL;
-		$classes	= strlen( trim( $classes ) ) ? explode( ' ', $classes) : array();
-		$classes[]	= 'module'.join( explode( ' ', ucwords( str_replace( '-', ' ', $controller ) ) ) );
-		$classes[]	= 'controller-'.$controller;
-		$classes[]	= 'action-'.$action;
-		$classes[]	= 'site-'.$controller.'-'.$action;
+		/*  --  BODY CLASSES  --  */
+		$classes	= array();
+		foreach( $this->bodyClasses as $class )
+			$classes[]	= $class;
+		if( isset( $bodyAttributes['class'] ) && strlen( trim( $bodyAttributes['class'] ) ) )
+			foreach( explode( " ", trim( $bodyAttributes['class'] ) ) as $class )
+				$classes[]	= $class;
 		$bodyAttributes['class']	= join( ' ', $classes );
 #		if( empty( $bodyAttributes['id'] ) )
 #			$bodyAttributes['id']	= 
