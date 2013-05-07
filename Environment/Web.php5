@@ -225,13 +225,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	 */
 	protected function initPage( $pageJavaScripts = TRUE, $packStyleSheets = TRUE )
 	{
-		$controller	= str_replace( '/', '-', $this->getRequest()->get( 'controller' ) );
-		$action		= str_replace( '/', '-', $this->getRequest()->get( 'action' ) );
 		$this->page	= new CMF_Hydrogen_Environment_Resource_Page( $this );
-		$this->page->addBodyClass( 'module'.join( explode( ' ', ucwords( str_replace( '-', ' ', $controller ) ) ) ) );
-		$this->page->addBodyClass( 'controller-'.$controller );
-		$this->page->addBodyClass( 'action-'.$action );
-		$this->page->addBodyClass( 'site-'.$controller.'-'.$action );
 		$this->page->setPackaging( $pageJavaScripts, $packStyleSheets );
 		$this->page->setBaseHref( $this->getBaseUrl( self::$configKeyBaseHref ) );
 		$this->page->applyModules();
