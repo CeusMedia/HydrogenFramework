@@ -164,6 +164,14 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 	}
 
 	public function build( $bodyAttributes = array() ){
+		$controller	= str_replace( '/', '-', $this->env->getRequest()->get( 'controller' ) );
+		$action		= str_replace( '/', '-', $this->env->getRequest()->get( 'action' ) );
+		$moduleKey	= join( explode( ' ', ucwords( str_replace( '-', ' ', $controller ) ) ) );
+		$this->addBodyClass( 'module'.$moduleKey );
+		$this->addBodyClass( 'controller-'.$controller );
+		$this->addBodyClass( 'action-'.$action );
+		$this->addBodyClass( 'site-'.$controller.'-'.$action );
+
 		if( ( $modules = $this->env->getModules() ) )												//  get module handler resource if existing
 			$modules->callHook( 'Page', 'build', $this );											//  call related module event hooks
 
