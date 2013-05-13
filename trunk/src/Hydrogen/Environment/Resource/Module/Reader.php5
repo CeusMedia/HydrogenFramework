@@ -123,7 +123,8 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 			$values		= $pair->hasAttribute( 'values' ) ? explode( ',', $pair->getAttribute( 'values' ) ) : array();
 			$mandatory	= $pair->hasAttribute( 'mandatory' ) ? $pair->getAttribute( 'mandatory' ) : FALSE;
 			$protected	= $pair->hasAttribute( 'protected' ) ? $pair->getAttribute( 'protected' ) : FALSE;
-			$value	= trim( (string) $pair );
+			$title		= $pair->hasAttribute( 'title' ) ? $pair->getAttribute( 'title' ) : NULL;
+			$value		= trim( (string) $pair );
 			if( in_array( strtolower( $type ), array( 'boolean', 'bool' ) ) )						//  value is boolean
 				$value	= !in_array( strtolower( $value ), array( 'no', 'false', '0', '' ) );		//  value is not negative
 			$obj->config[$key]	= (object) array(
@@ -133,6 +134,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 				'values'	=> $values,
 				'mandatory'	=> $mandatory,
 				'protected'	=> $protected,
+				'title'		=> $title,
 			);
 		}
 		if( $xml->relations ){
