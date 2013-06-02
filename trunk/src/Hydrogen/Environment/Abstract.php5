@@ -99,10 +99,34 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		return $this->get( $key );
 	}
 
-	public function close()
+	/**
+	 *	Tries to unbind registered environment handler objects.
+	 *	@access		public
+	 *	@param		array		$additionalResources	List of resource member names to be unbound, too
+	 *	@return		void
+	 */
+	public function close( $additionalResources = array(), $keepAppAlive = FALSE )
 	{
-		unset( $this->config );																		//
-		unset( $this->clock );																		//
+		$resources	= array(																		//  list of resource handler member names, namely of ...
+			'config',																				//  ... base application configuration handler
+			'clock',																				//  ... internal clock handler
+			'logic',																				//  ... logic handler 
+			'modules',																				//  ... module handler
+			'dbc',																					//  ... database handler
+			'cache',																				//  ... cache handler
+			'acl',																					//  ... cache handler
+		);
+		$resources	= array_merge( $resources, array_values( $additionalResources ) );
+		foreach( array_reverse( $resources ) as $resource ){										//  iterate resources backwards
+			if( isset( $this->$resource ) ){														//  resource is set
+				if( isset( $this->clock ) )															//  if clock resource is still set ...
+					$this->clock->profiler->tick( 'env: close: '.$resource );						//  ... log action on profiler
+				unset( $this->$resource );															//  unbind resource
+			}
+		}
+		unset( $this->application );																//  unbind relation to application instance object
+		if( !$keepAppAlive )																		//  application is not meant to live without this environment
+			exit( 0 );																				//  so end of environment is end of application
 	}
 
 	public function get( $key )
