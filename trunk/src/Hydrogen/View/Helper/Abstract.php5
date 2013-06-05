@@ -46,6 +46,13 @@ abstract class CMF_Hydrogen_View_Helper_Abstract implements CMF_Hydrogen_View_He
 	/**	@var		boolean								$needsEnv		Flag: needs Environment to be set */
 	protected		$needsEnv							= TRUE;
 
+	protected function getWords( $section, $topic ){
+		$words	= $this->env->getLanguage()->getWords( $topic );
+		if( $section && array_key_exists( $section, $words ) )
+			return $words[$section];
+		return $words;
+	}
+
 	/**
 	 *	Extendable callback to run after an environment object has been set to this helper.
 	 *	@access		protected
