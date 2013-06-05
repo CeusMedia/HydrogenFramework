@@ -47,6 +47,13 @@ abstract class CMF_Hydrogen_View_Helper_Abstract implements CMF_Hydrogen_View_He
 	protected		$needsEnv							= TRUE;
 
 	/**
+	 *	Extendable callback to run after an environment object has been set to this helper.
+	 *	@access		protected
+	 *	@return		void
+	 */
+	protected function __onSetEnv(){}
+
+	/**
 	 *	Indicates whether this helper has an environment set.
 	 *	@access		public
 	 *	@return		boolean
@@ -75,7 +82,10 @@ abstract class CMF_Hydrogen_View_Helper_Abstract implements CMF_Hydrogen_View_He
 	public function setEnv( CMF_Hydrogen_Environment $env )
 	{
 		if( $this->needsEnv )
+		{
 			$this->env	= $env;
+			$this->__onSetEnv();
+		}
 	}
 }
 ?>
