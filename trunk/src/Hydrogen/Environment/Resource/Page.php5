@@ -160,7 +160,7 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 			}
 		}
 		$modules->callHook( 'Page', 'applyModules', $this );										//  call related module event hooks
-		$this->addHead( '<script type="text/javascript">var config = '.json_encode( $listConfig ).';</script>' );
+		$this->addHead( '<script type="text/javascript"><!--var config = '.json_encode( $listConfig ).';--></script>' );
 	}
 
 	public function build( $bodyAttributes = array() ){
@@ -250,6 +250,9 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 	}
 
 	public function setPackaging( $packJavaScripts = FALSE, $packStyleSheets = FALSE ){
+#		$this->js->setCompression( $packJavaScripts );
+#		$this->css->primer->setCompression( $packStyleSheets );
+#		$this->css->theme->setCompression( $packStyleSheets );
 		$this->packJavaScripts	= $packJavaScripts;
 		$this->packStyleSheets	= $packStyleSheets;
 	}
