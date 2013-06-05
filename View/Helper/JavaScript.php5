@@ -40,7 +40,7 @@
 class CMF_Hydrogen_View_Helper_JavaScript
 {
 	protected static $instance;
-	protected $pathCache			= "contents/cache/";
+	protected $pathCache			= "cache/";
 	protected $prefix				= "";
 	protected $suffix				= "";
 	protected $revision;
@@ -153,7 +153,10 @@ class CMF_Hydrogen_View_Helper_JavaScript
 			if( $this->revision )
 				$content	= "/* @revision ".$this->revision." */\n";
 			foreach( $this->urls as $url ){
-				$content	= @file_get_contents( $url );
+				if( preg_match( "/^http/", $url ) )
+					$content	= Net_Reader::readUrl( $url );
+				else
+					$content	= File_Reader::load( $url );
 				if( $content === FALSE )
 					throw new RuntimeException( 'Script file "'.$url.'" not existing' );
 				if( !preg_match( "/\.min\.js$/", $url ) )
@@ -219,13 +222,13 @@ class CMF_Hydrogen_View_Helper_JavaScript
 			array_push( $this->scripts, $indentEndTag ? "\t\t" : '' );
 			$content	= implode( "\n", $this->scripts );
 			if( $this->useCompression ){
-				try{
-					$content	= Net_API_Google_ClosureCompiler::minify( $content );
-				}
-				catch( Exception $e ){
+#				try{
+#					$content	= Net_API_Google_ClosureCompiler::minify( $content );
+#				}
+#				catch( Exception $e ){
 					if( class_exists( 'JSMin' ) )
 						$content	= JSMin::minify( $content );
-				}
+#				}
 			}
 			$attributes	= array(
 				'type'		=> 'text/javascript',
