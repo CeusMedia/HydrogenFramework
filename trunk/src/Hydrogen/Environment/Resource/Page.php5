@@ -160,7 +160,9 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 			}
 		}
 		$modules->callHook( 'Page', 'applyModules', $this );										//  call related module event hooks
-		$this->addHead( '<script type="text/javascript"><!--var config = '.json_encode( $listConfig ).';--></script>' );
+		$script		= 'var config = '.json_encode( $listConfig ).';';
+		$script		= UI_HTML_Tag::create( 'script', "<!--\n".$script."\n-->", array( 'type' => "text/javascript" ) );
+		$this->addHead( $script );
 	}
 
 	public function build( $bodyAttributes = array() ){
