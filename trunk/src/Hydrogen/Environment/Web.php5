@@ -61,12 +61,29 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	/**	@var	CMF_Hydrogen_Environment_Resource_Page			$page		Page Object */
 	protected $page;
 
-	public $url;
-	public $scheme;
+	/**	@var	string											$host		Detected HTTP host */
 	public $host;
+	/**	@var	string											$path		Detected HTTP path */
 	public $path;
+	/**	@var	string											$root		Detected  */
 	public $root;
+	/**	@var	string											$scheme		Detected  */
+	public $scheme;
+	/**	@var	string											$uri		Detected  */
 	public $uri;
+	/**	@var	string											$url		Detected application base URL */
+	public $url;
+
+	public static $defaultPaths					= array(
+		'classes'	=> 'classes/',
+		'images'	=> 'images/',
+		'locales'	=> 'locales/',
+		'logs'		=> 'logs/',
+		'scripts'	=> 'javascripts/',
+		'styles'	=> 'styles/',
+		'templates'	=> 'templates/',
+		'themes'	=> 'themes/',
+	);
 
 	/**
 	 *	Constructor, sets up Resource Environment.
@@ -104,24 +121,45 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 		}
 	}
 
+	/**
+	 *	
+	 */
 	public function close()
 	{
-		unset( $this->dbc );																		//
-		unset( $this->session );																	//
-		unset( $this->request );																	//
-		unset( $this->response );																	//
-		unset( $this->messenger );																	//
-		unset( $this->language );																	//
-		parent::close();
+		$resources	= array(
+			'session',																				//  HTTP session handler
+			'request',																				//  HTTP request handler
+			'response',																				//  HTTP response handler
+			'messenger',																			//  application message handler
+			'language',																				//  language handler
+		);
+		parent::close( $resources );																//  close environment and application execution
 	}
 
-	protected function detectSelf(){
-		$this->host		= getEnv( 'HTTP_HOST' );
-		$this->root		= getEnv( 'DOCUMENT_ROOT' );
-		$this->path		= dirname( getEnv( 'SCRIPT_NAME' ) ).'/';
-		$this->uri		= $this->root.$this->path;
-		$this->scheme	= getEnv( "HTTPS" ) ? 'https' : 'http';
-		$this->url		= $this->scheme.'://'.$this->host.$this->path;
+	/**
+	 *	Detects basic environmental web and local information.
+	 *	Notes global scheme, host, relative application path and absolute application URL.
+	 *	Notes local document root path, relative application path and absolute application URI.
+	 *	@access		protected
+	 *	@return		void
+	 *	@throws		CMF_Hydrogen_Environment_Exception	if application has been executed outside a valid web server environment or no HTTP host has been provided by web server
+	 *	@throws		CMF_Hydrogen_Environment_Exception	if no document root path has been provided by web server
+	 *	@throws		CMF_Hydrogen_Environment_Exception	if no script file path has been provided by web server
+	 */
+	protected function detectSelf()
+	{
+		if( !getEnv( 'HTTP_HOST' ) )																//  application has been executed outside a valid web server environment or no HTTP host has been provided by web server
+			throw new CMF_Hydrogen_Environment_Exception( 'This application needs to be executed within by a web server' );
+		if( !getEnv( 'DOCUMENT_ROOT' ) )															//  no document root path has been provided by web server
+			throw new CMF_Hydrogen_Environment_Exception( 'Your web server needs to provide a document root path' );
+		if( !getEnv( 'SCRIPT_NAME' ) )																//  no script file path has been provided by web server
+			throw new CMF_Hydrogen_Environment_Exception( 'Your web server needs to provide the running scripts file path' );
+		$this->host		= getEnv( 'HTTP_HOST' );													//  note requested HTTP host name
+		$this->root		= getEnv( 'DOCUMENT_ROOT' );												//  note document root of web server or virtual host
+		$this->path		= dirname( getEnv( 'SCRIPT_NAME' ) ).'/';									//  note absolute working path 
+		$this->scheme	= getEnv( "HTTPS" ) ? 'https' : 'http';										//  note used URL scheme
+		$this->url		= $this->scheme.'://'.$this->host.$this->path;								//  note calculated base application URI
+		$this->uri		= $this->root.$this->path;													//  note calculated absolute base application path 
 	}
 
 	/**
