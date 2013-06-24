@@ -145,9 +145,22 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 		}
 		foreach( $xml->sql as $sql ){
 			$event	= $sql->getAttribute( 'on' );
+			$from	= $sql->hasAttribute( 'version-from' ) ? $sql->getAttribute( 'version-from' ) : "";
+			$to		= $sql->hasAttribute( 'version-to' ) ? $sql->getAttribute( 'version-to' ) : "";
 			$type	= $sql->hasAttribute( 'type' ) ? $sql->getAttribute( 'type' ) : '*';
 			foreach( explode( ',', $type ) as $type ){
 				$key	= $event.'@'.$type;
+				if( $event == "update" ){
+					if( !$sql->hasAttribute( 'version-from' ) )
+						throw new Exception( 'SQL type "update" needs attribute "version-from"' );
+					if( !$sql->hasAttribute( 'version-to' ) )
+						throw new Exception( 'SQL type "update" needs attribute "version-to"' );
+					$from	= $sql->getAttribute( 'version-from' );
+					$to		= $sql->getAttribute( 'version-to' );
+					if( $from === $to )
+						throw new Exception( 'SQL update versions need to differ' );
+					$key	= $event.":".$from."->".$to.'@'.$type;
+				}
 				$obj->sql[$key]	= (string) $sql;
 			}
 		}
