@@ -69,6 +69,13 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	/**	@var	string						$path			Absolute folder path of application */
 	public $path							= NULL;
 
+	public static $defaultPaths					= array(
+		'classes'	=> 'classes/',
+		'locales'	=> 'locales/',
+		'logs'		=> 'logs/',
+		'templates'	=> 'templates/',
+	);
+	
 	/**
 	 *	Constructor, sets up Resource Environment.
 	 *	@access		public
@@ -77,6 +84,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	 */
 	public function __construct( $options = array() )
 	{
+		self::$defaultPaths['cache']	= sys_get_temp_dir().'/cache/';
 		$this->options		= $options;																//  store given environment options
 		$this->path			= isset( $options['pathApp'] ) ? $options['pathApp'] : getCwd().'/';	//  detect application path
 		$this->initClock();																			//  setup clock
@@ -325,6 +333,14 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 			else if( in_array( strtolower( $data[$key] ), array( "no", "nein" ) ) )					//  value *means* no
 				$data[$key]	= FALSE;																//  change value to boolean FALSE
 		}
+
+		foreach( self::$defaultPaths as $key => $value ){
+			if( isset( $data['path.'.$key] ) )
+				$value	= $data['path.'.$key];
+			$value	= preg_replace( "@/+$@", "", $value )."/";
+			$data['path.'.$key]	= $value;
+		}
+		ksort( $data );
 		$this->config	= new ADT_List_Dictionary( $data );											//  create dictionary from array
 		if( $this->config->has( 'config.error.reporting' ) )										//  error reporting is defined
 			error_reporting( $this->config->get( 'config.error.reporting' ) );						//  set error reporting level

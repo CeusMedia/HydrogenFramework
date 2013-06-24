@@ -52,6 +52,7 @@ class CMF_Hydrogen_Environment_Remote extends CMF_Hydrogen_Environment_Abstract 
 	 *	@return		void
 	 */
 	public function __construct( $options ){
+		self::$defaultPaths	= CMF_Hydrogen_Environment_Web::$defaultPaths;
 		$this->options	= $options;
 		$this->path		= isset( $options['pathApp'] ) ? $options['pathApp'] : getCwd().'/';
 
@@ -64,6 +65,15 @@ class CMF_Hydrogen_Environment_Remote extends CMF_Hydrogen_Environment_Abstract 
 
 		$this->hasDatabase	= (bool) $this->dbc;													//  note if database is available
 		$this->path	= $options['pathApp'];															//  
+	}
+
+	/**
+	 *	Close remote enviroment and keep calling client application alive.
+	 *	@access		public
+	 *	@return		void
+	 */
+	public function close(){
+		parent::close( array(), FALSE );															//  unbind bound resources but keep application alive
 	}
 }
 ?>
