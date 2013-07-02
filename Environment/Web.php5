@@ -112,12 +112,12 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 		{
 			if( getEnv( 'HTTP_HOST' ) )
 				die( UI_HTML_Exception_Page::render( $e ) );
-			else
-				
+			else{
 				remark( $e->getMessage() );
 				remark( $e->getTraceAsString() );
 				remark();
 				exit;
+			}
 		}
 	}
 
@@ -325,7 +325,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 							$outside[]	= $path;													//  add link to public link list
 					}
 				}
-			}			
+			}
 			$this->config->set( 'module.acl.inside', implode( ',', $inside ) );						//  save public link list
 			$this->config->set( 'module.acl.outside', implode( ',', $outside ) );					//  save public link list
 		}
