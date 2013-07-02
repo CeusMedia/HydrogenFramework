@@ -64,7 +64,7 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_H
 	 *	@todo		correct implementation: rank by depth, not length, see todo below
 	 *	@return		string
 	 */
-	public function getCurrentKey( $linkMap, $current = NULL ){
+	static public function getCurrentKey( $linkMap, $current = NULL ){
 		$path		= $current;
 		if( isset( $_REQUEST['path'] ) && $current !== NULL )
 			$path	= utf8_decode( $_REQUEST['path'] );
