@@ -43,7 +43,7 @@
 class CMF_Hydrogen_View_Helper_Navigation_SingleAutoTabs extends CMF_Hydrogen_View_Helper_Navigation_SingleList{
 
 	public $classContainer	= "";
-	public $classWidth		= "ui-tabs ui-widget ui-corner-all";
+	public $classWidget		= "ui-tabs ui-widget ui-corner-all";
 	public $classHelper		= "ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-all";
 	public $classTab		= "ui-state-default ui-corner-top";
 	public $classTabActive	= "ui-tabs-selected ui-state-active";
