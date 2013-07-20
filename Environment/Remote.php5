@@ -44,7 +44,7 @@ class CMF_Hydrogen_Environment_Remote extends CMF_Hydrogen_Environment_Abstract 
 
 	/**	@var	boolean		$hasDatabase		Flag: indicates availability of a database connection */
 	public $hasDatabase		= FALSE;
-	
+
 	/**
 	 *	Constructor.
 	 *	@access		public
@@ -70,9 +70,11 @@ class CMF_Hydrogen_Environment_Remote extends CMF_Hydrogen_Environment_Abstract 
 	/**
 	 *	Close remote enviroment and keep calling client application alive.
 	 *	@access		public
+	 *	@param		array		$additionalResources	Not used in remote environment
+	 *	@param		boolean		$keepAppAlive			Not used in remote environment
 	 *	@return		void
 	 */
-	public function close(){
+	public function close( $additionalResources = array(), $keepAppAlive = FALSE){
 		parent::close( array(), FALSE );															//  unbind bound resources but keep application alive
 	}
 }
