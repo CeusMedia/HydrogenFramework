@@ -39,6 +39,7 @@
  */
 class CMF_Hydrogen_View_Helper_StyleSheet{
 
+	protected $pathBase				= "";
 	protected $pathCache			= "";
 	protected $prefix				= "";
 	protected $suffix				= "";
@@ -49,6 +50,11 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 	protected $useCompression		= FALSE;
 	public $indent					= "\t\t";
 
+	public function __construct( $basePath = NULL ){
+		if( $basePath !== NULL )
+			$this->pathBase		= $basePath;
+	}
+	
 	/**
 	 *	Collect a StyleSheet block.
 	 *	@access		public
@@ -68,6 +74,8 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 	 *	@return		void
 	 */
 	public function addUrl( $url, $onTop = FALSE ){
+		if( !preg_match( "@^[a-z]+://@", $url ) )
+			$url	= $this->pathBase.$url;
 		$onTop ? array_unshift( $this->urls, $url ) : array_push( $this->urls, $url );
 	}
 
