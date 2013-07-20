@@ -288,6 +288,8 @@ class CMF_Hydrogen_View
 
 	public function populateTexts( $keys, $path ){
 		$list	= array();
+		if( is_string( $keys ) )
+			$keys	= array( $keys );
 		foreach( $keys as $key ){
 			$uri	= $path.$key.'.html';
 			$list[$key]	= "";
