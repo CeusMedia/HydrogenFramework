@@ -114,39 +114,35 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 	protected function main()
 	{
 		ob_start();
-		$content	= $this->control();											// dispatch and run request
-		$dev		= ob_get_clean();
-		
-		if( $this->env->getRequest()->isAjax() )								// this is an AJAX request
-			return $content;													// deliver content only
+		$request	= $this->env->getRequest();
+		$content	= $this->control();																//  dispatch and run request
 
-		$config		= $this->env->getConfig();									// shortcut to configation object
+		if( $request->isAjax() || $request->has( '__contentOnly' ) )								//  this is an AJAX request
+			return $content;																		//  deliver content only
 
 		$data		 = array(
-			'page'			=> $this->env->getPage(),
-			'config'		=> $config,											// configuration object
-			'request'		=> $this->env->getRequest(),						// request object
-			'content'		=> $content,										// rendered response page view content
-			'clock'			=> $this->clock,									// system clock for performance messure
-			'dev'			=> $dev,											// warnings, notices or development messages
+			'page'			=> $this->env->getPage(),												//  HTML 
+			'config'		=> $this->env->getConfig(),												//  configuration object
+			'request'		=> $request,											//  request object
+			'content'		=> $content,															//  rendered response page view content
+			'clock'			=> $this->env->getClock(),												//  system clock for performance messure
+			'dev'			=> ob_get_clean(),														//  warnings, notices or development messages
 		);
 
 		if( $this->env->has( 'messenger' ) )
-			$data['messenger']	= $this->env->getMessenger();					// UI messages for user
-		if( $this->env->has( 'language' ) )
+			$data['messenger']	= $this->env->getMessenger();										//  UI messages for user
+		if( $this->env->has( 'language' ) )															//  language support is available
 		{
-			$language			= $this->env->getLanguage();					// shortcut to language object
-			$data['language']	= $language->getLanguage();						// document language
-			$data['words']		= $language->getWords( 'main', FALSE, FALSE );	// main UI word pairs
+			$data['language']	= $this->env->getLanguage()->getLanguage();							//  note document language
+			$data['words']		= $this->env->getLanguage()->getWords( 'main', FALSE, FALSE );		//  note main UI word pairs
 		}
-		if( $this->env->has( 'database' ) )
+		if( $this->env->has( 'database' ) )															//  database support is available
 		{
-			$database	= $this->env->getDatabase();							// shortcut to database connection object
-			$data['dbQueries']		= (int) $database->numberExecutes;			// number of SQL queries executed
-			$data['dbStatements']	= (int) $database->numberStatements;		// number of SQL statements sent
+			$data['dbQueries']		= (int) $this->env->getDatabase()->numberExecutes;				//  note number of SQL queries executed
+			$data['dbStatements']	= (int) $this->env->getDatabase()->numberStatements;			//  note number of SQL statements sent
 		}
-		$this->setViewComponents( $data );										// set up information sources for main template
-		return $this->view();													// render and return main template to constructor
+		$this->setViewComponents( $data );															//  set up information resources for main template
+		return $this->view();																		//  render and return main template to constructor
 	}
 
 	/**
@@ -187,7 +183,9 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 	}
 
 	/**
-	 *	Main method.
+	 *	General main application method.
+	 *	You can copy and modify this method in your application to handle exceptions your way.
+	 *	NOTE: You need to execute $this->respond( $this->main() ) in order to start dispatching, controlling and rendering.
 	 *	@access		public
 	 *	@return		void
 	 */
@@ -196,19 +194,13 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 		error_reporting( E_ALL );
 		try
 		{
-			/*	@todo		Hack for moved clock, please remove later */
-			$this->clock	= $this->env->getClock();
-
-			$this->respond( $this->main() );
-			$this->logOnComplete();
-			$this->env->close();
-			exit( 0 );
+			$this->respond( $this->main() );														//
+			$this->logOnComplete();																	//
+			$this->env->close();																	//  teardown environment and quit application execution
 		}
 		catch( Exception $e )
 		{
-			$page	= new UI_HTML_Exception_Page();
-			die( $page->render( $e ) );
-		#	new UI_HTML_Exception_TraceViewer( $e );
+			UI_HTML_Exception_Page::display( $e );
 		}
 	}
 }
