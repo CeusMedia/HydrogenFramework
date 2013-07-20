@@ -122,9 +122,13 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	}
 
 	/**
-	 *	
+	 *	Tries to unbind registered environment handler objects.
+	 *	@access		public
+	 *	@param		array		$additionalResources	List of resource member names to be unbound, too
+	 *	@param		boolean		$keepAppAlive			Flag: do not end execution right now if turned on
+	 *	@return		void
 	 */
-	public function close()
+	public function close( $additionalResources = array(), $keepAppAlive = FALSE )
 	{
 		$resources	= array(
 			'session',																				//  HTTP session handler
