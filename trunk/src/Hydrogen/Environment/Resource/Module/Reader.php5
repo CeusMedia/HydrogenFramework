@@ -38,7 +38,7 @@
  *	@version		$Id$
  */
 class CMF_Hydrogen_Environment_Resource_Module_Reader{
-	
+
 	static public function load( $fileName, $id ){
 		$xml	= XML_ElementReader::readFile( $fileName );
 		$obj	= new stdClass();
@@ -70,7 +70,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 		$obj->sql					= array();
 		$obj->links					= array();
 		$obj->hooks					= array();
-		
+
 		if( $xml->files ){
 			$map	= array(
 				'class'		=> 'classes',
