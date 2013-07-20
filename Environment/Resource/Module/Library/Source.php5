@@ -85,6 +85,8 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source implements CMF_Hyd
 		$index	= new File_RecursiveNameFilter( $this->source->path, 'module.xml' );
 		$this->env->clock->profiler->tick( 'CMFR_Library_Source::scanFolder: init' );
 		foreach( $index as $entry ){
+			if( preg_match( "@/templates$@", $entry->getPath() ) )
+				continue;
 			$id		= preg_replace( '@^'.$this->source->path.'@', '', $entry->getPath() );
 			$id		= str_replace( '/', '_', $id );
 

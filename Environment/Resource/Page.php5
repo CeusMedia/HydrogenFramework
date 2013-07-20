@@ -63,14 +63,16 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 
 		parent::__construct( $language );
 		$this->js			= CMF_Hydrogen_View_Helper_JavaScript::getInstance();
-		$this->css			= new stdClass;
-		$this->css->primer	= new CMF_Hydrogen_View_Helper_StyleSheet();
-		$this->css->theme	= new CMF_Hydrogen_View_Helper_StyleSheet();
 
 		$path	= $env->config->get( 'path.themes' );
 		if( $env->config->get( 'layout.primer' ) )
 			$this->pathPrimer	= $path.$env->config->get( 'layout.primer' ).'/';
 		$this->pathTheme	= $path.$env->config->get( 'layout.theme' ).'/';
+		$this->css			= new stdClass;
+		$this->css->primer	= new CMF_Hydrogen_View_Helper_StyleSheet( $this->pathPrimer );
+		$this->css->theme	= new CMF_Hydrogen_View_Helper_StyleSheet( $this->pathTheme.'css/' );
+
+		
 		if( strlen( $title	= $env->config->get( 'app.name' ) ) )
 			$this->setTitle( $title );
 		if( ( $modules = $this->env->getModules() ) )												//  get module handler resource if existing
@@ -114,7 +116,7 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 						if( !strlen( trim( $pathStylesLib ) ) )
 							throw new RuntimeException( 'Path to style library "path.styles.lib" is not configured' );
 						$this->css->primer->addUrl( $pathStylesLib.$style->file, $top );			//  load style file from styles library
-					}	
+					}
 					else if( $source == 'scripts-lib' && $pathScriptsLib ){							//  style file is in scripts library, which is enabled by configured path
 						if( !strlen( trim( $pathScriptsLib ) ) )
 							throw new RuntimeException( 'Path to script library "path.scripts.lib" is not configured' );
@@ -165,7 +167,7 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 		$this->addHead( $script );
 	}
 
-	public function build( $bodyAttributes = array() ){
+	public function build( $bodyAttributes = array(), $htmlAttributes = array() ){
 		$controller	= str_replace( '/', '-', $this->env->getRequest()->get( 'controller' ) );
 		$action		= str_replace( '/', '-', $this->env->getRequest()->get( 'action' ) );
 		$moduleKey	= join( explode( ' ', ucwords( str_replace( '-', ' ', $controller ) ) ) );
@@ -202,7 +204,7 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 #			$bodyAttributes['id']	= 
 		if( ( $modules = $this->env->getModules() ) )												//  get module handler resource if existing
 			$modules->callHook( 'App', 'respond', $this );											//  call related module event hooks
-		return parent::build( $bodyAttributes );
+		return parent::build( $bodyAttributes, $htmlAttributes );
 	}
 
 	/**
