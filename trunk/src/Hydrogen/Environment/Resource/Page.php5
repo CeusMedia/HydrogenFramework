@@ -69,7 +69,7 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 			$this->pathPrimer	= $path.$env->config->get( 'layout.primer' ).'/';
 		$this->pathTheme	= $path.$env->config->get( 'layout.theme' ).'/';
 		$this->css			= new stdClass;
-		$this->css->primer	= new CMF_Hydrogen_View_Helper_StyleSheet( $this->pathPrimer );
+		$this->css->primer	= new CMF_Hydrogen_View_Helper_StyleSheet( $this->pathPrimer.'css/' );
 		$this->css->theme	= new CMF_Hydrogen_View_Helper_StyleSheet( $this->pathTheme.'css/' );
 
 		
@@ -86,11 +86,11 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 	}
 
 	public function addPrimerStyle( $fileName, $onTop = FALSE ){
-		$this->css->primer->addUrl( $this->pathPrimer.'css/'.$fileName, $onTop );
+		$this->css->primer->addUrl( $fileName, $onTop );
 	}
 
 	public function addThemeStyle( $fileName ){
-		$this->css->theme->addUrl( $this->pathTheme.'css/'.$fileName );
+		$this->css->theme->addUrl( $fileName );
 	}
 
 	public function applyModules(){
