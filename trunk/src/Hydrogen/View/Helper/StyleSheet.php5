@@ -74,8 +74,6 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 	 *	@return		void
 	 */
 	public function addUrl( $url, $onTop = FALSE ){
-		if( !preg_match( "@^[a-z]+://@", $url ) )
-			$url	= $this->pathBase.$url;
 		$onTop ? array_unshift( $this->urls, $url ) : array_push( $this->urls, $url );
 	}
 
@@ -98,7 +96,7 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 	 *	@return		string
 	 */
 	public function getPackageHash(){
-		$copy	= $this->urls;
+		$copy	= $this->getUrlList();
 		sort( $copy );
 		$key	= implode( '_', $copy );
 		return md5( $this->revision.$key );
@@ -161,7 +159,13 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 	 *	@return		array
 	 */
 	public function getUrlList(){
-		return $this->urls;
+		$list	= array();
+		foreach( $this->urls as $url ){
+			if( !preg_match( "@^[a-z]+://@", $url ) )
+				$url	= $this->pathBase.$url;
+			$list[]	= $url;
+		}
+		return $list;
 	}
 
 	/**
@@ -174,7 +178,7 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 	public function render( $indentEndTag = FALSE, $forceFresh = FALSE ){
 		$links		= '';
 		$styles		= '';
-		if( $this->urls ){
+		if( $this->getUrlList() ){
 			if( $this->useCompression ){
 				$fileCss	= $this->getPackageFileName( $forceFresh );
 				$attributes	= array(
@@ -187,7 +191,7 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 			}
 			else{
 				$list	= array();
-				foreach( $this->urls as $url )
+				foreach( $this->getUrlList() as $url )
 				{
 					if( $this->revision )
 						$url	.= '?r'.$this->revision;
