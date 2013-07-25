@@ -52,7 +52,7 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 
 	public function __construct( $basePath = NULL ){
 		if( $basePath !== NULL )
-			$this->pathBase		= $basePath;
+			$this->setBasePath( $basePath );
 	}
 	
 	/**
@@ -219,6 +219,10 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 		return $links.$styles;
 	}
 
+	public function setBasePath( $path ){
+		$this->pathBase	= $path;
+	}
+	
 	/**
 	 *	Set path to file cache.
 	 *	@access		public
