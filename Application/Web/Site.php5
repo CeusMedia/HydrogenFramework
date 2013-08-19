@@ -100,6 +100,10 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 				if( $result )
 					return $result;
 			}
+			else if( $this->env->getRequest()->has( 'showException' ) ){							//  @todo: kriss: you need to secure this view by a configurable run mode etc.
+				UI_HTML_Exception_Page::display( $e );
+				exit;
+			}
 			else if( !$this->env->getMessenger() )
 				throw $e;
 			$this->env->getMessenger()->noteFailure( $e->getMessage() );
