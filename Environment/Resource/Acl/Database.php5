@@ -77,6 +77,8 @@ class CMF_Hydrogen_Environment_Resource_Acl_Database extends CMF_Hydrogen_Enviro
 			foreach( $model->getAll() as $role )
 				$this->roles[$role->roleId]	= $role;
 		}
+		if( !isset( $this->roles[$roleId] ) )
+			throw new OutOfRangeException( 'Role with ID '.$roleId.' is not existing' );
 		return $this->roles[$roleId];
 	}
 
