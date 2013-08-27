@@ -33,7 +33,6 @@ class CMF_Hydrogen_View_Helper_LanguageSelector extends CMF_Hydrogen_View_Helper
 		$language	= $this->env->getLanguage();
 		$words		= $language->getWords( 'main' );
 
-		$locale		= $language->getLanguage();
 		$locales	= $language->getLanguages();
 		$locale		= $this->env->getSession()->get( 'language' );
 		$languages	= $words['languages'];
