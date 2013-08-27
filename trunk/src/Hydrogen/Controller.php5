@@ -204,11 +204,14 @@ class CMF_Hydrogen_Controller
 	 */
 	protected function restart( $uri, $withinModule = FALSE )
 	{
-		$base   = preg_replace( "@^(.*)\/*$@U", "\\1/", dirname( getEnv( 'SCRIPT_NAME' ) ) );
-		if( $withinModule ){
-			$controller	= $this->env->getRequest()->get( 'controller' );
-			$base	.= $this->alias ? $this->alias : $controller;
-			$base	.= strlen( $uri ) ? '/' : '';
+		$base	= "";
+		if( !preg_match( "/^http/", $uri ) ){
+			$base   = preg_replace( "@^(.*)\/*$@U", "\\1/", dirname( getEnv( 'SCRIPT_NAME' ) ) );
+			if( $withinModule ){
+				$controller	= $this->env->getRequest()->get( 'controller' );
+				$base	.= $this->alias ? $this->alias : $controller;
+				$base	.= strlen( $uri ) ? '/' : '';
+			}
 		}
 	#	$this->dbc->close();
 	#	$this->session->close();
