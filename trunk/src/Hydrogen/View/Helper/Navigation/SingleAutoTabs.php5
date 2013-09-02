@@ -64,6 +64,8 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAutoTabs extends CMF_Hydrogen_Vi
 		$rankedLinkItemList	= array();
 
 		foreach( $linkMap as $link ){
+			if( in_array( $link->path, $this->linksToSkip ) )
+				continue; 
 			$class	= $this->classTab.' access-'.$link->access;
 			$class	.= $active == $link->path ? ' '.$this->classTabActive : '';
 			$label	= $link->label;

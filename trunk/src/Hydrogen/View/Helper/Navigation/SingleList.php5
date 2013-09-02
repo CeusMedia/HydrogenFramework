@@ -46,6 +46,7 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_H
 	protected $innerClass		= 'single';
 	protected $innerId			= 'navigation-inner';
 	protected $needsEnv			= FALSE;
+	protected $linksToSkip		= array();
 
 	public function __construct( $linkMap, $innerClass = NULL, $innerId = NULL )
 	{
@@ -54,6 +55,10 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_H
 			$this->innerClass	= $innerClass;
 		if( $innerId )
 			$this->innerId		= $innerId;
+	}
+
+	public function skipLink( $path ){
+		$this->linksToSkip[]	= $path;
 	}
 
 	/**
@@ -94,6 +99,8 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_H
 		$list	= array();
 		foreach( $this->linkMap as $key => $label )
 		{
+			if( in_array( $key, $this->linksToSkip ) )
+				continue;
 			$class		= $active == $key ? 'active' : NULL;
 			$url		= $key == "index" ? "./" : ( $niceUrls ? './'.$key : './?controller='.$key );
 			$link		= UI_HTML_Elements::Link( $url, $label, $class );
