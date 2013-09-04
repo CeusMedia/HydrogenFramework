@@ -71,6 +71,10 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 		$this->css			= new stdClass;
 		$this->css->primer	= new CMF_Hydrogen_View_Helper_StyleSheet( $this->pathPrimer.'css/' );
 		$this->css->theme	= new CMF_Hydrogen_View_Helper_StyleSheet( $this->pathTheme.'css/' );
+		if( $env->config->get( 'app.revision' ) ){
+			$this->css->primer->setRevision( $env->config->get( 'app.revision' ) );
+			$this->css->theme->setRevision( $env->config->get( 'app.revision' ) );
+		}
 
 		
 		if( strlen( $title	= $env->config->get( 'app.name' ) ) )
