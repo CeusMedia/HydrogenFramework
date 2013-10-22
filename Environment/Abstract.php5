@@ -319,8 +319,10 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$configFile	= self::$configFile;															//  get config file @todo remove this old way
 		if( !empty( $this->options['configFile'] ) )												//  get config file from options @todo enforce this new way
 			$configFile	= $this->options['configFile'];												//  get config file from options
-		if( !file_exists( $configFile ) )															//  config file not found
-			throw new RuntimeException( 'Config file "'.$configFile.'" not existing' );				//  quit with exception
+		if( !file_exists( $configFile ) ){															//  config file not found
+			$message	= sprintf( 'Config file "%s" not existing', $configFile );
+			throw new CMF_Hydrogen_Environment_Exception( $message );								//  quit with exception
+		}
 
 		$data			= parse_ini_file( $configFile, FALSE );										//  parse configuration file (without section support)
 
