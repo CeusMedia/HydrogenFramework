@@ -171,6 +171,25 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 		$this->env->getSession()->set( $this->keyMessages, array() );
 	}
 
+	public function getMessages(){
+		return (array) $this->env->getSession()->get( $this->keyMessages );
+	}
+
+	/**
+	 *	Indicates wheteher an Error or a Failure has been noted.
+	 *	@access		public
+	 *	@return		integer		Number of noted errors or failures
+	 */
+	public function gotError()
+	{
+		$count		= 0;
+		$messages	= (array) $this->env->getSession()->get( $this->keyMessages );
+		foreach( $messages as $message )
+			if( $message['type'] < 2 )
+				$count++;
+		return $count;
+	}
+	
 	/**
 	 *	Saves a Error Message on the Message Stack.
 	 *	@access		public
@@ -223,21 +242,6 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 	{
 		$message	= $this->applyParametersToMessage( func_get_args() );
 		$this->noteMessage( 3, $message);
-	}
-
-	/**
-	 *	Indicates wheteher an Error or a Failure has been noted.
-	 *	@access		public
-	 *	@return		integer		Number of noted errors or failures
-	 */
-	public function gotError()
-	{
-		$count		= 0;
-		$messages	= (array) $this->env->getSession()->get( $this->keyMessages );
-		foreach( $messages as $message )
-			if( $message['type'] < 2 )
-				$count++;
-		return $count;
 	}
 
 	/**
