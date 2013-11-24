@@ -270,7 +270,9 @@ class CMF_Hydrogen_View
 			extract( $this->data );																	//  
 			extract( $___data );																	//  
 			$helpers	= $this->helpers;															//  
-			$result		= require( $___templateUri );												//  
+			$result		= include( $___templateUri );												//  
+			if( $result === FALSE )
+				throw new RuntimeException( 'Template file "'.$___templateUri.'" is not existing' );
 			$buffer		= ob_get_clean();															//  
 			$content	= $result;
 			if( trim( $buffer ) )
