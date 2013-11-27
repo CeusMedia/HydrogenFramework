@@ -93,15 +93,17 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$this->initModules();																		//  setup module support
 		$this->initDatabase();																		//  setup database connection
 		$this->initCache();																			//  setup cache support
+		if( $this->modules )
+			$this->modules->callHook( 'Env', 'constructEnd', $this );
 	}
 
 	public function __onInit(){
 		if( $this->modules )																		//  module support and modules available
 			$this->modules->callHook( 'Env', 'init', $this );										//  call related module event hooks
 	}
-	
+
 	public function __onLoad(){}
-	
+
 	public function __get( $key )
 	{
 		return $this->get( $key );
@@ -149,7 +151,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	public function getApp(){
 		return $this->application;
 	}
-	
+
 	/**
 	 *	Initialize remote access control list.
 	 *	@access		public
@@ -268,17 +270,17 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 			if( !$type )
 				$type	= 'CMF_Hydrogen_Environment_Resource_Acl_Database';
 		}
-		
+
 		$this->acl	= Alg_Object_Factory::createObject( $type, array( $this ) );
 		$this->acl->roleAccessNone	= 0;
 		$this->acl->roleAccessFull	= 128;
-		
+
 		$this->acl->setPublicLinks( explode( ',', $config->get( 'module.acl.public' ) ) );
 		$this->acl->setPublicInsideLinks( explode( ',', $config->get( 'module.acl.inside' ) ) );
 		$this->acl->setPublicOutsideLinks( explode( ',', $config->get( 'module.acl.outside' ) ) );
 		$this->clock->profiler->tick( 'env: acl' );
 	}
-	
+
 	protected function initCache(){
 		$cache	= NULL;
 		if( class_exists( 'CMM_SEA_Factory' ) ){
@@ -290,7 +292,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 				$resource	= $config->resource ? $config->resource : NULL;
 				$context	= $config->context ? $config->context : NULL;
 				$expiration	= $config->expiration ? (int) $config->expiration : 0;
-				
+
 				if( $type == 'PDO' ){
 					if( !$this->dbc )
 						throw new RuntimeException( 'A database connection is needed for PDO cache adapter' );
@@ -299,6 +301,8 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 				$cache	= $factory->newStorage( $type, $resource, $context, $expiration );
 			}
 		}
+		if( !$cache )
+			$cache	= new CMF_Hydrogen_Environment_Resource_CacheDummy();
 		$this->cache	= $cache;
 		$this->clock->profiler->tick( 'env: cache' );
 	}
@@ -373,11 +377,11 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 //	remark( $clock->stop() );
 		$this->clock->profiler->tick( 'env: disclosure' );
 	}
-	
+
 #	protected function initLog(){
 #		$this->log	= CMF_Hydrogen_Environment_Resource_Log( $this );
 #	}
-	
+
 	protected function initLogic()
 	{
 		$this->logic		= new CMF_Hydrogen_Environment_Resource_LogicPool( $this );
@@ -388,9 +392,8 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 #		$modules		= $this->modules->getInstalled();
 		$this->modules	= new CMF_Hydrogen_Environment_Resource_Module_Library_Local( $this );
 		$modules		= $this->modules->getAll();
-		$public			= explode( ',', $this->config->get( 'module.acl.public' ) );					//  get current public link list
+		$public			= explode( ',', $this->config->get( 'module.acl.public' ) );				//  get current public link list
 		foreach( $modules as $moduleId => $module ){
-			
 			$prefix	= 'module.'.strtolower( $moduleId );											//  build config key prefix of module
 			$this->config->set( $prefix, TRUE );													//  enable module in configuration
 			foreach( $module->config as $key => $value ){											//  iterate module configuration pairs
@@ -401,7 +404,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 				else																				//  legacy @todo remove
 					$this->config->set( $prefix.'.'.$key, $value );									//  
 			}
-			
+
 			foreach( $module->links as $link ){														//  iterate module links
 				if( $link->access == "public" ){													//  link is public
 					$path	= str_replace( '/', '_', $link->path );									//  get link path
