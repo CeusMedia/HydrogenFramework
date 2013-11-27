@@ -33,6 +33,9 @@ class CMF_Hydrogen_Environment_Resource_Logic
 	);
 	public $fileNameLogDev		= 'logs/dev.log';
 
+	/**	@var	CMF_Hydrogen_Environment_Abstract	$env	Environment object */
+	protected $env;
+
 	/**
 	 *	Constructor.
 	 *	@access		public
