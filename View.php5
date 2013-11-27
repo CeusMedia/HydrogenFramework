@@ -288,15 +288,24 @@ class CMF_Hydrogen_View
 		return $content;
 	}
 
-	public function populateTexts( $keys, $path ){
-		$list	= array();
-		if( is_string( $keys ) )
-			$keys	= array( $keys );
-		foreach( $keys as $key ){
-			$uri	= $path.$key.'.html';
-			$list[$key]	= "";
-			if( $this->hasContentFile( $uri ) )
-				$list[$key]	= $this->loadContentFile( $uri );
+	/**
+	 *	...
+	 *	@access		public
+	 *	@param		array		$keys		List of file keys, like "index.top" for "index.top.html"
+	 *	@param		string		$path		Path to files within locales, like "html/index/"
+	 *	@return		array
+     */
+	public function populateTexts( $keys, $path, $data = array() ){
+		$path	= preg_replace( "/\/+$/", "", $path ).'/';											//  correct path
+		$list	= array();																			//  prepare empty list
+		$keys	= is_string( $keys ) ? array( $key ) : $keys;										//  convert single key to list
+		foreach( $keys as $key ){																	//  iterate keys
+			$url		= $path.$key.'.html';														//  build filename
+			$id			= str_replace( " ", "", ucwords( preg_replace( "/[^a-z]/", " ", $key ) ) );	//  camelcase key
+			$id			= "text".str_replace( " ", "", $id );										//  generate ID for key
+			$list[$id]	= '';
+			if( $this->hasContentFile( $url ) )
+				$list[$id]	= $this->loadContentFile( $url, $data );								//  load file content
 		}
 		return $list;
 	}
