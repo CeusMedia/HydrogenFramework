@@ -202,7 +202,7 @@ class CMF_Hydrogen_Controller
 	 *	@todo		concept and implement anti-loop
 	 *	@see		http://dev.(ceusmedia.com)/cmKB/?MTI
 	 */
-	protected function restart( $uri, $withinModule = FALSE )
+	protected function restart( $uri, $withinModule = FALSE, $status = NULL )
 	{
 		$base	= "";
 		if( !preg_match( "/^http/", $uri ) ){
@@ -215,6 +215,9 @@ class CMF_Hydrogen_Controller
 		}
 	#	$this->dbc->close();
 	#	$this->session->close();
+		
+		if( $status )
+			Net_HTTP_Status::sendHeader( (int) $status );
 		header( "Location: ".$base.$uri );
 		die;
 	}
