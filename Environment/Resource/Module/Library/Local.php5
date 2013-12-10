@@ -125,13 +125,9 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydr
 			$this->modules	= unserialize( File_Reader::load( $cacheFile ) );
 			return;
 		}
-		
-		
+
 		$index	= new File_RegexFilter( $this->path, '/^[a-z0-9_]+\.xml$/i' );
 		foreach( $index as $entry ){
-
-			$moduleId		= preg_replace( '/\.xml$/i', '', $entry->getFilename() );
-			
 			$moduleId		= preg_replace( '/\.xml$/i', '', $entry->getFilename() );
 			$moduleFile		= $this->path.$moduleId.'.xml';
 			$module			= CMF_Hydrogen_Environment_Resource_Module_Reader::load( $moduleFile, $moduleId );
