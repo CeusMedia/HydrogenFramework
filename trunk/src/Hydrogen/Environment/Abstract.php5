@@ -381,7 +381,6 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 #	protected function initLog(){
 #		$this->log	= CMF_Hydrogen_Environment_Resource_Log( $this );
 #	}
-
 	protected function initLogic()
 	{
 		$this->logic		= new CMF_Hydrogen_Environment_Resource_LogicPool( $this );
