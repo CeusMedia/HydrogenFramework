@@ -123,6 +123,7 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 	{
 		$messages	= (array) $this->env->getSession()->get( $this->keyMessages );
 		$list		= '';
+		$ids		= array();
 		if( count( $messages ) )
 		{
 			$list	= array();
@@ -131,7 +132,13 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 				if( $linkResources )
 					$message['message']	= preg_replace( '/(http.+)("|\'| )/U', '<a href="\\1">\\1</a>\\2', $message['message'] );
 
-
+				/*  --  kriss: don't repeat yourself!  --  */
+				/*  (avoid dubplicate messages which were collected during several redirects)  */
+				$id	= md5( json_encode( array( $message['type'], $message['message'] ) ) );			//  calculate message ID
+				if( in_array( $id, $ids ) )															//  ID has been calculated before
+					continue;																		//  skip this duplicate message
+				$ids[]	= $id;																		//  note calculated ID
+				
 				$class		= $this->classes[$message['type']];
 				$message	= UI_HTML_Tag::create( 'span', $message['message'], array( 'class' => 'message' ) );
 				if( $timeFormat && !empty( $message['timestamp'] ) )
