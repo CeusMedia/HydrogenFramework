@@ -41,6 +41,15 @@ class CMF_Hydrogen_Environment_Resource_CacheDummy{
 	}
 
 	/**
+	 *	Simulate to remove pair from cache.
+	 *	@access		public
+	 *	@return		boolean		Always true.
+	 */
+	public function remove( $key ){
+		return TRUE;
+	}
+
+	/**
 	 *	Simulate to store cache.
 	 *	@access		public
 	 *	@param		string		$content		Context within cache storage
