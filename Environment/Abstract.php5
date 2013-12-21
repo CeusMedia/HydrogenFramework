@@ -282,7 +282,8 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	}
 
 	protected function initCache(){
-		$cache	= NULL;
+		$this->cache	= new CMF_Hydrogen_Environment_Resource_CacheDummy();
+/*		$cache	= NULL;
 		if( class_exists( 'CMM_SEA_Factory' ) ){
 			$factory	= new CMM_SEA_Factory();
 			$cache		= $factory->newStorage( 'Noop' );
@@ -304,7 +305,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		if( !$cache )
 			$cache	= new CMF_Hydrogen_Environment_Resource_CacheDummy();
 		$this->cache	= $cache;
-		$this->clock->profiler->tick( 'env: cache' );
+		$this->clock->profiler->tick( 'env: cache' );*/
 	}
 
 	protected function initClock()
