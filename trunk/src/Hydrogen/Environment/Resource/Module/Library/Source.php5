@@ -76,8 +76,8 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source implements CMF_Hyd
 
 		$cache			= $this->env->getCache();
 		$cacheKeySource	= 'Sources/'.$this->source->id;
-		if( $cache && $cache->has( $cacheKeySource ) ){
-			$this->modules	= unserialize( $cache->get( $cacheKeySource ) );
+		if( $cache->has( $cacheKeySource ) ){
+			$this->modules	= $cache->get( $cacheKeySource );
 			return;
 		}
 
@@ -91,8 +91,8 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source implements CMF_Hyd
 			$id		= str_replace( '/', '_', $id );
 
 			$cacheKey	= 'Modules/'.$this->source->id.'/'.$id;
-			if( $cache && $cache->has( $cacheKey ) ){
-				$list[$id]	= unserialize( $cache->get( $cacheKey ) );
+			if( $cache->has( $cacheKey ) ){
+				$list[$id]	= $cache->get( $cacheKey );
 #				$this->env->clock->profiler->tick( 'CMFR_Library_Source::scanFolder: Module #'.$id.':cache' );
 				continue;
 			}
@@ -115,13 +115,12 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source implements CMF_Hyd
 				$this->env->messenger->noteFailure( 'XML of available Module "'.$id.'" is broken ('.$e->getMessage().').' );
 			}
 			if( $cache )
-				$cache->set( $cacheKey, serialize( $obj ) );
+				$cache->set( $cacheKey, $obj );
 #			$this->env->clock->profiler->tick( 'CMFR_Library_Source::scanFolder: Module #'.$id.':file' );
 		}
 		ksort( $list );
 		$this->modules	= $list;
-		if( $cache )
-			$cache->set( $cacheKeySource, serialize( $list ) );
+		$cache->set( $cacheKeySource, $list );
 	}
 
 	protected function scanHttp(){
