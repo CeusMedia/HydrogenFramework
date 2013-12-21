@@ -75,6 +75,8 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydr
 				ob_start();
 				$args	= array( $this->env, &$context, $module, $arguments );
 				call_user_func_array( $function, $args );
+
+				$this->env->clock->profiler->tick( '<!--Resource_Module_Library_Local::call-->Hook: '.$event.'@'.$resource.': '.$module->id );
 				$stdout	= ob_get_clean();
 				if( strlen( $stdout ) )
 					if( $this->env->has( 'messenger' ) )
@@ -89,7 +91,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydr
 					throw new RuntimeException( 'Hook '.$module->id.'::'.$resource.'@'.$event.' failed', 0, $e );
 			}
 		}
-		$this->env->clock->profiler->tick( 'Resource_Module_Library_Local::callHook' );
+//		$this->env->clock->profiler->tick( 'Resource_Module_Library_Local::callHook' );
 		return $count;
 	}
 

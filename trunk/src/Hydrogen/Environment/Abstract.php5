@@ -57,7 +57,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	protected $config;
 	/**	@var	CMF_Hydrogen_Environment_Resource_Database_PDO	$dbc		Database Connection Object */
 	protected $dbc;
-	
+
 	public static $configFile				= "config.ini.inc";
 
 	/**	@var	CMF_Hydrogen_Environment_Resource_LogicPool				$logic		Pool for logic class instances */
@@ -75,7 +75,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		'logs'		=> 'logs/',
 		'templates'	=> 'templates/',
 	);
-	
+
 	/**
 	 *	Constructor, sets up Resource Environment.
 	 *	@access		public
@@ -95,6 +95,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$this->initCache();																			//  setup cache support
 		if( $this->modules )
 			$this->modules->callHook( 'Env', 'constructEnd', $this );
+		$this->__onInit();
 	}
 
 	public function __onInit(){
@@ -284,7 +285,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	protected function initCache(){
 		$this->cache	= new CMF_Hydrogen_Environment_Resource_CacheDummy();
 /*		$cache	= NULL;
-		if( class_exists( 'CMM_SEA_Factory' ) ){
+		if( 0 && class_exists( 'CMM_SEA_Factory' ) ){
 			$factory	= new CMM_SEA_Factory();
 			$cache		= $factory->newStorage( 'Noop' );
 			if( $this->modules->has( 'Resource_Cache' ) ){

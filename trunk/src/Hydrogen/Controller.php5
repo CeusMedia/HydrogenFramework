@@ -66,8 +66,9 @@ class CMF_Hydrogen_Controller
 	{
 		$env->clock->profiler->tick( 'CMF_Controller('.get_class( $this ).')' );
 		$this->setEnv( $env );
-		$env->clock->profiler->tick( 'CMF_Controller('.get_class( $this ).'): env set' );
+//		$env->clock->profiler->tick( 'CMF_Controller('.get_class( $this ).'): env set' );
 		$this->view	= $this->getViewObject( $this->controller );
+		$env->clock->profiler->tick( 'CMF_Controller('.get_class( $this ).'): got view object' );
 //		$arguments		= array_slice( func_get_args(), 1 );										//  collect additional arguments for extended logic classes
 //		Alg_Object_MethodFactory::callObjectMethod( $this, '__onInit', $arguments, TRUE, TRUE );	//  invoke possibly extended init method
 		$this->__onInit();
@@ -142,6 +143,7 @@ class CMF_Hydrogen_Controller
 		}
 		else
 			throw new Exception( 'Neither view template nor content file defined' );
+		$this->env->clock->profiler->tick( 'Controller::getView: done' );
 		return $result;
 	}
 
