@@ -68,6 +68,7 @@ class CMF_Hydrogen_View
 	 */
 	public function __construct( CMF_Hydrogen_Environment_Web $env )
 	{
+		$env->clock->profiler->tick( 'CMF_View('.get_class( $this ).')::init start' );
 		$this->setEnv( $env );
 		$this->html		= new UI_HTML_Elements;
 		$this->time		= new Alg_Time_Converter();
@@ -77,7 +78,7 @@ class CMF_Hydrogen_View
 		$this->pathTemplates	= strlen( $path ) ? $path : $this->pathTemplates;					//  use configured template path is set, else keep default path
 		if( !file_exists( $this->pathTemplates ) )													//  templates folder is not existing
 			throw new RuntimeException( 'Templates folder "'.$this->pathTemplates.'" is missing' );	//  quit with exception
-
+		$env->clock->profiler->tick( 'CMF_Controller('.get_class( $this ).')::init done' );
 /*		if( class_exists( 'CMM_TEA_Factory' ) ){
 			$config	= 'config/TEA.ini';
 			if( !file_exists( 'config/TEA.ini' ) )
