@@ -163,7 +163,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 		$this->root		= $root	= getEnv( 'DOCUMENT_ROOT' );										//  note document root of web server or virtual host
 		$this->path		= $path = dirname( getEnv( 'SCRIPT_NAME' ) ).'/';							//  note absolute working path 
 		$this->scheme	= getEnv( "HTTPS" ) ? 'https' : 'http';										//  note used URL scheme
-		$this->url		= $this->scheme.'://'.$host.( $port ? ':'.$port : '' ).$path;				//  note calculated base application URI
+		$this->url		= $this->scheme.'://'.$host./*( $port ? ':'.$port : '' ).*/$path;				//  note calculated base application URI
 		$this->uri		= $root.$path;																//  note calculated absolute base application path 
 	}
 
