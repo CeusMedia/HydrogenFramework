@@ -253,9 +253,11 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 		$this->clock->profiler->tick( 'env: language' );
 	}
 
-	protected function initMessenger()
+	protected function initMessenger( $enabled = "auto" )
 	{
-		$this->messenger	= new CMF_Hydrogen_Environment_Resource_Messenger( $this );
+		if( $enabled === "auto" )																	//  auto detect mode
+			$enabled	= preg_match( "/html/", getEnv( 'HTTP_ACCEPT' ) );							//  enabled if HTML is requested
+		$this->messenger	= new CMF_Hydrogen_Environment_Resource_Messenger( $this, $enabled );
 		$this->clock->profiler->tick( 'env: messenger' );
 	}
 

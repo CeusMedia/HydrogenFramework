@@ -40,7 +40,7 @@
  *	@todo			is a web environment needed instead? try to avoid this - maybe a console messenger needs to be implemented therefore
  *	@todo			finish path resolution (path is set twice at the moment)
  */
-class CMF_Hydrogen_Environment_Remote extends CMF_Hydrogen_Environment_Abstract {
+class CMF_Hydrogen_Environment_Remote extends CMF_Hydrogen_Environment_Abstract{
 
 	/**	@var	boolean		$hasDatabase		Flag: indicates availability of a database connection */
 	public $hasDatabase		= FALSE;
@@ -65,6 +65,7 @@ class CMF_Hydrogen_Environment_Remote extends CMF_Hydrogen_Environment_Abstract 
 
 		$this->hasDatabase	= (bool) $this->dbc;													//  note if database is available
 		$this->path	= $options['pathApp'];															//  
+		$this->__onInit();
 	}
 
 	/**
