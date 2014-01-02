@@ -61,9 +61,10 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 	 *	@param		CMF_Hydrogen_Environment_Abstract	$env			Instance of any Session Handler
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment_Abstract $env  )
+	public function __construct( CMF_Hydrogen_Environment_Abstract $env, $enabled = TRUE  )
 	{
-		$this->env	= $env;
+		$this->env		= $env;
+		$this->enabled	= $enabled;
 	}
 
 	/**
@@ -178,6 +179,10 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 		$this->env->getSession()->set( $this->keyMessages, array() );
 	}
 
+	public function enable( $yesOrNo ){
+		$this->enabled	= (boolean) $yesOrNo;
+	}
+
 	public function getMessages(){
 		return (array) $this->env->getSession()->get( $this->keyMessages );
 	}
@@ -260,11 +265,13 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 	 */
 	protected function noteMessage( $type, $message)
 	{
-		if( is_array( $message ) || is_object( $message ) || is_resource( $message ) )
-			throw new InvalidArgumentException( 'Message must be a string or numeric' );
-		$messages	= (array) $this->env->getSession()->get( $this->keyMessages );
-		$messages[]	= array( "message" => $message, "type" => $type, "timestamp" => time() );
-		$this->env->getSession()->set( $this->keyMessages, $messages );
+		if( $this->enabled ){
+			if( is_array( $message ) || is_object( $message ) || is_resource( $message ) )
+				throw new InvalidArgumentException( 'Message must be a string or numeric' );
+			$messages	= (array) $this->env->getSession()->get( $this->keyMessages );
+			$messages[]	= array( "message" => $message, "type" => $type, "timestamp" => time() );
+			$this->env->getSession()->set( $this->keyMessages, $messages );
+		}
 	}
 }
 ?>
