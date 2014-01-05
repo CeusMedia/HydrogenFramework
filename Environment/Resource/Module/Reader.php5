@@ -148,20 +148,28 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 			$from	= $sql->hasAttribute( 'version-from' ) ? $sql->getAttribute( 'version-from' ) : "";
 			$to		= $sql->hasAttribute( 'version-to' ) ? $sql->getAttribute( 'version-to' ) : "";
 			$type	= $sql->hasAttribute( 'type' ) ? $sql->getAttribute( 'type' ) : '*';
+
+			if( $event == "update" ){
+				if( !$sql->hasAttribute( 'version-from' ) )
+					throw new Exception( 'SQL type "update" needs attribute "version-from"' );
+				if( !$sql->hasAttribute( 'version-to' ) )
+					throw new Exception( 'SQL type "update" needs attribute "version-to"' );
+				if( $from === $to )
+					throw new Exception( 'SQL update versions need to differ' );
+			}
+
 			foreach( explode( ',', $type ) as $type ){
 				$key	= $event.'@'.$type;
-				if( $event == "update" ){
-					if( !$sql->hasAttribute( 'version-from' ) )
-						throw new Exception( 'SQL type "update" needs attribute "version-from"' );
-					if( !$sql->hasAttribute( 'version-to' ) )
-						throw new Exception( 'SQL type "update" needs attribute "version-to"' );
-					$from	= $sql->getAttribute( 'version-from' );
-					$to		= $sql->getAttribute( 'version-to' );
-					if( $from === $to )
-						throw new Exception( 'SQL update versions need to differ' );
+				if( $event == "update" )
 					$key	= $event.":".$from."->".$to.'@'.$type;
-				}
-				$obj->sql[$key]	= (string) $sql;
+	//			$obj->sql[$key]	= (string) $sql;
+				$obj->sql[$key] = (object) array(
+					'event'		=> $event,
+					'from'		=> $from,
+					'to'		=> $to,
+					'type'		=> $type,
+					'sql'		=> (string) $sql
+				);
 			}
 		}
 
