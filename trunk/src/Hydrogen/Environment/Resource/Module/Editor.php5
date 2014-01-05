@@ -171,12 +171,16 @@ class CMF_Hydrogen_Environment_Resource_Module_Editor{
 		$this->saveModuleXml( $moduleId, $xml );													//  save modified module XML
 	}
 
-	public function addSql( $moduleId, $ddl, $event, $type ){
+	public function addSql( $moduleId, $ddl, $event, $type, $versionFrom = NULL, $versionTo = NULL ){
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
 		$ddl		= str_replace( '&', '&amp;', "\n".$ddl."\n" );
 		$node		= $xml->addChildCData( 'sql', $ddl );											//  add SQL as CDATA node
 		$node->addAttribute( 'on', $event );														//  set event attribute on new node
 		$node->addAttribute( 'type', $type );														//  set type attribute on new node
+		if( $event === "update" ){																	//  only for update set versions
+			$node->addAttribute( 'version-from', $versionFrom );									//  set update source version
+			$node->addAttribute( 'version-to', $versionTo );										//  set update target version
+		}
 		$this->saveModuleXml( $moduleId, $xml );													//  save modified module XML
 		
 	}
@@ -271,6 +275,21 @@ class CMF_Hydrogen_Environment_Resource_Module_Editor{
 				$relation->remove();
 				$this->saveModuleXml( $moduleId, $xml );											//  save modified module XML
 				return TRUE;
+			}
+		}
+		return FALSE;
+	}
+
+	public function removeSql( $moduleId, $event, $type, $versionFrom = NULL, $versionTo = NULL ){
+		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
+		foreach( $xml->sql as $sql ){																//  iterate SQL entries
+			if( $sql->event === $event && $sql->type === $type ){									//  event and type are matching
+				$matchingVersions	= $sql->from === $versionFrom && $sql->from === $versionFrom;	//  compare versions
+				if( $event !== "update" || ( $event === "update" && $matchingVersions ) ){			//  check versions on update
+					$sql->remove();																	//  remove XML node
+					$this->saveModuleXml( $moduleId, $xml );										//  save modified module XML
+					return TRUE;
+				}
 			}
 		}
 		return FALSE;
