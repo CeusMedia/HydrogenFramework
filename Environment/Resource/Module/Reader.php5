@@ -49,7 +49,6 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 		$obj->version				= (string) $xml->version;
 		$obj->versionAvailable		= NULL;
 		$obj->versionInstalled		= NULL;
-		$obj->price					= (string) $xml->price;
 		$obj->companies				= array();
 		$obj->authors				= array();
 		$obj->licenses				= array();
@@ -70,7 +69,16 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 		$obj->sql					= array();
 		$obj->links					= array();
 		$obj->hooks					= array();
+		$obj->installType			= 0;
+		$obj->installDate			= NULL;
 
+		if( $xml->version->hasAttribute( 'install-type' ) )
+			$obj->installType	= (int) $xml->version->getAttribute( 'install-type' );
+		if( $xml->version->hasAttribute( 'install-date' ) )
+			$obj->installDate	= strtotime( $xml->version->getAttribute( 'install-date' ) );
+		if( $xml->version->hasAttribute( 'install-source' ) )
+			$obj->installSource	= strtotime( $xml->version->getAttribute( 'install-source' ) );
+		
 		if( $xml->files ){
 			$map	= array(
 				'class'		=> 'classes',
