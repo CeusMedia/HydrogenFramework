@@ -71,13 +71,14 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 		$obj->hooks					= array();
 		$obj->installType			= 0;
 		$obj->installDate			= NULL;
+		$obj->installSource			= NULL;
 
 		if( $xml->version->hasAttribute( 'install-type' ) )
 			$obj->installType	= (int) $xml->version->getAttribute( 'install-type' );
 		if( $xml->version->hasAttribute( 'install-date' ) )
 			$obj->installDate	= strtotime( $xml->version->getAttribute( 'install-date' ) );
 		if( $xml->version->hasAttribute( 'install-source' ) )
-			$obj->installSource	= strtotime( $xml->version->getAttribute( 'install-source' ) );
+			$obj->installSource	= $xml->version->getAttribute( 'install-source' );
 		
 		if( $xml->files ){
 			$map	= array(
