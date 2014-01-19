@@ -47,12 +47,13 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAutoTabs extends CMF_Hydrogen_Vi
 	public $classHelper		= "ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-all";
 	public $classTab		= "ui-state-default ui-corner-top";
 	public $classTabActive	= "ui-tabs-selected ui-state-active";
+	protected $container	= FALSE;
 
 	public function __construct( CMF_Hydrogen_Environment_Abstract $env ){
 		$this->env	= $env;
 	}
 
-	public function render(){
+	public function render( $current = NULL, $niceUrls = FALSE ){
 		$request	= $this->env->getRequest();
 		$userId		= $this->env->getSession()->get( 'userId' );
 		$language	= $this->env->getLanguage()->getLanguage();
@@ -86,8 +87,15 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAutoTabs extends CMF_Hydrogen_Vi
 //			'style'	=> 'float: left; height: auto;'
 		);
 		$list		= UI_HTML_Tag::create( 'ul', join( $linkItemList ), $attributes	);
+		if( $this->container )
+			$list	= UI_HTML_Tag::create( 'div', $list, array( 'class' => 'container' ) );
+
 		$widget		= UI_HTML_Tag::create( 'div', $list, array( 'class' => $this->classWidget ) );
 		return UI_HTML_Tag::create( 'div', $widget, array( 'class' => $this->classContainer ) );
+	}
+
+	public function setContainer( $boolean ){
+		$this->container	= (boolean) $boolean;
 	}
 
 	protected function getUserModuleLinks( $userId, $language, $useAcl = TRUE ){
@@ -103,7 +111,6 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAutoTabs extends CMF_Hydrogen_Vi
 					continue;
 #				if( isset( $linkMap[$link->path] ) )												//  link has been added already
 #					continue;
-
 				$pathParts	= explode( '/', $link->path );
 				$action		= array_pop( $pathParts );
 				$controller	= implode( '_', $pathParts ); 
