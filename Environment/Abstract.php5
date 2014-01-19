@@ -267,8 +267,11 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$config		= $this->getConfig();
 		$type		= 'CMF_Hydrogen_Environment_Resource_Acl_AllPublic';
 		if( $config->get( 'module.roles' ) ){
-			$type	= $config->get( 'module.roles.acl' );
-			if( !$type )
+			if( !( $type = $config->get( 'module.roles.acl' ) ) )
+				$type	= 'CMF_Hydrogen_Environment_Resource_Acl_Database';
+		}
+		else if( $config->get( 'module.resource_users' ) ){
+			if( !( $type == $config->get( 'module.resource_users.acl' ) ) )
 				$type	= 'CMF_Hydrogen_Environment_Resource_Acl_Database';
 		}
 
@@ -408,14 +411,15 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 
 			foreach( $module->links as $link ){														//  iterate module links
 				if( $link->access == "public" ){													//  link is public
+					$link->path	= $link->path ? $link->path : 'index/index';
 					$path	= str_replace( '/', '_', $link->path );									//  get link path
 					if( !in_array( $path, $public ) )												//  link is not in public link list
 						$public[]	= $path;														//  add link to public link list
 				}
 			}
 		}
-		$this->modules->callHook( 'Env', 'initModules', $this );										//  call related module event hooks
-		$this->config->set( 'module.acl.public', implode( ',', $public ) );						//  save public link list
+		$this->modules->callHook( 'Env', 'initModules', $this );									//  call related module event hooks
+		$this->config->set( 'module.acl.public', implode( ',', array_unique( $public ) ) );			//  save public link list
 		$this->clock->profiler->tick( 'env: modules' );
 	}
 
