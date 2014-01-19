@@ -128,7 +128,7 @@ class CMF_Hydrogen_Dispatcher_General
 	}
 
 	public function checkAccess( $controller, $action ){
-		$access	= $this->env->getAcl()->has( str_replace( '/', '_', $controller ), $action );
+		$access	= $this->env->getAcl()->has( $controller, $action );
 		if( !$access ){
 			$message	= 'Access to '.$controller.'/'.$action.' denied.';
 			throw new RuntimeException( $message, 403 );											// break with internal error
