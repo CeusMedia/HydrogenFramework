@@ -61,6 +61,19 @@ class CMF_Hydrogen_Environment_Resource_Acl_Server extends CMF_Hydrogen_Environm
 		return $this->rights[$roleId];
 	}
 
+	
+	/**
+	 *	Return list controller actions or matrix of controllers and actions of role.
+	 *	@abstract
+	 *	@public
+	 *	@param		string		$controller		Controller to list actions for, otherwise return matrix
+	 *	@param		integer		$roleId			Specified role, otherwise current role
+	 *	@return		array						List of actions or matrix of controllers and actions
+	 */
+	public function index( $controller = NULL, $roleId = NULL ){
+		throw new Exception( 'Not implemented yet' );
+	}
+
 	/**
 	 *	Returns Role.
 	 *	@access		protected
