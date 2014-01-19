@@ -1,5 +1,5 @@
 <?php
-class CMF_Hydrogen_View_Helper_HTML{
+/*class CMF_Hydrogen_View_Helper_HTML{
 //	public function __construct();
 }
 
@@ -193,4 +193,5 @@ class XHTML extends UI_HTML_Elements {
 		return UI_HTML_Tag::create( 'dt', $term ).$definitions;
 	}
 }
+ */
 ?>
