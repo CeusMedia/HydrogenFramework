@@ -321,6 +321,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 		if( $this->modules ){
 			foreach( $this->modules->getAll() as $module ){
 				foreach( $module->links as $link ){													//  iterate module links
+					$link->path	= $link->path ? $link->path : 'index/index';
 					if( $link->access == "inside" ){												//  link is inside public
 						$path	= str_replace( '/', '_', $link->path );								//  get link path
 						if( !in_array( $path, $inside ) )											//  link is not in public link list
@@ -333,8 +334,8 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 					}
 				}
 			}
-			$this->config->set( 'module.acl.inside', implode( ',', $inside ) );						//  save public link list
-			$this->config->set( 'module.acl.outside', implode( ',', $outside ) );					//  save public link list
+			$this->config->set( 'module.acl.inside', implode( ',', array_unique( $inside ) ) );		//  save public link list
+			$this->config->set( 'module.acl.outside', implode( ',', array_unique( $outside ) ) );	//  save public link list
 		}
 		$this->clock->profiler->tick( 'env: session' );
 	}
