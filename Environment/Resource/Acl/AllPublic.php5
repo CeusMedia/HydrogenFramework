@@ -66,6 +66,40 @@ class CMF_Hydrogen_Environment_Resource_Acl_AllPublic extends CMF_Hydrogen_Envir
 	}
 
 	/**
+	 *	Return list controller actions or matrix of controllers and actions of role.
+	 *	@abstract
+	 *	@public
+	 *	@param		string		$controller		Controller to list actions for, otherwise return matrix
+	 *	@param		integer		$roleId			Specified role, otherwise current role
+	 *	@return		array						List of actions or matrix of controllers and actions
+	 */
+	public function index( $controller = NULL, $roleId = NULL ){
+		if( !$this->controllerActions )
+			$this->scanControllerActions();
+		if( $controller === NULL )
+			return $this->controllerActions;
+		if( array_key_exists( $controller, $this->controllerActions ) )
+			return $this->controllerActions[$controller];
+		return array();
+	}
+
+	/**
+	 *	Scan controller classes for actions using disclosure.
+	 *	@access		protected
+	 *	@return		void
+	 */
+	protected function scanControllerActions(){
+		$disclosure	= new CMF_Hydrogen_Environment_Resource_Disclosure();
+		$classes	= $disclosure->reflect( 'classes/Controller/' );
+		foreach( $classes as $className => $classData ){
+			$className	= strtolower( str_replace( '_', '/', $className ) );
+			$this->controllerActions[$className]	= array();
+			foreach( $classData->methods as $methodName => $methodData )
+				$this->controllerActions[$className][]	= $methodName;
+		}
+	}
+
+	/**
 	 *	Allowes access to a controller action for a role.
 	 *	@access		public
 	 *	@param		integer		$roleId			Role ID

@@ -44,8 +44,9 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 	public $roleAccessFull	= 1;
 	public $roleAccessAcl	= 2;
 
-	protected $rights		= array();
-	protected $roles		= array();
+	protected $controllerActions	= array();
+	protected $rights				= array();
+	protected $roles				= array();
 	/*	@var		$publicLinks				Map of links with public access */
 	protected $linksPublic			= array();
 	protected $linksPublicInside	= array();
@@ -100,6 +101,16 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 	}
 
 	/**
+	 *	Return list controller actions or matrix of controllers and actions of role.
+	 *	@abstract
+	 *	@public
+	 *	@param		string		$controller		Controller to list actions for, otherwise return matrix
+	 *	@param		integer		$roleId			Specified role, otherwise current role
+	 *	@return		array						List of actions or matrix of controllers and actions
+	 */
+	abstract public function index( $controller = NULL, $roleId = NULL );
+
+	/**
 	 *	Indicates wheter a role is system operator and has access to all controller actions.
 	 *	@access		public
 	 *	@param		integer		$roleId			Role ID
@@ -151,9 +162,10 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 			print_m( $this->linksPublicInside );
 			die;
 		}
-		$controller	= str_replace( '/', '_', strtolower( $controller ) );
+		$controller	= strtolower( str_replace( '_', '/', $controller ) );
 		
-		$linkPath	= $controller.'_'.$action;
+		$linkPath	= $controller && $action ? $controller.'_'.$action : '';
+		
 		if( in_array( $linkPath, $this->linksPublic ) )
 			return 3;
 		if( !$roleId ){
@@ -170,10 +182,8 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 		if( $this->hasNoAccess( $roleId ) )
 			return -1;
 		$rights	= $this->getRights( $roleId );
-		foreach( $rights as $right )
-			if( strtolower( $right->controller ) == $controller )
-				if( $right->action == $action )
-					return 1;
+		if( isset( $rights[$controller] ) && in_array( $action, $rights[$controller] ) )
+			return 1;
 		return 0;
 	}
 
