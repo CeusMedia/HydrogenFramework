@@ -97,25 +97,30 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source implements CMF_Hyd
 				continue;
 			}
 			$icon	= $entry->getPath().'/icon';
-			try{
-				$obj	= CMF_Hydrogen_Environment_Resource_Module_Reader::load( $entry->getPathname(), $id );
-				$obj->path		= $entry->getPath();
-				$obj->file		= $entry->getPathname();
-				$obj->source	= $this->source->id;
-				$obj->id		= $id;
-				$obj->versionAvailable	= $obj->version;
-				$obj->icon	= NULL;
-				if( file_exists( $icon.'.png' ) )
-					$obj->icon	= 'data:image/png;base64,'.base64_encode( File_Reader::load( $icon.'.png' ) );
-				else if( file_exists( $icon.'.ico' ) )
-					$obj->icon	= 'data:image/x-icon;base64,'.base64_encode( File_Reader::load( $icon.'.ico' ) );
-				$list[$id]	= $obj;
+			$filePath	= $entry->getPathname();
+			if( !is_readable( $filePath ) )
+				$this->env->messenger->noteFailure( 'Module file "'.$filePath.'" is not readable.' );
+			else{
+				try{
+					$obj	= CMF_Hydrogen_Environment_Resource_Module_Reader::load( $filePath, $id );
+					$obj->path		= $entry->getPath();
+					$obj->file		= $filePath;
+					$obj->source	= $this->source->id;
+					$obj->id		= $id;
+					$obj->versionAvailable	= $obj->version;
+					$obj->icon	= NULL;
+					if( file_exists( $icon.'.png' ) )
+						$obj->icon	= 'data:image/png;base64,'.base64_encode( File_Reader::load( $icon.'.png' ) );
+					else if( file_exists( $icon.'.ico' ) )
+						$obj->icon	= 'data:image/x-icon;base64,'.base64_encode( File_Reader::load( $icon.'.ico' ) );
+					$list[$id]	= $obj;
+				}
+				catch( Exception $e ){
+					$this->env->messenger->noteFailure( 'XML of available Module "'.$id.'" is broken ('.$e->getMessage().').' );
+				}
+				if( $cache )
+					$cache->set( $cacheKey, $obj );
 			}
-			catch( Exception $e ){
-				$this->env->messenger->noteFailure( 'XML of available Module "'.$id.'" is broken ('.$e->getMessage().').' );
-			}
-			if( $cache )
-				$cache->set( $cacheKey, $obj );
 #			$this->env->clock->profiler->tick( 'CMFR_Library_Source::scanFolder: Module #'.$id.':file' );
 		}
 		ksort( $list );
