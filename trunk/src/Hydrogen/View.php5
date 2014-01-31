@@ -304,8 +304,8 @@ class CMF_Hydrogen_View
 			$url		= $path.$key.'.html';														//  build filename
 			$id			= str_replace( " ", "", ucwords( preg_replace( "/[^a-z]/", " ", $key ) ) );	//  camelcase key
 			$id			= "text".str_replace( " ", "", $id );										//  generate ID for key
-			$list[$id]	= '';
-			if( $this->hasContentFile( $url ) )
+			$list[$id]	= '';																		//  default: empty block in list
+			if( $this->hasContentFile( $url ) )														//  content file is available
 				$list[$id]	= $this->loadContentFile( $url, $data );								//  load file content
 		}
 		return $list;
