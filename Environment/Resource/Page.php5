@@ -106,8 +106,10 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 		$pathScriptsLib	= $this->env->config->get( 'path.scripts.lib' );
 		$pathStylesLib	= $this->env->config->get( 'path.styles.lib' );
 		$listConfig		= array();
+		$settings		= array();
 
 		foreach( $modules->getAll() as $module ){													//  iterate installed modules
+			$settings[$module->id]	= array();
 			foreach( $module->files->styles as $style ){											//  iterate module style files
 				if( !empty( $style->load ) && $style->load == "auto" ){								//  style file is to be loaded always
 					$source	= !empty( $style->source ) ? $style->source : NULL;						//  get source attribute if possible
@@ -161,12 +163,16 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 				if( empty( $pair->protected ) || $pair->protected == 'no' ){
 					$key	= 'module.'.strtolower( $module->id ).'.'.$pair->key;
 					$key	= str_replace( '.', '_', $key );
-					$listConfig[$key]	 = $pair->value;
+					$listConfig[$key]	 = $pair->value;											//  @deprecated in favour of next line
+					$settings[$module->id][str_replace( '.', '_', $pair->key )]	= $pair->value;
 				}
 			}
+			if( !$settings[$module->id] )
+				unset( $settings[$module->id] );
 		}
 		$modules->callHook( 'Page', 'applyModules', $this );										//  call related module event hooks
-		$script		= 'var config = '.json_encode( $listConfig ).';';
+		$script		= 'var config = '.json_encode( $listConfig ).';';								//  @deprecated leave only next line
+		$script		.= 'var settings = '.json_encode( $settings ).';';
 		$script		= UI_HTML_Tag::create( 'script', "<!--\n".$script."\n-->", array( 'type' => "text/javascript" ) );
 		$this->addHead( $script );
 	}
