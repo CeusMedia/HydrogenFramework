@@ -99,6 +99,9 @@ class CMF_Hydrogen_Environment_Resource_Language
 				$language		= $this->env->getSession()->get( 'language' );
 		}
 		$this->setLanguage( $language );
+		$words	= $this->getWords( 'main' );
+		if( !empty( $words['main']['title'] ) )
+			$env->title	= $words['main']['title'];
 	}
 
 	/**
