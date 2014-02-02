@@ -299,7 +299,7 @@ class CMF_Hydrogen_View
 	public function populateTexts( $keys, $path, $data = array() ){
 		$path	= preg_replace( "/\/+$/", "", $path ).'/';											//  correct path
 		$list	= array();																			//  prepare empty list
-		$keys	= is_string( $keys ) ? array( $key ) : $keys;										//  convert single key to list
+		$keys	= is_string( $keys ) ? array( $keys ) : $keys;										//  convert single key to list
 		foreach( $keys as $key ){																	//  iterate keys
 			$url		= $path.$key.'.html';														//  build filename
 			$id			= str_replace( " ", "", ucwords( preg_replace( "/[^a-z]/", " ", $key ) ) );	//  camelcase key
