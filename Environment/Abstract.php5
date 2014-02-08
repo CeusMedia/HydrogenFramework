@@ -41,7 +41,7 @@
  *	@since			0.1
  *	@version		$Id$
  *	@todo			decide whether to use onInit or onLoad and remove the other
- *	@todo		call to onInit is to soon of another environment is existing
+ *	@todo			call to onInit is to soon of another environment is existing
  */
 abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environment, ArrayAccess
 {
@@ -91,17 +91,17 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$this->path			= isset( $options['pathApp'] ) ? $options['pathApp'] : getCwd().'/';	//  detect application path
 		$this->initClock();																			//  setup clock
 		$this->initConfiguration();																	//  setup configuration
-		$this->initLogic();
+		$this->initLogic();																			//  setup logic pool
 		$this->initModules();																		//  setup module support
 		$this->initDatabase();																		//  setup database connection
 		$this->initCache();																			//  setup cache support
-		if( $this->modules )
-			$this->modules->callHook( 'Env', 'constructEnd', $this );
+		$this->modules->callHook( 'Env', 'constructEnd', $this );									//  call module hooks for end of env construction
 
-		date_default_timezone_set( @date_default_timezone_get() );
-		if( !empty( self::$timezone ) )
-			date_default_timezone_set( self::$timezone );
-		$this->__onInit();
+		date_default_timezone_set( @date_default_timezone_get() );									//  avoid having no timezone set
+		if( !empty( self::$timezone ) )																//  a timezone has be set externally before
+			date_default_timezone_set( self::$timezone );											//  set this timezone
+		$this->__onInit();																			//  default callback for construction end
+		$this->clock->profiler->tick( 'Environment (Abstract): construction dont' );				//  log time of construction
 	}
 
 	public function __onInit(){
