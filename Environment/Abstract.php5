@@ -60,6 +60,8 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 
 	public static $configFile				= "config.ini.inc";
 
+	public static $timezone					= NULL;
+
 	/**	@var	CMF_Hydrogen_Environment_Resource_LogicPool				$logic		Pool for logic class instances */
 	protected $logic						= array();
 	/**	@var	CMF_Hydrogen_Environment_Resource_Module_Library_Local	$modules	Handler for local modules */
@@ -95,6 +97,10 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$this->initCache();																			//  setup cache support
 		if( $this->modules )
 			$this->modules->callHook( 'Env', 'constructEnd', $this );
+
+		date_default_timezone_set( @date_default_timezone_get() );
+		if( !empty( self::$timezone ) )
+			date_default_timezone_set( self::$timezone );
 		$this->__onInit();
 	}
 
@@ -370,7 +376,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$hasModule	= $this->getModules()->has( 'Resource_Database' );								//  module for database connection is enabled
 		$hasConfig	= $this->config->get( 'database.driver' );										//  database connection is configured in main config (deprecated)
 		if( $hasModule || $hasConfig ){																//  database connection has been configured
-			if( class_exists( 'Resource_Database' ) )
+			if( $hasModule && class_exists( 'Resource_Database' ) )
 				$this->dbc	= new Resource_Database( $this );										//  try to configure and connect database
 			else																					//  @deprecated
 				$this->dbc	= new CMF_Hydrogen_Environment_Resource_Database_PDO( $this );			//  try to configure and connect database
