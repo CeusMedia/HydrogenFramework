@@ -107,6 +107,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 			$this->initPage();																		//  
 			$this->initAcl();
 			$this->__onInit();																		//  
+			$this->clock->profiler->tick( 'Environment (Web): construction done' );					//  log time of construction
 		}
 		catch( Exception $e )
 		{
