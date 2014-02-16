@@ -119,15 +119,6 @@ class CMF_Hydrogen_View
 			$this->registerHelper($name, $object, $parameters);
 	}
 
-	public function & getData( $key = NULL )
-	{
-		if( !$key )
-			return $this->data;
-		if( isset( $this->data[$key] ) )
-			return $this->data[$key];
-		throw new InvalidArgumentException( 'Data for key "'.$key."' is not set" );
-	}
-
 	public function getContentUri( $fileKey, $path = NULL )
 	{
 		$path		= preg_replace( '/^(.+)(\/)*$/U', '\\1/', $path );
@@ -136,19 +127,15 @@ class CMF_Hydrogen_View
 		return $uri;
 	}
 
-	/**
-	 *	Loads View Class of called Controller.
-	 *	@access		protected
-	 *	@param		string		$section	Section in locale file
-	 *	@param		string		$topic		Locale file key, eg. test/my, default: current controller
-	 *	@return		void
-	 */
-	protected function getWords( $section = NULL, $topic = NULL ){
-		if( empty( $topic ) && $this->env->getLanguage()->hasWords( $this->controller ) )
-			$topic = $this->controller;
-		if( empty( $section ) )
-			return $this->env->getLanguage()->getWords( $topic );
-		return (object) $this->env->getLanguage()->getSection( $topic, $section );
+	public function & getData( $key = NULL, $autoSetTo = NULL )
+	{
+		if( !$key )
+			return $this->data;
+		if( !isset( $this->data[$key] ) &&  !is_null( $autoSetTo ) )
+			$this->addData( $key, $autoSetTo );
+		if( isset( $this->data[$key] ) )
+			return $this->data[$key];
+		throw new InvalidArgumentException( 'Data for key "'.$key."' is not set" );
 	}
 
 	protected function getTemplateUri( $controller, $action )
@@ -170,6 +157,21 @@ class CMF_Hydrogen_View
 		return $this->pathTemplates.$fileKey;
 	}
 
+	/**
+	 *	Loads View Class of called Controller.
+	 *	@access		protected
+	 *	@param		string		$section	Section in locale file
+	 *	@param		string		$topic		Locale file key, eg. test/my, default: current controller
+	 *	@return		void
+	 */
+	protected function getWords( $section = NULL, $topic = NULL ){
+		if( empty( $topic ) && $this->env->getLanguage()->hasWords( $this->controller ) )
+			$topic = $this->controller;
+		if( empty( $section ) )
+			return $this->env->getLanguage()->getWords( $topic );
+		return (object) $this->env->getLanguage()->getSection( $topic, $section );
+	}
+
 	public function hasContent( $controller, $action, $path = NULL )
 	{
 		$fileKey	= $controller.'/'.$action.'.html';
@@ -182,6 +184,10 @@ class CMF_Hydrogen_View
 		return file_exists( $uri );
 	}
 
+	public function hasData( $key )
+	{
+		return isset( $this->data[$key] );
+	}
 
 	public function hasTemplate( $controller, $action )
 	{
@@ -260,7 +266,7 @@ class CMF_Hydrogen_View
 			return $template->render();																//  
 		}
 		else{
-			$content	= '';
+			$___content	= '';
 			ob_start();
 			$view		= $___view		= $this;													//  
 			$env		= $___env		= $this->env;												//  
@@ -274,19 +280,19 @@ class CMF_Hydrogen_View
 			$result		= include( $___templateUri );												//  
 			if( $result === FALSE )
 				throw new RuntimeException( 'Template file "'.$___templateUri.'" is not existing' );
-			$buffer		= ob_get_clean();															//  
-			$content	= $result;
-			if( trim( $buffer ) )
+			$___buffer		= ob_get_clean();														//  
+			$___content	= $result;
+			if( trim( $___buffer ) )
 			{
-				if( !is_string( $content ) )
-					$content	= $buffer;
+				if( !is_string( $___content ) )
+					$___content	= $___buffer;
 				else if( $this->env->getMessenger() )
-					$this->env->getMessenger()->noteFailure( nl2br( $buffer ) );
+					$this->env->getMessenger()->noteFailure( nl2br( $___buffer ) );
 				else
-					throw new RuntimeException( $buffer );
+					throw new RuntimeException( $___buffer );
 			}
 		}
-		return $content;
+		return $___content;
 	}
 
 	/**
