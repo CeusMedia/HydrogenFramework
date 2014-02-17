@@ -41,8 +41,10 @@
 class CMF_Hydrogen_Application_Console extends CMF_Hydrogen_Application_Abstract
 {
 	public function __construct( $env = NULL ){
+		if( self::$classEnvironment === 'CMF_Hydrogen_Environment_Web' )
+			self::$classEnvironment	= 'CMF_Hydrogen_Environment_Console';
 		parent::__construct( $env );
-		$this->env->request	= new Console_Command_ArgumentParser();
+		$this->env->set( 'request', new Console_Command_ArgumentParser() );
 	}
 
 	/**
