@@ -76,7 +76,6 @@ class CMF_Hydrogen_Environment_Resource_Language
 		else																						//  otherwise scan locales folder
 			foreach( Folder_Lister::getFolderList( $this->filePath ) as $folder )					//  iterate found locale folders
 				$this->languages[]	= $folder->getFilename();										//  save locale folder as language
-		
 		$language			= $config->has( 'locale.default' ) ? $config['locale.default'] : 'en';
 
 		if( $this->env->has( 'session' ) )

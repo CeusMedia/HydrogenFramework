@@ -22,7 +22,7 @@ class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment_Abstract
 #			$this->initResponse();																	//  setup HTTP response handler
 #			$this->initRouter();																	//  setup request router
 	//		$this->initFieldDefinition();															//  --  FIELD DEFINITION SUPPORT  --  //
-#			$this->initLanguage();																	//  setup language support
+			$this->initLanguage();																	//  setup language support
 #			$this->initPage();																		//  
 			$this->initAcl();
 		}
@@ -33,6 +33,10 @@ class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment_Abstract
 		}
 	}
 
+	public function getLanguage(){
+		return $this->language;
+	}
+
 	public function getMessenger(){
 		return $this->messenger;
 	}
@@ -41,8 +45,13 @@ class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment_Abstract
 		return $this->request;
 	}
 
-	public function initConfiguration(){
-		$this->config	= new ADT_List_Dictionary();
+//	public function initConfiguration(){
+//		$this->config	= new ADT_List_Dictionary();
+//	}
+
+	public function initLanguage(){
+		$this->language		= new CMF_Hydrogen_Environment_Resource_Language( $this );
+		$this->clock->profiler->tick( 'env: language' );
 	}
 
 	public function initMessenger(){
