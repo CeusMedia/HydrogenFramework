@@ -51,12 +51,12 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydr
 		if( $config->get( 'path.module.config' ) )
 			$this->path	= $config->get( 'path.module.config' );
 		$this->path		= $env->path.$this->path;
-		$this->env->clock->profiler->tick( 'Resource_Module_Library_Local::init' );
+		$this->env->clock->profiler->tick( 'Resource_Module_Library_Local::' );
 		$this->scan( $config->get( 'system.cache.modules' ) );
-		$this->env->clock->profiler->tick( 'Resource_Module_Library_Local::scan' );
 	}
 
 	public function callHook( $resource, $event, $context, $arguments = array() ){
+//		$this->env->clock->profiler->tick( 'Resource_Module_Library_Local::callHook: '.$event.'@'.$resource.' start' );
 		$count	= 0;
 		foreach( $this->modules as $module ){
 			if( empty( $module->hooks[$resource][$event] ) )
@@ -75,7 +75,6 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydr
 				ob_start();
 				$args	= array( $this->env, &$context, $module, $arguments );
 				call_user_func_array( $function, $args );
-
 				$this->env->clock->profiler->tick( '<!--Resource_Module_Library_Local::call-->Hook: '.$event.'@'.$resource.': '.$module->id );
 				$stdout	= ob_get_clean();
 				if( strlen( $stdout ) )
@@ -91,7 +90,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydr
 					throw new RuntimeException( 'Hook '.$module->id.'::'.$resource.'@'.$event.' failed', 0, $e );
 			}
 		}
-//		$this->env->clock->profiler->tick( 'Resource_Module_Library_Local::callHook' );
+//		$this->env->clock->profiler->tick( 'Resource_Module_Library_Local::callHook: '.$event.'@'.$resource.' done' );
 		return $count;
 	}
 
@@ -115,7 +114,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydr
 	public function has( $moduleId ){
 		return array_key_exists( $moduleId, $this->modules );
 	}
-	
+
 	public function scan( $useCache = FALSE, $forceReload = FALSE ){
 		if( !file_exists( $this->path ) )
 			return;
@@ -125,6 +124,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydr
 			$this->clearCache();
 		if( $useCache && file_exists( $cacheFile ) ){
 			$this->modules	= unserialize( File_Reader::load( $cacheFile ) );
+			$this->env->clock->profiler->tick( 'Resource_Module_Library_Local::scan (cache)' );
 			return;
 		}
 
@@ -143,12 +143,12 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydr
 				$module->icon	= 'data:image/png;base64,'.base64_encode( File_Reader::load( $icon.'.png' ) );
 			else if( file_exists( $icon.'.ico' ) )
 				$module->icon	= 'data:image/x-icon;base64,'.base64_encode( File_Reader::load( $icon.'.ico' ) );
-			
 			$this->modules[$moduleId]	= $module;
 		}
 		ksort( $this->modules );
 		if( $useCache )
 			File_Writer::save( $cacheFile, serialize( $this->modules ) );
+		$this->env->clock->profiler->tick( 'Resource_Module_Library_Local::scan (files)' );
 	}
 }
 ?>
