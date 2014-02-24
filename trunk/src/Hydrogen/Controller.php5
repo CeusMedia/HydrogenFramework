@@ -67,7 +67,7 @@ class CMF_Hydrogen_Controller
 		$env->clock->profiler->tick( 'CMF_Controller('.get_class( $this ).')' );
 		$this->setEnv( $env );
 //		$env->clock->profiler->tick( 'CMF_Controller('.get_class( $this ).'): env set' );
-		$this->view	= $this->getViewObject( $this->controller );
+		$this->view	= $this->getViewObject( $this->controller, !$env->getRequest()->isAjax() );
 		$env->clock->profiler->tick( 'CMF_Controller('.get_class( $this ).'): got view object' );
 //		$arguments		= array_slice( func_get_args(), 1 );										//  collect additional arguments for extended logic classes
 //		Alg_Object_MethodFactory::callObjectMethod( $this, '__onInit', $arguments, TRUE, TRUE );	//  invoke possibly extended init method
@@ -152,13 +152,16 @@ class CMF_Hydrogen_Controller
 	 *	@access		protected
 	 *	@return		void
 	 */
-	protected function getViewObject( $controller )
+	protected function getViewObject( $controller, $force = TRUE )
 	{
 		$name	= str_replace( ' ', '_', ucwords( str_replace( '/', ' ', $controller ) ) );
 		$class	= self::$prefixView.$name;
-		if( !class_exists( $class, TRUE ) )
+		if( class_exists( $class, TRUE ) )
+			return Alg_Object_Factory::createObject( $class, array( &$this->env ) );
+		else if( $force )
 			throw new RuntimeException( 'View "'.$name.'" is missing', 301 );
-		return Alg_Object_Factory::createObject( $class, array( &$this->env ) );
+		else
+			return new CMF_Hydrogen_View( $this->env );
 	}
 
 	/**
