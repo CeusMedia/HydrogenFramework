@@ -72,6 +72,22 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 			) );
 			return $output;																			//  return generated output
 		}
+		catch( ErrorException $e ){
+			if( getEnv( 'HTTP_HOST' ) ){
+				if( $this->env->getModules()->has( 'ErrorException' ) ){
+					$view	= new View_ErrorException( $this->env );
+					return $view->handle( $e );
+				}
+				return UI_HTML_Exception_Page::render( $e );
+				
+			}
+			else{
+				remark( $e->getMessage() );
+				remark( $e->getTraceAsString() );
+				remark();
+				exit;
+			}
+		}
 		catch( Exception $e )
 		{
 			if( $e->getCode() == 403 && $this->env->getModules()->has( 'Resource_Authentication' ) ){
