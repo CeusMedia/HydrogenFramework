@@ -89,6 +89,11 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		self::$defaultPaths['cache']	= sys_get_temp_dir().'/cache/';
 		$this->options		= $options;																//  store given environment options
 		$this->path			= isset( $options['pathApp'] ) ? $options['pathApp'] : getCwd().'/';	//  detect application path
+
+		date_default_timezone_set( @date_default_timezone_get() );									//  avoid having no timezone set
+		if( !empty( self::$timezone ) )																//  a timezone has be set externally before
+			date_default_timezone_set( self::$timezone );											//  set this timezone
+
 		$this->initClock();																			//  setup clock
 		$this->initConfiguration();																	//  setup configuration
 		$this->initLogic();																			//  setup logic pool
@@ -96,10 +101,6 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$this->initDatabase();																		//  setup database connection
 		$this->initCache();																			//  setup cache support
 		$this->modules->callHook( 'Env', 'constructEnd', $this );									//  call module hooks for end of env construction
-
-		date_default_timezone_set( @date_default_timezone_get() );									//  avoid having no timezone set
-		if( !empty( self::$timezone ) )																//  a timezone has be set externally before
-			date_default_timezone_set( self::$timezone );											//  set this timezone
 		$this->__onInit();																			//  default callback for construction end
 		$this->clock->profiler->tick( 'Environment (Abstract): construction dont' );				//  log time of construction
 	}
