@@ -56,7 +56,7 @@ class CMF_Hydrogen_Model
  	protected $prefix;
 	/**	@var		ADT_List_Dictionary				$cache			Model data cache */
 	protected $cache;
-	/**	@var		int								$fetchMode		PDO fetch mode */
+	/**	@var		integer							$fetchMode		PDO fetch mode */
 	protected $fetchMode;
 
 	public static $cacheClass						= 'ADT_List_Dictionary';
@@ -66,7 +66,7 @@ class CMF_Hydrogen_Model
 	 *	Constructor.
 	 *	@access		public
 	 *	@param		CMF_Hydrogen_Environment_Abstract	$env			Application Environment Object
-	 *	@param		int								$id				ID to focus on
+	 *	@param		integer							$id				ID to focus on
 	 *	@return		void
 	 */
 	public function __construct( CMF_Hydrogen_Environment_Abstract $env, $id = NULL )
@@ -97,8 +97,8 @@ class CMF_Hydrogen_Model
 	 *	Returns Data of single Line by ID.
 	 *	@access		public
 	 *	@param		array			$data			Data to add to Table
-	 *	@param		bool		$stripTags		Flag: strip HTML Tags from values
-	 *	@return		int
+	 *	@param		boolean			$stripTags		Flag: strip HTML Tags from values
+	 *	@return		integer
 	 */
 	public function add( $data, $stripTags = TRUE )
 	{
@@ -132,12 +132,12 @@ class CMF_Hydrogen_Model
 	}
 
 	/**
-	 *	Returns Data of single Line by ID.
+	 *	Modifies data of single row by ID.
 	 *	@access		public
-	 *	@param		int				$id				ID to focus on
+	 *	@param		integer			$id				ID to focus on
 	 *	@param		array			$data			Data to edit
-	 *	@param		bool			$stripTags		Flag: strip HTML Tags from values
-	 *	@return		int				Number of changed rows
+	 *	@param		boolean			$stripTags		Flag: strip HTML Tags from values
+	 *	@return		integer			Number of changed rows
 	 */
 	public function edit( $id, $data, $stripTags = TRUE )
 	{
@@ -150,10 +150,18 @@ class CMF_Hydrogen_Model
 		return $result;
 	}
 
+	public function editByIndices( $indices, $data ){
+		if( !is_array( $indices ) )
+			throw new InvalidArgumentException( 'Index map must be an array' );
+		if( !$indices )
+			throw new InvalidArgumentException( 'Index map cannot be empty' );
+		return $this->table->updateByConditions( $data, $indices );
+	}
+
 	/**
 	 *	Returns Data of single Line by ID.
 	 *	@access		public
-	 *	@param		int				$id				ID to focus on
+	 *	@param		integer			$id				ID to focus on
 	 *	@param		string			$field			Single Field to return
 	 *	@return		mixed
 	 */
@@ -317,8 +325,8 @@ class CMF_Hydrogen_Model
 	/**
 	 *	Returns table name with or without index.
 	 *	@access		public
-	 *	@param		boolean		$prefixed		Flag: return table name with prefix
-	 *	@return		string		Table name with or without prefix
+	 *	@param		boolean			$prefixed		Flag: return table name with prefix
+	 *	@return		string			Table name with or without prefix
 	 */
 	public function getName( $prefixed = TRUE ){
 		if( $prefixed )
@@ -328,8 +336,8 @@ class CMF_Hydrogen_Model
 
 	/**
 	 *	Indicates whether a table row is existing by ID.
-	 *	@param		int				$id				ID to focus on
-	 *	@return		bool
+	 *	@param		integer			$id				ID to focus on
+	 *	@return		boolean
 	 */
 	public function has( $id )
 	{
@@ -343,7 +351,7 @@ class CMF_Hydrogen_Model
 	 *	@access		public
 	 *	@param		string			$key			Key of Index
 	 *	@param		string			$value			Value of Index
-	 *	@return		bool
+	 *	@return		boolean
 	 */
 	public function hasByIndex( $key, $value )
 	{
@@ -354,7 +362,7 @@ class CMF_Hydrogen_Model
 	 *	Indicates whether a Table Row is existing by a Map of Indices.
 	 *	@access		public
 	 *	@param		array			$indices		Map of Index Keys and Values
-	 *	@return		bool
+	 *	@return		boolean
 	 */
 	public function hasByIndices( $indices )
 	{
@@ -364,8 +372,8 @@ class CMF_Hydrogen_Model
 	/**
 	 *	Returns Data of single Line by ID.
 	 *	@access		public
-	 *	@param		int				$id				ID to focus on
-	 *	@return		bool
+	 *	@param		integer			$id				ID to focus on
+	 *	@return		boolean
 	 */
 	public function remove( $id )
 	{
@@ -386,7 +394,7 @@ class CMF_Hydrogen_Model
 	 *	@access		public
 	 *	@param		string			$key			Key of Index
 	 *	@param		string			$value			Value of Index
-	 *	@return		bool
+	 *	@return		boolean
 	 */
 	public function removeByIndex( $key, $value )
 	{
