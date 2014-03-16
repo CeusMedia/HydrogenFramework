@@ -172,9 +172,9 @@ class CMF_Hydrogen_View
 		return (object) $this->env->getLanguage()->getSection( $topic, $section );
 	}
 
-	public function hasContent( $controller, $action, $path = NULL )
+	public function hasContent( $controller, $action, $path = NULL, $extension = '.html' )
 	{
-		$fileKey	= $controller.'/'.$action.'.html';
+		$fileKey	= $controller.'/'.$action.$extension;
 		return $this->hasContentFile( $fileKey, $path );
 	}
 
