@@ -429,7 +429,8 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 				}
 			}
 		}
-		$this->modules->callHook( 'Env', 'initModules', $this );									//  call related module event hooks
+		if( !( $this instanceof CMF_Hydrogen_Environment_Remote ) )
+			$this->modules->callHook( 'Env', 'initModules', $this );								//  call related module event hooks
 		$this->config->set( 'module.acl.public', implode( ',', array_unique( $public ) ) );			//  save public link list
 		$this->clock->profiler->tick( 'env: modules' );
 	}
