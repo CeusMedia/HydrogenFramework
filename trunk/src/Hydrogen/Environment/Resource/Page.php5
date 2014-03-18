@@ -76,7 +76,6 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 			$this->css->theme->setRevision( $env->config->get( 'app.revision' ) );
 		}
 
-		
 		if( strlen( $title	= $env->config->get( 'app.name' ) ) )
 			$this->setTitle( $title );
 		if( ( $modules = $this->env->getModules() ) )												//  get module handler resource if existing
@@ -98,6 +97,7 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 	}
 
 	public function applyModules(){
+		$config		= $this->env->getConfig()->getAll( 'module.', TRUE );							//  dictionary of (user modified) module settings
 		$modules	= $this->env->getModules();														//  get module handler resource
 		if( !$modules )																				//  module handler resource is not existing
 			return;
@@ -161,10 +161,10 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 			}
 			foreach( $module->config as $pair ){													//  iterate module configuration pairs
 				if( !empty( $pair->protected ) && $pair->protected !== 'yes' ){
-					$key	= 'module.'.strtolower( $module->id ).'.'.$pair->key;
-					$key	= str_replace( '.', '_', $key );
-					$listConfig[$key]	 = $pair->value;											//  @deprecated in favour of next line
-					$settings[$module->id][str_replace( '.', '_', $pair->key )]	= $pair->value;
+					$value	= $config->get( strtolower( $module->id ).'.'.$pair->key );				//  get (user modified) module setting value
+					$settings[$module->id][str_replace( '.', '_', $pair->key )]	= $value;			//  note module setting
+					$key	= 'module.'.strtolower( $module->id ).'.'.$pair->key;					//  @deprecated see line below
+					$listConfig[str_replace( '.', '_', $key )]	 = $pair->value;					//  @deprecated in favour of settings
 				}
 			}
 			if( !$settings[$module->id] )
@@ -172,7 +172,7 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 		}
 		$modules->callHook( 'Page', 'applyModules', $this );										//  call related module event hooks
 		$script		= 'var config = '.json_encode( $listConfig ).';';								//  @deprecated leave only next line
-		$script		.= 'var settings = '.json_encode( $settings ).';';
+		$script		.= "\n\n".'var settings = '.json_encode( $settings ).';';
 		$script		= UI_HTML_Tag::create( 'script', "<!--\n".$script."\n-->", array( 'type' => "text/javascript" ) );
 		$this->addHead( $script );
 	}
