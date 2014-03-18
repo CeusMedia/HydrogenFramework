@@ -79,7 +79,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 			$obj->installDate	= strtotime( $xml->version->getAttribute( 'install-date' ) );
 		if( $xml->version->hasAttribute( 'install-source' ) )
 			$obj->installSource	= $xml->version->getAttribute( 'install-source' );
-		
+
 		if( $xml->files ){
 			$map	= array(
 				'class'		=> 'classes',
@@ -153,29 +153,22 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 				$obj->relations->supports[]	= (string) $moduleName;
 		}
 		foreach( $xml->sql as $sql ){
-			$event	= $sql->getAttribute( 'on' );
-			$from	= $sql->hasAttribute( 'version-from' ) ? $sql->getAttribute( 'version-from' ) : "";
-			$to		= $sql->hasAttribute( 'version-to' ) ? $sql->getAttribute( 'version-to' ) : "";
-			$type	= $sql->hasAttribute( 'type' ) ? $sql->getAttribute( 'type' ) : '*';
+			$event		= $sql->getAttribute( 'on' );
+			$to			= $sql->hasAttribute( 'version-to' ) ? $sql->getAttribute( 'version-to' ) : NULL;
+			$version	= $sql->hasAttribute( 'version' ) ? $sql->getAttribute( 'version' ) : $to; 		//NULL;			//  @todo: remove fallback
+			$type		= $sql->hasAttribute( 'type' ) ? $sql->getAttribute( 'type' ) : '*';
 
-			if( $event == "update" ){
-				if( !$sql->hasAttribute( 'version-from' ) )
-					throw new Exception( 'SQL type "update" needs attribute "version-from"' );
-				if( !$sql->hasAttribute( 'version-to' ) )
-					throw new Exception( 'SQL type "update" needs attribute "version-to"' );
-				if( $from === $to )
-					throw new Exception( 'SQL update versions need to differ' );
-			}
+			if( $event == "update" )
+				if( !$version )
+					throw new Exception( 'SQL type "update" needs attribute "version"' );
 
 			foreach( explode( ',', $type ) as $type ){
 				$key	= $event.'@'.$type;
 				if( $event == "update" )
-					$key	= $event.":".$from."->".$to.'@'.$type;
-	//			$obj->sql[$key]	= (string) $sql;
+					$key	= $event.":".$version.'@'.$type;
 				$obj->sql[$key] = (object) array(
 					'event'		=> $event,
-					'from'		=> $from,
-					'to'		=> $to,
+					'version'	=> $version,
 					'type'		=> $type,
 					'sql'		=> (string) $sql
 				);
@@ -207,7 +200,6 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 			$event		= $hook->getAttribute( 'event' );
 			$obj->hooks[$resource][$event]	= (string) $hook;
 		}
-
 		return $obj;
 	}
 }

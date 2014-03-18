@@ -45,8 +45,8 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 	protected $suffix				= "";
 	protected $revision;
 	/**	@var	array				$styles		List of StyleSheet blocks */
-	protected $styles				= array();
-	protected $urls					= array();
+	protected $styles				= array( 'top' => array(), 'mid' => array(), 'end' => array() );
+	protected $urls					= array( 'top' => array(), 'mid' => array(), 'end' => array() );
 	protected $useCompression		= FALSE;
 	public $indent					= "\t\t";
 
@@ -54,27 +54,37 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 		if( $basePath !== NULL )
 			$this->setBasePath( $basePath );
 	}
-	
+
 	/**
 	 *	Collect a StyleSheet block.
 	 *	@access		public
 	 *	@param		string		$style		StyleSheet block
-	 *	@param		bool		$onTop		Put this block on top of all others
+	 *	@param		integer		$level		Run level, values: (top, mid, end), default: mid
 	 *	@return		void
 	 */
-	public function addStyle( $style, $onTop = FALSE ){
-		$onTop ? array_unshift( $this->styles, $style ) : array_push( $this->styles, $style );
+	public function addStyle( $style, $level = 'mid', $key = NULL ){
+		$level	= is_bool( $level ) ? ( $level ? 'top' : 'mid' ) : $level;				//  hack: map older boolean values to levels @todo remove if modules are adjusted
+		$level	= in_array( $level, array( 'top', 'mid', 'end' ) ) ? $level : 'mid';
+		$key	= strlen( $key ) ? md5( $key ) : 'default';
+		if( !array_key_exists( $key, $this->styles[$level] ) )
+			$this->styles[$level][$key]	= array();
+		$this->styles[$level][$key][]	= $style;
 	}
 
 	/**
 	 *	Add a StyleSheet URL.
 	 *	@access		public
 	 *	@param		string		$url		StyleSheet URL
-	 *	@param		bool		$onTop		Flag: add this URL on top of all others
+	 *	@param		integer		$level		Run level between 0 and 9
 	 *	@return		void
 	 */
-	public function addUrl( $url, $onTop = FALSE ){
-		$onTop ? array_unshift( $this->urls, $url ) : array_push( $this->urls, $url );
+	public function addUrl( $url, $level = 'mid', $key = NULL ){
+		$level	= is_bool( $level ) ? ( $level ? 'top' : 'mid' ) : $level; // hack: map older boolean values to levels @todo remove if modules are adjusted
+		$level	= in_array( $level, array( 'top', 'mid', 'end' ) ) ? $level : 'mid';
+		$key	= strlen( $key ) ? md5( $key ) : md5( 'default' );
+		if( !array_key_exists( $key, $this->urls[$level] ) )
+			$this->urls[$level][$key]	= array();
+		$this->urls[$level][$key][]		= $url;
 	}
 
 	/**
@@ -141,7 +151,7 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 			if( preg_match( "/^http/", $url ) ){													//  CSS resource is global (using HTTP)
 				$contents[]	= Net_Reader::readUrl( $url );											//  read global CSS content and append to content list
 				continue;																			//  skip to next without relocation etc.
-			}					
+			}
 			$pathFile	= dirname( $url ).'/';														//  get path to CSS file within app
 			$content	= $combiner->combineString( $pathFile, File_Reader::load( $url ), TRUE );	//  read local CSS content and insert imported CSS files within CSS content
 			if( preg_match( "/\/[a-z]+/", $content ) )												//  CSS content contains path notations
@@ -154,18 +164,39 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 	}
 
 	/**
+	 *	Returns a list of collected StyleSheet blocks.
+	 *	@access		public
+	 *	@return		array
+	 */
+	public function getStyleList(){
+		$list	= array( 'top' => array(), 'mid' => array(), 'end' => array() );
+		foreach( $this->styles as $level => $map ){
+			foreach( $map as $key => $styles ){
+				foreach( $styles as $style ){
+					$list[$level][]	= $style;
+				}
+			}
+		}
+		return $list['top'] + $list['mid'] + $list['end'];
+	}
+
+	/**
 	 *	Returns a list of collected StyleSheet URLs.
 	 *	@access		public
 	 *	@return		array
 	 */
 	public function getUrlList(){
-		$list	= array();
-		foreach( $this->urls as $url ){
-			if( !preg_match( "@^[a-z]+://@", $url ) )
-				$url	= $this->pathBase.$url;
-			$list[]	= $url;
+		$list	= array( 'top' => array(), 'mid' => array(), 'end' => array() );
+		foreach( $this->urls as $level => $map ){
+			foreach( $map as $key => $urls ){
+				foreach( $urls as $url ){
+					if( !preg_match( "@^[a-z]+://@", $url ) )
+						$url	= $this->pathBase.$url;
+					$list[$level][]	= $url;
+				}
+			}
 		}
-		return $list;
+		return array_merge( $list['top'], $list['mid'], $list['end'] );
 	}
 
 	/**
@@ -178,7 +209,10 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 	public function render( $indentEndTag = FALSE, $forceFresh = FALSE ){
 		$links		= '';
 		$styles		= '';
-		if( $this->getUrlList() ){
+		$urls		= $this->getUrlList();
+		$styles		= $this->getStyleList();
+
+		if( $urls ){
 			if( $this->useCompression ){
 				$fileCss	= $this->getPackageFileName( $forceFresh );
 				$attributes	= array(
@@ -191,8 +225,7 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 			}
 			else{
 				$list	= array();
-				foreach( $this->getUrlList() as $url )
-				{
+				foreach( $urls as $url ){
 					if( $this->revision )
 						$url	.= '?r'.$this->revision;
 					$attributes	= array(
@@ -206,23 +239,20 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 				$links	= implode( "\n".$this->indent, $list  );
 			}
 		}
-
-		if( $this->styles ){
-			array_unshift( $this->styles, '' );
-			array_push( $this->styles, $indentEndTag ? "\t\t" : '' );
-			$content	= implode( "\n", $this->styles );
-			$attributes	= array(
-				'type'		=> 'text/css',
-			);
-			$styles	= "\n".$this->indent.UI_HTML_Tag::create( 'style', $content."\n".$this->indent, $attributes );
+		if( $styles ){
+			array_unshift( $styles, '' );
+			array_push( $styles, $indentEndTag ? "\t\t" : '' );
+			$content	= implode( "\n", $styles );
+			$attributes	= array( 'type' => 'text/css' );
+			$links	.= "\n".$this->indent.UI_HTML_Tag::create( 'style', $content."\n".$this->indent, $attributes );
 		}
-		return $links.$styles;
+		return $links;
 	}
 
 	public function setBasePath( $path ){
 		$this->pathBase	= $path;
 	}
-	
+
 	/**
 	 *	Set path to file cache.
 	 *	@access		public
