@@ -81,10 +81,12 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	/**
 	 *	Constructor, sets up Resource Environment.
 	 *	@access		public
+	 *	@param		array		$options 			@todo: doc
+	 *	@param		boolean		$isFinal			Flag: there is no extending environment class, default: TRUE
 	 *	@return		void
 	 *	@todo		call to onInit is to soon of another environment is existing
 	 */
-	public function __construct( $options = array() )
+	public function __construct( $options = array(), $isFinal = TRUE )
 	{
 		self::$defaultPaths['cache']	= sys_get_temp_dir().'/cache/';
 		$this->options		= $options;																//  store given environment options
@@ -100,9 +102,10 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$this->initModules();																		//  setup module support
 		$this->initDatabase();																		//  setup database connection
 		$this->initCache();																			//  setup cache support
+		if( !$isFinal )
+			return;
 		$this->modules->callHook( 'Env', 'constructEnd', $this );									//  call module hooks for end of env construction
 		$this->__onInit();																			//  default callback for construction end
-		$this->clock->profiler->tick( 'Environment (Abstract): construction dont' );				//  log time of construction
 	}
 
 	public function __onInit(){
@@ -382,6 +385,8 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 			else																					//  @deprecated
 				$this->dbc	= new CMF_Hydrogen_Environment_Resource_Database_PDO( $this );			//  try to configure and connect database
 		}
+		if( $this->modules )
+			$this->modules->callHook( 'Database', 'init', $this->dbc );
 		$this->clock->profiler->tick( 'env: database' );
 	}
 
