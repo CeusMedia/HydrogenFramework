@@ -88,12 +88,12 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 			$this->bodyClasses[]	= trim( htmlentities( $class, ENT_QUOTES, 'UTF-8' ) );
 	}
 
-	public function addPrimerStyle( $fileName, $onTop = FALSE ){
-		$this->css->primer->addUrl( $fileName, $onTop );
+	public function addPrimerStyle( $fileName, $level = 'mid' ){
+		$this->css->primer->addUrl( $fileName, $level );
 	}
 
-	public function addThemeStyle( $fileName ){
-		$this->css->theme->addUrl( $fileName );
+	public function addThemeStyle( $fileName, $level = 'mid' ){
+		$this->css->theme->addUrl( $fileName, $level );
 	}
 
 	public function applyModules(){
@@ -113,23 +113,23 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 			foreach( $module->files->styles as $style ){											//  iterate module style files
 				if( !empty( $style->load ) && $style->load == "auto" ){								//  style file is to be loaded always
 					$source	= !empty( $style->source ) ? $style->source : NULL;						//  get source attribute if possible
-					$top	= !empty( $style->top );												//  get flag attribute for appending on top
+					$level	= !empty( $style->level ) ? $style->level : 'mid';						//  get flag attribute for appending on top
 					if( preg_match( "/^[a-z]+:\/\/.+$/", $style->file ) )							//  style file is absolute URL
-						$this->css->theme->addUrl( $style->file, $top );							//  add style file URL
+						$this->css->theme->addUrl( $style->file, $level );							//  add style file URL
 					else if( $source == 'primer' )													//  style file is in primer theme
-						$this->addPrimerStyle( $style->file, $top );								//  load style file from primer theme folder
+						$this->addPrimerStyle( $style->file, $level );								//  load style file from primer theme folder
 					else if( $source == 'lib' ){													//  style file is in styles library, which is enabled by configured path
 						if( !strlen( trim( $pathStylesLib ) ) )
 							throw new RuntimeException( 'Path to style library "path.styles.lib" is not configured' );
-						$this->css->primer->addUrl( $pathStylesLib.$style->file, $top );			//  load style file from styles library
+						$this->css->primer->addUrl( $pathStylesLib.$style->file, $level );			//  load style file from styles library
 					}
 					else if( $source == 'scripts-lib' && $pathScriptsLib ){							//  style file is in scripts library, which is enabled by configured path
 						if( !strlen( trim( $pathScriptsLib ) ) )
 							throw new RuntimeException( 'Path to script library "path.scripts.lib" is not configured' );
-						$this->css->primer->addUrl( $pathScriptsLib.$style->file, $top );			//  load style file from scripts library
+						$this->css->primer->addUrl( $pathScriptsLib.$style->file, $level );			//  load style file from scripts library
 					}
 					else if( $source == 'theme' || !$source )										//  style file is in custom theme
-						$this->addThemeStyle( $style->file );										//  load style file from custom theme folder
+						$this->addThemeStyle( $style->file, $level );								//  load style file from custom theme folder
 					else																			//  style file is in an individual source folder within themes folder
 						$this->css->primer->addUrl( $path.$source.'/'.$style->file );				//  load style file from source folder within themes folder
 				}
