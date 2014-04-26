@@ -2,7 +2,7 @@
 /**
  *	Generic Model Class of Framework Hydrogen.
  *
- *	Copyright (c) 2007-2012 Christian Würker (ceusmedia.com)
+ *	Copyright (c) 2007-2014 Christian Würker (ceusmedia.com)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		cmFrameworks
  *	@package		Hydrogen
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2012 Christian Würker
+ *	@copyright		2007-2014 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.1
@@ -32,7 +32,7 @@
  *	@package		Hydrogen
  *	@uses			Database_PDO_TableWriter
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2012 Christian Würker
+ *	@copyright		2007-2014 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.1
@@ -72,11 +72,8 @@ class CMF_Hydrogen_Model
 	public function __construct( CMF_Hydrogen_Environment_Abstract $env, $id = NULL )
 	{
 		$this->setEnv( $env );
-		$dbc	= $env->getDatabase();
-		if( !$dbc )
-			throw new RuntimeException( 'Database resource needed for '.get_class( $this ) );
 		$this->table	= new Database_PDO_TableWriter(
-			$env->getDatabase(),
+			$this->env->getDatabase(),
 			$this->prefix.$this->name,
 			$this->columns,
 			$this->primaryKey,
@@ -87,12 +84,12 @@ class CMF_Hydrogen_Model
 		$this->table->setIndices( $this->indices );
 		$this->cache	= Alg_Object_Factory::createObject( self::$cacheClass );
 		$this->cacheKey	= 'db.'.$this->prefix.$this->name.'.';
-		
+
 		if( !empty( $this->env->storage ) )
 			$this->table->setUndoStorage( $this->env->storage );
 	}
-	
-	//  --  PUBLIC METHODS  --  // 
+
+	//  --  PUBLIC METHODS  --  //
 	/**
 	 *	Returns Data of single Line by ID.
 	 *	@access		public
@@ -190,7 +187,7 @@ class CMF_Hydrogen_Model
 		}
 		return $data;
 	}
-	
+
 	/**
 	 *	Returns Data of all Lines.
 	 *	@access		public
@@ -273,7 +270,7 @@ class CMF_Hydrogen_Model
 		}
 		return $data;
 	}
-	
+
 	/**
 	 *	Returns data of single line selected by indices.
 	 *	@access		public
@@ -321,7 +318,7 @@ class CMF_Hydrogen_Model
 	public function getLastQuery(){
 		return $this->table->getLastQuery();
 	}
-	
+
 	/**
 	 *	Returns table name with or without index.
 	 *	@access		public
@@ -368,7 +365,7 @@ class CMF_Hydrogen_Model
 	{
 		return (bool) $this->getByIndices( $indices );
 	}
-	
+
 	/**
 	 *	Returns Data of single Line by ID.
 	 *	@access		public
@@ -456,7 +453,6 @@ class CMF_Hydrogen_Model
 				$this->cache->remove( $this->cacheKey.$id );
 			}
 		}
-			
 		$this->table->defocus();
 		return $number;
 	}
@@ -466,10 +462,13 @@ class CMF_Hydrogen_Model
 	 *	@access		protected
 	 *	@param		CMF_Hydrogen_Environment_Abstract	$env			Application Environment Object
 	 *	@return		void
+	 *	@throws		RuntimeException		if no database resource is available in given environment
 	 */
 	protected function setEnv( CMF_Hydrogen_Environment_Abstract $env )
 	{
 		$this->env		= $env;
+		if( !$env->getDatabase() )
+			throw new RuntimeException( 'Database resource needed for '.get_class( $this ) );
 		$this->prefix	= $env->getDatabase()->getPrefix();
 	}
 
@@ -481,7 +480,7 @@ class CMF_Hydrogen_Model
 	 *	@see		http://dev.mysql.com/doc/refman/4.1/en/truncate.html
 	 */
 	public function truncate(){
-		$this->table->truncate();	
+		$this->table->truncate();
 	}
 }
 ?>
