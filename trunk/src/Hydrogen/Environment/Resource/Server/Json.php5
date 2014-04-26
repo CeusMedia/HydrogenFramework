@@ -38,6 +38,8 @@
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.3
  *	@version		$Id$
+ *	@deprecated		use module Resource:Server:JSON instead
+ *	@todo			to be deleted 
  */
 class CMF_Hydrogen_Environment_Resource_Server_Json {
 
@@ -59,6 +61,7 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 	 *	@return		void
 	 */
 	public function __construct( CMF_Hydrogen_Environment_Abstract $env ) {
+		throw new Exception( "Depreacted. Please use cmFrameworks:Modules:Resource:Server:JSON" );
 		$this->env				= $env;
 		$this->serverUri		= $env->config->get( 'server.uri' );
 		$this->serverUsername	= $env->config->get( 'server.username' );
