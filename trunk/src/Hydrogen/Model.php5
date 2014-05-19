@@ -248,12 +248,13 @@ class CMF_Hydrogen_Model
 	 *	@param		string			$key			Key of Index
 	 *	@param		string			$value			Value of Index
 	 *	@param		string			$field			Single Field to return
+	 *	@param		array			$orders			Map of Orders to include in SQL Query
 	 *	@return		mixed
 	 */
-	public function getByIndex( $key, $value, $field = "" )
+	public function getByIndex( $key, $value, $field = "", $orders = array() )
 	{
 		$this->table->focusIndex( $key, $value );
-		$data	= $this->table->get( TRUE );
+		$data	= $this->table->get( TRUE, $orders );
 		$this->table->defocus();
 		if( $field ){
 			if( empty( $data ) )
