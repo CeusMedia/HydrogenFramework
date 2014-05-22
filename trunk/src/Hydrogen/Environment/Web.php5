@@ -160,13 +160,17 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 #			throw new CMF_Hydrogen_Environment_Exception( 'Your web server needs to provide a document root path' );
 #		if( !getEnv( 'SCRIPT_NAME' ) )																//  no script file path has been provided by web server
 #			throw new CMF_Hydrogen_Environment_Exception( 'Your web server needs to provide the running scripts file path' );
+
+		$path	= dirname( getEnv( 'SCRIPT_NAME' ) );												//  get requested working path
+		$port	= getEnv( 'SERVER_PORT' );															//  get used HTTP port
+
 		$this->host		= $host = getEnv( 'HTTP_HOST' );											//  note requested HTTP host name
-		$this->port		= $port = getEnv( 'SERVER_PORT' );											//  note requested HTTP port
+		$this->port		= $port = $port == 80 ? '' : $port;											//  note requested HTTP port
 		$this->root		= $root	= getEnv( 'DOCUMENT_ROOT' );										//  note document root of web server or virtual host
-		$this->path		= $path = dirname( getEnv( 'SCRIPT_NAME' ) ).'/';							//  note absolute working path 
+		$this->path		= $path = $path !== "/" ? $path.'/' : $path;								//  note requested working path
 		$this->scheme	= getEnv( "HTTPS" ) ? 'https' : 'http';										//  note used URL scheme
-		$this->url		= $this->scheme.'://'.$host./*( $port ? ':'.$port : '' ).*/$path;				//  note calculated base application URI
-		$this->uri		= $root.$path;																//  note calculated absolute base application path 
+		$this->url		= $this->scheme.'://'.$host.( $port ? ':'.$port : '' ).$path;				//  note calculated base application URI
+		$this->uri		= $root.$path;																//  note calculated absolute base application path
 	}
 
 	/**
