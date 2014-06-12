@@ -62,7 +62,9 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 	{
 		$this->env	= $env;
 	}
-	
+
+	abstract protected function getRights( $roleId );
+
 	/**
 	 *	Returns Role.
 	 *	@access		protected
@@ -163,9 +165,8 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 			die;
 		}
 		$controller	= strtolower( str_replace( '_', '/', $controller ) );
-		
 		$linkPath	= $controller && $action ? $controller.'_'.$action : '';
-		
+		$controller	= strtolower( str_replace( '/', '_', $controller ) );
 		if( in_array( $linkPath, $this->linksPublic ) )
 			return 3;
 		if( !$roleId ){
@@ -173,10 +174,8 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 				return 4;
 			return -2;
 		}
-
 		if( in_array( $linkPath, $this->linksPublicInside ) )
 			return 5;
-			
 		if( $this->hasFullAccess( $roleId ) )
 			return 2;
 		if( $this->hasNoAccess( $roleId ) )
