@@ -297,6 +297,8 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 
 	protected function initCache(){
 		$this->cache	= new CMF_Hydrogen_Environment_Resource_CacheDummy();
+		if( $this->modules )																		//  module support and modules available
+			$this->modules->callHook( 'Env', 'initCache', $this );									//  call related module event hooks
 /*		$cache	= NULL;
 		if( 0 && class_exists( 'CMM_SEA_Factory' ) ){
 			$factory	= new CMM_SEA_Factory();
