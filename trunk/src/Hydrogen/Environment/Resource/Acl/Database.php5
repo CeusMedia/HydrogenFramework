@@ -58,7 +58,7 @@ class CMF_Hydrogen_Environment_Resource_Acl_Database extends CMF_Hydrogen_Enviro
 			$model	= new Model_Role_Right( $this->env );
 			$this->rights[$roleId]	= array();
 			foreach( $model->getAllByIndex( 'roleId', $roleId ) as $right ){
-				$controller = strtolower( str_replace( '_', '/', $right->controller ) );
+				$controller = strtolower( str_replace( '/', '_', $right->controller ) );
 				if( !isset( $this->rights[$roleId][$controller] ) )
 					$this->rights[$roleId][$controller]	= array();
 				$this->rights[$roleId][$controller][]	= $right->action;
