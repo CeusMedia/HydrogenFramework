@@ -51,7 +51,7 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 	protected $linksPublic			= array();
 	protected $linksPublicInside	= array();
 	protected $linksPublicOutside	= array();
-	
+
 	/**
 	 *	Constructor.
 	 *	@access		public
@@ -164,9 +164,8 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 			print_m( $this->linksPublicInside );
 			die;
 		}
-		$controller	= strtolower( str_replace( '_', '/', $controller ) );
-		$linkPath	= $controller && $action ? $controller.'_'.$action : '';
 		$controller	= strtolower( str_replace( '/', '_', $controller ) );
+		$linkPath	= $controller && $action ? $controller.'_'.$action : '';
 		if( in_array( $linkPath, $this->linksPublic ) )
 			return 3;
 		if( !$roleId ){
