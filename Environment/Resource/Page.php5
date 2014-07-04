@@ -131,7 +131,7 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 					else if( $source == 'theme' || !$source )										//  style file is in custom theme
 						$this->addThemeStyle( $style->file, $level );								//  load style file from custom theme folder
 					else																			//  style file is in an individual source folder within themes folder
-						$this->css->primer->addUrl( $path.$source.'/'.$style->file );				//  load style file from source folder within themes folder
+						$this->css->primer->addUrl( /*$path.$source.'/'.*/$style->file );				//  load style file /*from source folder within themes folder*/
 				}
 			}
 			foreach( $module->files->scripts as $script ){											//  iterate module script files
@@ -215,6 +215,16 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 		if( ( $modules = $this->env->getModules() ) )												//  get module handler resource if existing
 			$modules->callHook( 'App', 'respond', $this );											//  call related module event hooks
 		return parent::build( $bodyAttributes, $htmlAttributes );
+	}
+
+	/**
+	 *	Returns path to theme or primer.
+	 *	@access		public
+	 *	@param		boolean		$primer			Flag: return path to primer instead of theme
+	 *	@return		string						Path to theme or primer
+	 */
+	public function getThemePath( $primer = FALSE ){
+		return $primer ? $this->pathPrimer : $this->pathTheme;
 	}
 
 	/**
