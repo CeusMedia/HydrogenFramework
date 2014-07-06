@@ -81,8 +81,7 @@ class CMF_Hydrogen_Controller
 	 *	@return		void
 	 */
 	protected function __onInit(){}
-	
-	
+
 	protected function addData( $key, $value, $topic = NULL )
 	{
 		return $this->view->setData( array( $key => $value ), $topic );
@@ -100,7 +99,7 @@ class CMF_Hydrogen_Controller
 		}
 		return $input;
 	}
-	
+
 	/**
 	 *	Returns Data for View.
 	 *	@access		protected
@@ -110,7 +109,7 @@ class CMF_Hydrogen_Controller
 	{
 		return $this->view->getData( $key );
 	}
-	
+
 	//  --  PUBLIC METHODS  --  //
 	/**
 	 *	Returns View Content of called Action.
@@ -198,33 +197,46 @@ class CMF_Hydrogen_Controller
 				$request->set( $key, $value );
 		$this->redirect = TRUE;
 	}
-	
+
 	/**
 	 *	Redirects by requesting a URI.
 	 *	@access		protected
 	 *	@param		string		$uri				URI to request
+	 *	@param		integer		$status				HTTP status code to send, default: 200
+	 *	@param		boolean		$allowForeignHost	Flag: allow redirection outside application base URL, default: no
 	 *	@return		void
 	 *	@todo		concept and implement anti-loop
 	 *	@see		http://dev.(ceusmedia.com)/cmKB/?MTI
 	 */
-	protected function restart( $uri, $withinModule = FALSE, $status = NULL )
+	protected function restart( $uri, $withinModule = FALSE, $status = NULL, $allowForeignHost = FALSE )
 	{
 		$base	= "";
 		if( !preg_match( "/^http/", $uri ) ){
-			$base   = preg_replace( "@^(.*)\/*$@U", "\\1/", dirname( getEnv( 'SCRIPT_NAME' ) ) );
+			$base	= $this->env->getBaseUrl();
 			if( $withinModule ){
 				$controller	= $this->env->getRequest()->get( 'controller' );
 				$base	.= $this->alias ? $this->alias : $controller;
 				$base	.= strlen( $uri ) ? '/' : '';
 			}
 		}
+		if( !$allowForeignHost ){
+			if( getEnv( 'HTTP_HOST' ) !== parse_url( $base.$uri, PHP_URL_HOST ) ){
+				$message	= 'Redirection to foreign host is not allowed.';
+				if( $this->env->has( 'messenger' ) ){
+					$this->env->getMessenger()->noteFailure( $message );
+					$this->restart( NULL );
+				}
+				print( $message );
+				exit;
+			}
+		}
 	#	$this->dbc->close();
 	#	$this->session->close();
-		
+
 		if( $status )
 			Net_HTTP_Status::sendHeader( (int) $status );
 		header( "Location: ".$base.$uri );
-		die;
+		exit;
 	}
 
 	/**
