@@ -45,17 +45,19 @@
  */
 abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environment, ArrayAccess
 {
-	/** @var	CMF_Hydrogen_Environment_Resource_Acl_Abstract	$acl	Implementation of access control list */
+	/** @var	CMF_Hydrogen_Environment_Resource_Acl_Abstract	$acl			Implementation of access control list */
 	protected $acl;
-	/**	@var	CMF_Hydrogen_Application	$application	Instance of Application */
+	/**	@var	CMF_Hydrogen_Application						$application	Instance of Application */
 	protected $application;
-	/**	@var	CMM_SEA_Adapter_Interface	$cache			Instance of cache adapter */
+	/**	@var	CMM_SEA_Adapter_Interface						$cache			Instance of cache adapter */
 	protected $cache;
-	/**	@var	Alg_Time_Clock				$clock			Clock Object */
+	/**	@var	CMF_Hydrogen_Environment_Resource_Captain		$captain		Instance of captain */
+	protected $captain;
+	/**	@var	Alg_Time_Clock									$clock			Clock Object */
 	protected $clock;
-	/**	@var	ADT_List_Dictionary			$config			Configuration Object */
+	/**	@var	ADT_List_Dictionary								$config			Configuration Object */
 	protected $config;
-	/**	@var	CMF_Hydrogen_Environment_Resource_Database_PDO	$dbc		Database Connection Object */
+	/**	@var	CMF_Hydrogen_Environment_Resource_Database_PDO	$dbc			Database Connection Object */
 	protected $dbc;
 
 	public static $configFile				= "config.ini.inc";
@@ -98,6 +100,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 
 		$this->initClock();																			//  setup clock
 		$this->initConfiguration();																	//  setup configuration
+		$this->initCaptain();																		//  setup captain
 		$this->initLogic();																			//  setup logic pool
 		$this->initModules();																		//  setup module support
 		$this->initDatabase();																		//  setup database connection
@@ -151,12 +154,15 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 			exit( 0 );																				//  so end of environment is end of application
 	}
 
-	public function get( $key )
+	public function get( $key, $strict = TRUE )
 	{
 		if( isset( $this->$key ) && !is_null( $this->$key ) )
 			return $this->$key;
-		$message	= 'No environment resource found for key "%1$s"';
-		throw new RuntimeException( sprintf( $message, $key ) );
+		if( $strict ){
+			$message	= 'No environment resource found for key "%1$s"';
+			throw new RuntimeException( sprintf( $message, $key ) );
+		}
+		return NULL;
 	}
 
 	public function getApp(){
@@ -186,6 +192,10 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 
 	public function getCache(){
 		return $this->cache;
+	}
+
+	public function getCaptain(){
+		return $this->captain;
 	}
 
 	public function getClock()
@@ -324,6 +334,10 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$this->clock->profiler->tick( 'env: cache' );*/
 	}
 
+	protected function initCaptain(){
+		$this->captain	= new CMF_Hydrogen_Environment_Resource_Captain( $this );
+	}
+
 	protected function initClock()
 	{
 		$this->clock	= new Alg_Time_Clock();
@@ -409,7 +423,10 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$this->logic		= new CMF_Hydrogen_Environment_Resource_LogicPool( $this );
 		$this->clock->profiler->tick( 'env: logic' );
 	}
+
 	protected function initModules(){
+		if( !$this->captain )
+			$this->initCaptain();
 #		$this->modules	= new CMF_Hydrogen_Environment_Resource_Module_Handler( $this );
 #		$modules		= $this->modules->getInstalled();
 		$this->modules	= new CMF_Hydrogen_Environment_Resource_Module_Library_Local( $this );

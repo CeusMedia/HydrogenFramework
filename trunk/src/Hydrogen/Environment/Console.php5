@@ -13,7 +13,7 @@ class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment_Abstract
 	 */
 	public function __construct( $options = array() )
 	{
-		ob_start();
+//		ob_start();
 		try
 		{
 			parent::__construct( $options );

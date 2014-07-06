@@ -56,6 +56,10 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydr
 	}
 
 	public function callHook( $resource, $event, $context, $arguments = array() ){
+		$captain	= $this->env->getCaptain();
+		$countHooks	= $captain->callHook( $resource, $event, $context, $arguments );
+//		remark( 'Library_Local@'.$event.': '.$countHooks );
+		return $countHooks;
 //		$this->env->clock->profiler->tick( 'Resource_Module_Library_Local::callHook: '.$event.'@'.$resource.' start' );
 		$count	= 0;
 		foreach( $this->modules as $module ){
