@@ -219,15 +219,17 @@ class CMF_Hydrogen_Controller
 				$base	.= strlen( $uri ) ? '/' : '';
 			}
 		}
-		if( !$allowForeignHost ){
-			if( getEnv( 'HTTP_HOST' ) !== parse_url( $base.$uri, PHP_URL_HOST ) ){
-				$message	= 'Redirection to foreign host is not allowed.';
-				if( $this->env->has( 'messenger' ) ){
-					$this->env->getMessenger()->noteFailure( $message );
-					$this->restart( NULL );
+		if( !$allowForeignHost ){													//  redirect to foreign domain not allowed
+			$hostFrom	= parse_url( getEnv( 'HTTP_HOST' ), PHP_URL_HOST );			//  current host domain
+			$hostTo		= parse_url( $base.$uri, PHP_URL_HOST );					//  requested host domain
+			if( $hostFrom !== $hostTo ){											//  both are not matching
+				$message	= 'Redirection to foreign host is not allowed.';		//  error message
+				if( $this->env->has( 'messenger' ) ){								//  messenger is available
+					$this->env->getMessenger()->noteFailure( $message );			//  note message
+					$this->restart( NULL );											//  redirect to start
 				}
-				print( $message );
-				exit;
+				print( $message );													//  otherwise print message
+				exit;																//  and exit
 			}
 		}
 	#	$this->dbc->close();
