@@ -220,7 +220,7 @@ class CMF_Hydrogen_Controller
 			}
 		}
 		if( !$allowForeignHost ){													//  redirect to foreign domain not allowed
-			$hostFrom	= parse_url( getEnv( 'HTTP_HOST' ), PHP_URL_HOST );			//  current host domain
+			$hostFrom	= getEnv( 'HTTP_HOST' );									//  current host domain
 			$hostTo		= parse_url( $base.$uri, PHP_URL_HOST );					//  requested host domain
 			if( $hostFrom !== $hostTo ){											//  both are not matching
 				$message	= 'Redirection to foreign host is not allowed.';		//  error message
