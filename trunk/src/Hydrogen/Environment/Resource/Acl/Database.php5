@@ -99,7 +99,7 @@ class CMF_Hydrogen_Environment_Resource_Acl_Database extends CMF_Hydrogen_Enviro
 				$this->scanControllerActions();
 			if( $controller === NULL )
 				return $this->controllerActions;
-			$controller	= strtolower( str_replace( '_', '/', $controller ) );
+			$controller	= strtolower( str_replace( '/', '_', $controller ) );
 			if( isset( $this->controllerActions[$controller] ) )
 				return $this->controllerActions[$controller];
 			return array();
@@ -108,7 +108,7 @@ class CMF_Hydrogen_Environment_Resource_Acl_Database extends CMF_Hydrogen_Enviro
 			$rights	= $this->getRights( $roleId );
 			if( $controller === NULL )
 				return $rights;
-			$controller	= strtolower( str_replace( '_', '/', $controller ) );
+			$controller	= strtolower( str_replace( '/', '_', $controller ) );
 			if( isset( $rights[$controller] ) )
 				return $rights[$controller];
 			return array();
@@ -142,7 +142,7 @@ class CMF_Hydrogen_Environment_Resource_Acl_Database extends CMF_Hydrogen_Enviro
 		$disclosure	= new CMF_Hydrogen_Environment_Resource_Disclosure();
 		$classes	= $disclosure->reflect( 'classes/Controller/' );
 		foreach( $classes as $className => $classData ){
-			$className	= strtolower( str_replace( '_', '/', $className ) );
+			$className	= strtolower( str_replace( '/', '_', $className ) );
 			$this->controllerActions[$className]	= array();
 			foreach( $classData->methods as $methodName => $methodData )
 				$this->controllerActions[$className][]	= $methodName;
