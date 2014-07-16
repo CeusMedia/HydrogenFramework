@@ -211,34 +211,33 @@ class CMF_Hydrogen_Controller
 	protected function restart( $uri, $withinModule = FALSE, $status = NULL, $allowForeignHost = FALSE )
 	{
 		$base	= "";
-		if( !preg_match( "/^http/", $uri ) ){
-			$base	= $this->env->getBaseUrl();
-			if( $withinModule ){
-				$controller	= $this->env->getRequest()->get( 'controller' );
-				$base	.= $this->alias ? $this->alias : $controller;
-				$base	.= strlen( $uri ) ? '/' : '';
+		if( !preg_match( "/^http/", $uri ) ){														//  URI is not starting with HTTP scheme
+			$base	= $this->env->getBaseUrl();														//  get application base URI
+			if( $withinModule ){																	//  redirection is within module
+				$controller	= $this->env->getRequest()->get( 'controller' );						//  get current controller
+				$base	.= $this->alias ? $this->alias : $controller;								//  
+				$base	.= strlen( $uri ) ? '/' : '';												//  
 			}
 		}
-		if( !$allowForeignHost ){													//  redirect to foreign domain not allowed
-			$hostFrom	= getEnv( 'HTTP_HOST' );									//  current host domain
-			$hostTo		= parse_url( $base.$uri, PHP_URL_HOST );					//  requested host domain
-			if( $hostFrom !== $hostTo ){											//  both are not matching
-				$message	= 'Redirection to foreign host is not allowed.';		//  error message
-				if( $this->env->has( 'messenger' ) ){								//  messenger is available
-					$this->env->getMessenger()->noteFailure( $message );			//  note message
-					$this->restart( NULL );											//  redirect to start
+		if( !$allowForeignHost ){																	//  redirect to foreign domain not allowed
+			$hostFrom	= parse_url( 'http://'.getEnv( 'HTTP_HOST' ), PHP_URL_HOST );				//  current host domain
+			$hostTo		= parse_url( $base.$uri, PHP_URL_HOST );									//  requested host domain
+			if( $hostFrom !== $hostTo ){															//  both are not matching
+				$message	= 'Redirection to foreign host is not allowed.';						//  error message
+				if( $this->env->has( 'messenger' ) ){												//  messenger is available
+					$this->env->getMessenger()->noteFailure( $message );							//  note message
+					$this->restart( NULL );															//  redirect to start
 				}
-				print( $message );													//  otherwise print message
-				exit;																//  and exit
+				print( $message );																	//  otherwise print message
+				exit;																				//  and exit
 			}
 		}
-	#	$this->dbc->close();
-	#	$this->session->close();
-
-		if( $status )
-			Net_HTTP_Status::sendHeader( (int) $status );
-		header( "Location: ".$base.$uri );
-		exit;
+	#	$this->dbc->close();																		//  close database connection
+	#	$this->session->close();																	//  close session
+		if( $status )																				//  a HTTP status code is to be set
+			Net_HTTP_Status::sendHeader( (int) $status );											//  send HTTP status code header
+		header( "Location: ".$base.$uri );															//  send HTTP redirect header
+		exit;																						//  and exit application
 	}
 
 	/**
