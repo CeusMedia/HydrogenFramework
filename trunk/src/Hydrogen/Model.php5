@@ -129,6 +129,17 @@ class CMF_Hydrogen_Model
 	}
 
 	/**
+	 *	Returns number of entries selected by map of indices.
+	 *	@access		public
+	 *	@param		array			$indices		Map of index conditions
+	 *	@return		integer			Number of entries within this index
+	 */
+	public function countByIndices( $indices )
+	{
+		return $this->count( $indices );
+	}
+
+	/**
 	 *	Modifies data of single row by ID.
 	 *	@access		public
 	 *	@param		integer			$id				ID to focus on
