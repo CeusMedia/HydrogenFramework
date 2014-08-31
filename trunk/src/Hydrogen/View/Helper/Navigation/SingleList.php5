@@ -47,7 +47,7 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_H
 	protected $innerId			= 'navigation-inner';
 	protected $needsEnv			= FALSE;
 	protected $linksToSkip		= array();
-	public $pathRequestKey		= "__path";
+	public static $pathRequestKey		= "__path";
 
 	public function __construct( $linkMap, $innerClass = NULL, $innerId = NULL )
 	{
@@ -72,8 +72,8 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_H
 	 */
 	static public function getCurrentKey( $linkMap, $current = NULL ){
 		$path		= $current;
-		if( isset( $_REQUEST[$this->pathRequestKey] ) && $current === NULL )
-			$path	= utf8_decode( $_REQUEST[$this->pathRequestKey] );
+		if( isset( $_REQUEST[self::$pathRequestKey] ) && $current === NULL )
+			$path	= utf8_decode( $_REQUEST[self::$pathRequestKey] );
 		$matches	= array();																		//  empty array to regular matching
 		$selected	= array();																		//  list of possibly selected links
 		foreach( $linkMap as $key => $label ){														//  iterate link map
@@ -95,7 +95,7 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_H
 
 	public function render( $current = NULL, $niceUrls = FALSE )
 	{
-		$path	= empty( $_REQUEST[$this->pathRequestKey] ) ? $current : $_REQUEST[$this->pathRequestKey];
+		$path	= empty( $_REQUEST[self::$pathRequestKey] ) ? $current : $_REQUEST[self::$pathRequestKey];
 		$active	= $this->getCurrentKey( $this->linkMap, $current );
 		$list	= array();
 		foreach( $this->linkMap as $key => $label )
