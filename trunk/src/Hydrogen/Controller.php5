@@ -43,6 +43,13 @@ class CMF_Hydrogen_Controller
 	public static $prefixView		= "View_";
 	public $alias					= "";
 
+	const RESTART_FROM_IGNORE		= 0;
+	const RESTART_FROM_POP			= 1;
+	const RESTART_FROM_APPLY		= 2;
+	const RESTART_FROM_CARRY		= 4;
+	const RESTART_FROM_SET			= 8;
+	const RESTART_FROM_PUSH			= 16;
+	
 	/**	@var		CMF_Hydrogen_Environment_Abstract	$env			Application Environment Object */
 	protected $env;
 	/**	@var		array								$_data			Collected Data for View */
@@ -180,6 +187,8 @@ class CMF_Hydrogen_Controller
 
 	/**
 	 *	Redirects by calling different Controller and Action.
+	 *	Attention: This will *NOT* effect the URL in browser nor need cURL requests to allow forwarding.
+	 *	Attention: This is not recommended, please user restart in favour.
 	 *	@access		protected
 	 *	@param		string		$controller		Controller to be called, default: index
 	 *	@param		string		$action			Action to be called, default: index
@@ -199,16 +208,48 @@ class CMF_Hydrogen_Controller
 	}
 
 	/**
+	 *	Redirects to given URI, allowing URIs external to current application.
+	 *	Attention: This *WILL* effect the URL displayed in browser / need request clients (eG. cURL) to allow forwarding.
+	 *
+	 *	Alias for restart with parameters $allowForeignHost set to TRUE and $withinModule to FALSE.
+	 *	HTTP status will be 200.
+	 *	@access		protected
+	 *	@param		string		$uri				URI to request, may be external
+	 *	@return		void
+	 *	@todo		kriss: check for better HTTP status
+	 */
+	protected function relocate( $uri ){
+		$this->restart( $uri, FALSE, NULL, TRUE );
+	}
+
+	/**
 	 *	Redirects by requesting a URI.
+	 *	Attention: This *WILL* effect the URL displayed in browser / need request clients (eG. cURL) to allow forwarding.
+	 *
+	 *	By default, redirect URIs are are request path within the current application, eg. "./[CONTROLLER]/[ACTION]"
+	 *	ATTENTION: For browser compatibility local paths should start with "./"
+	 *
+	 *	If seconds parameters is set to TRUE, the given URI is a path inside the current controller.
+	 *	This would look like this: $this->restart( '[ACTION]', TRUE );
+	 *
+	 *	If forth parameters is set to TRUE, redirects to is a path inside the current controller.
+	 *	This would look like this: $this->restart( 'http://example.com/', FALSE, NULL, TRUE );
+	 *	There is a shorter alias: $this->relocate( 'http://example.com/' );
+	 *
 	 *	@access		protected
 	 *	@param		string		$uri				URI to request
-	 *	@param		integer		$status				HTTP status code to send, default: 200
+	 *	@param		string		$withinModule		Flag: user path inside current controller 
+	 *	@param		integer		$status				HTTP status code to send, default: NULL -> 200
 	 *	@param		boolean		$allowForeignHost	Flag: allow redirection outside application base URL, default: no
+	 *	@param		integer		$modeFrom			How to handle FROM parameter from request or for new request, not handled atm
 	 *	@return		void
-	 *	@todo		concept and implement anti-loop
+	 *	@link		https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#3xx_Redirection HTTP status codes
+	 *	@todo		kriss: implement automatic lookout for "from" request parameter
+	 *	@todo		kriss: implement handling of FROM request parameter, see controller constants
+	 *	@todo		kriss: concept and implement anti-loop
 	 *	@see		http://dev.(ceusmedia.com)/cmKB/?MTI
 	 */
-	protected function restart( $uri, $withinModule = FALSE, $status = NULL, $allowForeignHost = FALSE )
+	protected function restart( $uri, $withinModule = FALSE, $status = NULL, $allowForeignHost = FALSE, $modeFrom = 0 )
 	{
 		$base	= "";
 		if( !preg_match( "/^http/", $uri ) ){														//  URI is not starting with HTTP scheme
