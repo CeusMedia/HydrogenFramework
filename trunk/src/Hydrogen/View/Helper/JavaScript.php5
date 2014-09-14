@@ -45,7 +45,12 @@ class CMF_Hydrogen_View_Helper_JavaScript
 	protected $suffix				= "";
 	protected $revision;
 	/**	@var	array				$scripts		List of JavaScript blocks */
-	protected $scripts				= array();
+	protected $scripts				= array(
+		'top'	=> array(),
+		'mid'	=> array(),
+		'end'	=> array(),
+		'ready'	=> array()
+	);
 	protected $urls					= array();
 	protected $useCompression		= FALSE;
 	public $indent					= "\t\t";
@@ -69,12 +74,27 @@ class CMF_Hydrogen_View_Helper_JavaScript
 	 *	Collect a JavaScript block.
 	 *	@access		public
 	 *	@param		string		$script		JavaScript block
-	 *	@param		bool		$onTop		Put this block on top of all others
+	 *	@param		integer		$level		Run level, values: (top, mid, end), default: mid
 	 *	@return		void
 	 */
-	public function addScript( $script, $onTop = FALSE ){
-		$onTop ? array_unshift( $this->scripts, $script ) : array_push( $this->scripts, $script );
+	public function addScript( $script, $level = 'mid', $key = NULL ){
+		$level	= is_bool( $level ) ? ( $level ? 'top' : 'mid' ) : $level;				//  hack: map older boolean values to levels @todo remove if modules are adjusted
+		$level	= in_array( $level, array( 'top', 'mid', 'end', 'ready' ) ) ? $level : 'ready';
+		$key	= strlen( $key ) ? md5( $key ) : 'default';
+		if( !array_key_exists( $key, $this->scripts[$level] ) )
+			$this->scripts[$level][$key]	= array();
+		$this->scripts[$level][$key][]	= $script;
 	}
+
+    /**
+     *  Collect a StyleSheet block.
+     *  @access     public
+     *  @param      string      $style      StyleSheet block
+     *  @return     void
+     */
+    public function addStyle( $style, $level = 'mid', $key = NULL ){
+    }
+
 
 	/**
 	 *	Add a JavaScript URL.
@@ -217,25 +237,36 @@ class CMF_Hydrogen_View_Helper_JavaScript
 			}
 		}
 
-		if( $this->scripts ){
-			array_unshift( $this->scripts, '' );
-			array_push( $this->scripts, $indentEndTag ? "\t\t" : '' );
-			$content	= implode( "\n", $this->scripts );
-			if( $this->useCompression ){
-#				try{
-#					$content	= Net_API_Google_ClosureCompiler::minify( $content );
-#				}
-#				catch( Exception $e ){
-					if( class_exists( 'JSMin' ) )
-						$content	= JSMin::minify( $content );
-#				}
-			}
-			$attributes	= array(
-				'type'		=> 'text/javascript',
-	//			'language'	=> 'JavaScript',
-			);
-			$scripts	= "\n".$this->indent.UI_HTML_Tag::create( 'script', $content."\n".$this->indent, $attributes );
+        $list   = array( 'top' => array(), 'mid' => array(), 'end' => array(), 'ready' => array() );
+        foreach( $this->scripts as $level => $map ){
+            foreach( $map as $key => $scripts ){
+                foreach( $scripts as $script ){
+                    $list[$level][] = $script;
+                }
+            }
+        }
+        foreach( $list as $level => $map ){
+			$list[$level]	= implode( ";\n", $map );
+			if( $level === "ready" && count( $map ) )
+				$list[$level]	= '$(document).ready(function(){'.$list[$level].'});';
+			if( $level )
+				$level	.= "\n";
 		}
+		$scripts	= $list['top'].$list['mid'].$list['end'].$list['ready'];
+		if( $this->useCompression ){
+#			try{
+#				$content	= Net_API_Google_ClosureCompiler::minify( $content );
+#			}
+#			catch( Exception $e ){
+				if( class_exists( 'JSMin' ) )
+					$content	= JSMin::minify( $content );
+#			}
+		}
+		$attributes	= array(
+			'type'		=> 'text/javascript',
+//			'language'	=> 'JavaScript',
+		);
+		$scripts	= "\n".$this->indent.UI_HTML_Tag::create( 'script', $scripts, $attributes );
 		return $links.$scripts;
 	}
 
