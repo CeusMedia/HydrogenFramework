@@ -79,7 +79,6 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 					return $view->handle( $e );
 				}
 				return UI_HTML_Exception_Page::render( $e );
-				
 			}
 			else{
 				remark( $e->getMessage() );
@@ -99,7 +98,9 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 						foreach( $request->get( 'arguments' ) as $argument )
 							$forwardUrl	.= '/'.$argument;
 					$url	= $this->env->url.'auth/login?from='.$forwardUrl;
-					header( 'Location: '.$url );
+					Net_HTTP_Status::sendHeader( 403 );
+					if( !$this->env->getRequest()->isAjax() )
+						header( 'Location: '.$url );
 					exit;
 				}
 			}
