@@ -109,7 +109,11 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 		$settings		= array();
 
 		foreach( $modules->getAll() as $module ){													//  iterate installed modules
-			$settings[$module->id]	= array();
+			$settings[$module->id]	= array(
+				'_id'		=> $module->id,
+				'_title'	=> $module->title,
+				'_version'	=> $module->version,
+			);
 			foreach( $module->files->styles as $style ){											//  iterate module style files
 				if( !empty( $style->load ) && $style->load == "auto" ){								//  style file is to be loaded always
 					$source	= !empty( $style->source ) ? $style->source : NULL;						//  get source attribute if possible
