@@ -255,11 +255,11 @@ class CMF_Hydrogen_View_Helper_JavaScript
 		$scripts	= $list['top'].$list['mid'].$list['end'].$list['ready'];
 		if( $this->useCompression ){
 #			try{
-#				$content	= Net_API_Google_ClosureCompiler::minify( $content );
+#				$scripts	= Net_API_Google_ClosureCompiler::minify( $scripts );
 #			}
 #			catch( Exception $e ){
 				if( class_exists( 'JSMin' ) )
-					$content	= JSMin::minify( $content );
+					$scripts	= JSMin::minify( $scripts );
 #			}
 		}
 		$attributes	= array(
