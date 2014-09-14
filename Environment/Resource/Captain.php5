@@ -92,8 +92,9 @@ class CMF_Hydrogen_Environment_Resource_Captain {
 				$methodName	= preg_replace( $pattern, "\\2", $function );
 				$function	= array( $className, $methodName );
 			}
-			else
+			else{
 				$function	= create_function( '$env, $context, $module, $arguments = array()', $function );
+			}
 			try{
 				$count++;
 				ob_start();
