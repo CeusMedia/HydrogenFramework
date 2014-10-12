@@ -12,7 +12,7 @@ class CMF_Hydrogen_Environment_Resource_Disclosure{
 		'skipAbstract'		=> TRUE,
 		'skipMagic'			=> TRUE,
 		'skipInherited'		=> TRUE,
-		'SkipFramework'		=> TRUE,
+		'skipFramework'		=> TRUE,
 		'methodFilter'		=> ReflectionMethod::IS_PUBLIC
 	);
 
