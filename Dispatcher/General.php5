@@ -163,7 +163,7 @@ class CMF_Hydrogen_Dispatcher_General
 		}
 		while( $instance->redirect );
 		$this->env->clock->profiler->tick( 'Dispatcher_General::dispatch: done' );
-		$view	= $instance->getView();
+		$view	= $instance->renderView();
 		$this->env->clock->profiler->tick( 'Dispatcher_General::dispatch: view' );
 		return $view;
 	}
