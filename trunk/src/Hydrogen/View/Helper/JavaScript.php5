@@ -246,13 +246,11 @@ class CMF_Hydrogen_View_Helper_JavaScript
             }
         }
         foreach( $list as $level => $map ){
-			$list[$level]	= implode( ";\n", $map );
-			if( $level === "ready" && count( $map ) )
-				$list[$level]	= '$(document).ready(function(){'.$list[$level].'});';
-			if( $level )
-				$level	.= "\n";
+			$list[$level]	= implode( "\n", $map );
+			if( $level === "ready" )
+				$list[$level]	= 'jQuery(document).ready(function(){'.$list[$level].'});';
 		}
-		$scripts	= $list['top'].$list['mid'].$list['end'].$list['ready'];
+		$scripts	= $list['top'].$list['mid'].$list['end'];
 		if( $this->useCompression ){
 #			try{
 #				$scripts	= Net_API_Google_ClosureCompiler::minify( $scripts );
@@ -266,8 +264,25 @@ class CMF_Hydrogen_View_Helper_JavaScript
 			'type'		=> 'text/javascript',
 //			'language'	=> 'JavaScript',
 		);
-		$scripts	= "\n".$this->indent.UI_HTML_Tag::create( 'script', $scripts, $attributes );
-		return $links.$scripts;
+		$scripts1	= "\n".$this->indent.UI_HTML_Tag::create( 'script', $scripts, $attributes );
+
+		$scripts	= $list['ready'];
+		if( $this->useCompression ){
+#			try{
+#				$content	= Net_API_Google_ClosureCompiler::minify( $content );
+#			}
+#			catch( Exception $e ){
+				if( class_exists( 'JSMin' ) )
+					$content	= JSMin::minify( $content );
+#			}
+		}
+		$attributes	= array(
+			'type'		=> 'text/javascript',
+//			'language'	=> 'JavaScript',
+		);
+		$scripts2	= "\n".$this->indent.UI_HTML_Tag::create( 'script', $scripts, $attributes );
+		
+		return $links.$scripts2.$scripts1;
 	}
 
 	/**
