@@ -250,39 +250,36 @@ class CMF_Hydrogen_View_Helper_JavaScript
 			if( $level === "ready" )
 				$list[$level]	= 'jQuery(document).ready(function(){'.$list[$level].'});';
 		}
-		$scripts	= $list['top'].$list['mid'].$list['end'];
-		if( $this->useCompression ){
-#			try{
-#				$scripts	= Net_API_Google_ClosureCompiler::minify( $scripts );
-#			}
-#			catch( Exception $e ){
+		$scripts	= trim( $list['top'].$list['mid'].$list['end'] );
+		if( strlen( $scripts ) ){
+			if( $this->useCompression ){
 				if( class_exists( 'JSMin' ) )
 					$scripts	= JSMin::minify( $scripts );
-#			}
+				else if( class_exists( 'Net_API_Google_ClosureCompiler' ) )
+					$scripts	= Net_API_Google_ClosureCompiler::minify( $scripts );
+			}
+			$attributes	= array(
+				'type'		=> 'text/javascript',
+	//			'language'	=> 'JavaScript',
+			);
+			$scripts	= "\n".$this->indent.UI_HTML_Tag::create( 'script', $scripts, $attributes );
 		}
-		$attributes	= array(
-			'type'		=> 'text/javascript',
-//			'language'	=> 'JavaScript',
-		);
-		$scripts1	= "\n".$this->indent.UI_HTML_Tag::create( 'script', $scripts, $attributes );
 
-		$scripts	= $list['ready'];
-		if( $this->useCompression ){
-#			try{
-#				$content	= Net_API_Google_ClosureCompiler::minify( $content );
-#			}
-#			catch( Exception $e ){
+		$scriptsOnReady	= trim( $list['ready'] );
+		if( strlen( $scriptsOnReady ) ){
+			if( $this->useCompression ){
 				if( class_exists( 'JSMin' ) )
-					$content	= JSMin::minify( $content );
-#			}
+					$scriptsOnReady	= JSMin::minify( $scriptsOnReady );
+				else if( class_exists( 'Net_API_Google_ClosureCompiler' ) )
+					$scriptsOnReady	= Net_API_Google_ClosureCompiler::minify( $scriptsOnReady );
+			}
+			$attributes	= array(
+				'type'		=> 'text/javascript',
+	//			'language'	=> 'JavaScript',
+			);
+			$scriptsOnReady	= "\n".$this->indent.UI_HTML_Tag::create( 'script', $scriptsOnReady, $attributes );
 		}
-		$attributes	= array(
-			'type'		=> 'text/javascript',
-//			'language'	=> 'JavaScript',
-		);
-		$scripts2	= "\n".$this->indent.UI_HTML_Tag::create( 'script', $scripts, $attributes );
-		
-		return $links.$scripts2.$scripts1;
+		return $links.$scriptsOnReady.$scripts;
 	}
 
 	/**
