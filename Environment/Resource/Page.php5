@@ -254,11 +254,12 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 	 */
 	protected function renderScriptsOnReady( $compress = FALSE, $wrapInTag = FALSE ){
 		$list	= array();
+		ksort( $this->scriptsOnReady );
 		foreach( $this->scriptsOnReady as $level => $scripts )
 			foreach( $scripts as $script )
-				$list[]	= preg_replace( "/;?$/", ";", trim( $script ) );
-		$list	= join( "\n\t", $list );
-		$script		= "$(document).ready(function(){\n\t".$list."\n});";
+				$list[]	= preg_replace( "/;+$/", ";", trim( $script ) );
+		$list	= join( "\n", $list );
+		$script		= "jQuery(document).ready(function(){\n".$list."\n});";
 		if( !$wrapInTag )
 			return $script;
 		return UI_HTML_Tag::create( 'script', $script, array( 'type' => 'text/javascript' ) );
