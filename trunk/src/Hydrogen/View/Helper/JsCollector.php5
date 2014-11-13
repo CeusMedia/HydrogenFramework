@@ -36,6 +36,7 @@
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.1
  *	@version		$Id$
+ *	@todo			kriss: check if deprecated
  */
 class CMF_Hydrogen_View_Helper_JsCollector {
 

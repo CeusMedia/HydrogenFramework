@@ -44,13 +44,10 @@ class CMF_Hydrogen_View_Helper_JavaScript
 	protected $prefix				= "";
 	protected $suffix				= "";
 	protected $revision;
-	/**	@var	array				$scripts		List of JavaScript blocks */
-	protected $scripts				= array(
-		'top'	=> array(),
-		'mid'	=> array(),
-		'end'	=> array(),
-		'ready'	=> array()
-	);
+	/**	@var	array				$scripts			List of JavaScript blocks */
+	protected $scripts				= array();
+	/**	@var	array				$scriptsOnReady		List if JavaScripts to run on load if browser is ready */
+	protected $scriptsOnReady		= array();
 	protected $urls					= array();
 	protected $useCompression		= FALSE;
 	public $indent					= "\t\t";
@@ -78,23 +75,33 @@ class CMF_Hydrogen_View_Helper_JavaScript
 	 *	@return		void
 	 */
 	public function addScript( $script, $level = 'mid', $key = NULL ){
-		$level	= is_bool( $level ) ? ( $level ? 'top' : 'mid' ) : $level;				//  hack: map older boolean values to levels @todo remove if modules are adjusted
-		$level	= in_array( $level, array( 'top', 'mid', 'end', 'ready' ) ) ? $level : 'ready';
+		if( $level === "ready" )
+			return $this->addScriptOnReady( $script, 5 );
+		$level	= $this->sanitizeLevel( $level );
+		if( !array_key_exists( $level, $this->scripts ) )
+			$this->scripts[$level]	= array();
 		$key	= strlen( $key ) ? md5( $key ) : 'default';
 		if( !array_key_exists( $key, $this->scripts[$level] ) )
 			$this->scripts[$level][$key]	= array();
 		$this->scripts[$level][$key][]	= $script;
 	}
-
-    /**
-     *  Collect a StyleSheet block.
-     *  @access     public
-     *  @param      string      $style      StyleSheet block
-     *  @return     void
-     */
-    public function addStyle( $style, $level = 'mid', $key = NULL ){
-    }
-
+	
+	/**
+	 *	Appends JavaScript code to be run after Browser finished rendering (document.ready).
+	 *	@access		public
+	 *	@param		string		$script			JavaScript code to execute on ready
+	 *	@param		integer		$runlevel		Run order level of JavaScript code, default: 5, less: earlier, more: later
+	 *	@return		void
+	 */
+	public function addScriptOnReady( $script, $runlevel = 5, $key = NULL ){
+		$runlevel	= $this->sanitizeLevel( $runlevel );
+		if( !isset( $this->scriptsOnReady[$runlevel] ) )											//  runlevel is not yet defined in scripts list
+			$this->scriptsOnReady[$runlevel]	= array();											//  create empty scripts list for runlevel
+		$key	= strlen( $key ) ? md5( $key ) : 'default';
+		if( !array_key_exists( $key, $this->scriptsOnReady[$runlevel] ) )
+			$this->scriptsOnReady[$runlevel][$key]	= array();
+		$this->scriptsOnReady[$runlevel][$key][]	= $script;										//  note JavaScript code on runlevel
+	}
 
 	/**
 	 *	Add a JavaScript URL.
@@ -124,6 +131,21 @@ class CMF_Hydrogen_View_Helper_JavaScript
 				continue;
 			unlink( $item->getPathname() );
 		}
+	}
+
+	protected function compress( $script ){
+//		$script	= preg_replace( "@^\s*//.+\n?@", "", $script );
+//		$script	= preg_replace( "@/\*.+\*/\n?@sU", "", $script );
+		if( class_exists( 'JSMin' ) ){
+			try{
+				return JSMin::minify( $script );
+			}
+			catch( Exception $e ){}
+		}
+		if( class_exists( 'Net_API_Google_ClosureCompiler' ) ){
+			return Net_API_Google_ClosureCompiler::minify( $script );
+		}
+		return $script;
 	}
 
 	/**
@@ -179,10 +201,10 @@ class CMF_Hydrogen_View_Helper_JavaScript
 					$content	= File_Reader::load( $url );
 				if( $content === FALSE )
 					throw new RuntimeException( 'Script file "'.$url.'" not existing' );
-				if( !preg_match( "/\.min\.js$/", $url ) )
-					if( class_exists( 'JSMin' ) )
-						$content	= JSMin::minify( $content );
-				$contents[]	= $content;
+				if( preg_match( "/\.min\.js$/", $url ) )
+					array_unshift( $contents, preg_replace( "@/\*.+\*/\n?@sU", "", $content ) );
+				else
+					$contents[]	= $this->compress( $content );
 			}
 			$content	= implode( "\n\n", $contents );
 			File_Writer::save( $fileJs, $content );
@@ -200,86 +222,106 @@ class CMF_Hydrogen_View_Helper_JavaScript
 	}
 
 	/**
-	 *	Renders an HTML scrtipt tag with all collected JavaScript URLs and blocks.
+	 *	Renders an HTML script tag with all collected JavaScript URLs and blocks.
 	 *	@access		public
 	 *	@param		bool		$indentEndTag	Flag: indent end tag by 2 tabs
 	 *	@param		bool		$forceFresh		Flag: force fresh creation instead of using cache
 	 *	@return		string
 	 */
 	public function render( $indentEndTag = FALSE, $forceFresh = FALSE ){
-		$links		= '';
-		$scripts	= '';
-		if( $this->urls ){
-			if( $this->useCompression ){
-				$fileJs	= $this->getPackageFileName( $forceFresh );
+		$links			= $this->renderUrls( $this->useCompression, TRUE, $forceFresh );
+		$scripts		= $this->renderScripts( $this->useCompression, TRUE );
+		$scriptsOnReady	= $this->renderScriptsOnReady( $this->useCompression, TRUE );
+		return $links.$scriptsOnReady.$scripts;
+	}
+
+	/**
+	 *	Renders block of collected JavaScript code with directive to run if Browser finished loading (using jQuery event document.ready).
+	 *	@access		protected
+	 *	@param		boolean		$compress		Flag: compress code
+	 *	@param		boolean		$wrapInTag		Flag: wrap code in HTML script tag
+	 *	@return		string		Combinded JavaScript code to run if Browser is ready
+	 */
+	protected function renderScripts( $compress = FALSE, $wrapInTag = FALSE ){
+		$list	= array();
+		ksort( $this->scripts );
+		foreach( $this->scripts as $level => $map )
+			foreach( $map as $key => $scripts )
+				foreach( $scripts as $script )
+					$list[]	= preg_replace( "/;+$/", ";", trim( $script ) );
+		if( !count( $list ) )
+			return '';
+		$content		= join( "\n", $list );
+		if( $compress )
+			$content	= $this->compress( $content );
+		if( !$wrapInTag )
+			return $content;
+		return UI_HTML_Tag::create( 'script', $content, array( 'type' => 'text/javascript' ) );
+	}
+
+	/**
+	 *	Renders block of collected JavaScript code with directive to run if Browser finished loading (using jQuery event document.ready).
+	 *	@access		protected
+	 *	@param		boolean		$wrapInTag		Flag: wrap code in HTML script tag
+	 *	@return		string		Combinded JavaScript code to run if Browser is ready
+	 */
+	protected function renderScriptsOnReady( $compress = FALSE, $wrapInTag = FALSE ){
+		$list	= array();
+		ksort( $this->scriptsOnReady );
+		foreach( $this->scriptsOnReady as $level => $map )
+			foreach( $map as $key => $scripts )
+				foreach( $scripts as $script )
+					$list[]	= preg_replace( "/;+$/", ";", trim( $script ) );
+		if( !count( $list ) )
+			return '';
+		$content	= trim( join( "\n", $list ) );
+		$content		= "jQuery(document).ready(function(){\n".$content."\n});";
+		if( $compress )
+			$content	= $this->compress( $content );
+		if( !$wrapInTag )
+			return $content;
+		return UI_HTML_Tag::create( 'script', $content, array( 'type' => 'text/javascript' ) );
+	}
+
+	protected function renderUrls( $compress, $wrapInTag = FALSE, $forceFresh = FALSE ){
+		if( !count( $this->urls ) )
+			return '';
+		if( $this->useCompression ){
+			$fileJs	= $this->getPackageFileName( $forceFresh );
+			if( $this->revision )
+				$fileJs	.= '?'.$this->revision;
+			$attributes	= array(
+				'type'		=> 'text/javascript',
+	//			'language'	=> 'JavaScript',
+				'src'		=> $fileJs
+			);
+			$links	= UI_HTML_Tag::create( 'script', NULL, $attributes );
+		}
+		else{
+			$list	= array();
+			foreach( $this->urls as $url ){
 				if( $this->revision )
-					$fileJs	.= '?'.$this->revision;
+					$url	.= ( preg_match( '/\?/', $url ) ? '&amp;' : '?' ).$this->revision;
 				$attributes	= array(
 					'type'		=> 'text/javascript',
 		//			'language'	=> 'JavaScript',
-					'src'		=> $fileJs
+					'src'		=> $url
 				);
-				$links	= UI_HTML_Tag::create( 'script', NULL, $attributes );
+				$list[]	= UI_HTML_Tag::create( 'script', NULL, $attributes );
 			}
-			else{
-				$list	= array();
-				foreach( $this->urls as $url ){
-					if( $this->revision )
-						$url	.= ( preg_match( '/\?/', $url ) ? '&amp;' : '?' ).$this->revision;
-					$attributes	= array(
-						'type'		=> 'text/javascript',
-			//			'language'	=> 'JavaScript',
-						'src'		=> $url
-					);
-					$list[]	= UI_HTML_Tag::create( 'script', NULL, $attributes );
-				}
-				$links	= implode( "\n".$this->indent, $list  );
-			}
+			$links	= implode( "\n".$this->indent, $list  );
 		}
+		return $links;
+	}
 
-        $list   = array( 'top' => array(), 'mid' => array(), 'end' => array(), 'ready' => array() );
-        foreach( $this->scripts as $level => $map ){
-            foreach( $map as $key => $scripts ){
-                foreach( $scripts as $script ){
-                    $list[$level][] = $script;
-                }
-            }
-        }
-        foreach( $list as $level => $map ){
-			$list[$level]	= implode( "\n", $map );
-			if( $level === "ready" )
-				$list[$level]	= 'jQuery(document).ready(function(){'.$list[$level].'});';
-		}
-		$scripts	= trim( $list['top'].$list['mid'].$list['end'] );
-		if( strlen( $scripts ) ){
-			if( $this->useCompression ){
-				if( class_exists( 'JSMin' ) )
-					$scripts	= JSMin::minify( $scripts );
-				else if( class_exists( 'Net_API_Google_ClosureCompiler' ) )
-					$scripts	= Net_API_Google_ClosureCompiler::minify( $scripts );
-			}
-			$attributes	= array(
-				'type'		=> 'text/javascript',
-	//			'language'	=> 'JavaScript',
-			);
-			$scripts	= "\n".$this->indent.UI_HTML_Tag::create( 'script', $scripts, $attributes );
-		}
-
-		$scriptsOnReady	= trim( $list['ready'] );
-		if( strlen( $scriptsOnReady ) ){
-			if( $this->useCompression ){
-				if( class_exists( 'JSMin' ) )
-					$scriptsOnReady	= JSMin::minify( $scriptsOnReady );
-				else if( class_exists( 'Net_API_Google_ClosureCompiler' ) )
-					$scriptsOnReady	= Net_API_Google_ClosureCompiler::minify( $scriptsOnReady );
-			}
-			$attributes	= array(
-				'type'		=> 'text/javascript',
-	//			'language'	=> 'JavaScript',
-			);
-			$scriptsOnReady	= "\n".$this->indent.UI_HTML_Tag::create( 'script', $scriptsOnReady, $attributes );
-		}
-		return $links.$scriptsOnReady.$scripts;
+	protected function sanitizeLevel( $level ){
+		if( $level === "top" )
+			return $level	= 2;
+		if( $level === "mid" )
+			return $level	= 5;
+		if( $level === "bottom" )
+			return $level	= 8;
+		return min( 9, max( 1, (int) $level ) );
 	}
 
 	/**
