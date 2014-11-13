@@ -50,8 +50,6 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 	public $js;
 	/**	@var	stdClass								$css				CSS containers (primer, theme) */
 	public $css;
-	/**	@var	array									$scriptsOnReady		List if JavaScripts to run on load if browser is ready */
-	protected $scriptsOnReady	= array();
 	/**	@var		CMM_TEA_Factory						$tea				Instance of TEA (Template Engine Abstraction) Factory (from cmModules) OR empty if TEA is not available */
 	public $tea					= NULL;
 
@@ -110,9 +108,9 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 
 		foreach( $modules->getAll() as $module ){													//  iterate installed modules
 			$settings[$module->id]	= array(
-				'_id'		=> $module->id,
-				'_title'	=> $module->title,
-				'_version'	=> $module->version,
+//				'_id'		=> $module->id,
+//				'_title'	=> $module->title,
+//				'_version'	=> $module->version,
 			);
 			foreach( $module->files->styles as $style ){											//  iterate module style files
 				if( !empty( $style->load ) && $style->load == "auto" ){								//  style file is to be loaded always
@@ -175,8 +173,8 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 				unset( $settings[$module->id] );
 		}
 		$modules->callHook( 'Page', 'applyModules', $this );										//  call related module event hooks
-		$script		= 'var config = '.json_encode( $listConfig ).';';								//  @deprecated leave only next line
-		$script		.= "\n\n".'var settings = '.json_encode( $settings ).';';
+//		$script		= 'var config = '.json_encode( $listConfig ).';';								//  @deprecated leave only next line
+		$script		= 'var settings = '.json_encode( $settings ).';';
 		$script		= UI_HTML_Tag::create( 'script', "<!--\n".$script."\n-->", array( 'type' => "text/javascript" ) );
 		$this->addHead( $script );
 	}
@@ -200,10 +198,6 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 
 		$this->addHead( $this->css->primer->render( $this->packStyleSheets ) );
 		$this->addHead( $this->css->theme->render( $this->packStyleSheets ) );
-
-		if( $this->scriptsOnReady )																	//  JavaScripts to call on start have been collected
-			$this->js->addScript( $this->renderScriptsOnReady() );									//  append collected onReady-JavaScripts to page
-
 		$this->addBody( $this->js->render() );
 
 		/*  --  BODY CLASSES  --  */
@@ -246,26 +240,6 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 	}
 
 	/**
-	 *	Inserts collected JavaScript code into page bottom with directive to run if Browser finished loading (using jQuery event document.ready).
-	 *	@access		protected
-	 *	@param		boolean		$compress		Flag: compress code
-	 *	@param		boolean		$wrapInTag		Flag: wrap code in HTML script tag
-	 *	@return		string		Combinded JavaScript code to run if Browser is ready
-	 */
-	protected function renderScriptsOnReady( $compress = FALSE, $wrapInTag = FALSE ){
-		$list	= array();
-		ksort( $this->scriptsOnReady );
-		foreach( $this->scriptsOnReady as $level => $scripts )
-			foreach( $scripts as $script )
-				$list[]	= preg_replace( "/;+$/", ";", trim( $script ) );
-		$list	= join( "\n", $list );
-		$script		= "jQuery(document).ready(function(){\n".$list."\n});";
-		if( !$wrapInTag )
-			return $script;
-		return UI_HTML_Tag::create( 'script', $script, array( 'type' => 'text/javascript' ) );
-	}
-
-	/**
 	 *	Appends JavaScript code to be run after Browser finished rendering (document.ready).
 	 *	@access		public
 	 *	@param		string		$script			JavaScript code to execute on ready
@@ -273,12 +247,20 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 	 *	@return		void
 	 */
 	public function runScript( $script, $runlevel = 5 ){
-		if( !isset( $this->scriptsOnReady[(int) $runlevel] ) )										//  runlevel is not yet defined in scripts list
-			$this->scriptsOnReady[(int) $runlevel]	= array();										//  create empty scripts list for runlevel
-		$this->scriptsOnReady[(int) $runlevel][]	= $script;										//  note JavaScript code on runlevel
+		return $this->js->addScriptOnReady( $script, $runlevel );
 	}
 
+	/**
+	 *	Deprecated.
+	 *	@param type $packJavaScripts
+	 *	@param type $packStyleSheets
+	 *	@deprecated		will be removed
+	 *	@todo			step 1: enable messenger note and let apps adjust
+	 *	@todo			step 2: remove method
+	 */
 	public function setPackaging( $packJavaScripts = FALSE, $packStyleSheets = FALSE ){
+//		$this->env->getMessenger()->noteNotice( '<b>Deprecation: </b>Calling Page::setPackaging is deprecated. Please use module UI:Compressor instead.' );
+
 #		$this->js->setCompression( $packJavaScripts );
 #		$this->css->primer->setCompression( $packStyleSheets );
 #		$this->css->theme->setCompression( $packStyleSheets );
