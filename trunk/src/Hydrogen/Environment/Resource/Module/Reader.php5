@@ -49,6 +49,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 		$obj->version				= (string) $xml->version;
 		$obj->versionAvailable		= NULL;
 		$obj->versionInstalled		= NULL;
+		$obj->versionLog			= array();
 		$obj->companies				= array();
 		$obj->authors				= array();
 		$obj->licenses				= array();
@@ -73,15 +74,23 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 		$obj->installDate			= NULL;
 		$obj->installSource			= NULL;
 
-		if( $xml->version->hasAttribute( 'install-type' ) )
-			$obj->installType	= (int) $xml->version->getAttribute( 'install-type' );
-		if( $xml->version->hasAttribute( 'install-date' ) )
-			$obj->installDate	= strtotime( $xml->version->getAttribute( 'install-date' ) );
-		if( $xml->version->hasAttribute( 'install-source' ) )
-			$obj->installSource	= $xml->version->getAttribute( 'install-source' );
+		/*	--  LOCALLY INSTALLED MODULE  --  */
+		if( $xml->version->hasAttribute( 'install-type' ) )											//  install type is set
+			$obj->installType	= (int) $xml->version->getAttribute( 'install-type' );				//  note install type
+		if( $xml->version->hasAttribute( 'install-date' ) )											//  install date is set
+			$obj->installDate	= strtotime( $xml->version->getAttribute( 'install-date' ) );		//  note install date
+		if( $xml->version->hasAttribute( 'install-source' ) )										//  install source is set
+			$obj->installSource	= $xml->version->getAttribute( 'install-source' );					//  note install source
 
-		if( $xml->files ){
-			$map	= array(
+		foreach( $xml->log as $entry ){																//  iterate version log entries if available
+			$obj->versionLog[]	= (object) array(													//  append version log entry
+				'note'		=> (string) $entry,														//  extract entry note
+				'version'	=> $entry->getAttribute( 'version' ),									//  extract entry version
+			);
+		}
+
+		if( $xml->files ){																			//  iterate files
+			$map	= array(																		//  ...
 				'class'		=> 'classes',
 				'locale'	=> 'locales',
 				'template'	=> 'templates',
