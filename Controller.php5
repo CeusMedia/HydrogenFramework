@@ -69,12 +69,13 @@ class CMF_Hydrogen_Controller
 	 *	@param		CMF_Hydrogen_Environment_Abstract	$env			Application Environment Object
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment_Abstract $env )
+	public function __construct( CMF_Hydrogen_Environment_Abstract $env, $setupView = TRUE )
 	{
 		$env->clock->profiler->tick( 'CMF_Controller('.get_class( $this ).')' );
 		$this->setEnv( $env );
 //		$env->clock->profiler->tick( 'CMF_Controller('.get_class( $this ).'): env set' );
-		$this->setupView( !$env->getRequest()->isAjax() );
+		if( $setupView )
+			$this->setupView( !$env->getRequest()->isAjax() );
 		$env->clock->profiler->tick( 'CMF_Controller('.get_class( $this ).'): got view object' );
 //		$arguments		= array_slice( func_get_args(), 1 );										//  collect additional arguments for extended logic classes
 //		Alg_Object_MethodFactory::callObjectMethod( $this, '__onInit', $arguments, TRUE, TRUE );	//  invoke possibly extended init method
