@@ -75,8 +75,9 @@ class CMF_Hydrogen_Environment_Resource_Captain {
 	 *	@param		object		$context		...
 	 *	@param		array		$arguments		...
 	 *	@return		integer						Number of called hooks for event
-	 *	@throws		RuntimeException			...
-	 *	@throws		RuntimeException			...
+	 *	@throws		RuntimeException			if given static class method is not existing
+	 *	@throws		RuntimeException			ig method call produces stdout output, for example warnings and notices
+	 *	@throws		RuntimeException			if method call is throwing an exception
 	 */
 	public function callHook( $resource, $event, $context, $arguments = array() ){
 //		$this->env->clock->profiler->tick( 'Resource_Module_Library_Local::callHook: '.$event.'@'.$resource.' start' );
@@ -91,6 +92,8 @@ class CMF_Hydrogen_Environment_Resource_Captain {
 				$className	= preg_replace( $pattern, "\\1", $function );
 				$methodName	= preg_replace( $pattern, "\\2", $function );
 				$function	= array( $className, $methodName );
+				if( !method_exists( $className, $methodName ) )
+					throw new RuntimeException( 'Method '.$className.'::'.$methodName.' is not existing' );
 			}
 			else{
 				$function	= create_function( '$env, $context, $module, $arguments = array()', $function );
