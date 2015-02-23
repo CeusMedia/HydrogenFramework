@@ -101,9 +101,10 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydr
 			$moduleId		= preg_replace( '/\.xml$/i', '', $entry->getFilename() );
 			$moduleFile		= $this->path.$moduleId.'.xml';
 			$module			= CMF_Hydrogen_Environment_Resource_Module_Reader::load( $moduleFile, $moduleId );
-			$module->uri	= $moduleFile;
-			$module->source	= 'local';
-			$module->id		= $moduleId;
+			$module->id			= $moduleId;
+			$module->uri		= $moduleFile;
+			$module->source		= 'local';
+			$module->isInstalled		= TRUE;
 			$module->versionInstalled	= $module->version;
 
 			$icon	= $entry->getPath().'/'.$moduleId;
