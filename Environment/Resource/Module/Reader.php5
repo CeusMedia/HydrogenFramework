@@ -50,6 +50,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 		$obj->versionAvailable		= NULL;
 		$obj->versionInstalled		= NULL;
 		$obj->versionLog			= array();
+		$obj->isInstalled			= FALSE;
 		$obj->companies				= array();
 		$obj->authors				= array();
 		$obj->licenses				= array();
