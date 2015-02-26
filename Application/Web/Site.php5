@@ -59,6 +59,11 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 		$request		= $this->env->getRequest();
 		try
 		{
+			$captain	= $this->env->getCaptain();
+			$result		= $captain->callHook( 'App', 'onDispatch', $this, array() );
+			if( is_string( $result ) && strlen( trim( $result ) ) ){
+				return $result;
+			}
 			$dispatcher	= new CMF_Hydrogen_Dispatcher_General( $this->env );
 			$dispatcher->checkClassActionArguments	= self::$checkClassActionArguments;
 			if( $defaultController )
