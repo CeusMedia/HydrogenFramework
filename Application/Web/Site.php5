@@ -56,10 +56,11 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 	 */
 	protected function control( $defaultController = NULL, $defaultAction = NULL )
 	{
-		$request		= $this->env->getRequest();
+		$request	= $this->env->getRequest();
+		$captain	= $this->env->getCaptain();
+		$captain->callHook( 'App', 'onControl', $this, array() );
 		try
 		{
-			$captain	= $this->env->getCaptain();
 			$result		= $captain->callHook( 'App', 'onDispatch', $this, array() );
 			if( is_string( $result ) && strlen( trim( $result ) ) ){
 				return $result;
