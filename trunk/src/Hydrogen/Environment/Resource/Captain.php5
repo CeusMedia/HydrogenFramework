@@ -82,6 +82,7 @@ class CMF_Hydrogen_Environment_Resource_Captain {
 	public function callHook( $resource, $event, $context, $arguments = array() ){
 //		$this->env->clock->profiler->tick( 'Resource_Module_Library_Local::callHook: '.$event.'@'.$resource.' start' );
 		$count		= 0;
+		$result		= NULL;
 		$modules	= $this->env->hasModules() ? $this->env->getModules()->getAll() : array();
 		foreach( $modules as $module ){
 			if( empty( $module->hooks[$resource][$event] ) )
@@ -102,7 +103,7 @@ class CMF_Hydrogen_Environment_Resource_Captain {
 				$count++;
 				ob_start();
 				$args	= array( $this->env, &$context, $module, $arguments );
-				call_user_func_array( $function, $args );
+				$result	= call_user_func_array( $function, $args );
 				$this->env->clock->profiler->tick( '<!--Resource_Module_Library_Local::call-->Hook: '.$event.'@'.$resource.': '.$module->id );
 				$stdout	= ob_get_clean();
 				if( strlen( $stdout ) )
@@ -117,9 +118,11 @@ class CMF_Hydrogen_Environment_Resource_Captain {
 				else
 					throw new RuntimeException( 'Hook '.$module->id.'::'.$resource.'@'.$event.' failed: '.$e->getMessage(), 0, $e );
 			}
+			if( (bool) $result )
+				return $result;
 		}
 //		$this->env->clock->profiler->tick( 'Resource_Module_Library_Local::callHook: '.$event.'@'.$resource.' done' );
-		return $count;
+		return $result;
 	}
 }
 ?>
