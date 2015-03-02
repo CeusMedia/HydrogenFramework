@@ -323,6 +323,15 @@ class CMF_Hydrogen_View
 		$this->addHelper( $name, $object );
 	}
 
+	protected function renderContent( $content, $dataType = "HTML" ){
+		$data	= (object) array(
+			'content'	=> $content,
+			'type'		=> $dataType
+		);
+		$this->env->getCaptain()->callHook( 'View', 'onRenderContent', $this, $data );
+		return $data->content;
+	}
+	
 	/**
 	 *	Sets Data of View.
 	 *	@access		public
