@@ -311,8 +311,11 @@ class CMF_Hydrogen_View
 			$id			= str_replace( " ", "", ucwords( preg_replace( "/[^a-z]/", " ", $key ) ) );	//  camelcase key
 			$id			= "text".str_replace( " ", "", $id );										//  generate ID for key
 			$list[$id]	= '';																		//  default: empty block in list
-			if( $this->hasContentFile( $url ) )														//  content file is available
-				$list[$id]	= $this->loadContentFile( $url, $data );								//  load file content
+			if( $this->hasContentFile( $url ) ){													//  content file is available
+				$content	= $this->loadContentFile( $url, $data );								//  load file content
+				$content	= $this->renderContent( $content );										//  render content
+				$list[$id]	= $content;																//  append content to map
+			}
 		}
 		return $list;
 	}
