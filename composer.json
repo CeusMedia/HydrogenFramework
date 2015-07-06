@@ -22,7 +22,7 @@
     "michelf/php-markdown": "1.5.0"
   },
   "autoload": {
-    "classmap": ["classes/"]
+    "classmap": ["src/"]
   },
   "minimum-stability": "dev"
 }
