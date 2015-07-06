@@ -12,7 +12,7 @@ if( !defined( 'CMF_VERSION' ) )															//  ...
 $__loaderFrameworks	= new CMC_Loader;													//  get new Loader Instance
 $__loaderFrameworks->setExtensions( 'php5' );											//  set Class File Extension
 $__loaderFrameworks->setPrefix( 'CMF_' );												//  set Class Name Prefix
-$__loaderFrameworks->setPath( CMF_PATH/*.'src/'*/ );										//  set Class Path
+$__loaderFrameworks->setPath( CMF_PATH.'src/' );										//  set Class Path
 $__loaderFrameworks->setVerbose( FALSE );												//  set autoloader verbosity
 $__loaderFrameworks->registerAutoloader();
 ?>
