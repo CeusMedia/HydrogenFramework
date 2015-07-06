@@ -208,7 +208,7 @@ class CMF_Hydrogen_Environment_Resource_Language
 	{
 		$this->env->clock->profiler->tick( 'Resource_Language::load('.$topic.')' );
 		$fileName	= $this->getFilenameOfLanguage( $topic );
-		$reader		= new File_Reader($fileName);
+		$reader		= new FS_File_Reader($fileName);
 		if( $reader->exists() )
 		{
 			$data	= FALSE;
@@ -226,7 +226,7 @@ class CMF_Hydrogen_Environment_Resource_Language
 				$this->env->clock->profiler->tick( 'Resource_Language::load: '.$topic.' @mode1' );
 			}
 			if( $data === FALSE ){
-				$data	= File_INI_Reader::load( $fileName, TRUE );
+				$data	= FS_File_INI_Reader::load( $fileName, TRUE );
 				$this->env->clock->profiler->tick( 'Resource_Language::load: '.$topic.' @mode2' );
 			}
 			$this->data[$topic]	= $data;

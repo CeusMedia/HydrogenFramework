@@ -91,12 +91,12 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydr
 		if( $forceReload )
 			$this->clearCache();
 		if( $useCache && file_exists( $cacheFile ) ){
-			$this->modules	= unserialize( File_Reader::load( $cacheFile ) );
+			$this->modules	= unserialize( FS_File_Reader::load( $cacheFile ) );
 			$this->env->clock->profiler->tick( 'Resource_Module_Library_Local::scan (cache)' );
 			return;
 		}
 
-		$index	= new File_RegexFilter( $this->path, '/^[a-z0-9_]+\.xml$/i' );
+		$index	= new FS_File_RegexFilter( $this->path, '/^[a-z0-9_]+\.xml$/i' );
 		foreach( $index as $entry ){
 			$moduleId		= preg_replace( '/\.xml$/i', '', $entry->getFilename() );
 			$moduleFile		= $this->path.$moduleId.'.xml';
@@ -109,14 +109,14 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydr
 
 			$icon	= $entry->getPath().'/'.$moduleId;
 			if( file_exists( $icon.'.png' ) )
-				$module->icon	= 'data:image/png;base64,'.base64_encode( File_Reader::load( $icon.'.png' ) );
+				$module->icon	= 'data:image/png;base64,'.base64_encode( FS_File_Reader::load( $icon.'.png' ) );
 			else if( file_exists( $icon.'.ico' ) )
-				$module->icon	= 'data:image/x-icon;base64,'.base64_encode( File_Reader::load( $icon.'.ico' ) );
+				$module->icon	= 'data:image/x-icon;base64,'.base64_encode( FS_File_Reader::load( $icon.'.ico' ) );
 			$this->modules[$moduleId]	= $module;
 		}
 		ksort( $this->modules );
 		if( $useCache )
-			File_Writer::save( $cacheFile, serialize( $this->modules ) );
+			FS_File_Writer::save( $cacheFile, serialize( $this->modules ) );
 		$this->env->clock->profiler->tick( 'Resource_Module_Library_Local::scan (files)' );
 	}
 }

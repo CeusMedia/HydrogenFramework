@@ -32,7 +32,7 @@
  *	@package		Hydrogen.Environment.Resource.Module.Library
  *	@implements		CMF_Hydrogen_Environment_Resource_Module_Library
  *	@uses			CMF_Hydrogen_Environment_Resource_Module_Reader
- *	@uses			File_RecursiveNameFilter
+ *	@uses			FS_File_RecursiveNameFilter
  *	@uses			Net_HTTP_Request_Sender
  *	@uses			Net_Reader
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
@@ -82,7 +82,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source implements CMF_Hyd
 		}
 
 		$list	= array();
-		$index	= new File_RecursiveNameFilter( $this->source->path, 'module.xml' );
+		$index	= new FS_File_RecursiveNameFilter( $this->source->path, 'module.xml' );
 		$this->env->clock->profiler->tick( 'CMFR_Library_Source::scanFolder: init' );
 		foreach( $index as $entry ){
 			if( preg_match( "@/templates$@", $entry->getPath() ) )
@@ -93,7 +93,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source implements CMF_Hyd
 			$cacheKey	= 'Modules/'.$this->source->id.'/'.$id;
 			if( $cache->has( $cacheKey ) ){
 				$list[$id]	= $cache->get( $cacheKey );
-#				$this->env->clock->profiler->tick( 'CMFR_Library_Source::scanFolder: Module #'.$id.':cache' );
+#				$this->env->clock->profiler->tick( 'CMF_Library_Source::scanFolder: Module #'.$id.':cache' );
 				continue;
 			}
 			$icon	= $entry->getPath().'/icon';
@@ -110,9 +110,9 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source implements CMF_Hyd
 					$obj->versionAvailable	= $obj->version;
 					$obj->icon	= NULL;
 					if( file_exists( $icon.'.png' ) )
-						$obj->icon	= 'data:image/png;base64,'.base64_encode( File_Reader::load( $icon.'.png' ) );
+						$obj->icon	= 'data:image/png;base64,'.base64_encode( FS_File_Reader::load( $icon.'.png' ) );
 					else if( file_exists( $icon.'.ico' ) )
-						$obj->icon	= 'data:image/x-icon;base64,'.base64_encode( File_Reader::load( $icon.'.ico' ) );
+						$obj->icon	= 'data:image/x-icon;base64,'.base64_encode( FS_File_Reader::load( $icon.'.ico' ) );
 					$list[$id]	= $obj;
 				}
 				catch( Exception $e ){
