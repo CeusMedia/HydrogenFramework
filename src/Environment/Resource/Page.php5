@@ -94,6 +94,9 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 		$this->css->theme->addUrl( $fileName, $level );
 	}
 
+	/**
+	 *	@todo		kriss: apply JS levels after CMF_Hydrogen_View_Helper_JavaScript is supporting it
+	 */
 	public function applyModules(){
 		$config		= $this->env->getConfig()->getAll( 'module.', TRUE );							//  dictionary of (user modified) module settings
 		$modules	= $this->env->getModules();														//  get module handler resource
@@ -115,7 +118,7 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 			foreach( $module->files->styles as $style ){											//  iterate module style files
 				if( !empty( $style->load ) && $style->load == "auto" ){								//  style file is to be loaded always
 					$source	= !empty( $style->source ) ? $style->source : NULL;						//  get source attribute if possible
-					$level	= !empty( $style->level ) ? $style->level : 'mid';						//  get flag attribute for appending on top
+					$level	= !empty( $style->level ) ? $style->level : 'mid';						//  get load level (top, mid, end), default: mid
 					if( preg_match( "/^[a-z]+:\/\/.+$/", $style->file ) )							//  style file is absolute URL
 						$this->css->theme->addUrl( $style->file, $level );							//  add style file URL
 					else if( $source == 'primer' )													//  style file is in primer theme
@@ -139,18 +142,19 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 			foreach( $module->files->scripts as $script ){											//  iterate module script files
 				if( !empty( $script->load ) && $script->load == "auto" ){							//  script file is to be loaded always
 					$source	= empty( $script->source ) ? 'local' : $script->source;
-					$top	= !empty( $script->top );												//  get flag attribute for appending on top
+					$level	= !empty( $script->level ) ? $script->level : 'mid';					//  get load level (top, mid, end, ready), default: mid
+					$top	= !empty( $script->top ) || $level === "top";							//  get flag attribute for appending on top
 					if( $source == 'lib' ){															//  script file is in script library
-						if( $top )																	//  
-							$this->addJavaScript( $pathScriptsLib.$script->file );					//  
-						else																		//  
-							$this->js->addUrl( $pathScriptsLib.$script->file, $top );				//  load script file from script library
+						if( $top )																	//
+							$this->addJavaScript( $pathScriptsLib.$script->file );					//
+						else																		//
+							$this->js->addUrl( $pathScriptsLib.$script->file/*, $level*/ );			//  load script file from script library
 					}
 					else if( $source == 'local' ){													//  script file is in app scripts folder
-						if( $top )																	//  
-							$this->addJavaScript( $pathScripts.$script->file );						//	
-						else																		//  
-							$this->js->addUrl( $pathScripts.$script->file, $top );					//  load script file from app scripts folder
+						if( $top )																	//
+							$this->addJavaScript( $pathScripts.$script->file );						//
+						else																		//
+							$this->js->addUrl( $pathScripts.$script->file/*, $level*/ );			//  load script file from app scripts folder
 					}
 					else if( $source == 'url' ){													//  script file is absolute URL
 						if( !preg_match( "/^[a-z]+:\/\/.+$/", $script->file ) ){
@@ -188,8 +192,13 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 		$this->addBodyClass( 'action-'.$action );
 		$this->addBodyClass( 'site-'.$controller.'-'.$action );
 
-		if( ( $modules = $this->env->getModules() ) )												//  get module handler resource if existing
-			$modules->callHook( 'Page', 'build', $this );											//  call related module event hooks
+		if( ( $modules = $this->env->getModules() ) ){												//  get module handler resource if existin
+			$data	= (object) array(
+				'content'   => $this->getBody(),
+			);
+			$modules->callHook( 'Page', 'build', $this, $data );									//  call related module event hooks
+			$this->setBody( $data->content );
+		}
 
 		if( $this->packStyleSheets && $this->env->getRequest()->has( 'flushStyleCache') ){
 			$this->css->primer->clearCache();

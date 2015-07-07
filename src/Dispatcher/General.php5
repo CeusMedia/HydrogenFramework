@@ -44,7 +44,9 @@
 class CMF_Hydrogen_Dispatcher_General
 {
 	public $defaultController			= 'index';
+
 	public $defaultAction				= 'index';
+
 	public $defaultArguments			= array();
 
 	protected $history					= array();
@@ -53,73 +55,56 @@ class CMF_Hydrogen_Dispatcher_General
 
 	public static $prefixController		= "Controller_";
 
-
 	public function __construct( CMF_Hydrogen_Environment_Abstract $env ) {
 		$this->env		= $env;
 		$this->request	= $env->getRequest();
 	}
 
-	protected function checkClass( $className )
-	{
-		if( !class_exists( $className ) )															// class is neither loaded nor loadable
-		{
+	protected function checkClass( $className ){
+		if( !class_exists( $className ) ){															// class is neither loaded nor loadable
 			$message	= 'Invalid Controller "'.$className.'"';
 			throw new RuntimeException( $message, 201 );											// break with internal error
 		}
 	}
 
-	protected function checkClassAction( $className, $instance, $action )
-	{
+	protected function checkClassAction( $className, $instance, $action ){
 		$denied = array( '__construct', '__destruct', 'getView', 'getData' );
-		if( !method_exists( $instance, $action ) || in_array( $action, $denied ) )													// no action method in controller instance
-		{
+		if( !method_exists( $instance, $action ) || in_array( $action, $denied ) ){					// no action method in controller instance
 			$message	= 'Invalid Action "'.ucfirst( $className ).'::'.$action.'"';
 			throw new RuntimeException( $message, 211 );											// break with internal error
 		}
 	}
 
-	protected function checkClassActionArguments( $className, $instance )
-	{
+	protected function checkClassActionArguments( $className, $instance ){
 		$action		= $this->request->get( 'action' );
 		$arguments	= $this->request->get( 'arguments' );
 		$numberArgsAtLeast	= 0;
 		$numberArgsTotal	= 0;
-//		remark($className);
-//		remark($action);
-//		print_m($instance);
 		$methodReflection	= new ReflectionMethod( $instance, $action );
 		$methodArguments	= $methodReflection->getParameters();
 
-//		print_m($methodArguments);
-		while( $methodArgument = array_shift( $methodArguments ) )
-		{
+		while( $methodArgument = array_shift( $methodArguments ) ){
 			$numberArgsTotal++;
 			if( !$methodArgument->isOptional() )
 				$numberArgsAtLeast++;
 		}
-		if( count( $arguments ) < $numberArgsAtLeast )
-		{
+		if( count( $arguments ) < $numberArgsAtLeast ){
 			$message	= 'Not enough arguments for action "'.ucfirst( $className ).'::'.$action.'"';
 			throw new RuntimeException( $message, 212 );											// break with internal error
 		}
-//		remark(count( $arguments ));
-//		remark($numberArgsTotal);
-		if( count( $arguments ) > $numberArgsTotal )
-		{
+		if( count( $arguments ) > $numberArgsTotal ){
 			$message	= 'Too much arguments for action "'.ucfirst( $className ).'::'.$action.'"';
 			throw new RuntimeException( $message, 212 );											// break with internal error
 		}
 
 	}
 
-	protected function checkForLoop()
-	{
+	protected function checkForLoop(){
 		$controller	= $this->request->get( 'controller' );
 		$action		= $this->request->get( 'action' );
 		if( empty( $this->history[$controller][$action] ) )
 			$this->history[$controller][$action]	= 0;
-		if( $this->history[$controller][$action] > 2 )
-		{
+		if( $this->history[$controller][$action] > 2 ){
 			throw new RuntimeException( 'Too many redirects' );
 #			$this->messenger->noteFailure( 'Too many redirects.' );
 #			break;
@@ -135,11 +120,9 @@ class CMF_Hydrogen_Dispatcher_General
 		}
 	}
 
-	public function dispatch()
-	{
+	public function dispatch(){
 		$this->env->clock->profiler->tick( 'Dispatcher_General::dispatch' );
-		do
-		{
+		do{
 			$this->realizeCall();
 			$this->checkForLoop();
 
@@ -158,7 +141,6 @@ class CMF_Hydrogen_Dispatcher_General
 				$this->checkClassActionArguments( $className, $instance, $action );
 			$this->env->clock->profiler->tick( 'Dispatcher_General::dispatch: check@'.$controller.'/'.$action );
 			Alg_Object_MethodFactory::callObjectMethod( $instance, $action, $arguments );			// call action method in controller class with arguments
-
 			$this->noteLastCall( $instance );
 		}
 		while( $instance->redirect );
@@ -173,9 +155,8 @@ class CMF_Hydrogen_Dispatcher_General
 		$name		= str_replace( ' ', '_', ucwords( $parts ) );									//  glue together capitalized
 		return self::$prefixController.$name;														//  return controller class name
 	}
-	
-	protected function noteLastCall( CMF_Hydrogen_Controller $instance )
-	{
+
+	protected function noteLastCall( CMF_Hydrogen_Controller $instance ){
 		$session	= $this->env->getSession();
 		if( !$session )
 			return;
@@ -187,8 +168,7 @@ class CMF_Hydrogen_Dispatcher_General
 		$session->set( 'lastAction', $this->request->get( 'action' ) );
 	}
 
-	protected function realizeCall()
-	{
+	protected function realizeCall(){
 		if( !trim( $this->request->get( 'controller' ) ) )
 			$this->request->set( 'controller', $this->defaultController );
 		if( !trim( $this->request->get( 'action' ) ) )

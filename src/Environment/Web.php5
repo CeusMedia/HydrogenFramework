@@ -85,6 +85,8 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 		'themes'	=> 'themes/',
 	);
 
+	protected $resourcesToClose					= array();
+
 	/**
 	 *	Constructor, sets up Resource Environment.
 	 *	@access		public
@@ -147,19 +149,31 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	 *	Notes global scheme, host, relative application path and absolute application URL.
 	 *	Notes local document root path, relative application path and absolute application URI.
 	 *	@access		protected
+	 *	@param		boolean		$strict			Flag: strict mode: throw exceptions
 	 *	@return		void
-	 *	@throws		CMF_Hydrogen_Environment_Exception	if application has been executed outside a valid web server environment or no HTTP host has been provided by web server
-	 *	@throws		CMF_Hydrogen_Environment_Exception	if no document root path has been provided by web server
-	 *	@throws		CMF_Hydrogen_Environment_Exception	if no script file path has been provided by web server
+	 *	@throws		CMF_Hydrogen_Environment_Exception	if strict mode and application has been executed outside a valid web server environment or no HTTP host has been provided by web server
+	 *	@throws		CMF_Hydrogen_Environment_Exception	if strict mode and no document root path has been provided by web server
+	 *	@throws		CMF_Hydrogen_Environment_Exception	if strict mode and no script file path has been provided by web server
 	 */
-	protected function detectSelf()
+	protected function detectSelf( $strict = TRUE )
 	{
-#		if( !getEnv( 'HTTP_HOST' ) )																//  application has been executed outside a valid web server environment or no HTTP host has been provided by web server
-#			throw new CMF_Hydrogen_Environment_Exception( 'This application needs to be executed within by a web server' );
-#		if( !getEnv( 'DOCUMENT_ROOT' ) )															//  no document root path has been provided by web server
-#			throw new CMF_Hydrogen_Environment_Exception( 'Your web server needs to provide a document root path' );
-#		if( !getEnv( 'SCRIPT_NAME' ) )																//  no script file path has been provided by web server
-#			throw new CMF_Hydrogen_Environment_Exception( 'Your web server needs to provide the running scripts file path' );
+		if( $strict ){
+			if( !getEnv( 'HTTP_HOST' ) ){															//  application has been executed outside a valid web server environment or no HTTP host has been provided by web server
+				throw new CMF_Hydrogen_Environment_Exception(
+					'This application needs to be executed within by a web server'
+				);
+			}
+			if( !getEnv( 'DOCUMENT_ROOT' ) ){														//  no document root path has been provided by web server
+				throw new CMF_Hydrogen_Environment_Exception(
+					'Your web server needs to provide a document root path'
+				);
+			}
+			if( !getEnv( 'SCRIPT_NAME' ) ){															//  no script file path has been provided by web server
+				throw new CMF_Hydrogen_Environment_Exception(
+					'Your web server needs to provide the running scripts file path'
+				 );
+			}
+		}
 
 		$this->host		= preg_replace( "/:[0-9]{2,5}$/", "", getEnv( 'HTTP_HOST' ) );				//  note requested HTTP host name without port
 		$this->port		= getEnv( 'SERVER_PORT' ) == 80 ? '' : getEnv( 'SERVER_PORT' );				//  note requested HTTP port
@@ -344,6 +358,10 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 		$this->clock->profiler->tick( 'env: session' );
 		if( $this->modules )
 			$this->modules->callHook( 'Session', 'init', $this->session );
+	}
+
+	protected function registerResourceToClose( $resourceKey ){
+		$this->resourcesToClose[]	= $resourceKey;
 	}
 }
 ?>

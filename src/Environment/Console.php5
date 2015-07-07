@@ -36,12 +36,16 @@ class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment_Abstract
 
 	protected function detectSelf()
 	{
-/*		$this->host		= $host = getEnv( 'HTTP_HOST' );											//  note requested HTTP host name
-		$this->port		= $port = getEnv( 'SERVER_PORT' );											//  note requested HTTP port
-		$this->root		= $root	= getEnv( 'DOCUMENT_ROOT' );										//  note document root of web server or virtual host
-		$this->path		= $path = dirname( getEnv( 'SCRIPT_NAME' ) ).'/';							//  note absolute working path 
-		$this->scheme	= getEnv( "HTTPS" ) ? 'https' : 'http';										//  note used URL scheme
-*/		$this->url		= $this->config->get( 'app.url' );
+		$this->url = $this->config->get( 'app.url' );												//  get application URL from config
+		if( !$this->url )																			//  application URL not set
+			$this->url = $this->config->get( 'app.base.url' );										//  get application base URL from config
+		if( !$this->url )																			//  application base URL not set
+			throw new RuntimeException( 'Please define app.base.url in config.ini, first!' );		//  quit with exception
+
+		$this->scheme	= parse_url( $this->url, PHP_URL_SCHEME );									//  note used URL scheme
+		$this->host		= parse_url( $this->url, PHP_URL_HOST );									//  note requested HTTP host name
+		$this->port		= parse_url( $this->url, PHP_URL_PORT );									//  note requested HTTP port
+		$this->path		= $this->config->get( 'app.base.path' );									//  note absolute working path
 	}
 
 	public function getLanguage(){

@@ -2,7 +2,7 @@
 /**
  *	Generic View Class of Framework Hydrogen.
  *
- *	Copyright (c) 2007-2012 Christian Würker (ceusmedia.com)
+ *	Copyright (c) 2007-2015 Christian Würker (ceusmedia.com)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		cmFrameworks
  *	@package		Hydrogen
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2012 Christian Würker
+ *	@copyright		2007-2015 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.1
@@ -33,7 +33,7 @@
  *	@uses			UI_HTML_Elements
  *	@uses			Alg_Time_Converter
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2012 Christian Würker
+ *	@copyright		2007-2015 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.1
@@ -135,7 +135,7 @@ class CMF_Hydrogen_View
 			$this->addData( $key, $autoSetTo );
 		if( isset( $this->data[$key] ) )
 			return $this->data[$key];
-		throw new InvalidArgumentException( 'Data for key "'.$key."' is not set" );
+		throw new InvalidArgumentException( 'View data for key "'.htmlentities( $key, ENT_QUOTES, 'UTF-8' ).'" is not set' );
 	}
 
 	protected function getTemplateUri( $controller, $action )
@@ -223,9 +223,33 @@ class CMF_Hydrogen_View
 			$this->env->getPage()->tea->setDefaultType( 'STE' );									//  
 			$template	= $this->env->getPage()->tea->getTemplate( $uri );							//  create template object for content file
 			$template->setData( $data );															//  set given data
-			return $template->render();																//  render template and return content
+			$content	= $template->render();														//  render template
 		}
-		return UI_Template::render( $uri, $data );													//  render template with simple integrated but soon deprecated template engine
+		else
+			$content	= UI_Template::render( $uri, $data );										//  render template with integrated template engine
+		$content	= $this->renderContent( $content );												//  apply modules to content
+		return $content;																			//  return loaded and rendered content
+	}
+
+	/**
+	 *	Tries to load several content files within a path.
+	 *	@access		public
+	 *	@param		string		$path		Path to files within locales, like "html/controller/action/"
+	 *	@param		array		$keys		List of file keys (without .html extension)
+	 *	@return		array		Map of collected file contents
+     */
+	public function loadContentFiles( $path, $keys, $data = array() ){
+		$path	= preg_replace( "/\/+$/", "", $path ).'/';											//  correct path
+		$keys	= is_string( $keys ) ? array( $keys ) : $keys;										//  convert single key to list
+		foreach( $keys as $key ){																	//  iterate keys
+			$url		= $path.$key.'.html';														//  build filename
+			$list[$key]	= '';																		//  default: empty block in map
+			if( $this->hasContentFile( $url ) ){													//  content file is available
+				$content	= $this->loadContentFile( $url, $data );								//  load file content
+				$list[$key]	= $content;																//  append content to map
+			}
+		}
+		return $list;																				//  return collected content map
 	}
 
 	/**
@@ -234,18 +258,19 @@ class CMF_Hydrogen_View
 	 *	@param		string		$controller			Name of Controller
 	 *	@param		string		$action				Name of Action
 	 *	@param		array		$data				Additional Array of View Data
+	 *	@param		boolean		$renderContent		Flag: inject content blocks of modules
 	 *	@return		string
 	 */
-	public function loadTemplate( $controller, $action, $data = array() )
+	public function loadTemplate( $controller, $action, $data = array(), $renderContent = TRUE )
 	{
 		$fileKey	= $controller.'/'.$action.'.php';
 		$uri		= $this->getTemplateUri( $controller, $action );
 		if( !file_exists( $uri ) )
 			throw new RuntimeException( 'Template "'.$controller.'/'.$action.'" is not existing', 311 );
-		return $this->loadTemplateFile( $fileKey, $data );
+		return $this->loadTemplateFile( $fileKey, $data, $renderContent );
 	}
 
-	public function loadTemplateFile( $fileName, $data = array() )
+	public function loadTemplateFile( $fileName, $data = array(), $renderContent = TRUE )
 	{
 		$___templateUri	= $this->getTemplateUriFromFile( $fileName );
 		if( !file_exists( $___templateUri ) )
@@ -263,7 +288,7 @@ class CMF_Hydrogen_View
 			$this->env->getPage()->tea->setDefaultType( 'PHP' );									//  
 			$template	= $this->env->getPage()->tea->getTemplate( $___templateUri );				//  
 			$template->setData( $data );															//  
-			return $template->render();																//  
+			$content	= $template->render();														//  render content with template engine
 		}
 		else{
 			$___content	= '';
@@ -277,47 +302,48 @@ class CMF_Hydrogen_View
 			extract( $this->data );																	//  
 			extract( $___data );																	//  
 			$helpers	= $this->helpers;															//  
-			$result		= include( $___templateUri );												//  
-			if( $result === FALSE )
+			try{
+				$content	= include( $___templateUri );											//  render template by include
+			}
+			catch( Exception $e ){
+				$message	= 'Rendering template file "%s" failed: %s';
+				$message	= sprintf( $message, $___templateUri, $e->getMessage() );
+				throw new RuntimeException( $message, 0, $e  );
+			}
+			if( $content === FALSE )
 				throw new RuntimeException( 'Template file "'.$___templateUri.'" is not existing' );
-			$___buffer		= ob_get_clean();														//  
-			$___content	= $result;
-			if( trim( $___buffer ) )
-			{
-				if( !is_string( $___content ) )
-					$___content	= $___buffer;
-				else if( $this->env->getMessenger() )
-					$this->env->getMessenger()->noteFailure( nl2br( $___buffer ) );
-				else
-					throw new RuntimeException( $___buffer );
+			$buffer		= trim( preg_replace( '/^(<br( ?\/)?>)+/s', "", ob_get_clean() ) );			//  get standard output buffer
+			if( strlen( $buffer ) ){																//  there is something in buffer
+				if( !is_string( $content ) )														//  the view did not return content
+					$content	= $buffer;															//  use buffer as content
+				else if( $this->env->getMessenger() )												//  otherwise use messenger
+					$this->env->getMessenger()->noteFailure( nl2br( $buffer ) );					//  note as failure
+				else																				//  otherwise
+					throw new RuntimeException( $buffer );											//  throw exception
 			}
 		}
-		return $___content;
+		if( $renderContent )
+			$content	= $this->renderContent( $content );											//  apply modules to content
+		return $content;																			//  return loaded and rendered content
 	}
 
 	/**
-	 *	...
+	 *	Tries to load several content files and maps them by prefixed IDs.
 	 *	@access		public
-	 *	@param		array		$keys		List of file keys, like "index.top" for "index.top.html"
-	 *	@param		string		$path		Path to files within locales, like "html/index/"
-	 *	@return		array
+	 *	@param		array		$keys		List of file keys (without .html extension)
+	 *	@param		string		$path		Path to files within locales, like "html/controller/action/"
+	 *	@return		array		Prefixed map of collected file contents mapped by prefixed IDs
      */
-	public function populateTexts( $keys, $path, $data = array() ){
-		$path	= preg_replace( "/\/+$/", "", $path ).'/';											//  correct path
+	public function populateTexts( $keys, $path, $data = array(), $prefix = "text" ){
 		$list	= array();																			//  prepare empty list
-		$keys	= is_string( $keys ) ? array( $keys ) : $keys;										//  convert single key to list
-		foreach( $keys as $key ){																	//  iterate keys
-			$url		= $path.$key.'.html';														//  build filename
-			$id			= str_replace( " ", "", ucwords( preg_replace( "/[^a-z]/", " ", $key ) ) );	//  camelcase key
-			$id			= "text".str_replace( " ", "", $id );										//  generate ID for key
-			$list[$id]	= '';																		//  default: empty block in list
-			if( $this->hasContentFile( $url ) ){													//  content file is available
-				$content	= $this->loadContentFile( $url, $data );								//  load file content
-				$content	= $this->renderContent( $content );										//  render content
-				$list[$id]	= $content;																//  append content to map
-			}
+		$files	= $this->loadContentFiles( $path, $keys, $data );									//  try to load files
+		foreach( $files as $key => $value ){														//  iterate file contents
+			$id	= preg_replace( "/[^a-z]/", " ", $key );											//  replace not allowed characters
+			$id	= $prefix ? $prefix." ".$id : $id;													//  prepend prefix to ID if set
+			$id	= Alg_Text_CamelCase::convert( $id, TRUE, FALSE );									//  build camelcased ID
+			$list[$id]	= $value;																	//  append content to map
 		}
-		return $list;
+		return $list;																				//  return map of collected files
 	}
 
 	protected function registerHelper( $name, $class, $parameters = array() )
@@ -326,7 +352,7 @@ class CMF_Hydrogen_View
 		$this->addHelper( $name, $object );
 	}
 
-	protected function renderContent( $content, $dataType = "HTML" ){
+	public function renderContent( $content, $dataType = "HTML" ){
 		$data	= (object) array(
 			'content'	=> $content,
 			'type'		=> $dataType
@@ -334,7 +360,7 @@ class CMF_Hydrogen_View
 		$this->env->getCaptain()->callHook( 'View', 'onRenderContent', $this, $data );
 		return $data->content;
 	}
-	
+
 	/**
 	 *	Sets Data of View.
 	 *	@access		public

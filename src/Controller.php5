@@ -137,6 +137,39 @@ class CMF_Hydrogen_Controller
 		return $this->env->getLanguage()->getSection( $topic, $section );
 	}
 
+	protected function handleJsonResponse( $status, $data, $httpStatusCode = NULL ){
+		$type	= NULL;
+		if( in_array( $status, array( TRUE, "data", "success", "succeeded" ) ) )
+			$type	= "data";
+		else if( in_array( $status, array( FALSE, "error", "fail", "failed" ) ) )
+			$type	= "error";
+		$response	= (object) array(
+			'status'	=> $type,
+			'data'		=> $data,
+			'timestamp'	=> microtime( TRUE ),
+		);
+		$json	= json_encode( $response, JSON_PRETTY_PRINT );
+		header( "Content-Type: application/json" );
+		header( "Content-Length: ".strlen( $json ) );
+		print( $json );
+		exit;
+	}
+
+	/**
+	 *	Checks if current request came via AJAX.
+	 *	Otherwise returns application main page as HTML by redirection.
+	 *	Also notes a failure message in UI messenger.
+	 *	@access		public
+	 *	@return		void
+	 *	@todo		locale support (use main.ini section msg etc.)
+	 */
+	protected function checkAjaxRequest(){
+		if( !$this->env->getRequest()->isAjax() ){
+			$this->messenger->noteFailure( 'Invalid access access attempt.' );
+			$this->restart( NULL, FALSE, 401 );
+		}
+	}
+
 	/**
 	 *	Redirects by calling different Controller and Action.
 	 *	Attention: This will *NOT* effect the URL in browser nor need cURL requests to allow forwarding.
@@ -164,14 +197,18 @@ class CMF_Hydrogen_Controller
 	 *	Attention: This *WILL* effect the URL displayed in browser / need request clients (eG. cURL) to allow forwarding.
 	 *
 	 *	Alias for restart with parameters $allowForeignHost set to TRUE and $withinModule to FALSE.
-	 *	HTTP status will be 200.
+	 *	Similar to: $this->restart( 'http://foreign.tld/', FALSE, NULL, TRUE );
+	 *
+	 *	HTTP status will be 200 or second parameter.
+	 *
 	 *	@access		protected
 	 *	@param		string		$uri				URI to request, may be external
+	 *	@param		integer		$status				HTTP status code to send, default: NULL -> 200
 	 *	@return		void
 	 *	@todo		kriss: check for better HTTP status
 	 */
-	protected function relocate( $uri ){
-		$this->restart( $uri, FALSE, NULL, TRUE );
+	protected function relocate( $uri, $status = NULL ){
+		$this->restart( $uri, FALSE, $status, TRUE );
 	}
 
 	/**
@@ -216,12 +253,16 @@ class CMF_Hydrogen_Controller
 	 *	By default, redirect URIs are are request path within the current application, eg. "./[CONTROLLER]/[ACTION]"
 	 *	ATTENTION: For browser compatibility local paths should start with "./"
 	 *
-	 *	If seconds parameters is set to TRUE, the given URI is a path inside the current controller.
+	 *	If seconds parameter is set to TRUE, redirects to a path inside the current controller.
+	 *	Therefore the given URI needs to be a path inside the current controller.
 	 *	This would look like this: $this->restart( '[ACTION]', TRUE );
+	 *	Of course you can append actions arguments and parameters.
 	 *
-	 *	If forth parameters is set to TRUE, redirects to is a path inside the current controller.
-	 *	This would look like this: $this->restart( 'http://example.com/', FALSE, NULL, TRUE );
-	 *	There is a shorter alias: $this->relocate( 'http://example.com/' );
+	 *	If third parameter is set to a valid HTTP status code, the code and its HTTP status text will be set for response.
+	 *
+	 *	If forth parameter is set to TRUE, redirects to URIs outside the current domain are allowed.
+	 *	This would look like this: $this->restart( 'http://foreign.tld/', FALSE, NULL, TRUE );
+	 *	There is a shorter alias: $this->relocate( 'http://foreign.tld/' );
 	 *
 	 *	@access		protected
 	 *	@param		string		$uri				URI to request
@@ -233,8 +274,7 @@ class CMF_Hydrogen_Controller
 	 *	@link		https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#3xx_Redirection HTTP status codes
 	 *	@todo		kriss: implement automatic lookout for "from" request parameter
 	 *	@todo		kriss: implement handling of FROM request parameter, see controller constants
-	 *	@todo		kriss: concept and implement anti-loop
-	 *	@see		http://dev.(ceusmedia.com)/cmKB/?MTI
+	 *	@todo		kriss: concept and implement anti-loop {@see http://dev.(ceusmedia.com)/cmKB/?MTI}
 	 */
 	protected function restart( $uri, $withinModule = FALSE, $status = NULL, $allowForeignHost = FALSE, $modeFrom = 0 )
 	{
@@ -265,6 +305,13 @@ class CMF_Hydrogen_Controller
 		if( $status )																				//  a HTTP status code is to be set
 			Net_HTTP_Status::sendHeader( (int) $status );											//  send HTTP status code header
 		header( "Location: ".$base.$uri );															//  send HTTP redirect header
+
+		$link	= UI_HTML_Tag::create( 'a', $base.$uri, array( 'href' => $base.$uri ) );
+		$text	= UI_HTML_Tag::create( 'small', 'Redirecting to '.$link.' ...' );
+		$page	= new UI_HTML_PageFrame();
+		$page->addMetaTag( 'http-equiv', 'refresh', '0; '.$base.$uri );
+		$page->addBody( $text );
+		print( $page->build() );
 		exit;																						//  and exit application
 	}
 

@@ -44,6 +44,8 @@
 class CMF_Hydrogen_Environment_Resource_Server_Json {
 
 	protected $env;
+	/**	@var	array				$serverControllers	List of available server controllers */
+	protected $serverControllers	= array();
 	protected $serverUsername;
 	protected $serverPassword;
 	protected $serverUri;
@@ -78,6 +80,14 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 		$this->clientIp		= getEnv( 'REMOTE_ADDR' );
 		if( empty( $this->serverUri ) )
 			throw new RuntimeException( 'No server URI set in config (server.uri)' );
+		try{
+			$data	= $this->getData( 'info/disclosure', 'listControllers' );
+			print_m( $data );
+			die;
+#			$this->serverControllers	= array();
+		}
+		catch( Exception $e ){
+		}
 	}
 
 	protected function buildServerGetUrl( $controller, $action = NULL, $arguments = array(), $parameters = array() ) {
@@ -172,6 +182,10 @@ class CMF_Hydrogen_Environment_Resource_Server_Json {
 			error_log( time()." GET (".$statusCode."): ".$json."\n", 3, $logPath.$logFile );
 		$response	= $this->handleResponse( $json, $url, $statusCode );
 		return $response->data;
+	}
+
+	public function getControllers() {
+		return $this->serverControllers;
 	}
 
 	protected function handleResponse( $json, $url, $statusCode ) {
