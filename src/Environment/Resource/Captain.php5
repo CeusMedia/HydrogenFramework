@@ -57,6 +57,9 @@ class CMF_Hydrogen_Environment_Resource_Captain {
 	/**	@var		CMF_Hydrogen_Environment_Abstract	$env		Environment object */
 	protected $env;
 
+	/**	@var		array								$disabledHooks	List of disabled hooks */
+	protected $disabledHooks	= array();
+
 	/**
 	 *	Constructor.
 	 *	@access		public
@@ -70,8 +73,8 @@ class CMF_Hydrogen_Environment_Resource_Captain {
 	/**
 	 *	...
 	 *	@access		public
-	 *	@param		string		$resource		...
-	 *	@param		string		$event			...
+	 *	@param		string		$resource		Name of resource (e.G. Page or View)
+	 *	@param		string		$event			Name of hook event (e.G. onBuild or onRenderContent)
 	 *	@param		object		$context		...
 	 *	@param		array		$arguments		...
 	 *	@return		integer						Number of called hooks for event
@@ -80,6 +83,8 @@ class CMF_Hydrogen_Environment_Resource_Captain {
 	 *	@throws		RuntimeException			if method call is throwing an exception
 	 */
 	public function callHook( $resource, $event, $context, $arguments = array() ){
+		if( array_key_exists( $resource."::".$event, $this->disabledHooks ) )
+			return FALSE;
 //		$this->env->clock->profiler->tick( 'Resource_Module_Library_Local::callHook: '.$event.'@'.$resource.' start' );
 		$count		= 0;
 		$result		= NULL;
@@ -87,42 +92,76 @@ class CMF_Hydrogen_Environment_Resource_Captain {
 		foreach( $modules as $module ){
 			if( empty( $module->hooks[$resource][$event] ) )
 				continue;
-			$function	= $module->hooks[$resource][$event];
-			$pattern	= "/^([a-z0-9_]+)::([a-z0-9_]+)$/i";
-			if( preg_match( $pattern, $function ) ){
-				$className	= preg_replace( $pattern, "\\1", $function );
-				$methodName	= preg_replace( $pattern, "\\2", $function );
-				$function	= array( $className, $methodName );
-				if( !method_exists( $className, $methodName ) )
-					throw new RuntimeException( 'Method '.$className.'::'.$methodName.' is not existing' );
-			}
-			else{
-				$function	= create_function( '$env, $context, $module, $arguments = array()', $function );
-			}
-			try{
-				$count++;
-				ob_start();
-				$args	= array( $this->env, &$context, $module, $arguments );
-				$result	= call_user_func_array( $function, $args );
-				$this->env->clock->profiler->tick( '<!--Resource_Module_Library_Local::call-->Hook: '.$event.'@'.$resource.': '.$module->id );
-				$stdout	= ob_get_clean();
-				if( strlen( $stdout ) )
+			if( !is_array( $module->hooks[$resource][$event] ) )
+				$module->hooks[$resource][$event]	= array( $module->hooks[$resource][$event] );
+			foreach( $module->hooks[$resource][$event] as $nr => $function ){
+//				$function	= $module->hooks[$resource][$event];
+				$pattern	= "/^([a-z0-9_]+)::([a-z0-9_]+)$/i";
+				if( preg_match( $pattern, $function ) ){
+					$className	= preg_replace( $pattern, "\\1", $function );
+					$methodName	= preg_replace( $pattern, "\\2", $function );
+					$function	= array( $className, $methodName );
+					if( !method_exists( $className, $methodName ) )
+						throw new RuntimeException( 'Method '.$className.'::'.$methodName.' is not existing' );
+				}
+				else{
+					$function	= create_function( '$env, $context, $module, $arguments = array()', $function );
+				}
+				try{
+					$count++;
+					ob_start();
+					$args	= array( $this->env, &$context, $module, $arguments );
+					$result	= call_user_func_array( $function, $args );
+					$this->env->clock->profiler->tick( '<!--Resource_Module_Library_Local::call-->Hook: '.$event.'@'.$resource.': '.$module->id );
+					$stdout	= ob_get_clean();
+					if( strlen( $stdout ) )
+						if( $this->env->has( 'messenger' ) )
+							$this->env->getMessenger()->noteNotice( 'Call on event '.$event.'@'.$resource.' hooked by module '.$module->id.' reported: '.$stdout );
+						else
+							throw new RuntimeException( $stdout );
+				}
+				catch( Exception $e ){
 					if( $this->env->has( 'messenger' ) )
-						$this->env->getMessenger()->noteNotice( 'Call on event '.$event.'@'.$resource.' hooked by module '.$module->id.' reported: '.$stdout );
+						$this->env->getMessenger()->noteFailure( 'Call on event '.$event.'@'.$resource.' hooked by module '.$module->id.' failed: '.$e->getMessage() );
 					else
-						throw new RuntimeException( $stdout );
-			}
-			catch( Exception $e ){
-				if( $this->env->has( 'messenger' ) )
-					$this->env->getMessenger()->noteFailure( 'Call on event '.$event.'@'.$resource.' hooked by module '.$module->id.' failed: '.$e->getMessage() );
-				else
-					throw new RuntimeException( 'Hook '.$module->id.'::'.$resource.'@'.$event.' failed: '.$e->getMessage(), 0, $e );
+						throw new RuntimeException( 'Hook '.$module->id.'::'.$resource.'@'.$event.' failed: '.$e->getMessage(), 0, $e );
+				}
 			}
 			if( (bool) $result )
 				return $result;
 		}
 //		$this->env->clock->profiler->tick( 'Resource_Module_Library_Local::callHook: '.$event.'@'.$resource.' done' );
 		return $result;
+	}
+
+	/**
+	 *	Removed hook from disable list.
+	 *	@access		public
+	 *	@param		string		$resource		Name of resource (e.G. Page or View)
+	 *	@param		string		$event			Name of hook event (e.G. onBuild or onRenderContent)
+	 *	@return 	boolean
+	 */
+	public function enableHook( $resource, $event ){
+		$key	= $resource."::".$event;
+		if( !array_key_exists( $key, $this->disabledHooks ) )
+			return FALSE;
+		unset( $this->disabledHooks[$key] );
+		return TRUE;
+	}
+
+	/**
+	 *	Adds hook from disable list.
+	 *	@access		public
+	 *	@param		string		$resource		Name of resource (e.G. Page or View)
+	 *	@param		string		$event			Name of hook event (e.G. onBuild or onRenderContent)
+	 *	@return 	boolean
+	 */
+	public function disableHook( $resource, $event ){
+		$key	= $resource."::".$event;
+		if( array_key_exists( $key, $this->disabledHooks ) )
+			return FALSE;
+		$this->disabledHooks[$key]	= TRUE;
+		return TRUE;
 	}
 }
 ?>
