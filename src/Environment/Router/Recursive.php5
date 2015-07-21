@@ -46,7 +46,7 @@ class CMF_Hydrogen_Environment_Router_Recursive extends CMF_Hydrogen_Environment
 
 		$request	= $this->env->getRequest();
 
-		if( $request->has( '__path' ) ) 
+		if( FALSE !== getEnv( 'REDIRECT_URL' ) && $request->has( '__path' ) )
 			self::$pathKey	= '__path';
 
 		$path	= $request->getFromSource( self::$pathKey, 'get' );
