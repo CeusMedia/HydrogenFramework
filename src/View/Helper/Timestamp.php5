@@ -98,7 +98,7 @@ class CMF_Hydrogen_View_Helper_Timestamp extends CMF_Hydrogen_View_Helper_Abstra
 		if( $html ){
 			$attr		= array( 'class' => 'phrase' );
 			$datetime	= $this->toDatetime();
-			$acronym	= UI_HTML_Elements::Acronym( $phrase, $datetime );
+			$acronym	= UI_HTML_Tag::create( 'abbr', $phrase, array( 'title' => $datetime ) );
 			$phrase		= UI_HTML_Tag::create( 'span', $acronym, $attr );
 		}
 		return $phrase;
