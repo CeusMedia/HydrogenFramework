@@ -288,9 +288,10 @@ class CMF_Hydrogen_Model
 	 *	@access		public
 	 *	@param		array			$indices		Map of Index Keys and Values
 	 *	@param		string			$field			Single field to return
+	 *	@param		array			$orders			Map of Orders to include in SQL Query
 	 *	@return		mixed
 	 */
-	public function getByIndices( $indices, $field = "" )
+	public function getByIndices( $indices, $field = "", $orders = array() )
 	{
 		if( !is_array( $indices ) )
 			throw new InvalidArgumentException( 'Index map must be an array' );
@@ -300,7 +301,7 @@ class CMF_Hydrogen_Model
 			throw new InvalidArgumentException( 'Field must be a string' );
 		foreach( $indices as $key => $value )
 			$this->table->focusIndex( $key, $value );
-		$data	= $this->table->get( TRUE );
+		$data	= $this->table->get( TRUE, $orders);
 		$this->table->defocus();
 		if( $field ){
 			if( empty( $data ) )
@@ -408,9 +409,8 @@ class CMF_Hydrogen_Model
 	public function removeByIndex( $key, $value )
 	{
 		$this->table->focusIndex( $key, $value );
-		$result	= FALSE;
 		$rows	= $this->table->get( FALSE );
-		if( count( $rows ) )
+		if( $number = count( $rows ) )
 		{
 			$this->table->delete();
 			foreach( $rows as $row )
@@ -429,7 +429,7 @@ class CMF_Hydrogen_Model
 			$result	= TRUE;
 		}
 		$this->table->defocus();
-		return $result;
+		return $number;
 	}
 
 	/**
@@ -448,9 +448,9 @@ class CMF_Hydrogen_Model
 			$this->table->focusIndex( $key, $value );
 
 		$rows	= $this->table->get( FALSE );
-		if( count( $rows ) )
+		if( $number = count( $rows ) )
 		{
-			$number	= $this->table->delete();
+			$this->table->delete();
 			foreach( $rows as $row )
 			{
 				switch( $this->fetchMode )
