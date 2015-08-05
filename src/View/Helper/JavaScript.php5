@@ -120,7 +120,7 @@ class CMF_Hydrogen_View_Helper_JavaScript
 	 *	@return		void
 	 */
 	public function clearCache(){
-		$index			= new File_Iterator( $this->pathCache );
+		$index			= new FS_File_Iterator( $this->pathCache );
 		$lengthPrefix	= strlen( $this->prefix );
 		$lengthSuffix	= strlen( $suffix = $this->suffix.'.js' );
 		foreach( $index as $item ){
@@ -198,7 +198,7 @@ class CMF_Hydrogen_View_Helper_JavaScript
 				if( preg_match( "/^http/", $url ) )
 					$content	= Net_Reader::readUrl( $url );
 				else
-					$content	= File_Reader::load( $url );
+					$content	= FS_File_Reader::load( $url );
 				if( $content === FALSE )
 					throw new RuntimeException( 'Script file "'.$url.'" not existing' );
 				if( preg_match( "/\.min\.js$/", $url ) )
@@ -207,7 +207,7 @@ class CMF_Hydrogen_View_Helper_JavaScript
 					$contents[]	= $this->compress( $content );
 			}
 			$content	= implode( "\n\n", $contents );
-			File_Writer::save( $fileJs, $content );
+			FS_File_Writer::save( $fileJs, $content );
 		}
 		return $fileJs;
 	}
