@@ -338,7 +338,7 @@ class CMF_Hydrogen_View
 		$list	= array();																			//  prepare empty list
 		$files	= $this->loadContentFiles( $path, $keys, $data );									//  try to load files
 		foreach( $files as $key => $value ){														//  iterate file contents
-			$id	= preg_replace( "/[^a-z]/", " ", $key );											//  replace not allowed characters
+			$id	= preg_replace( "/[^a-z]/i", " ", $key );											//  replace not allowed characters
 			$id	= $prefix ? $prefix." ".$id : $id;													//  prepend prefix to ID if set
 			$id	= Alg_Text_CamelCase::convert( $id, TRUE, FALSE );									//  build camelcased ID
 			$list[$id]	= $value;																	//  append content to map

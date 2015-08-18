@@ -41,7 +41,7 @@ abstract class CMF_Hydrogen_Environment_Router_Abstract implements CMF_Hydrogen_
 {
 	/**	@var		string		Key of path in request, default: path */
 	static public $pathKey		= "path";
-	
+
 	/**	@var	CMF_Hydrogen_Environment_Abstract	$env		Environment object */
 	protected $env;
 #	public $configKeyBaseHref	= 'app.base.url';
@@ -51,8 +51,7 @@ abstract class CMF_Hydrogen_Environment_Router_Abstract implements CMF_Hydrogen_
 	public function __construct( CMF_Hydrogen_Environment_Abstract $env )
 	{
 		$this->env	= $env;
-		if( FALSE !== getEnv( 'REDIRECT_URL' ) )
-			$this->parseFromRequest();
+		$this->parseFromRequest();
 	}
 
 	public function getRelativeUri( $controller = NULL, $action = NULL, $arguments = NULL, $parameters = NULL, $fragmentId = NULL )
