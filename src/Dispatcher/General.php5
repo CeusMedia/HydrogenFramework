@@ -113,8 +113,11 @@ class CMF_Hydrogen_Dispatcher_General
 	}
 
 	public function checkAccess( $controller, $action ){
-		$access	= $this->env->getAcl()->has( $controller, $action );
-		if( !$access ){
+		$right1	= $this->env->getAcl()->has( $controller, $action );
+		$right2	= $this->env->getAcl()->has( $controller.'_'.$action );
+//		$right2	= $this->env->getAcl()->has( $controller );
+//		$this->env->getMessenger()->noteNotice( "R1: ".$right1." | R2: ".$right2." | Controller: ".$controller." | Action: ".$action );
+		if( !( $right1 || $right2 ) ){
 			$message	= 'Access to '.$controller.'/'.$action.' denied.';
 			throw new RuntimeException( $message, 403 );											// break with internal error
 		}
