@@ -220,7 +220,7 @@ class CMF_Hydrogen_View
 			throw new RuntimeException( 'Locale content file "'.$fileKey.'" is missing.', 321 );	//  throw exception
 //		$data	= array_merge( $this->data, $data );
 		if( $this->env->getPage()->tea ){															//  template engine abstraction is enabled
-			$this->env->getPage()->tea->setDefaultType( 'STE' );									//  
+			$this->env->getPage()->tea->setDefaultType( 'STE' );									//
 			$template	= $this->env->getPage()->tea->getTemplate( $uri );							//  create template object for content file
 			$template->setData( $data );															//  set given data
 			$content	= $template->render();														//  render template
@@ -277,31 +277,31 @@ class CMF_Hydrogen_View
 			throw new RuntimeException( 'Template "'.$fileName.'" is not existing', 311 );
 
 		if( $this->env->getPage()->tea ){
-			$data['this']		= $this;															//  
-			$data['view']		= $this;															//  
-			$data['env']		= $this->env;														//  
-			$data['config']		= $this->env->getConfig();											//  
-			$data['request']	= $this->env->getRequest();											//  
-			$data['session']	= $this->env->getSession();											//  
-			$data['helpers']	= $this->helpers;													//  
-			$data	+= $this->data;																	//  
-			$this->env->getPage()->tea->setDefaultType( 'PHP' );									//  
-			$template	= $this->env->getPage()->tea->getTemplate( $___templateUri );				//  
-			$template->setData( $data );															//  
+			$data['this']		= $this;															//
+			$data['view']		= $this;															//
+			$data['env']		= $this->env;														//
+			$data['config']		= $this->env->getConfig();											//
+			$data['request']	= $this->env->getRequest();											//
+			$data['session']	= $this->env->getSession();											//
+			$data['helpers']	= $this->helpers;													//
+			$data	+= $this->data;																	//
+			$this->env->getPage()->tea->setDefaultType( 'PHP' );									//
+			$template	= $this->env->getPage()->tea->getTemplate( $___templateUri );				//
+			$template->setData( $data );															//
 			$content	= $template->render();														//  render content with template engine
 		}
 		else{
 			$___content	= '';
 			ob_start();
-			$view		= $___view		= $this;													//  
-			$env		= $___env		= $this->env;												//  
-			$config		= $___config	= $this->env->getConfig();									//  
-			$request	= $___request	= $this->env->getRequest();									//  
-			$session	= $___session	= $this->env->getSession();									//  
-			$___data	= $data;																	//  
-			extract( $this->data );																	//  
-			extract( $___data );																	//  
-			$helpers	= $this->helpers;															//  
+			$view		= $___view		= $this;													//
+			$env		= $___env		= $this->env;												//
+			$config		= $___config	= $this->env->getConfig();									//
+			$request	= $___request	= $this->env->getRequest();									//
+			$session	= $___session	= $this->env->getSession();									//
+			$___data	= $data;																	//
+			extract( $this->data );																	//
+			extract( $___data );																	//
+			$helpers	= $this->helpers;															//
 			try{
 				$content	= include( $___templateUri );											//  render template by include
 			}
