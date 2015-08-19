@@ -85,7 +85,7 @@ class CMF_Hydrogen_View_Helper_JavaScript
 			$this->scripts[$level][$key]	= array();
 		$this->scripts[$level][$key][]	= $script;
 	}
-	
+
 	/**
 	 *	Appends JavaScript code to be run after Browser finished rendering (document.ready).
 	 *	@access		public
@@ -232,7 +232,7 @@ class CMF_Hydrogen_View_Helper_JavaScript
 		$links			= $this->renderUrls( $this->useCompression, TRUE, $forceFresh );
 		$scripts		= $this->renderScripts( $this->useCompression, TRUE );
 		$scriptsOnReady	= $this->renderScriptsOnReady( $this->useCompression, TRUE );
-		return $links.$scriptsOnReady.$scripts;
+		return $links.PHP_EOL.$scriptsOnReady.PHP_EOL.$scripts;
 	}
 
 	/**
@@ -268,14 +268,18 @@ class CMF_Hydrogen_View_Helper_JavaScript
 	protected function renderScriptsOnReady( $compress = FALSE, $wrapInTag = FALSE ){
 		$list	= array();
 		ksort( $this->scriptsOnReady );
-		foreach( $this->scriptsOnReady as $level => $map )
-			foreach( $map as $key => $scripts )
-				foreach( $scripts as $script )
-					$list[]	= preg_replace( "/;+$/", ";", trim( $script ) );
+		foreach( $this->scriptsOnReady as $level => $map ){
+			foreach( $map as $key => $scripts ){
+				foreach( $scripts as $script ){
+					$script		= preg_replace( "/;+$/", ";", trim( $script ) );
+					$list[]		= "jQuery(document).ready(function(){".$script."});";
+				}
+			}
+		}
 		if( !count( $list ) )
 			return '';
-		$content	= trim( join( "\n", $list ) );
-		$content		= "jQuery(document).ready(function(){\n".$content."\n});";
+		$content	= PHP_EOL.trim( join( PHP_EOL, $list ) ).PHP_EOL;
+	//	$content		= "jQuery(document).ready(function(){\n".$content."\n});";
 		if( $compress )
 			$content	= $this->compress( $content );
 		if( !$wrapInTag )
