@@ -22,7 +22,6 @@ class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment_Abstract
 			$this->initRequest();																	//  setup HTTP request handler
 #			$this->initResponse();																	//  setup HTTP response handler
 #			$this->initRouter();																	//  setup request router
-	//		$this->initFieldDefinition();															//  --  FIELD DEFINITION SUPPORT  --  //
 			$this->initLanguage();																	//  setup language support
 #			$this->initPage();																		//  
 			$this->initAcl();

@@ -106,6 +106,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source implements CMF_Hyd
 					$obj->path		= $entry->getPath();
 					$obj->file		= $filePath;
 					$obj->source	= $this->source->id;
+					$obj->_source	= $this->source;
 					$obj->id		= $id;
 					$obj->versionAvailable	= $obj->version;
 					$obj->icon	= NULL;

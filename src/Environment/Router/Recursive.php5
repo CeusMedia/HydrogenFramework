@@ -53,35 +53,37 @@ class CMF_Hydrogen_Environment_Router_Recursive extends CMF_Hydrogen_Environment
 		$path	= urldecode( $path );
 		$path	= preg_replace( '@^(.*)/?$@U', '\\1', trim( $path ) );
 		$parts	= explode( '/', $path );
-		$right	= array();
 		$left	= $parts;
-		while( count( $left ) )
-		{
-			$class	= array();
-			foreach( $left as $part )
-				$class[]	= ucfirst( $part );
-			$className	= 'Controller_'.implode( '_', $class );
-			if( class_exists( $className ) )
+		$right	= array();
+		if( strlen( trim( $path ) ) ){
+			while( count( $left ) )
 			{
-//				remark( 'Controller Class: '.$className );
-				$controller	= implode( '/', $left );
-				$request->set( 'controller', $controller );
-				if( count( $right ) )
+				$class	= array();
+				foreach( $left as $part )
+					$class[]	= ucfirst( $part );
+				$className	= 'Controller_'.implode( '_', $class );
+				if( class_exists( $className ) )
 				{
-					if( method_exists( $className, $right[0] ) )
+	//				remark( 'Controller Class: '.$className );
+					$controller	= implode( '/', $left );
+					$request->set( 'controller', $controller );
+					if( count( $right ) )
 					{
-//						remark( 'Controller Method: '.$right[0] );
-						$request->set( 'action', array_shift( $right ) );
+						if( method_exists( $className, $right[0] ) )
+						{
+	//						remark( 'Controller Method: '.$right[0] );
+							$request->set( 'action', array_shift( $right ) );
+						}
+						$request->set( 'arguments', $right );
+	//					if( $right )
+	//						remark( 'Arguments: '.implode( ', ', $right ) );
 					}
-					$request->set( 'arguments', $right );
-//					if( $right )
-//						remark( 'Arguments: '.implode( ', ', $right ) );
+					break;
 				}
-				break;
+				array_unshift( $right, array_pop( $left ) );
 			}
-			array_unshift( $right, array_pop( $left ) );
 		}
-		if( !$request->get( 'controller' ) )
+		if( !$request->get( 'controller' ) && $right )
 			$request->set( 'arguments', $right );
 
 /*		remark( "controller: ".$request->get( 'controller' ) );

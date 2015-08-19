@@ -104,10 +104,9 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 			$this->initRequest();																	//  setup HTTP request handler
 			$this->initResponse();																	//  setup HTTP response handler
 			$this->initRouter();																	//  setup request router
-	//		$this->initFieldDefinition();															//  --  FIELD DEFINITION SUPPORT  --  //
 			$this->initLanguage();																	//  setup language support
-			$this->initPage();																		//  
-			$this->initAcl();																		//  
+			$this->initPage();																		//
+			$this->initAcl();																		//
 			$this->modules->callHook( 'Env', 'constructEnd', $this );								//  call module hooks for end of env construction
 			$this->__onInit();																		//  default callback for construction end
 			$this->clock->profiler->tick( 'Environment (Web): construction end' );					//  log time of construction
@@ -283,7 +282,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	 *	Initialize page frame resource.
 	 *	@access		protected
 	 *	@param		boolean		$pageJavaScripts	Flag: compress JavaScripts, default: TRUE
-	 *	@param		boolean		$packStyleSheets	Flag: compress Stylesheet, default: TRUE 
+	 *	@param		boolean		$packStyleSheets	Flag: compress Stylesheet, default: TRUE
 	 *	@return		void
 	 */
 	protected function initPage( $pageJavaScripts = TRUE, $packStyleSheets = TRUE )
