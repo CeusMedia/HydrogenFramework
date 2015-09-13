@@ -73,7 +73,9 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source implements CMF_Hyd
 	protected function scanFolder(){
 		if( !file_exists( $this->source->path ) )
 			throw new RuntimeException( 'Source path "'.$this->source->path.'" is not existing' );
-
+#		@todo activate if source handling is implemented
+#		if( !file_exists( $this->source->path.'source.xml' ) )
+#			throw new RuntimeException( 'Source XML "'.$this->source->path.'source.xml" is not existing' );
 		$cache			= $this->env->getCache();
 		$cacheKeySource	= 'Sources/'.$this->source->id;
 		if( $cache->has( $cacheKeySource ) ){
