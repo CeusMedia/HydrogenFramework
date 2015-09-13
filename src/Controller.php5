@@ -49,7 +49,7 @@ class CMF_Hydrogen_Controller
 	const RESTART_FROM_CARRY		= 4;
 	const RESTART_FROM_SET			= 8;
 	const RESTART_FROM_PUSH			= 16;
-	
+
 	/**	@var		CMF_Hydrogen_Environment_Abstract	$env			Application Environment Object */
 	protected $env;
 	/**	@var		array								$_data			Collected Data for View */
@@ -93,6 +93,21 @@ class CMF_Hydrogen_Controller
 	protected function addData( $key, $value, $topic = NULL )
 	{
 		return $this->view->setData( array( $key => $value ), $topic );
+	}
+
+	/**
+	 *	Checks if current request came via AJAX.
+	 *	Otherwise returns application main page as HTML by redirection.
+	 *	Also notes a failure message in UI messenger.
+	 *	@access		public
+	 *	@return		void
+	 *	@todo		locale support (use main.ini section msg etc.)
+	 */
+	protected function checkAjaxRequest(){
+		if( !$this->env->getRequest()->isAjax() ){
+			$this->messenger->noteFailure( 'Invalid AJAX/AJAJ access attempt.' );
+			$this->restart( NULL, FALSE, 401 );
+		}
 	}
 
 	protected function compactFilterInput( $input ){
@@ -153,21 +168,6 @@ class CMF_Hydrogen_Controller
 		header( "Content-Length: ".strlen( $json ) );
 		print( $json );
 		exit;
-	}
-
-	/**
-	 *	Checks if current request came via AJAX.
-	 *	Otherwise returns application main page as HTML by redirection.
-	 *	Also notes a failure message in UI messenger.
-	 *	@access		public
-	 *	@return		void
-	 *	@todo		locale support (use main.ini section msg etc.)
-	 */
-	protected function checkAjaxRequest(){
-		if( !$this->env->getRequest()->isAjax() ){
-			$this->messenger->noteFailure( 'Invalid access access attempt.' );
-			$this->restart( NULL, FALSE, 401 );
-		}
 	}
 
 	/**
@@ -266,7 +266,7 @@ class CMF_Hydrogen_Controller
 	 *
 	 *	@access		protected
 	 *	@param		string		$uri				URI to request
-	 *	@param		string		$withinModule		Flag: user path inside current controller 
+	 *	@param		string		$withinModule		Flag: user path inside current controller
 	 *	@param		integer		$status				HTTP status code to send, default: NULL -> 200
 	 *	@param		boolean		$allowForeignHost	Flag: allow redirection outside application base URL, default: no
 	 *	@param		integer		$modeFrom			How to handle FROM parameter from request or for new request, not handled atm
