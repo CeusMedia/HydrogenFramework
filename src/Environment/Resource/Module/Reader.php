@@ -84,10 +84,12 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 			$obj->installSource	= $xml->version->getAttribute( 'install-source' );					//  note install source
 
 		foreach( $xml->log as $entry ){																//  iterate version log entries if available
-			$obj->versionLog[]	= (object) array(													//  append version log entry
-				'note'		=> (string) $entry,														//  extract entry note
-				'version'	=> $entry->getAttribute( 'version' ),									//  extract entry version
-			);
+			if( $entry->hasAttribute( "version" ) ){												//  only if log entry is versioned
+				$obj->versionLog[]	= (object) array(												//  append version log entry
+					'note'		=> (string) $entry,													//  extract entry note
+					'version'	=> $entry->getAttribute( 'version' ),								//  extract entry version
+				);
+			}
 		}
 
 		if( $xml->files ){																			//  iterate files
