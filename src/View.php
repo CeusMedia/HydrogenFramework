@@ -398,5 +398,23 @@ class CMF_Hydrogen_View
 			$this->action		= $this->env->getRequest()->get( 'action' );
 		}
 	}
+
+	/**
+	 *	Sets HTML page title from language file assigned by controller.
+	 *	Lets you select an language section and key and inserts given data.
+	 *	Can set a new page title or append or prepend to currently set title.
+	 *	Usage: Call this method in your view methods!
+	 *	@access		protected
+	 *	@param		string		$section		Section in language file of current controller
+	 *	@param		string		$key			Pair key in this section
+	 *	@param		array		$data			List of arguments to insert using sprintf
+	 *	@param		mixed		$mode			Concat mode: 0 - set | 1 - append, -1 - prepend
+	 *	@return		void
+	 */
+	protected function setPageTitle( $section = 'index', $key = 'title', $data = array(), $mode = 1 ){
+		$data	= $this->getData();
+		if( isset( $data['words'][$section][$key] ) )
+			$this->env->getPage()->setTitle( $data['words'][$section][$key], $mode );
+	}
 }
 ?>
