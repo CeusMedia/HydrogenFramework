@@ -95,6 +95,11 @@ class CMF_Hydrogen_Controller
 		return $this->view->setData( array( $key => $value ), $topic );
 	}
 
+	protected function callHook( $resource, $event, $context = NULL, $data = array() ){
+		$context	= $context ? $context : $this;
+		return $this->env->getCaptain()->callHook( $resource, $event, $context, $data );
+	}
+
 	/**
 	 *	Checks if current request came via AJAX.
 	 *	Otherwise returns application main page as HTML by redirection.
@@ -283,8 +288,8 @@ class CMF_Hydrogen_Controller
 			$base	= $this->env->getBaseUrl();														//  get application base URI
 			if( $withinModule ){																	//  redirection is within module
 				$controller	= $this->env->getRequest()->get( 'controller' );						//  get current controller
-				$base	.= $this->alias ? $this->alias : $controller;								//  
-				$base	.= strlen( $uri ) ? '/' : '';												//  
+				$base	.= $this->alias ? $this->alias : $controller;								//
+				$base	.= strlen( $uri ) ? '/' : '';												//
 			}
 		}
 		if( !$allowForeignHost ){																	//  redirect to foreign domain not allowed
