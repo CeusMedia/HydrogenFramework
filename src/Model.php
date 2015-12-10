@@ -328,6 +328,15 @@ class CMF_Hydrogen_Model
 		return $this->table->getColumns();
 	}
 
+	/**
+	 *	Returns list of table index columns.
+	 *	@access		public
+	 *	@return		array
+	 */
+	public function getIndices(){
+		return $this->table->getIndices();
+	}
+
 	public function getLastQuery(){
 		return $this->table->getLastQuery();
 	}
