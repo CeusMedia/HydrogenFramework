@@ -308,6 +308,7 @@ class CMF_Hydrogen_View
 			catch( Exception $e ){
 				$message	= 'Rendering template file "%s" failed: %s';
 				$message	= sprintf( $message, $___templateUri, $e->getMessage() );
+				$this->env->getCaptain()->callHook( 'Server:System', 'logException', $this, $e );
 				throw new RuntimeException( $message, 0, $e  );
 			}
 			if( $content === FALSE )

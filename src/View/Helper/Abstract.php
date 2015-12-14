@@ -61,6 +61,13 @@ abstract class CMF_Hydrogen_View_Helper_Abstract implements CMF_Hydrogen_View_He
 	protected function __onSetEnv(){}
 
 	/**
+	 *	@todo 		kriss: enable after helper interface is updated
+	 */
+/*	public function __toString(){
+		return $this->render();
+	}*/
+
+	/**
 	 *	Indicates whether this helper has an environment set.
 	 *	@access		public
 	 *	@return		boolean
@@ -79,6 +86,11 @@ abstract class CMF_Hydrogen_View_Helper_Abstract implements CMF_Hydrogen_View_He
 	{
 		return $this->needsEnv;
 	}
+
+	/**
+	 *	@todo 		kriss: enable after helper interface is updated
+	 */
+/*	public function render();*/
 
 	/**
 	 *	Set environment if needed within this helper.

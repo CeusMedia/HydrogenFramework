@@ -43,5 +43,13 @@ interface CMF_Hydrogen_View_Helper
 	public function hasEnv();
 	public function needsEnv();
 	public function setEnv( CMF_Hydrogen_Environment $env );
+
+//	@todo 	kriss: see if this pattern (having render method) is realizable for all existing helpers
+//	public function render();
+//	public function __toString();
+
+//	@todo 	whats with __construct( $env ) for all helpers?
+//	@todo 	mind the idea of a "helper pool", like the logic pool
+
 }
 ?>
