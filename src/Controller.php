@@ -65,8 +65,11 @@ class CMF_Hydrogen_Controller
 
 	/**
 	 *	Constructor.
+	 *	Will set up related view class by default. Disable this for controllers without views.
+	 *	Calls __onInit() in the end.
 	 *	@access		public
 	 *	@param		CMF_Hydrogen_Environment_Abstract	$env			Application Environment Object
+	 *	@param		boolean								$setupView		Flag: auto create view object for controller (default: TRUE)
 	 *	@return		void
 	 */
 	public function __construct( CMF_Hydrogen_Environment_Abstract $env, $setupView = TRUE )
@@ -158,12 +161,13 @@ class CMF_Hydrogen_Controller
 	}
 
 	protected function handleJsonResponse( $status, $data, $httpStatusCode = NULL ){
-		$type	= NULL;
-		if( in_array( $status, array( TRUE, "data", "success", "succeeded" ) ) )
+		$type	= $status;
+		if( in_array( $status, array( TRUE, "data", "success", "succeeded" ), TRUE ) )
 			$type	= "data";
-		else if( in_array( $status, array( FALSE, "error", "fail", "failed" ) ) )
+		else if( in_array( $status, array( FALSE, "error", "fail", "failed" ), TRUE ) )
 			$type	= "error";
 		$response	= (object) array(
+			'code'		=> $httpStatusCode ? $httpStatusCode : 200,
 			'status'	=> $type,
 			'data'		=> $data,
 			'timestamp'	=> microtime( TRUE ),
@@ -173,6 +177,10 @@ class CMF_Hydrogen_Controller
 		header( "Content-Length: ".strlen( $json ) );
 		print( $json );
 		exit;
+	}
+
+	protected function handleJsonErrorResponse( $data, $httpStatusCode = NULL ){
+		$this->handleJsonResponse( 'error', $data, $httpStatusCode );
 	}
 
 	/**
