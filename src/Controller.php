@@ -161,21 +161,28 @@ class CMF_Hydrogen_Controller
 	}
 
 	protected function handleJsonResponse( $status, $data, $httpStatusCode = NULL ){
-		$type	= $status;
+		$type			= $status;
+		$httpStatusCode	= $httpStatusCode ? $httpStatusCode : 200;
 		if( in_array( $status, array( TRUE, "data", "success", "succeeded" ), TRUE ) )
 			$type	= "data";
 		else if( in_array( $status, array( FALSE, "error", "fail", "failed" ), TRUE ) )
 			$type	= "error";
 		$response	= (object) array(
-			'code'		=> $httpStatusCode ? $httpStatusCode : 200,
+			'code'		=> $httpStatusCode,
 			'status'	=> $type,
 			'data'		=> $data,
 			'timestamp'	=> microtime( TRUE ),
 		);
 		$json	= json_encode( $response, JSON_PRETTY_PRINT );
-		header( "Content-Type: application/json" );
-		header( "Content-Length: ".strlen( $json ) );
-		print( $json );
+		if( headers_sent() ){
+			print( "Headers already sent." );
+		}
+		else{
+			header( "HTTP/1.1 ".$httpStatusCode." ".Net_HTTP_Status::getText( $httpStatusCode ) );
+			header( "Content-Type: application/json" );
+			header( "Content-Length: ".strlen( $json ) );
+			print( $json );
+		}
 		exit;
 	}
 
@@ -253,8 +260,10 @@ class CMF_Hydrogen_Controller
 			$result	= $this->view->loadContent( $this->controller, $this->action, NULL, 'html/' );
 			$this->env->clock->profiler->tick( 'Controller::getView: loadContent' );
 		}
-		else
-			throw new Exception( 'Neither view template nor content file defined' );
+		else{
+			$message	= 'Neither view template nor content file defined for request path "%s/%s"';
+			throw new RuntimeException( sprintf( $message, $this->controller, $this->action ) );
+		}
 		$this->env->clock->profiler->tick( 'Controller::getView: done' );
 		return $result;
 	}
