@@ -105,6 +105,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$this->initModules();																		//  setup module support
 		$this->initDatabase();																		//  setup database connection
 		$this->initCache();																			//  setup cache support
+		$this->initLog();																			//  setup clock
 		if( !$isFinal )
 			return;
 		$this->modules->callHook( 'Env', 'constructEnd', $this );									//  call module hooks for end of env construction
@@ -223,10 +224,10 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		return $this->disclosure;
 	}
 
-#	public function getLog()
-#	{
-#		return $this->log;
-#	}
+	public function getLog()
+	{
+		return $this->log;
+	}
 
 	/**
 	 *	Returns Logic Pool Object.
@@ -420,9 +421,9 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$this->clock->profiler->tick( 'env: disclosure', 'Finished setup of self disclosure handler.' );
 	}
 
-#	protected function initLog(){
-#		$this->log	= CMF_Hydrogen_Environment_Resource_Log( $this );
-#	}
+	protected function initLog(){
+		$this->log	= new CMF_Hydrogen_Environment_Resource_Log( $this );
+	}
 
 	protected function initLogic(){
 		$this->logic		= new CMF_Hydrogen_Environment_Resource_LogicPool( $this );
