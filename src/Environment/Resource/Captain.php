@@ -130,7 +130,7 @@ class CMF_Hydrogen_Environment_Resource_Captain {
 				catch( Exception $e ){
 					if( $this->env->has( 'messenger' ) ){
 						$this->env->getMessenger()->noteFailure( 'Call on event '.$event.'@'.$resource.' hooked by module '.$module->id.' failed: '.$e->getMessage() );
-						$this->env->logException( $e );
+						$this->env->getLog()->logException( $e );
 					}
 					else
 						throw new RuntimeException( 'Hook '.$module->id.'::'.$resource.'@'.$event.' failed: '.$e->getMessage(), 0, $e );
