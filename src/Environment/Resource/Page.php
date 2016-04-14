@@ -86,12 +86,12 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 			$this->bodyClasses[]	= trim( htmlentities( $class, ENT_QUOTES, 'UTF-8' ) );
 	}
 
-	public function addPrimerStyle( $fileName, $level = 'mid' ){
-		$this->css->primer->addUrl( $fileName, $level );
+	public function addPrimerStyle( $fileName, $level = 'mid', $attributes = array() ){
+		$this->css->primer->addUrl( $fileName, $level, $attributes );
 	}
 
-	public function addThemeStyle( $fileName, $level = 'mid' ){
-		$this->css->theme->addUrl( $fileName, $level );
+	public function addThemeStyle( $fileName, $level = 'mid', $attributes = array() ){
+		$this->css->theme->addUrl( $fileName, $level, $attributes );
 	}
 
 	/**
@@ -218,7 +218,7 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 				$classes[]	= $class;
 		$bodyAttributes['class']	= join( ' ', $classes );
 #		if( empty( $bodyAttributes['id'] ) )
-#			$bodyAttributes['id']	= 
+#			$bodyAttributes['id']	=
 		if( ( $modules = $this->env->getModules() ) )												//  get module handler resource if existing
 			$modules->callHook( 'App', 'respond', $this );											//  call related module event hooks
 		return parent::build( $bodyAttributes, $htmlAttributes );
