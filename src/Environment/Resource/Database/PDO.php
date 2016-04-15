@@ -1,8 +1,8 @@
 <?php
 /**
- *	Database resource using PDO wrapper from cmClasses.
+ *	Database resource using PDO extension of CeusMedia:Common.
  *
- *	Copyright (c) 2011 Christian Würker (ceusmedia.com)
+ *	Copyright (c) 2011-2016 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,18 +20,18 @@
  *	@category		cmFrameworks
  *	@package		Hydrogen.Environment.Resource.Database
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2011 Christian Würker
+ *	@copyright		2011-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.4
  *	@version		$Id$
  */
 /**
- *	Database resource using PDO wrapper from cmClasses.
+ *	Database resource using PDO extension of CeusMedia:Common.
  *	@category		cmFrameworks
  *	@package		Hydrogen.Environment.Resource.Database
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2011 Christian Würker
+ *	@copyright		2011-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.4
@@ -40,7 +40,7 @@
 class CMF_Hydrogen_Environment_Resource_Database_PDO extends Database_PDO_Connection
 {
 	protected $env;
-	
+
 	public function __construct( CMF_Hydrogen_Environment_Abstract $env ){
 		$this->env	= $env;
 		$this->setUp();
@@ -56,7 +56,7 @@ class CMF_Hydrogen_Environment_Resource_Database_PDO extends Database_PDO_Connec
 			return $this->env->getConfig()->get( 'module.resource_database.access.prefix' );		//  extract prefix from module configuration
 		return $this->env->getConfig()->get( 'database.prefix' );									//  extract prefix from main configuration
 	}
-	
+
 	/**
 	 *	Sets up connection to database, if configured with database module or main config (deprecated).
 	 *
@@ -76,8 +76,8 @@ class CMF_Hydrogen_Environment_Resource_Database_PDO extends Database_PDO_Connec
 		$config			= $this->env->getConfig();
 		if( $this->env->getModules()->has( 'Resource_Database' ) ){									//  module for database support is installed
 			extract( $config->getAll( 'module.resource_database.access.' ) );						//  extract connection access configuration
-			$logStatements	= $config->get( 'module.resource_database.log.statements' );			//  
-			$logErrors		= $config->get( 'module.resource_database.log.errors' );				//  
+			$logStatements	= $config->get( 'module.resource_database.log.statements' );			//
+			$logErrors		= $config->get( 'module.resource_database.log.errors' );				//
 			$options		= $config->getAll( 'module.resource_database.option.' );				//  get connection options
 		}
 		else{																						//  @deprecated	use database module instead
@@ -91,7 +91,7 @@ class CMF_Hydrogen_Environment_Resource_Database_PDO extends Database_PDO_Connec
 			$logErrors		= $config->get( 'database.log.errors' );
 			$options		= $config->getAll( 'database.option.' );
 		}
-		
+
 		if( empty( $driver ) )
 			throw new RuntimeException( 'Database driver must be set in config:database.driver' );
 
@@ -114,14 +114,14 @@ class CMF_Hydrogen_Environment_Resource_Database_PDO extends Database_PDO_Connec
 			'MYSQL_ATTR_INIT_COMMAND'		=> "SET NAMES 'utf8';",
 		);
 		$options	+= $defaultOptions;
-		
+
 		//  --  DATABASE OPTIONS  --  //
 		$driverOptions	= array();																	//  @todo: to be implemented
 		foreach( $options as $key => $value ){														//  iterate all database options
 			if( !defined( "PDO::".$key ) )															//  no PDO constant for for option key
 				throw new InvalidArgumentException( 'Unknown constant PDO::'.$key );				//  quit with exception
 			if( is_string( $value ) && preg_match( "/^[A-Z][A-Z0-9_:]+$/", $value ) )				//  option value is a constant name
-				$value	= constant( $value );														//  replace option value string by constant value 
+				$value	= constant( $value );														//  replace option value string by constant value
 			$driverOptions[constant( "PDO::".$key )]	= $value;									//  note option
 		}
 

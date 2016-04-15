@@ -2,7 +2,7 @@
 /**
  *	Editor for local module XML files.
  *
- *	Copyright (c) 2012 Christian Würker (ceusmedia.com)
+ *	Copyright (c) 2012-2016 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		cmFrameworks
  *	@package		Hydrogen.Environment.Resource.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2012 Christian Würker
+ *	@copyright		2012-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.6
@@ -31,7 +31,7 @@
  *	@category		cmFrameworks
  *	@package		Hydrogen.Environment.Resource.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2012 Christian Würker
+ *	@copyright		2012-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.6
@@ -41,7 +41,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Editor{
 
 	protected $path;
 	protected $nsXml	= 'http://www.w3.org/XML/1998/namespace';
-	
+
 	public function __construct( CMF_Hydrogen_Environment_Abstract $env ){
 		$this->path		= 'config/modules/';
 		if( $env->getConfig()->get( 'path.module.config' ) )
@@ -110,7 +110,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Editor{
 			$link->addAttribute( 'title', trim( addslashes( $title ) ) );							//  set title attribute
 		$this->saveModuleXml( $moduleId, $xml );													//  save modified module XML
 	}
-	
+
 	/**
 	 *	Adds a new configuration pair to module XML file.
 	 *	@access		public
@@ -150,7 +150,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Editor{
 	 */
 	public function addLink( $moduleId, $path, $label = NULL, $access = NULL, $language = NULL, $rank = NULL ){
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
-		$link		= $xml->addChild( 'link', (string) $label );									//  
+		$link		= $xml->addChild( 'link', (string) $label );									//
 		if( strlen( trim( $path ) ) )																//  path attribute is given
 			$link->addAttribute( 'path', trim( $path ) );											//  set path attribute
 		if( strlen( trim( $access ) ) )																//  access attribute is given
@@ -182,7 +182,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Editor{
 			$node->addAttribute( 'version-to', $versionTo );										//  set update target version
 		}
 		$this->saveModuleXml( $moduleId, $xml );													//  save modified module XML
-		
+
 	}
 
 	public function editLink( $moduleId, $number, $path, $link = NULL, $label = NULL, $access = NULL, $language = NULL, $rank = NULL ){
@@ -249,7 +249,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Editor{
 	public function removeFile( $moduleId, $type, $resource ){
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
 		if( !isset( $xml->files->$type ) )
-			throw new InvalidArgumentException( 'Invalid type: '.$type );	
+			throw new InvalidArgumentException( 'Invalid type: '.$type );
 		foreach( $xml->files->$type as $file ){
 			if( $file->getValue() == $resource ){
 				$file->remove();
@@ -259,7 +259,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Editor{
 		}
 		return FALSE;
 	}
-	
+
 	public function removeLink( $moduleId, $number ){
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
 		if( !isset( $xml->link[(int) $number] ) )
@@ -309,6 +309,6 @@ class CMF_Hydrogen_Environment_Resource_Module_Editor{
 		$xml	= XML_DOM_Formater::format( $xml->asXML(), TRUE );
 		return File_Writer::save( $moduleFile, $xml );
 	}
-	
+
 }
 ?>
