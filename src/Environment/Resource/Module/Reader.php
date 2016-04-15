@@ -114,16 +114,20 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 
 		foreach( $xml->license as $license ){
 			$source	= $license->hasAttribute( 'source' ) ? $license->getAttribute( 'source' ) : '';
+			$title	= $license->hasAttribute( 'title' ) ? $license->getAttribute( 'title' ) : '';
 			$obj->licenses[]	= (object) array(
 				'label'		=> (string) $license,
-				'source'	=> $source
+				'source'	=> $source,
+				'title'		=> $title,
 			);
 		}
 
 		foreach( $xml->company as $company ){
+			$email	= $company->hasAttribute( 'email' ) ? $company->getAttribute( 'email' ) : '';
 			$site	= $company->hasAttribute( 'site' ) ? $company->getAttribute( 'site' ) : '';
 			$obj->companies[]	= (object) array(
 				'name'		=> (string) $company,
+				'email'		=> $email,
 				'site'		=> $site
 			);
 		}
