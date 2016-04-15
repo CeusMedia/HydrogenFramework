@@ -2,7 +2,7 @@
 /**
  *	Handler for local modules.
  *
- *	Copyright (c) 2012 Christian Würker (ceusmedia.com)
+ *	Copyright (c) 2012-2016 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		cmFrameworks
  *	@package		Hydrogen.Environment.Resource.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2012 Christian Würker
+ *	@copyright		2012-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.6
@@ -31,7 +31,7 @@
  *	@category		cmFrameworks
  *	@package		Hydrogen.Environment.Resource.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2012 Christian Würker
+ *	@copyright		2012-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.6
@@ -42,7 +42,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Handler{
 	protected $modulesInstalled		= array();
 	protected $modulesAvailable		= array();
 	protected $sources				= array();
-	
+
 	public function __construct( CMF_Hydrogen_Environment_Abstract $env ){
 		$this->env		= $env;
 		$config			= $this->env->getConfig();
@@ -52,7 +52,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Handler{
 #			foreach( $model->getAll() as $source )
 #				$this->sources[$source->id]	= $source;
 #		}
-#		
+#
 		$this->path		= 'config/modules/';
 		if( $config->get( 'path.module.config' ) )
 			$this->path	= $config->get( 'path.module.config' );
@@ -84,11 +84,11 @@ class CMF_Hydrogen_Environment_Resource_Module_Handler{
 		$source	= $installed ? $this->modulesInstalled : $this->modulesAvailable;
 		return array_key_exists( $moduleId, $source );
 	}
-	
+
 	public function isAvailable( $moduleId ){
 		return array_key_exists( $moduleId, $this->modulesAvailable );
 	}
-	
+
 	public function isInstalled( $moduleId ){
 		return array_key_exists( $moduleId, $this->modulesInstalled );
 	}

@@ -4,7 +4,7 @@
  *	@category		cmFrameworks
  *	@package		Hydrogen.Environment.Resource
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2010-2012Ceus Media
+ *	@copyright		2010-2016 Ceus Media
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.6
@@ -15,7 +15,7 @@
  *	@category		cmFrameworks
  *	@package		Hydrogen.Environment.Resource
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2010-2012Ceus Media
+ *	@copyright		2010-2016 Ceus Media
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.6
@@ -78,7 +78,7 @@ class CMF_Hydrogen_Environment_Resource_LogicPool {
 	public function __unset( $key ){
 		return $this->remove( $key );
 	}
-	
+
 	/**
 	 *	Stores a logic object in pool by its pool key and class name.
 	 *	Please use register() to add logic classes with lazy construction.
@@ -107,7 +107,7 @@ class CMF_Hydrogen_Environment_Resource_LogicPool {
 			$this->set( $key, $object, TRUE );
 		}
 		return $this->pool[$key];
-		
+
 	}
 
 	/**
@@ -159,7 +159,7 @@ class CMF_Hydrogen_Environment_Resource_LogicPool {
 			throw new RuntimeException( 'No logic "'.$key.'" available' );
 		unset( $this->pool[$key] );
 	}
-	
+
 	/**
 	 *	Stores a logic object in pool by its pool key.
 	 *	Please use add() to all logic classes or use register() to add logic classes with lazy construction.

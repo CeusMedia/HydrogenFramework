@@ -5,7 +5,7 @@
  *	@category		cmFrameworks
  *	@package		Hydrogen.Environment.Resource
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2014 Christian Würker
+ *	@copyright		2007-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.7
@@ -45,7 +45,7 @@
  *	@category		cmFrameworks
  *	@package		Hydrogen.Environment.Resource
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2014 Christian Würker
+ *	@copyright		2007-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.7
