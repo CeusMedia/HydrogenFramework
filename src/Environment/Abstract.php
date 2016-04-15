@@ -319,28 +319,6 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$this->cache	= new CMF_Hydrogen_Environment_Resource_CacheDummy();
 		if( $this->modules )																		//  module support and modules available
 			$this->modules->callHook( 'Env', 'initCache', $this );									//  call related module event hooks
-/*		$cache	= NULL;
-		if( 0 && class_exists( 'CMM_SEA_Factory' ) ){
-			$factory	= new CMM_SEA_Factory();
-			$cache		= $factory->newStorage( 'Noop' );
-			if( $this->modules->has( 'Resource_Cache' ) ){
-				$config		= (object) $this->config->getAll( 'module.resource_cache.' );
-				$type		= $config->type;
-				$resource	= $config->resource ? $config->resource : NULL;
-				$context	= $config->context ? $config->context : NULL;
-				$expiration	= $config->expiration ? (int) $config->expiration : 0;
-
-				if( $type == 'PDO' ){
-					if( !$this->dbc )
-						throw new RuntimeException( 'A database connection is needed for PDO cache adapter' );
-					$resource	= array( $this->dbc, $this->dbc->getPrefix().$resource );
-				}
-				$cache	= $factory->newStorage( $type, $resource, $context, $expiration );
-			}
-		}
-		if( !$cache )
-			$cache	= new CMF_Hydrogen_Environment_Resource_CacheDummy();
-		$this->cache	= $cache;*/
 		$this->clock->profiler->tick( 'env: cache', 'Finished setup of cache' );
 	}
 
