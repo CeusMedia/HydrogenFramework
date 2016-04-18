@@ -144,6 +144,9 @@ class CMF_Hydrogen_Environment_Resource_Language
 	 */
 	public function getWords( $topic, $strict = TRUE, $force = TRUE )
 	{
+		if( !strlen( trim( $topic ) ) )
+			throw new InvalidArgumentException( "getWords: Topic cannot be empty" );
+			
 		if( !isset( $this->data[$topic] ) )
 			$this->load( $topic, $strict, $force );
 		if( isset( $this->data[$topic] ) )
@@ -206,6 +209,8 @@ class CMF_Hydrogen_Environment_Resource_Language
 	 */
 	public function load( $topic, $strict = FALSE, $force = FALSE )
 	{
+		if( !strlen( trim( $topic ) ) )
+			throw new InvalidArgumentException( "Topic cannot be empty" );
 		$this->env->clock->profiler->tick( 'Resource_Language::load('.$topic.')' );
 		$fileName	= $this->getFilenameOfLanguage( $topic );
 		$reader		= new FS_File_Reader($fileName);
@@ -234,8 +239,8 @@ class CMF_Hydrogen_Environment_Resource_Language
 		}
 		else
 		{
-			$message	= 'Invalid language file "'.$topic.' ('.$fileName.')"';
-			if( $strict )
+			$message	= 'Invalid language file "'.$topic.'" ('.$fileName.')';
+			if(  $strict )
 				throw new RuntimeException( $message, 221 );
 			if( $force )
 				$this->env->getMessenger()->noteFailure( $message );
