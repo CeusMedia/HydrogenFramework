@@ -145,7 +145,7 @@ class CMF_Hydrogen_Controller
 	 *	@return		void
 	 */
 	protected function getWords( $section = NULL, $topic = NULL ){
-		if( empty( $topic ) && $this->env->getLanguage()->hasWords( $this->controller ) )
+		if( empty( $topic ) /*&& $this->env->getLanguage()->hasWords( $this->controller ) */)
 			$topic = $this->controller;
 		if( empty( $section ) )
 			return $this->env->getLanguage()->getWords( $topic );
