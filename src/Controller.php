@@ -2,7 +2,7 @@
 /**
  *	Generic Controller Class of Framework Hydrogen.
  *
- *	Copyright (c) 2007-2012 Christian Würker (ceusmedia.com)
+ *	Copyright (c) 2007-2016 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		cmFrameworks
  *	@package		Hydrogen
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2012 Christian Würker
+ *	@copyright		2007-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.1
@@ -31,7 +31,7 @@
  *	@category		cmFrameworks
  *	@package		Hydrogen
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2012 Christian Würker
+ *	@copyright		2007-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.1
@@ -65,8 +65,11 @@ class CMF_Hydrogen_Controller
 
 	/**
 	 *	Constructor.
+	 *	Will set up related view class by default. Disable this for controllers without views.
+	 *	Calls __onInit() in the end.
 	 *	@access		public
 	 *	@param		CMF_Hydrogen_Environment_Abstract	$env			Application Environment Object
+	 *	@param		boolean								$setupView		Flag: auto create view object for controller (default: TRUE)
 	 *	@return		void
 	 */
 	public function __construct( CMF_Hydrogen_Environment_Abstract $env, $setupView = TRUE )
@@ -93,6 +96,11 @@ class CMF_Hydrogen_Controller
 	protected function addData( $key, $value, $topic = NULL )
 	{
 		return $this->view->setData( array( $key => $value ), $topic );
+	}
+
+	protected function callHook( $resource, $event, $context = NULL, $data = array() ){
+		$context	= $context ? $context : $this;
+		return $this->env->getCaptain()->callHook( $resource, $event, $context, $data );
 	}
 
 	/**
@@ -153,21 +161,33 @@ class CMF_Hydrogen_Controller
 	}
 
 	protected function handleJsonResponse( $status, $data, $httpStatusCode = NULL ){
-		$type	= NULL;
-		if( in_array( $status, array( TRUE, "data", "success", "succeeded" ) ) )
+		$type			= $status;
+		$httpStatusCode	= $httpStatusCode ? $httpStatusCode : 200;
+		if( in_array( $status, array( TRUE, "data", "success", "succeeded" ), TRUE ) )
 			$type	= "data";
-		else if( in_array( $status, array( FALSE, "error", "fail", "failed" ) ) )
+		else if( in_array( $status, array( FALSE, "error", "fail", "failed" ), TRUE ) )
 			$type	= "error";
 		$response	= (object) array(
+			'code'		=> $httpStatusCode,
 			'status'	=> $type,
 			'data'		=> $data,
 			'timestamp'	=> microtime( TRUE ),
 		);
 		$json	= json_encode( $response, JSON_PRETTY_PRINT );
-		header( "Content-Type: application/json" );
-		header( "Content-Length: ".strlen( $json ) );
-		print( $json );
+		if( headers_sent() ){
+			print( "Headers already sent." );
+		}
+		else{
+			header( "HTTP/1.1 ".$httpStatusCode." ".Net_HTTP_Status::getText( $httpStatusCode ) );
+			header( "Content-Type: application/json" );
+			header( "Content-Length: ".strlen( $json ) );
+			print( $json );
+		}
 		exit;
+	}
+
+	protected function handleJsonErrorResponse( $data, $httpStatusCode = NULL ){
+		$this->handleJsonResponse( 'error', $data, $httpStatusCode );
 	}
 
 	/**
@@ -240,8 +260,10 @@ class CMF_Hydrogen_Controller
 			$result	= $this->view->loadContent( $this->controller, $this->action, NULL, 'html/' );
 			$this->env->clock->profiler->tick( 'Controller::getView: loadContent' );
 		}
-		else
-			throw new Exception( 'Neither view template nor content file defined' );
+		else{
+			$message	= 'Neither view template nor content file defined for request path "%s/%s"';
+			throw new RuntimeException( sprintf( $message, $this->controller, $this->action ) );
+		}
 		$this->env->clock->profiler->tick( 'Controller::getView: done' );
 		return $result;
 	}
@@ -274,7 +296,7 @@ class CMF_Hydrogen_Controller
 	 *	@link		https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#3xx_Redirection HTTP status codes
 	 *	@todo		kriss: implement automatic lookout for "from" request parameter
 	 *	@todo		kriss: implement handling of FROM request parameter, see controller constants
-	 *	@todo		kriss: concept and implement anti-loop {@see http://dev.(ceusmedia.com)/cmKB/?MTI}
+	 *	@todo		kriss: concept and implement anti-loop {@see http://dev.(ceusmedia.de)/cmKB/?MTI}
 	 */
 	protected function restart( $uri, $withinModule = FALSE, $status = NULL, $allowForeignHost = FALSE, $modeFrom = 0 )
 	{
@@ -283,8 +305,8 @@ class CMF_Hydrogen_Controller
 			$base	= $this->env->getBaseUrl();														//  get application base URI
 			if( $withinModule ){																	//  redirection is within module
 				$controller	= $this->env->getRequest()->get( 'controller' );						//  get current controller
-				$base	.= $this->alias ? $this->alias : $controller;								//  
-				$base	.= strlen( $uri ) ? '/' : '';												//  
+				$base	.= $this->alias ? $this->alias : $controller;								//
+				$base	.= strlen( $uri ) ? '/' : '';												//
 			}
 		}
 		if( !$allowForeignHost ){																	//  redirect to foreign domain not allowed

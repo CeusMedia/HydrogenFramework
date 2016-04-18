@@ -2,7 +2,7 @@
 /**
  *	Setup for access control list using a Database.
  *
- *	Copyright (c) 2010 Christian Würker (ceusmedia.com)
+ *	Copyright (c) 2010-2016 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		cmFrameworks
  *	@package		Hydrogen.Environment.Resource.Acl
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2010-2012 Christian Würker
+ *	@copyright		2010-2016 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.3
@@ -33,7 +33,7 @@
  *	@package		Hydrogen.Environment.Resource.Acl
  *	@extends		CMF_Hydrogen_Environment_Resource_Acl_Abstract
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2010-2012 Christian Würker
+ *	@copyright		2010-2016 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.3

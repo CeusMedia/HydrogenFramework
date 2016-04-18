@@ -2,7 +2,7 @@
 /**
  *	Generic View Class of Framework Hydrogen.
  *
- *	Copyright (c) 2007-2015 Christian Würker (ceusmedia.com)
+ *	Copyright (c) 2007-2016 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		cmFrameworks
  *	@package		Hydrogen
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2015 Christian Würker
+ *	@copyright		2007-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.1
@@ -33,7 +33,7 @@
  *	@uses			UI_HTML_Elements
  *	@uses			Alg_Time_Converter
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2015 Christian Würker
+ *	@copyright		2007-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.1
@@ -328,6 +328,7 @@ class CMF_Hydrogen_View
 			catch( Exception $e ){
 				$message	= 'Rendering template file "%s" failed: %s';
 				$message	= sprintf( $message, $___templateUri, $e->getMessage() );
+				$this->env->getCaptain()->callHook( 'Server:System', 'logException', $this, $e );
 				throw new RuntimeException( $message, 0, $e  );
 			}
 			if( $content === FALSE )
@@ -417,6 +418,24 @@ class CMF_Hydrogen_View
 			$this->controller	= $this->env->getRequest()->get( 'controller' );
 			$this->action		= $this->env->getRequest()->get( 'action' );
 		}
+	}
+
+	/**
+	 *	Sets HTML page title from language file assigned by controller.
+	 *	Lets you select an language section and key and inserts given data.
+	 *	Can set a new page title or append or prepend to currently set title.
+	 *	Usage: Call this method in your view methods!
+	 *	@access		protected
+	 *	@param		string		$section		Section in language file of current controller
+	 *	@param		string		$key			Pair key in this section
+	 *	@param		array		$data			List of arguments to insert using sprintf
+	 *	@param		mixed		$mode			Concat mode: 0 - set | 1 - append, -1 - prepend
+	 *	@return		void
+	 */
+	protected function setPageTitle( $section = 'index', $key = 'title', $data = array(), $mode = 1 ){
+		$data	= $this->getData();
+		if( isset( $data['words'][$section][$key] ) )
+			$this->env->getPage()->setTitle( $data['words'][$section][$key], $mode );
 	}
 }
 ?>

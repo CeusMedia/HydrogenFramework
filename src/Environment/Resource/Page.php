@@ -2,7 +2,7 @@
 /**
  *	XHTML Page Resource of Framework Hydrogen.
  *
- *	Copyright (c) 2010-2012 Christian Würker (ceusmedia.com)
+ *	Copyright (c) 2010-2016 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		cmFrameworks
  *	@package		Hydrogen.Environment.Resource
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2010-2012 Christian Würker
+ *	@copyright		2010-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.1
@@ -31,7 +31,7 @@
  *	@category		cmFrameworks
  *	@package		Hydrogen.Environment.Resource
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2010-2012 Christian Würker
+ *	@copyright		2010-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.1
@@ -86,12 +86,12 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 			$this->bodyClasses[]	= trim( htmlentities( $class, ENT_QUOTES, 'UTF-8' ) );
 	}
 
-	public function addPrimerStyle( $fileName, $level = 'mid' ){
-		$this->css->primer->addUrl( $fileName, $level );
+	public function addPrimerStyle( $fileName, $level = 'mid', $attributes = array() ){
+		$this->css->primer->addUrl( $fileName, $level, $attributes );
 	}
 
-	public function addThemeStyle( $fileName, $level = 'mid' ){
-		$this->css->theme->addUrl( $fileName, $level );
+	public function addThemeStyle( $fileName, $level = 'mid', $attributes = array() ){
+		$this->css->theme->addUrl( $fileName, $level, $attributes );
 	}
 
 	/**
@@ -218,7 +218,7 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 				$classes[]	= $class;
 		$bodyAttributes['class']	= join( ' ', $classes );
 #		if( empty( $bodyAttributes['id'] ) )
-#			$bodyAttributes['id']	= 
+#			$bodyAttributes['id']	=
 		if( ( $modules = $this->env->getModules() ) )												//  get module handler resource if existing
 			$modules->callHook( 'App', 'respond', $this );											//  call related module event hooks
 		return parent::build( $bodyAttributes, $htmlAttributes );

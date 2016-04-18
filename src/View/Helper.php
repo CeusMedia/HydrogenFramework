@@ -2,7 +2,7 @@
 /**
  *	Interface for view helpers.
  *
- *	Copyright (c) 20010-2012 Christian Würker (ceusmedia.com)
+ *	Copyright (c) 20010-2016 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		cmFrameworks
  *	@package		Hydrogen.View
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2010-2012 Christian Würker
+ *	@copyright		2010-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.3
@@ -32,7 +32,7 @@
  *	@category		cmFrameworks
  *	@package		Hydrogen.View
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2010-2012 Christian Würker
+ *	@copyright		2010-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.3
@@ -43,5 +43,13 @@ interface CMF_Hydrogen_View_Helper
 	public function hasEnv();
 	public function needsEnv();
 	public function setEnv( CMF_Hydrogen_Environment $env );
+
+//	@todo 	kriss: see if this pattern (having render method) is realizable for all existing helpers
+//	public function render();
+//	public function __toString();
+
+//	@todo 	whats with __construct( $env ) for all helpers?
+//	@todo 	mind the idea of a "helper pool", like the logic pool
+
 }
 ?>

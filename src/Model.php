@@ -2,7 +2,7 @@
 /**
  *	Generic Model Class of Framework Hydrogen.
  *
- *	Copyright (c) 2007-2014 Christian Würker (ceusmedia.com)
+ *	Copyright (c) 2007-2016 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		cmFrameworks
  *	@package		Hydrogen
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2014 Christian Würker
+ *	@copyright		2007-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.1
@@ -32,7 +32,7 @@
  *	@package		Hydrogen
  *	@uses			Database_PDO_TableWriter
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2014 Christian Würker
+ *	@copyright		2007-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.1
@@ -326,6 +326,15 @@ class CMF_Hydrogen_Model
 	 */
 	public function getColumns(){
 		return $this->table->getColumns();
+	}
+
+	/**
+	 *	Returns list of table index columns.
+	 *	@access		public
+	 *	@return		array
+	 */
+	public function getIndices(){
+		return $this->table->getIndices();
 	}
 
 	public function getLastQuery(){

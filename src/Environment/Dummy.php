@@ -2,7 +2,7 @@
 /**
  *	Empty environment for remote dummy use.
  *
- *	Copyright (c) 2012 Christian Würker (ceusmedia.com)
+ *	Copyright (c) 2012-2016 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		cmFrameworks
  *	@package		Hydrogen.Environment
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2012 Christian Würker
+ *	@copyright		2012-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.1
@@ -32,7 +32,7 @@
  *	@package		Hydrogen.Environment
  *	@extends		CMF_Hydrogen_Environment_Abstract
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2012 Christian Würker
+ *	@copyright		2012-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.1
@@ -41,7 +41,7 @@
 class CMF_Hydrogen_Environment_Dummy extends CMF_Hydrogen_Environment_Abstract {
 
 	public $hasDatabase		= FALSE;
-	
+
 	public function __construct( $options ){
 		$this->options	= $options;
 		$this->path			= isset( $options['pathApp'] ) ? $options['pathApp'] : getCwd().'/';

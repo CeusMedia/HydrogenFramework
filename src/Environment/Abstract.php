@@ -2,7 +2,7 @@
 /**
  *	Setup for Resource Environment for Hydrogen Applications.
  *
- *	Copyright (c) 2007-2012 Christian Würker (ceusmedia.com)
+ *	Copyright (c) 2007-2016 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		cmFrameworks
  *	@package		Hydrogen.Environment.Resource
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2012 Christian Würker
+ *	@copyright		2007-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.1
@@ -35,7 +35,7 @@
  *	@implements		ArrayAccess
  *	@uses			ADT_List_Dictionary
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2012 Christian Würker
+ *	@copyright		2007-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.1
@@ -105,6 +105,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$this->initModules();																		//  setup module support
 		$this->initDatabase();																		//  setup database connection
 		$this->initCache();																			//  setup cache support
+		$this->initLog();																			//  setup clock
 		if( !$isFinal )
 			return;
 		$this->modules->callHook( 'Env', 'constructEnd', $this );									//  call module hooks for end of env construction
@@ -135,7 +136,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$resources	= array(																		//  list of resource handler member names, namely of ...
 			'config',																				//  ... base application configuration handler
 			'clock',																				//  ... internal clock handler
-			'logic',																				//  ... logic handler 
+			'logic',																				//  ... logic handler
 			'modules',																				//  ... module handler
 			'dbc',																					//  ... database handler
 			'cache',																				//  ... cache handler
@@ -223,10 +224,10 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		return $this->disclosure;
 	}
 
-#	public function getLog()
-#	{
-#		return $this->log;
-#	}
+	public function getLog()
+	{
+		return $this->log;
+	}
 
 	/**
 	 *	Returns Logic Pool Object.
@@ -281,67 +282,56 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	 *	- CMF_Hydrogen_Environment_Resource_Acl_Server
 	 *	@access		protected
 	 *	@return		void
+	 *	@todo		remove support for old repo and modules
+	 *	@todo		remove support for old public links of discontinued ACL module
 	 */
 	protected function initAcl()
 	{
 		$config		= $this->getConfig();
 		$type		= 'CMF_Hydrogen_Environment_Resource_Acl_AllPublic';
-		if( $config->get( 'module.roles' ) ){
-			if( !( $type = $config->get( 'module.roles.acl' ) ) )
-				$type	= 'CMF_Hydrogen_Environment_Resource_Acl_Database';
+
+		//  @deprecated		to be removed
+		//  @todo			remove this support for old repo and modules
+		if( $config->get( 'module.roles' ) ){													//  check for roles module @deprected
+			if( !( $type = $config->get( 'module.roles.acl' ) ) )								//  take ACL class from module config
+				$type	= 'CMF_Hydrogen_Environment_Resource_Acl_Database';						//  otherwise apply database ACL
 		}
-		else if( $config->get( 'module.resource_users' ) ){
-			if( !( $type == $config->get( 'module.resource_users.acl' ) ) )
-				$type	= 'CMF_Hydrogen_Environment_Resource_Acl_Database';
+
+		if( $config->get( 'module.resource_authentication' ) ){									//  check for authentication module
+			if( !( $type == $config->get( 'module.resource_users.acl' ) ) )						//  take ACL class from module config
+				$type	= 'CMF_Hydrogen_Environment_Resource_Acl_Database';						//  otherwise apply database ACL
 		}
 
 		$this->acl	= Alg_Object_Factory::createObject( $type, array( $this ) );
 		$this->acl->roleAccessNone	= 0;
 		$this->acl->roleAccessFull	= 128;
 
+		//  @deprecated		module "ACL" is not existing anymore, modules are providing public links by configuration
+		//	@todo			remove this support and check replacement in all modules
 		$this->acl->setPublicLinks( explode( ',', $config->get( 'module.acl.public' ) ) );
 		$this->acl->setPublicInsideLinks( explode( ',', $config->get( 'module.acl.inside' ) ) );
 		$this->acl->setPublicOutsideLinks( explode( ',', $config->get( 'module.acl.outside' ) ) );
-		$this->clock->profiler->tick( 'env: acl' );
+
+		$this->clock->profiler->tick( 'env: acl', 'Finished setup of access control list.' );
 	}
 
 	protected function initCache(){
 		$this->cache	= new CMF_Hydrogen_Environment_Resource_CacheDummy();
 		if( $this->modules )																		//  module support and modules available
 			$this->modules->callHook( 'Env', 'initCache', $this );									//  call related module event hooks
-/*		$cache	= NULL;
-		if( 0 && class_exists( 'CMM_SEA_Factory' ) ){
-			$factory	= new CMM_SEA_Factory();
-			$cache		= $factory->newStorage( 'Noop' );
-			if( $this->modules->has( 'Resource_Cache' ) ){
-				$config		= (object) $this->config->getAll( 'module.resource_cache.' );
-				$type		= $config->type;
-				$resource	= $config->resource ? $config->resource : NULL;
-				$context	= $config->context ? $config->context : NULL;
-				$expiration	= $config->expiration ? (int) $config->expiration : 0;
-
-				if( $type == 'PDO' ){
-					if( !$this->dbc )
-						throw new RuntimeException( 'A database connection is needed for PDO cache adapter' );
-					$resource	= array( $this->dbc, $this->dbc->getPrefix().$resource );
-				}
-				$cache	= $factory->newStorage( $type, $resource, $context, $expiration );
-			}
-		}
-		if( !$cache )
-			$cache	= new CMF_Hydrogen_Environment_Resource_CacheDummy();
-		$this->cache	= $cache;
-		$this->clock->profiler->tick( 'env: cache' );*/
+		$this->clock->profiler->tick( 'env: cache', 'Finished setup of cache' );
 	}
 
 	protected function initCaptain(){
 		$this->captain	= new CMF_Hydrogen_Environment_Resource_Captain( $this );
+		$this->clock->profiler->tick( 'env: captain', 'Finished setup of event handler.' );
 	}
 
 	protected function initClock()
 	{
 		$this->clock	= new Alg_Time_Clock();
 		$this->clock->profiler	= new CMF_Hydrogen_Environment_Resource_Profiler();
+		$this->clock->profiler->tick( 'env: clock', 'Finished setup of profiler.' );
 	}
 
 	/**
@@ -382,7 +372,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$this->config	= new ADT_List_Dictionary( $data );											//  create dictionary from array
 		if( $this->config->has( 'config.error.reporting' ) )										//  error reporting is defined
 			error_reporting( $this->config->get( 'config.error.reporting' ) );						//  set error reporting level
-		$this->clock->profiler->tick( 'env: config' );
+		$this->clock->profiler->tick( 'env: config', 'Finished setup of base app configuration.' );
 	}
 
 	/**
@@ -393,17 +383,11 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	 */
 	protected function initDatabase()
 	{
-		$hasModule	= $this->getModules()->has( 'Resource_Database' );								//  module for database connection is enabled
-		$hasConfig	= $this->config->get( 'database.driver' );										//  database connection is configured in main config (deprecated)
-		if( $hasModule || $hasConfig ){																//  database connection has been configured
-			if( $hasModule && class_exists( 'Resource_Database' ) )
-				$this->dbc	= new Resource_Database( $this );										//  try to configure and connect database
-//			else																					//  @deprecated
-//				$this->dbc	= new CMF_Hydrogen_Environment_Resource_Database_PDO( $this );			//  try to configure and connect database
-		}
-		if( $this->modules )
-			$this->modules->callHook( 'Database', 'init', $this->dbc );
-		$this->clock->profiler->tick( 'env: database' );
+		if( !$this->modules || !$this->getModules()->has( 'Resource_Database' ) )					//  database module is not available
+			return;
+		$this->dbc	= new Resource_Database( $this );												//  try to configure and connect database
+		$this->modules->callHook( 'Database', 'init', $this->dbc );									//  call events hooked to database init
+		$this->clock->profiler->tick( 'env: database', 'Finished setup of database connection.' );
 	}
 
 	protected function initDisclosure()
@@ -412,16 +396,16 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$disclosure	= new CMF_Hydrogen_Environment_Resource_Disclosure( array() );
 		$this->disclosure	= $disclosure->reflect( 'classes/Controller/', array( 'classPrefix' => 'Controller_' ) );
 //	remark( $clock->stop() );
-		$this->clock->profiler->tick( 'env: disclosure' );
+		$this->clock->profiler->tick( 'env: disclosure', 'Finished setup of self disclosure handler.' );
 	}
 
-#	protected function initLog(){
-#		$this->log	= CMF_Hydrogen_Environment_Resource_Log( $this );
-#	}
-	protected function initLogic()
-	{
+	protected function initLog(){
+		$this->log	= new CMF_Hydrogen_Environment_Resource_Log( $this );
+	}
+
+	protected function initLogic(){
 		$this->logic		= new CMF_Hydrogen_Environment_Resource_LogicPool( $this );
-		$this->clock->profiler->tick( 'env: logic' );
+		$this->clock->profiler->tick( 'env: logic', 'Finished setup of logic pool.' );
 	}
 
 	protected function initModules(){
@@ -441,7 +425,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 					$this->config->set( $prefix.'.'.$key, $value->value );							//	set configuration pair
 				}
 				else																				//  legacy @todo remove
-					$this->config->set( $prefix.'.'.$key, $value );									//  
+					$this->config->set( $prefix.'.'.$key, $value );									//
 			}
 
 			foreach( $module->links as $link ){														//  iterate module links
@@ -456,7 +440,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		if( !( $this instanceof CMF_Hydrogen_Environment_Remote ) )
 			$this->modules->callHook( 'Env', 'initModules', $this );								//  call related module event hooks
 		$this->config->set( 'module.acl.public', implode( ',', array_unique( $public ) ) );			//  save public link list
-		$this->clock->profiler->tick( 'env: modules' );
+		$this->clock->profiler->tick( 'env: modules', 'Finished setup of modules.' );
 	}
 
 	public function offsetExists( $key )

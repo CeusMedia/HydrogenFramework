@@ -2,7 +2,7 @@
 /**
  *	Reader for local module XML files.
  *
- *	Copyright (c) 2012 Christian Würker (ceusmedia.com)
+ *	Copyright (c) 2012-2016 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		cmFrameworks
  *	@package		Hydrogen.Environment.Resource.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2012 Christian Würker
+ *	@copyright		2012-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.6
@@ -31,7 +31,7 @@
  *	@category		cmFrameworks
  *	@package		Hydrogen.Environment.Resource.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2012 Christian Würker
+ *	@copyright		2012-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			http://code.google.com/p/cmframeworks/
  *	@since			0.6
@@ -114,16 +114,20 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 
 		foreach( $xml->license as $license ){
 			$source	= $license->hasAttribute( 'source' ) ? $license->getAttribute( 'source' ) : '';
+			$title	= $license->hasAttribute( 'title' ) ? $license->getAttribute( 'title' ) : '';
 			$obj->licenses[]	= (object) array(
 				'label'		=> (string) $license,
-				'source'	=> $source
+				'source'	=> $source,
+				'title'		=> $title,
 			);
 		}
 
 		foreach( $xml->company as $company ){
+			$email	= $company->hasAttribute( 'email' ) ? $company->getAttribute( 'email' ) : '';
 			$site	= $company->hasAttribute( 'site' ) ? $company->getAttribute( 'site' ) : '';
 			$obj->companies[]	= (object) array(
 				'name'		=> (string) $company,
+				'email'		=> $email,
 				'site'		=> $site
 			);
 		}
