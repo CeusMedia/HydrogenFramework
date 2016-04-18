@@ -93,6 +93,8 @@ class CMF_Hydrogen_View
 			$this->tea->setCachePath( 'tmp/cache/templates/' );
 			$this->tea->setCompilePath( 'tmp/cache/templates_c/' );
 		}*/
+//		$this->env->getMessenger()->noteNotice( "View::Construct: ".get_class( $this ) );
+		$this->env->getCaptain()->callHook( 'View', 'onConstruct', $this, array() );
 		$this->__onInit();
 	}
 
@@ -108,7 +110,7 @@ class CMF_Hydrogen_View
 		return $this->setData( array( $key => $value ), $topic );
 	}
 
-	protected function addHelper( $name, $object, $parameters = array() )
+	public function addHelper( $name, $object, $parameters = array() )
 	{
 		if( is_object( $object ) )
 		{
@@ -135,7 +137,20 @@ class CMF_Hydrogen_View
 			$this->addData( $key, $autoSetTo );
 		if( isset( $this->data[$key] ) )
 			return $this->data[$key];
-		throw new InvalidArgumentException( 'View data for key "'.htmlentities( $key, ENT_QUOTES, 'UTF-8' ).'" is not set' );
+		throw new InvalidArgumentException( 'No view data by key "'.htmlentities( $key, ENT_QUOTES, 'UTF-8' ).'"' );
+	}
+
+	public function getHelper( $name, $strict = TRUE )
+	{
+		if( isset( $this->helpers[$name] ) )
+			return $this->helpers[$name];
+		if( !$strict )
+			return NULL;
+		throw new InvalidArgumentException( 'No view helper set by name "'.htmlentities( $name, ENT_QUOTES, 'UTF-8' ).'"' );
+	}
+
+	public function getHelpers(){
+		return $helpers;
 	}
 
 	protected function getTemplateUri( $controller, $action )
@@ -165,7 +180,7 @@ class CMF_Hydrogen_View
 	 *	@return		void
 	 */
 	protected function getWords( $section = NULL, $topic = NULL ){
-		if( empty( $topic ) && $this->env->getLanguage()->hasWords( $this->controller ) )
+		if( empty( $topic ) /*&& $this->env->getLanguage()->hasWords( $this->controller ) */)
 			$topic = $this->controller;
 		if( empty( $section ) )
 			return $this->env->getLanguage()->getWords( $topic );
@@ -187,6 +202,11 @@ class CMF_Hydrogen_View
 	public function hasData( $key )
 	{
 		return isset( $this->data[$key] );
+	}
+
+	public function hasHelper( $name )
+	{
+		return isset( $this->helpers[$name] );
 	}
 
 	public function hasTemplate( $controller, $action )
