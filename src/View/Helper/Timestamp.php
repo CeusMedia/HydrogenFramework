@@ -92,9 +92,13 @@ class CMF_Hydrogen_View_Helper_Timestamp extends CMF_Hydrogen_View_Helper_Abstra
 	public function toPhrase( $env, $html = FALSE, $languageTopic = 'main', $languageSection = 'phrases-time' ){
 		if( !$this->timestamp )
 			return '-';
-		$phraser	= new CMF_Hydrogen_View_Helper_DurationPhraser( $env );
-		$phraser->setLanguage( $languageTopic, $languageSection );
-		$phrase		= $phraser->getFromTimestamp( $this->timestamp );
+
+		$words	= $env->language->getWords( $languageTopic );
+		if( !isset( $words[$languageSection] ) )
+			throw new InvalidArgumentException( 'Invalid language section "'.$languageSection.'" in topic "'.$languageTopic.'"' );
+		$phraser	= new Alg_Time_DurationPhraser( $words[$languageSection] );
+		$phrase		= $phraser->getPhraseFromTimestamp( $this->timestamp );
+
 		if( $html ){
 			$attr		= array( 'class' => 'phrase' );
 			$datetime	= $this->toDatetime();
