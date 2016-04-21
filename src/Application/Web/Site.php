@@ -123,12 +123,16 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 					return $result;
 			}
 			else if( $this->env->getRequest()->has( 'showException' ) ){							//  @todo: kriss: you need to secure this view by a configurable run mode etc.
-				UI_HTML_Exception_Page::display( $e );
-				exit;
+				$this->env->getResponse()->setBody( UI_HTML_Exception_Page::render( $e ) );			//  fill response with exception page
+				$this->env->getResponse()->setStatus( 500 );										//  indicate HTTP status 500 - internal server error
+				$this->env->getResponse()->send();													//  send response
+				exit;																				//  and quit
 			}
-			else if( !$this->env->getMessenger() )
-				throw $e;
-			$this->env->getMessenger()->noteFailure( $e->getMessage() );
+			else if( $this->env->getMessenger() ){
+				$this->env->getMessenger()->noteFailure( $e->getMessage() );						//  fill messenger with exception message
+				$this->env->getResponse()->setStatus( 500 );										//  indicate HTTP status 500 - internal server error
+			}
+			throw new RuntimeException( "Unhandled exception: ".$e->getMessage(), 0, $e );			//  last call: throw exception with unhandled exception nested
 		}
 	}
 
@@ -147,7 +151,7 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 			return $content;																		//  deliver content only
 
 		$data		 = array(
-			'page'			=> $this->env->getPage(),												//  HTML 
+			'page'			=> $this->env->getPage(),												//  HTML
 			'config'		=> $this->env->getConfig(),												//  configuration object
 			'request'		=> $request,											//  request object
 			'content'		=> $content,															//  rendered response page view content
