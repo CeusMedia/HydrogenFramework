@@ -153,7 +153,7 @@ class CMF_Hydrogen_Controller
 	 *	@return		void
 	 */
 	protected function getWords( $section = NULL, $topic = NULL ){
-		if( empty( $topic ) /*&& $this->env->getLanguage()->hasWords( $this->controller ) */)
+		if( empty( $topic ) && $this->env->getLanguage()->hasWords( $this->controller ) )
 			$topic = $this->controller;
 		if( empty( $section ) )
 			return $this->env->getLanguage()->getWords( $topic );
@@ -377,7 +377,7 @@ class CMF_Hydrogen_Controller
 		$this->env			= $env;
 		$this->controller	= $env->getRequest()->get( 'controller' );
 		$this->action		= $env->getRequest()->get( 'action' );
-		if( $this->env->has( 'language' ) )
+		if( $this->env->has( 'language' ) && $this->controller )
 		{
 			$language	= $this->env->getLanguage();
 			$language->load( $this->controller, FALSE, FALSE );
