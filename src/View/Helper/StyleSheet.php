@@ -218,7 +218,7 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 				$list	= array();
 				foreach( $urls as $url ){
 					if( $this->revision )
-						$url	.= '?r'.$this->revision;
+						$url[0]	.= '?r'.$this->revision;
 					$attributes	= array(
 						'rel'		=> 'stylesheet',
 						'type'		=> 'text/css',
