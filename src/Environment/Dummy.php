@@ -17,26 +17,22 @@
  *	You should have received a copy of the GNU General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *	@category		cmFrameworks
- *	@package		Hydrogen.Environment
+ *	@category		Library
+ *	@package		CeusMedia.HydrogenFramework.Environment
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2012-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
- *	@link			http://code.google.com/p/cmframeworks/
- *	@since			0.1
- *	@version		$Id$
+ *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
 /**
  *	Empty environment for remote dummy use.
- *	@category		cmFrameworks
- *	@package		Hydrogen.Environment
+ *	@category		Library
+ *	@package		CeusMedia.HydrogenFramework.Environment
  *	@extends		CMF_Hydrogen_Environment_Abstract
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2012-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
- *	@link			http://code.google.com/p/cmframeworks/
- *	@since			0.1
- *	@version		$Id$
+ *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
 class CMF_Hydrogen_Environment_Dummy extends CMF_Hydrogen_Environment_Abstract {
 

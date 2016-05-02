@@ -17,29 +17,25 @@
  *	You should have received a copy of the GNU General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *	@category		cmFrameworks
- *	@package		Hydrogen.Environment.Resource.Server
+ *	@category		Library
+ *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Server
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2010-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
- *	@link			http://code.google.com/p/cmframeworks/
- *	@since			0.3
- *	@version		$Id$
+ *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
 /**
  *	Resource to communicate with chat server.
- *	@category		cmFrameworks
- *	@package		Hydrogen.Environment.Resource.Server
+ *	@category		Library
+ *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Server
  *	@uses			Net_Reader
  *	@uses			Net_CURL
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2010-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
- *	@link			http://code.google.com/p/cmframeworks/
- *	@since			0.3
- *	@version		$Id$
+ *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@deprecated		use module Resource:Server:JSON instead
- *	@todo			to be deleted 
+ *	@todo			to be deleted
  */
 class CMF_Hydrogen_Environment_Resource_Server_Json {
 

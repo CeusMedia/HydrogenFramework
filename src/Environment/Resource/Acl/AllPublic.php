@@ -17,27 +17,23 @@
  *	You should have received a copy of the GNU General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *	@category		cmFrameworks
- *	@package		Hydrogen.Environment.Resource.Acl
+ *	@category		Library
+ *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Acl
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2010-2016 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
- *	@link			http://code.google.com/p/cmframeworks/
- *	@since			01.03.2012
- *	@version		$Id$
+ *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
 /**
  *	Setup for access control list using a Database.
  *
- *	@category		cmFrameworks
- *	@package		Hydrogen.Environment.Resource.Acl
+ *	@category		Library
+ *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Acl
  *	@extends		CMF_Hydrogen_Environment_Resource_Acl_Abstract
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2010-2016 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
- *	@link			http://code.google.com/p/cmframeworks/
- *	@since			01.03.2012
- *	@version		$Id$
+ *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
 class CMF_Hydrogen_Environment_Resource_Acl_AllPublic extends CMF_Hydrogen_Environment_Resource_Acl_Abstract
 {

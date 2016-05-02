@@ -17,25 +17,21 @@
  *	You should have received a copy of the GNU General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *	@category		cmFrameworks
- *	@package		Hydrogen.Environment.Resource.Database
+ *	@category		Library
+ *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Database
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2011-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
- *	@link			http://code.google.com/p/cmframeworks/
- *	@since			0.4
- *	@version		$Id$
+ *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
 /**
  *	Database resource using PDO extension of CeusMedia:Common.
- *	@category		cmFrameworks
- *	@package		Hydrogen.Environment.Resource.Database
+ *	@category		Library
+ *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Database
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2011-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
- *	@link			http://code.google.com/p/cmframeworks/
- *	@since			0.4
- *	@version		$Id$
+ *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
 class CMF_Hydrogen_Environment_Resource_Database_PDO extends Database_PDO_Connection
 {

@@ -2,14 +2,12 @@
 /**
  *	Handler to call event for registered hooks.
  *
- *	@category		cmFrameworks
- *	@package		Hydrogen.Environment.Resource
+ *	@category		Library
+ *	@package		CeusMedia.HydrogenFramework.Environment.Resource
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2007-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
- *	@link			http://code.google.com/p/cmframeworks/
- *	@since			0.7
- *	@version		$Id$
+ *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
 /**
  *	The Captain is giving orders, depending on the changes of the situation.
@@ -42,14 +40,12 @@
  *	So, the module Manage:Customer:Project is able to append its tab to the given view of module
  *  Manage:Customer, which is now able to include the projects tab while showing a customer.
  *
- *	@category		cmFrameworks
- *	@package		Hydrogen.Environment.Resource
+ *	@category		Library
+ *	@package		CeusMedia.HydrogenFramework.Environment.Resource
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2007-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
- *	@link			http://code.google.com/p/cmframeworks/
- *	@since			0.7
- *	@version		$Id$
+ *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			code documentation
  */
 class CMF_Hydrogen_Environment_Resource_Captain {

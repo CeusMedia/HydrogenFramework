@@ -17,26 +17,22 @@
  *	You should have received a copy of the GNU General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *	@category		cmFrameworks
- *	@package		Hydrogen.Application.Web
+ *	@category		Library
+ *	@package		CeusMedia.HydrogenFramework.Application.Web
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2007-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
- *	@link			http://code.google.com/p/cmframeworks/
- *	@since			0.1
- *	@version		$Id$
+ *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
 /**
  *	Base application class for Hydrogen application.
- *	@category		cmFrameworks
- *	@package		Hydrogen.Application.Web
+ *	@category		Library
+ *	@package		CeusMedia.HydrogenFramework.Application.Web
  *	@uses			Alg_Object_Factory
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2007-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
- *	@link			http://code.google.com/p/cmframeworks/
- *	@since			0.1
- *	@version		$Id$
+ *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			Code Documentation
  */
 abstract class CMF_Hydrogen_Application_Abstract{
@@ -88,7 +84,7 @@ abstract class CMF_Hydrogen_Application_Abstract{
 	protected function reportMissingModules( $modules ){
 		print( 'Missing modules: '.join( ', ', $modules ) );
 	}
-	
+
 	abstract public function run();
 }
 ?>

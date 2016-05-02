@@ -17,28 +17,24 @@
  *	You should have received a copy of the GNU General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *	@category		cmFrameworks
- *	@package		Hydrogen.View.Helper.Navigation
+ *	@category		Library
+ *	@package		CeusMedia.HydrogenFramework.View.Helper.Navigation
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2012-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
- *	@link			http://code.google.com/p/cmframeworks/
- *	@since			0.6
- *	@version		$Id$
+ *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
 /**
  *	View helper to render a tab navigation from defined module page links.
  *
- *	@category		cmFrameworks
- *	@package		Hydrogen.View.Helper.Navigation
+ *	@category		Library
+ *	@package		CeusMedia.HydrogenFramework.View.Helper.Navigation
  *	@extends		CMF_Hydrogen_View_Helper_Navigation_SingleList
  *	@uses			UI_HTML_Tag
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2012-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
- *	@link			http://code.google.com/p/cmframeworks/
- *	@since			0.6
- *	@version		$Id$
+ *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
 class CMF_Hydrogen_View_Helper_Navigation_SingleAutoTabs extends CMF_Hydrogen_View_Helper_Navigation_SingleList{
 

@@ -17,28 +17,24 @@
  *	You should have received a copy of the GNU General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *	@category		cmFrameworks
- *	@package		Hydrogen.Dispatcher
+ *	@category		Library
+ *	@package		CeusMedia.HydrogenFramework.Dispatcher
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2007-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
- *	@link			http://code.google.com/p/cmframeworks/
- *	@since			0.1
- *	@version		$Id$
+ *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
 /**
  *	Generic Main Class of Framework Hydrogen
- *	@category		cmFrameworks
- *	@package		Hydrogen.Dispatcher
+ *	@category		Library
+ *	@package		CeusMedia.HydrogenFramework.Dispatcher
  *	@uses			RuntimeException
  *	@uses			ReflectionMethod
  *	@uses			Alg_Object_Factory
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2007-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
- *	@link			http://code.google.com/p/cmframeworks/
- *	@since			0.1
- *	@version		$Id$
+ *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			Code Documentation
  */
 class CMF_Hydrogen_Dispatcher_General

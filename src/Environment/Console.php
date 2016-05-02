@@ -1,4 +1,22 @@
 <?php
+/**
+ *	...
+ *	@category		Library
+ *	@package		CeusMedia.HydrogenFramework.Environment
+ *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
+ *	@copyright		2010-2016 Ceus Media
+ *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@link			https://github.com/CeusMedia/HydrogenFramework
+ */
+/**
+ *	...
+ *	@category		Library
+ *	@package		CeusMedia.HydrogenFramework.Environment
+ *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
+ *	@copyright		2010-2016 Ceus Media
+ *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@link			https://github.com/CeusMedia/HydrogenFramework
+ */
 class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment_Abstract{
 
 	/**	@var	Console_RequestReceiver		$request	Console Request Object */
@@ -23,7 +41,7 @@ class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment_Abstract
 #			$this->initResponse();																	//  setup HTTP response handler
 #			$this->initRouter();																	//  setup request router
 			$this->initLanguage();																	//  setup language support
-#			$this->initPage();																		//  
+#			$this->initPage();																		//
 			$this->initAcl();
 		}
 		catch( Exception $e )

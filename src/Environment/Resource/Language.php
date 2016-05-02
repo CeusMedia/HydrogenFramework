@@ -17,25 +17,21 @@
  *	You should have received a copy of the GNU General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *	@category		cmFrameworks
- *	@package		Hydrogen.Environment.Resource
+ *	@category		Library
+ *	@package		CeusMedia.HydrogenFramework.Environment.Resource
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2007-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
- *	@link			http://code.google.com/p/cmframeworks/
- *	@since			0.1
- *	@version		$Id$
+ *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
 /**
  *	Language Class of Framework Hydrogen.
- *	@category		cmFrameworks
- *	@package		Hydrogen.Environment.Resource
+ *	@category		Library
+ *	@package		CeusMedia.HydrogenFramework.Environment.Resource
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2007-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
- *	@link			http://code.google.com/p/cmframeworks/
- *	@since			0.1
- *	@version		$Id$
+ *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
 class CMF_Hydrogen_Environment_Resource_Language
 {
@@ -49,7 +45,7 @@ class CMF_Hydrogen_Environment_Resource_Language
 	protected $language;
 	/**	@var		array								$languages		List of allowed Languages */
 	protected $languages								= array();
-	
+
 	/**
 	 *	Constructor.
 	 *	Uses config::path.locales and defaults to 'locales/'.
@@ -132,7 +128,7 @@ class CMF_Hydrogen_Environment_Resource_Language
 	{
 		return $this->languages;
 	}
-	
+
 	/**
 	 *	Returns array of language sections within a language topic.
 	 *	@access		public
@@ -146,12 +142,12 @@ class CMF_Hydrogen_Environment_Resource_Language
 	{
 		if( !strlen( trim( $topic ) ) )
 			throw new InvalidArgumentException( "getWords: Topic cannot be empty" );
-			
+
 		if( !isset( $this->data[$topic] ) )
 			$this->load( $topic, $strict, $force );
 		if( isset( $this->data[$topic] ) )
 			return $this->data[$topic];
-		
+
 		$message	= 'Invalid language topic "'.$topic.'"';
 		if( $strict )
 			throw new RuntimeException( $message, 221 );
@@ -196,7 +192,7 @@ class CMF_Hydrogen_Environment_Resource_Language
 	 */
 	protected function getFilenameOfLanguage( $topic )
 	{
-		return $this->filePath.$this->language."/".$topic.".ini";	
+		return $this->filePath.$this->language."/".$topic.".ini";
 	}
 
 	/**

@@ -17,26 +17,22 @@
  *	You should have received a copy of the GNU General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *	@category		cmFrameworks
- *	@package		Hydrogen.View
+ *	@category		Library
+ *	@package		CeusMedia.HydrogenFramework.View
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2010-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
- *	@link			http://code.google.com/p/cmframeworks/
- *	@since			0.3
- *	@version		$Id$
+ *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
 /**
  *	Interface for view helpers.
  *
- *	@category		cmFrameworks
- *	@package		Hydrogen.View
+ *	@category		Library
+ *	@package		CeusMedia.HydrogenFramework.View
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2010-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
- *	@link			http://code.google.com/p/cmframeworks/
- *	@since			0.3
- *	@version		$Id$
+ *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
 interface CMF_Hydrogen_View_Helper
 {

@@ -17,25 +17,21 @@
  *	You should have received a copy of the GNU General Public License
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *	@category		cmFrameworks
- *	@package		Hydrogen.View.Helper
+ *	@category		Library
+ *	@package		CeusMedia.HydrogenFramework.View.Helper
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2010-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
- *	@link			http://code.google.com/p/cmframeworks/
- *	@since			0.1
- *	@version		$Id$
+ *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
 /**
  *	Component to collect and combine StyleSheet.
- *	@category		cmFrameworks
- *	@package		Hydrogen.View.Helper
+ *	@category		Library
+ *	@package		CeusMedia.HydrogenFramework.View.Helper
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2010-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
- *	@link			http://code.google.com/p/cmframeworks/
- *	@since			0.1
- *	@version		$Id$
+ *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
 class CMF_Hydrogen_View_Helper_StyleSheet{
 
