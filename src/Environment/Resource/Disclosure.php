@@ -43,7 +43,7 @@ class CMF_Hydrogen_Environment_Resource_Disclosure{
 
 		$classes	= array();
 		$path		= realpath( $path );
-		$index		= new File_RecursiveRegexFilter( $path, '/^[^_].+\.'.$options['fileExtension'].'$/' );
+		$index		= new FS_File_RecursiveRegexFilter( $path, '/^[^_].+\.'.$options['fileExtension'].'$/' );
 		foreach( $index as $entry ){
 			$fileName	= preg_replace( '@^'.$path.'/@', '', $entry->getPathname() );
 			$fileBase	= preg_replace( '@\.'.$options['fileExtension'].'$@', '', $fileName );
