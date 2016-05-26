@@ -52,6 +52,7 @@ class CMF_Hydrogen_Environment_Resource_Acl_Server extends CMF_Hydrogen_Environm
 		if( !isset( $this->rights[$roleId] ) )
 		{
 			$rights	= $this->env->getServer()->getData( 'role', 'getRights', array( $roleId ) );
+			$this->rights[$roleId]	= array();
 			foreach( $rights as $right ){
 				if( !isset( $this->rights[$roleId][$right->controller] ) )
 					$this->rights[$roleId][$right->controller]	= array();
