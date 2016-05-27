@@ -61,9 +61,11 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 		$path	= $env->config->get( 'path.themes' );
 		if( $env->config->get( 'layout.primer' ) )
 			$this->pathPrimer	= $path.$env->config->get( 'layout.primer' ).'/';
+		$this->pathCommon	= $path.'/common/';
 		$this->pathTheme	= $path.$env->config->get( 'layout.theme' ).'/';
 		$this->css			= new stdClass;
 		$this->css->primer	= new CMF_Hydrogen_View_Helper_StyleSheet( $this->pathPrimer.'css/' );
+		$this->css->common	= new CMF_Hydrogen_View_Helper_StyleSheet( $this->pathCommon.'css/' );
 		$this->css->theme	= new CMF_Hydrogen_View_Helper_StyleSheet( $this->pathTheme.'css/' );
 		if( $env->config->get( 'app.revision' ) ){
 			$this->css->primer->setRevision( $env->config->get( 'app.revision' ) );
@@ -80,6 +82,10 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 	public function addBodyClass( $class ){
 		if( strlen( trim( $class ) ) )
 			$this->bodyClasses[]	= trim( htmlentities( $class, ENT_QUOTES, 'UTF-8' ) );
+	}
+
+	public function addCommonStyle( $fileName, $level = 'mid', $attributes = array() ){
+		$this->css->common->addUrl( $fileName, $level, $attributes );
 	}
 
 	public function addPrimerStyle( $fileName, $level = 'mid', $attributes = array() ){
@@ -119,6 +125,8 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 						$this->css->theme->addUrl( $style->file, $level );							//  add style file URL
 					else if( $source == 'primer' )													//  style file is in primer theme
 						$this->addPrimerStyle( $style->file, $level );								//  load style file from primer theme folder
+					else if( $source == 'common' )													//  style file is in common theme
+						$this->addCommonStyle( $style->file, $level );								//  load style file from common theme folder
 					else if( $source == 'lib' ){													//  style file is in styles library, which is enabled by configured path
 						if( !strlen( trim( $pathStylesLib ) ) )
 							throw new RuntimeException( 'Path to style library "path.styles.lib" is not configured' );
@@ -198,10 +206,12 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 
 		if( $this->packStyleSheets && $this->env->getRequest()->has( 'flushStyleCache') ){
 			$this->css->primer->clearCache();
+			$this->css->common->clearCache();
 			$this->css->theme->clearCache();
 		}
 
 		$this->addHead( $this->css->primer->render( $this->packStyleSheets ) );
+		$this->addHead( $this->css->common->render( $this->packStyleSheets ) );
 		$this->addHead( $this->css->theme->render( $this->packStyleSheets ) );
 		$this->addBody( $this->js->render() );
 
