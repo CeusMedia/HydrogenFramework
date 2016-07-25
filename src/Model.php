@@ -350,6 +350,16 @@ class CMF_Hydrogen_Model
 	}
 
 	/**
+	 *	Returns primary key columns name of table.
+	 *	@access		public
+	 *	@return		string			Primary key column name
+	 */
+	public function getPrimaryKey(){
+		return $this->table->getPrimaryKey();
+	}
+
+
+	/**
 	 *	Indicates whether a table row is existing by ID.
 	 *	@param		integer			$id				ID to focus on
 	 *	@return		boolean
