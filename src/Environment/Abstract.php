@@ -55,6 +55,8 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	protected $config;
 	/**	@var	CMF_Hydrogen_Environment_Resource_Database_PDO	$dbc			Database Connection Object */
 	protected $dbc;
+	/**	@var	string											$uri			...  */
+	public $uri;
 
 	public static $configFile				= "config.ini.inc";
 
@@ -368,6 +370,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$this->config	= new ADT_List_Dictionary( $data );											//  create dictionary from array
 		if( $this->config->has( 'config.error.reporting' ) )										//  error reporting is defined
 			error_reporting( $this->config->get( 'config.error.reporting' ) );						//  set error reporting level
+		$this->uri		= getCwd().'/';
 		$this->clock->profiler->tick( 'env: config', 'Finished setup of base app configuration.' );
 	}
 
