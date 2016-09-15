@@ -29,12 +29,12 @@ class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment_Abstract
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function __construct( $options = array() )
+	public function __construct( $options = array(), $isFinal = TRUE )
 	{
 //		ob_start();
 		try
 		{
-			parent::__construct( $options );
+			parent::__construct( $options, FALSE );													//  construct parent but dont call __onInit
 			$this->detectSelf();
 			$this->initMessenger();																	//  setup user interface messenger
 			$this->initRequest();																	//  setup HTTP request handler
@@ -43,6 +43,12 @@ class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment_Abstract
 			$this->initLanguage();																	//  setup language support
 #			$this->initPage();																		//
 			$this->initAcl();
+
+			if( !$isFinal )
+				return;
+			$this->modules->callHook( 'Env', 'constructEnd', $this );								//  call module hooks for end of env construction
+			$this->__onInit();																		//  default callback for construction end
+
 		}
 		catch( Exception $e )
 		{
@@ -77,6 +83,10 @@ class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment_Abstract
 		return $this->request;
 	}
 
+	public function getSession(){
+		return new ADT_List_Dictionary();
+	}
+
 //	public function initConfiguration(){
 //		$this->config	= new ADT_List_Dictionary();
 //	}
@@ -91,7 +101,7 @@ class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment_Abstract
 	}
 
 	public function initRequest(){
-		$this->request	= new Console_RequestReceiver();
+		$this->request	= new CLI_RequestReceiver();
 	}
 }
 class Messenger extends CMF_Hydrogen_Environment_Resource_Messenger{
