@@ -91,6 +91,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		self::$defaultPaths['cache']	= sys_get_temp_dir().'/cache/';
 		$this->options		= $options;																//  store given environment options
 		$this->path			= isset( $options['pathApp'] ) ? $options['pathApp'] : getCwd().'/';	//  detect application path
+		$this->uri			= getCwd().'/';															//  detect application base URI
 
 		date_default_timezone_set( @date_default_timezone_get() );									//  avoid having no timezone set
 		if( !empty( self::$timezone ) )																//  a timezone has be set externally before
@@ -370,7 +371,6 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$this->config	= new ADT_List_Dictionary( $data );											//  create dictionary from array
 		if( $this->config->has( 'config.error.reporting' ) )										//  error reporting is defined
 			error_reporting( $this->config->get( 'config.error.reporting' ) );						//  set error reporting level
-		$this->uri		= getCwd().'/';
 		$this->clock->profiler->tick( 'env: config', 'Finished setup of base app configuration.' );
 	}
 
