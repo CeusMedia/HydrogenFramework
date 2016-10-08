@@ -146,12 +146,26 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 	 *	@param		integer		$roleId			Role ID
 	 *	@param		string		$controller		Name of controller
 	 *	@param		string		$action			Name of action
-	 *	@return		integer		Right state: -1: no access at all | 0: no access | 1: access | 2: access at all
+	 *	@return		integer		Right state
+	 *
+	 *	Return statuses:
+	 *	-2: outside but logged in
+	 *	-1: no access at all
+	 *	 0: no access
+	 *	 1: access by right
+	 *	 2: access at all
+	 *	 3: public access
+	 *	 4: public access if outside
+	 *	 5: public access if inside
 	 */
 	public function hasRight( $roleId, $controller = 'index', $action = 'index' )
 	{
+		$controller	= strtolower( str_replace( '/', '_', $controller ) );
+		$linkPath	= $controller && $action ? $controller.'_'.$action : '';
+
 		if( 0 ){
 			remark( 'Role: '.$roleId );
+			remark( 'Path: '.$linkPath );
 			remark( 'Public' );
 			print_m( $this->linksPublic );
 			remark( 'Public Outside' );
@@ -160,24 +174,25 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 			print_m( $this->linksPublicInside );
 			die;
 		}
-		$controller	= strtolower( str_replace( '/', '_', $controller ) );
-		$linkPath	= $controller && $action ? $controller.'_'.$action : '';
 		if( in_array( $linkPath, $this->linksPublic ) )
 			return 3;
-		if( !$roleId ){
+		if( $roleId ){
+			if( in_array( $linkPath, $this->linksPublicInside ) )
+				return 5;
+			if( in_array( $linkPath, $this->linksPublicOutside ) )
+				return -2;
+			if( $this->hasFullAccess( $roleId ) )
+				return 2;
+			if( $this->hasNoAccess( $roleId ) )
+				return -1;
+			$rights	= $this->getRights( $roleId );
+			if( isset( $rights[$controller] ) && in_array( $action, $rights[$controller] ) )
+				return 1;
+		}
+		else{
 			if( in_array( $linkPath, $this->linksPublicOutside ) )
 				return 4;
-			return -2;
 		}
-		if( in_array( $linkPath, $this->linksPublicInside ) )
-			return 5;
-		if( $this->hasFullAccess( $roleId ) )
-			return 2;
-		if( $this->hasNoAccess( $roleId ) )
-			return -1;
-		$rights	= $this->getRights( $roleId );
-		if( isset( $rights[$controller] ) && in_array( $action, $rights[$controller] ) )
-			return 1;
 		return 0;
 	}
 
