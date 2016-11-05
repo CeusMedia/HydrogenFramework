@@ -311,6 +311,34 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$this->acl->setPublicInsideLinks( explode( ',', $config->get( 'module.acl.inside' ) ) );
 		$this->acl->setPublicOutsideLinks( explode( ',', $config->get( 'module.acl.outside' ) ) );
 
+		//  @todo			this is the new code for the todo above, working with modules with defined links
+		//  @todo			still, all older modules nedd to be checked and migrated (see chat modules and chat server)
+		//  @todo			and what about links configured in config/pages.json ???
+		$linksPublic		= array();
+		$linksPublicOutside	= array();
+		$linksPublicInside	= array();
+		foreach( $this->getModules()->getAll() as $module ){
+			foreach( $module->links as $link ){
+				switch( $link->access ){
+					case 'outside':
+						$linksPublicOutside[]	= str_replace( "/", "_", $link->path );
+						break;
+					case 'inside':
+						$linksPublicInside[]	= str_replace( "/", "_", $link->path );
+						break;
+					case 'public':
+						$linksPublic[]	= str_replace( "/", "_", $link->path );
+						break;
+				}
+			}
+		}
+		if( $linksPublic )
+			$this->acl->setPublicLinks( $linksPublic );
+		if( $linksPublicOutside )
+			$this->acl->setPublicOutsideLinks( $linksPublicOutside );
+		if( $linksPublicInside )
+			$this->acl->setPublicInsideLinks( $linksPublicInside );
+
 		$this->clock->profiler->tick( 'env: acl', 'Finished setup of access control list.' );
 	}
 

@@ -174,6 +174,7 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 			print_m( $this->linksPublicInside );
 			die;
 		}
+<<<<<<< Updated upstream
 		if( in_array( $linkPath, $this->linksPublic ) )
 			return 3;
 		if( $roleId ){
@@ -191,6 +192,16 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 		}
 		else{
 			if( in_array( $linkPath, $this->linksPublicOutside ) )
+=======
+		$controller	= strtolower( str_replace( '/', '_', $controller ) );
+		$linkPath	= $controller && $action ? $controller.'_'.$action : '';
+//			remark( "link: ".$linkPath );die;
+
+		if( in_array( $linkPath, $this->linksPublic ) )
+			return 3;
+		if( in_array( $linkPath, $this->linksPublicOutside ) ){
+			if( !$roleId )
+>>>>>>> Stashed changes
 				return 4;
 		}
 		return 0;
