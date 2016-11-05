@@ -163,17 +163,6 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 		$controller	= strtolower( str_replace( '/', '_', $controller ) );
 		$linkPath	= $controller && $action ? $controller.'_'.$action : '';
 
-		if( 0 ){
-			remark( 'Role: '.$roleId );
-			remark( 'Path: '.$linkPath );
-			remark( 'Public' );
-			print_m( $this->linksPublic );
-			remark( 'Public Outside' );
-			print_m( $this->linksPublicOutside );
-			remark( 'Public Inside' );
-			print_m( $this->linksPublicInside );
-			die;
-		}
 		if( in_array( $linkPath, $this->linksPublic ) )
 			return 3;
 		if( $roleId ){
