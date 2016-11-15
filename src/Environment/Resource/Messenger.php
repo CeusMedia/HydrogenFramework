@@ -137,7 +137,8 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 				$ids[]	= $id;																		//  note calculated ID
 
 				$class		= $this->classes[$message['type']];
-				$message	= UI_HTML_Tag::create( 'span', $message['message'], array( 'class' => 'message' ) );
+				$message	= htmlentities( $message['message'], ENT_QUOTES, 'UTF-8' );				//  escape HTML entities
+				$message	= UI_HTML_Tag::create( 'span', $message, array( 'class' => 'message' ) );
 				if( $timeFormat && !empty( $message['timestamp'] ) )
 				{
 					$time		= $message['timestamp'];
