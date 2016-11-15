@@ -88,6 +88,9 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 	{
 		if( count( $arguments ) > 1 )
 		{
+			foreach( $arguments as $nr => $argument )
+				if( $nr )
+					$arguments[$nr]	= htmlentities( $argument, ENT_QUOTES, 'UTF-8' );
 			$function	= new ReflectionFunction( 'sprintf' );
 			$message	= $function->invokeArgs( $arguments );
 		}
@@ -126,7 +129,7 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 			$list	= array();
 			foreach( $messages as $message )
 			{
-				if( $linkResources )
+				if( $linkResources )																//  @todo	kriss: check what is the point of this? where is it used? can it be removed?
 					$message['message']	= preg_replace( '/(http.+)("|\'| )/U', '<a href="\\1">\\1</a>\\2', $message['message'] );
 
 				/*  --  kriss: don't repeat yourself!  --  */
