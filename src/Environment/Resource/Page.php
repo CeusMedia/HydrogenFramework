@@ -58,10 +58,11 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 		parent::__construct( 'XHTML_10_STRICT', $language );
 		$this->js			= CMF_Hydrogen_View_Helper_JavaScript::getInstance();
 
-		$path	= $env->config->get( 'path.themes' );
+		$path	= preg_replace( '/\/+$/', '', $env->config->get( 'path.themes' ) ).'/';
+		$this->pathPrimer	= $path;
 		if( $env->config->get( 'layout.primer' ) )
 			$this->pathPrimer	= $path.$env->config->get( 'layout.primer' ).'/';
-		$this->pathCommon	= $path.'/common/';
+		$this->pathCommon	= $path.'common/';
 		$this->pathTheme	= $path.$env->config->get( 'layout.theme' ).'/';
 		$this->css			= new stdClass;
 		$this->css->primer	= new CMF_Hydrogen_View_Helper_StyleSheet( $this->pathPrimer.'css/' );
