@@ -378,6 +378,15 @@ class CMF_Hydrogen_View
 		return $data->content;
 	}
 
+	static public function renderContentStatic( $env, $context, $content, $dataType = "HTML" ){
+		$data	= (object) array(
+			'content'	=> $content,
+			'type'		=> $dataType
+		);
+		$env->getCaptain()->callHook( 'View', 'onRenderContent', $context, $data );
+		return $data->content;
+	}
+
 	/**
 	 *	Sets Data of View.
 	 *	@access		public
