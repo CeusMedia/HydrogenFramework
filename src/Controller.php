@@ -73,7 +73,7 @@ class CMF_Hydrogen_Controller
 		$env->clock->profiler->tick( 'CMF_Controller('.get_class( $this ).')' );
 		$this->setEnv( $env );
 //		$env->clock->profiler->tick( 'CMF_Controller('.get_class( $this ).'): env set' );
-		if( $setupView )
+		if( !( $env instanceof CMF_Hydrogen_Environment_Console ) && $setupView )
 			$this->setupView( !$env->getRequest()->isAjax() );
 		$env->clock->profiler->tick( 'CMF_Controller('.get_class( $this ).'): got view object' );
 //		$arguments		= array_slice( func_get_args(), 1 );										//  collect additional arguments for extended logic classes

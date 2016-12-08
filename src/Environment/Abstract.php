@@ -312,7 +312,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$this->acl->setPublicOutsideLinks( explode( ',', $config->get( 'module.acl.outside' ) ) );
 
 		//  @todo			this is the new code for the todo above, working with modules with defined links
-		//  @todo			still, all older modules nedd to be checked and migrated (see chat modules and chat server)
+		//  @todo			still, all older modules need to be checked and migrated (see chat modules and chat server)
 		//  @todo			and what about links configured in config/pages.json ???
 		$linksPublic		= array();
 		$linksPublicOutside	= array();

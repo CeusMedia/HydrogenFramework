@@ -101,7 +101,8 @@ class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment_Abstract
 	}
 
 	public function initRequest(){
-		$this->request	= new CLI_RequestReceiver();
+		$this->request	= new CLI_ArgumentParser();
+		$this->request->parseArguments();
 	}
 }
 class Messenger extends CMF_Hydrogen_Environment_Resource_Messenger{
