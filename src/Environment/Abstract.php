@@ -41,42 +41,44 @@
  */
 abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environment, ArrayAccess
 {
-	/** @var	CMF_Hydrogen_Environment_Resource_Acl_Abstract	$acl			Implementation of access control list */
+	/** @var	CMF_Hydrogen_Environment_Resource_Acl_Abstract			$acl			Implementation of access control list */
 	protected $acl;
-	/**	@var	CMF_Hydrogen_Application						$application	Instance of Application */
+	/**	@var	CMF_Hydrogen_Application								$application	Instance of Application */
 	protected $application;
-	/**	@var	CMM_SEA_Adapter_Interface						$cache			Instance of cache adapter */
+	/**	@var	CMM_SEA_Adapter_Interface								$cache			Instance of cache adapter */
 	protected $cache;
-	/**	@var	CMF_Hydrogen_Environment_Resource_Captain		$captain		Instance of captain */
+	/**	@var	CMF_Hydrogen_Environment_Resource_Captain				$captain		Instance of captain */
 	protected $captain;
-	/**	@var	Alg_Time_Clock									$clock			Clock Object */
+	/**	@var	Alg_Time_Clock											$clock			Clock Object */
 	protected $clock;
-	/**	@var	ADT_List_Dictionary								$config			Configuration Object */
+	/**	@var	ADT_List_Dictionary										$config			Configuration Object */
 	protected $config;
-	/**	@var	CMF_Hydrogen_Environment_Resource_Database_PDO	$dbc			Database Connection Object */
-	protected $dbc;
-	/**	@var	string											$uri			...  */
-	public $uri;
-
+	/**	@var	string													$configFile		File path to base configuration */
 	public static $configFile				= "config.ini.inc";
-
-	public static $timezone					= NULL;
-
-	/**	@var	CMF_Hydrogen_Environment_Resource_LogicPool				$logic		Pool for logic class instances */
-	protected $logic						= array();
-	/**	@var	CMF_Hydrogen_Environment_Resource_Module_Library_Local	$modules	Handler for local modules */
-	protected $modules						= array();
-	/**	@var	array						$options		Set options to override static properties */
-	protected $options						= array();
-	/**	@var	string						$path			Absolute folder path of application */
-	public $path							= NULL;
-
-	public static $defaultPaths					= array(
+	/**	@var	CMF_Hydrogen_Environment_Resource_Database_PDO			$dbc			Database Connection Object */
+	protected $dbc;
+	/**	@var	array													$defaultPaths	Map of default paths to extend base configuration */
+	public static $defaultPaths				= array(
 		'classes'	=> 'classes/',
 		'locales'	=> 'locales/',
 		'logs'		=> 'logs/',
 		'templates'	=> 'templates/',
 	);
+	/**	@var	array													$disclosure		Map of classes ready to reflect */
+	protected $disclosure;
+	/**	@var	CMF_Hydrogen_Environment_Resource_LogicPool				$logic			Pool for logic class instances */
+	protected $logic;
+	/**	@var	CMF_Hydrogen_Environment_Resource_Module_Library_Local	$modules	Handler for local modules */
+	protected $modules						= array();
+	/**	@var	array													$options		Set options to override static properties */
+	protected $options						= array();
+	/**	@var	string													$path			Absolute folder path of application */
+	public $path							= NULL;
+	/**	@var	string													$uri			Application URI (absolute local path) */
+	public $uri;
+
+	public static $timezone					= NULL;
+
 
 	/**
 	 *	Constructor, sets up Resource Environment.
@@ -135,10 +137,10 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$resources	= array(																		//  list of resource handler member names, namely of ...
 			'config',																				//  ... base application configuration handler
 			'clock',																				//  ... internal clock handler
+			'cache',																				//  ... cache handler
+			'dbc',																					//  ... database handler
 			'logic',																				//  ... logic handler
 			'modules',																				//  ... module handler
-			'dbc',																					//  ... database handler
-			'cache',																				//  ... cache handler
 			'acl',																					//  ... cache handler
 		);
 		$resources	= array_merge( $resources, array_values( $additionalResources ) );
@@ -417,6 +419,11 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$this->clock->profiler->tick( 'env: database', 'Finished setup of database connection.' );
 	}
 
+	/**
+	 *	@todo  		why not keep the resource object instead of reflected class list? would need refactoring of resource and related modules, thou...
+	 *	@todo  		extract to resource module: question is where to store the resource? in env again?
+	 *	@todo  		to be deprecated in 0.9: please use module Resource_Disclosure instead
+	 */
 	protected function initDisclosure()
 	{
 //	$clock	= new Alg_Time_Clock();
@@ -426,6 +433,11 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$this->clock->profiler->tick( 'env: disclosure', 'Finished setup of self disclosure handler.' );
 	}
 
+	/**
+	 *	@todo  		extract to resource module
+	 *	@todo  		extract to resource module: question is where to store the resource? in env again?
+	 *	@todo  		to be deprecated in 0.9: please use module Resource_Disclosure instead
+	 */
 	protected function initLog(){
 		$this->log	= new CMF_Hydrogen_Environment_Resource_Log( $this );
 	}
