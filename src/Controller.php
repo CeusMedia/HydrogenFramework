@@ -48,16 +48,21 @@ class CMF_Hydrogen_Controller
 
 	/**	@var		CMF_Hydrogen_Environment_Abstract	$env			Application Environment Object */
 	protected $env;
+	/**	@var		string								$defaultPath	Default controller URI path */
+	protected $defaultPath;
+	/**	@var		string								$path			Preferred controller URI path */
+	protected $path;
+	/**	@var		CMF_Hydrogen_View					$view			View instance for controller */
+	protected $view;
 	/**	@var		array								$_data			Collected Data for View */
-	var $_data					= array();
+	protected $_data									= array();
+
 	/**	@var		string								$controller		Name of called Controller */
 	protected $controller		= "";
 	/**	@var		string								$action			Name of called Action */
 	protected $action			= "";
 	/**	@var		bool								$redirect		Flag for Redirection */
 	var $redirect				= FALSE;
-	/**	@var		CMF_Hydrogen_View					$view			View instance for controller */
-	protected $view;
 
 	/**
 	 *	Constructor.
@@ -76,6 +81,16 @@ class CMF_Hydrogen_Controller
 		if( !( $env instanceof CMF_Hydrogen_Environment_Console ) && $setupView )
 			$this->setupView( !$env->getRequest()->isAjax() );
 		$env->clock->profiler->tick( 'CMF_Controller('.get_class( $this ).'): got view object' );
+
+		$moduleClassName	= preg_replace( "/^Controller_/", "", get_class( $this ) );				//  cut controller class name ...
+		$this->defaultPath	= strtolower( str_replace( '_', '/', $moduleClassName ) );				//  to guess default controller URI path
+		$this->path			= $this->defaultPath;													//  and note this as controller path
+
+		$captain			= $this->env->getCaptain();												//  prepare hook call
+		$data				= array( 'moduleClassName' => $moduleClassName );						//  with cut controller class name
+		if( $path = $captain->callHook( 'Controller', 'onDetectPath', $this, $data ) )				//  to get preferred controller URI path
+			$this->path		= $path;																//  and set if has been resolved
+
 //		$arguments		= array_slice( func_get_args(), 1 );										//  collect additional arguments for extended logic classes
 //		Alg_Object_MethodFactory::callObjectMethod( $this, '__onInit', $arguments, TRUE, TRUE );	//  invoke possibly extended init method
 		$this->__onInit();																			//  default callback for construction end
@@ -312,7 +327,7 @@ class CMF_Hydrogen_Controller
 				$message	= 'Redirection to foreign host is not allowed.';						//  error message
 				if( $this->env->has( 'messenger' ) ){												//  messenger is available
 					$this->env->getMessenger()->noteFailure( $message );							//  note message
-					$this->restart( NULL );															//  redirect to start
+					$this->restart( NULL, FALSE, NULL, TRUE );															//  redirect to start
 				}
 				print( $message );																	//  otherwise print message
 				exit;																				//  and exit
