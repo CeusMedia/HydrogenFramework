@@ -57,7 +57,6 @@ class CMF_Hydrogen_Model
 
 	public static $cacheClass						= 'ADT_List_Dictionary';
 
-
 	/**
 	 *	Constructor.
 	 *	@access		public
@@ -65,8 +64,7 @@ class CMF_Hydrogen_Model
 	 *	@param		integer							$id				ID to focus on
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment_Abstract $env, $id = NULL )
-	{
+	public function __construct( CMF_Hydrogen_Environment_Abstract $env, $id = NULL ){
 		$this->setEnv( $env );
 		$this->table	= new DB_PDO_TableWriter(
 			$this->env->getDatabase(),
@@ -85,7 +83,6 @@ class CMF_Hydrogen_Model
 			$this->table->setUndoStorage( $this->env->storage );
 	}
 
-	//  --  PUBLIC METHODS  --  //
 	/**
 	 *	Returns Data of single Line by ID.
 	 *	@access		public
@@ -93,8 +90,7 @@ class CMF_Hydrogen_Model
 	 *	@param		boolean			$stripTags		Flag: strip HTML Tags from values
 	 *	@return		integer
 	 */
-	public function add( $data, $stripTags = TRUE )
-	{
+	public function add( $data, $stripTags = TRUE ){
 		$id	= $this->table->insert( $data, $stripTags );
 		$this->cache->set( $this->cacheKey.$id, $this->get( $id ) );
 		return $id;
@@ -114,27 +110,22 @@ class CMF_Hydrogen_Model
 	 *	@throws		InvalidArgumentException		in strict mode if field is empty but mandatory
 	 *	@throws		InvalidArgumentException		in strict mode if field is not a table column
 	 */
-	protected function checkField( $field, $mandatory = FALSE, $strict = TRUE )
-	{
-		if( !is_string( $field ) )
-		{
+	protected function checkField( $field, $mandatory = FALSE, $strict = TRUE ){
+		if( !is_string( $field ) ){
 			if( !$strict )
 				return FALSE;
 			throw new InvalidArgumentException( 'Field must be a string' );
 		}
 		$field	= trim( $field );
-		if( !strlen( $field ) )
-		{
-			if( $mandatory )
-			{
+		if( !strlen( $field ) ){
+			if( $mandatory ){
 				if( !$strict )
 					return FALSE;
 				throw new InvalidArgumentException( 'Field must have a value' );
 			}
 			return NULL;
 		}
-		if( !in_array( $field, $this->columns ) )
-		{
+		if( !in_array( $field, $this->columns ) ){
 			if( !$strict )
 				return FALSE;
 			$message	= 'Field "%s" is not an existing column of table %s';
@@ -156,18 +147,14 @@ class CMF_Hydrogen_Model
 	 *	@throws		InvalidArgumentException		in strict mode if field is not a string
 	 *	@throws		InvalidArgumentException		in strict mode if field is empty but mandatory
 	 */
-	protected function checkIndices( $indices, $mandatory = FALSE, $strict = TRUE )
-	{
-		if( !is_array( $indices ) )
-		{
+	protected function checkIndices( $indices, $mandatory = FALSE, $strict = TRUE ){
+		if( !is_array( $indices ) ){
 			if( !$strict )
 				return FALSE;
 			throw new InvalidArgumentException( 'Index map must be an array' );
 		}
-		if( !$indices )
-		{
-			if( $mandatory )
-			{
+		if( !$indices ){
+			if( $mandatory ){
 				if( !$strict )
 					return FALSE;
 				throw new InvalidArgumentException( 'Index map must have atleast one pair' );
@@ -182,8 +169,7 @@ class CMF_Hydrogen_Model
 	 *	@param		array			$conditions		Map of conditions
 	 *	@return		integer			Number of entries
 	 */
-	public function count( $conditions = array() )
-	{
+	public function count( $conditions = array() ){
 		return $this->table->count( $conditions );
 	}
 
@@ -194,8 +180,7 @@ class CMF_Hydrogen_Model
 	 *	@param		string			$value			Value of Index
 	 *	@return		integer			Number of entries within this index
 	 */
-	public function countByIndex( $key, $value )
-	{
+	public function countByIndex( $key, $value ){
 		$conditions	= array( $key => $value );
 		return $this->count( $conditions );
 	}
@@ -206,8 +191,7 @@ class CMF_Hydrogen_Model
 	 *	@param		array			$indices		Map of index conditions
 	 *	@return		integer			Number of entries within this index
 	 */
-	public function countByIndices( $indices )
-	{
+	public function countByIndices( $indices ){
 		return $this->count( $indices );
 	}
 
@@ -230,8 +214,7 @@ class CMF_Hydrogen_Model
 	 *	@param		boolean			$stripTags		Flag: strip HTML Tags from values
 	 *	@return		integer			Number of changed rows
 	 */
-	public function edit( $id, $data, $stripTags = TRUE )
-	{
+	public function edit( $id, $data, $stripTags = TRUE ){
 		$this->table->focusPrimary( $id );
 		$result	= 0;
 		if( count( $this->table->get( FALSE ) ) )
@@ -253,28 +236,17 @@ class CMF_Hydrogen_Model
 	 *	@param		string			$field			Single Field to return
 	 *	@return		mixed
 	 */
-	public function get( $id, $field = '' )
-	{
+	public function get( $id, $field = '' ){
 		$field	= $this->checkField( $field, FALSE, TRUE );
 		$data	= $this->cache->get( $this->cacheKey.$id );
-		if( !$data )
-		{
+		if( !$data ){
 			$this->table->focusPrimary( $id );
 			$data	= $this->table->get( TRUE );
 			$this->table->defocus();
 			$this->cache->set( $this->cacheKey.$id, $data );
 		}
-		if( strlen( trim( $field ) ) ){
-			if( empty( $data ) )
-				return $data;
-			switch( $this->fetchMode ){
-				case PDO::FETCH_CLASS:
-				case PDO::FETCH_OBJ:
-					return $data->$field;
-				default:
-					return $data[$field];
-			}
-		}
+		if( strlen( trim( $field ) ) )
+			return $this->getFieldsFromResult( $data, array( $field ) );
 		return $data;
 	}
 
@@ -284,13 +256,13 @@ class CMF_Hydrogen_Model
 	 *	@param		array			$conditions		Map of Conditions to include in SQL Query
 	 *	@param		array			$orders			Map of Orders to include in SQL Query
 	 *	@param		array			$limits			Map of Limits to include in SQL Query
+	 *	@param		array			$fields			Map of Columns to include in SQL Query
 	 *	@param		array			$groupings		List of columns to group by
 	 *	@param		array			$havings		List of conditions to apply after grouping
 	 *	@return		array
 	 */
-	public function getAll( $conditions = array(), $orders = array(), $limits = array(), $columns = array(), $groupings = array(), $havings = array() )
-	{
-		return $this->table->find( $columns, $conditions, $orders, $limits, $groupings, $havings );
+	public function getAll( $conditions = array(), $orders = array(), $limits = array(), $fields = array(), $groupings = array(), $havings = array() ){
+		return $this->table->find( $fields, $conditions, $orders, $limits, $groupings, $havings );
 	}
 
 	/**
@@ -301,9 +273,10 @@ class CMF_Hydrogen_Model
 	 *	@param		array			$orders			Map of Orders to include in SQL Query
 	 *	@param		array			$limits			List of Limits to include in SQL Query
 	 *	@return		array
+	 *	@todo		add arguments 'fields' using method 'getFieldsFromResult'
+	 *	@todo		OR add ...
 	 */
-	public function getAllByIndex( $key, $value, $orders = array(), $limits = array() )
-	{
+	public function getAllByIndex( $key, $value, $orders = array(), $limits = array() ){
 		$this->table->focusIndex( $key, $value );
 		$data	= $this->table->get( FALSE, $orders, $limits );
 		$this->table->defocus();
@@ -318,9 +291,10 @@ class CMF_Hydrogen_Model
 	 *	@param		array			$orders			Map of Orders to include in SQL Query
 	 *	@param		array			$limits			List of Limits to include in SQL Query
 	 *	@return		array
+	 *	@todo		add arguments 'fields' using method 'getFieldsFromResult'
+	 *	@todo		note throwable exceptions
 	 */
-	public function getAllByIndices( $indices = array(), $orders = array(), $limits = array() )
-	{
+	public function getAllByIndices( $indices = array(), $orders = array(), $limits = array() ){
 		$indices	= $this->checkIndices( $indices, TRUE, TRUE );
 		foreach( $indices as $key => $value )
 			$this->table->focusIndex( $key, $value );
@@ -330,64 +304,44 @@ class CMF_Hydrogen_Model
 	}
 
 	/**
-	 *	Returns data of single line selected by index.
+	 *	Returns data of first entry selected by index.
 	 *	@access		public
 	 *	@param		string			$key			Key of Index
 	 *	@param		string			$value			Value of Index
-	 *	@param		string			$field			Single Field to return
 	 *	@param		array			$orders			Map of Orders to include in SQL Query
+	 *	@param		string			$fields			List of fields or one field to return from result
+	 *	@param		boolean			$strict			Flag: throw exception if result is empty (default: FALSE)
 	 *	@return		mixed			Structure depending on fetch type, string if field selected, NULL if field selected and no entries
-	 *	@throws		InvalidArgumentException		if selected field is not a table column
+	 *	@todo		change argument order: move fields to end
 	 */
-	public function getByIndex( $key, $value, $field = "", $orders = array() )
-	{
-		$field	= $this->checkField( $field, FALSE, TRUE );
+	public function getByIndex( $key, $value, $orders = array(), $fields = array(), $strict = FALSE ){
+		foreach( $fields as $field )
+			$this->checkField( $field, FALSE, TRUE );
 		$this->table->focusIndex( $key, $value );
 		$data	= $this->table->get( TRUE, $orders );
 		$this->table->defocus();
-		if( strlen( $field ) ){
-			if( empty( $data ) )
-				return NULL;
-			switch( $this->fetchMode ){
-				case PDO::FETCH_CLASS:
-				case PDO::FETCH_OBJ:
-					return $data->$field;
-				default:
-					return $data[$field];
-			}
-		}
-		return $data;
+		return $this->getFieldsFromResult( $data, $fields, $strict );
 	}
 
 	/**
 	 *	Returns data of single line selected by indices.
 	 *	@access		public
 	 *	@param		array			$indices		Map of Index Keys and Values
-	 *	@param		string			$field			Single field to return
 	 *	@param		array			$orders			Map of Orders to include in SQL Query
+	 *	@param		string			$fields			List of fields or one field to return from result
+	 *	@param		boolean			$strict			Flag: throw exception if result is empty (default: FALSE)
 	 *	@return		mixed			Structure depending on fetch type, string if field selected, NULL if field selected and no entries
-	 *	@throws		InvalidArgumentException		if selected field is not a table column
+	 *	@todo  		change default value of argument 'strict' to TRUE
 	 */
-	public function getByIndices( $indices, $field = "", $orders = array() )
-	{
-		$field	= $this->checkField( $field, FALSE, TRUE );
+	public function getByIndices( $indices, $orders = array(), $fields = array(), $strict = FALSE ){
+		foreach( $fields as $field )
+			$field	= $this->checkField( $field, FALSE, TRUE );
 		$this->checkIndices( $indices, TRUE, TRUE );
 		foreach( $indices as $key => $value )
 			$this->table->focusIndex( $key, $value );
-		$data	= $this->table->get( TRUE, $orders);
+		$result	= $this->table->get( TRUE, $orders );
 		$this->table->defocus();
-		if( strlen( $field ) ){
-			if( empty( $data ) )
-				return NULL;
-			switch( $this->fetchMode ){
-				case PDO::FETCH_CLASS:
-				case PDO::FETCH_OBJ:
-					return $data->$field;
-				default:
-					return $data[$field];
-			}
-		}
-		return $data;
+		return $this->getFieldsFromResult( $result, $fields, $strict );
 	}
 
 	/**
@@ -397,6 +351,55 @@ class CMF_Hydrogen_Model
 	 */
 	public function getColumns(){
 		return $this->table->getColumns();
+	}
+
+	/**
+	 *	Returns any fields or one field from a query result.
+	 *	@access		protected
+	 *	@param		mixed			$result			Query result as array or object
+	 *	@param		array|string	$fields			List of fields or one field
+	 *	@param		boolean			$strict			Flag: throw exception if result is empty
+	 */
+	protected function getFieldsFromResult( $result, $fields = array(), $strict = TRUE ){
+		if( is_string( $fields ) )
+			$fields	= strlen( trim( $fields ) ) ? array( trim( $fields ) ) : array();
+		if( !is_array( $fields ) )
+			throw new \InvalidArgumentException( 'Fields must be of array or string' );
+		if( !$result ){
+			if( $strict )
+				throw new \Exception( 'Result is empty' );
+			if( count( $fields ) === 1 )
+				return NULL;
+			return array();
+		}
+		if( !count( $fields ) )
+			return $result;
+		foreach( $fields as $field )
+			if( !in_array( $field, $this->columns ) )
+				throw new \InvalidArgumentException( 'Field "'.$field.'" is not an existing column' );
+
+		if( count( $fields ) === 1 ){
+			switch( $this->fetchMode ){
+				case \PDO::FETCH_CLASS:
+				case \PDO::FETCH_OBJ:
+					return $result->$field;
+				default:
+					return $result[$field];
+			}
+		}
+		switch( $this->fetchMode ){
+			case \PDO::FETCH_CLASS:
+			case \PDO::FETCH_OBJ:
+				$map	= (object) array();
+				foreach( $fields as $field )
+					$map->$field	= $result->$field;
+				return $map;
+			default:
+				$list	= array();
+				foreach( $fields as $field )
+					$list[$field]	= $result[$field];
+				return $list;
+		}
 	}
 
 	/**
@@ -433,14 +436,12 @@ class CMF_Hydrogen_Model
 		return $this->table->getPrimaryKey();
 	}
 
-
 	/**
 	 *	Indicates whether a table row is existing by ID.
 	 *	@param		integer			$id				ID to focus on
 	 *	@return		boolean
 	 */
-	public function has( $id )
-	{
+	public function has( $id ){
 		if( $this->cache->has( $this->cacheKey.$id ) )
 			return TRUE;
 		return (bool) $this->get( $id );
@@ -453,8 +454,7 @@ class CMF_Hydrogen_Model
 	 *	@param		string			$value			Value of Index
 	 *	@return		boolean
 	 */
-	public function hasByIndex( $key, $value )
-	{
+	public function hasByIndex( $key, $value ){
 		return (bool) $this->getByIndex( $key, $value );
 	}
 
@@ -464,8 +464,7 @@ class CMF_Hydrogen_Model
 	 *	@param		array			$indices		Map of Index Keys and Values
 	 *	@return		boolean
 	 */
-	public function hasByIndices( $indices )
-	{
+	public function hasByIndices( $indices ){
 		return (bool) $this->getByIndices( $indices );
 	}
 
@@ -475,12 +474,10 @@ class CMF_Hydrogen_Model
 	 *	@param		integer			$id				ID to focus on
 	 *	@return		boolean
 	 */
-	public function remove( $id )
-	{
+	public function remove( $id ){
 		$this->table->focusPrimary( $id );
 		$result	= FALSE;
-		if( count( $this->table->get( FALSE ) ) )
-		{
+		if( count( $this->table->get( FALSE ) ) ){
 			$this->table->delete();
 			$result	= TRUE;
 		}
@@ -496,19 +493,16 @@ class CMF_Hydrogen_Model
 	 *	@param		string			$value			Value of Index
 	 *	@return		boolean
 	 */
-	public function removeByIndex( $key, $value )
-	{
+	public function removeByIndex( $key, $value ){
 		$this->table->focusIndex( $key, $value );
+		$number	= 0;
 		$rows	= $this->table->get( FALSE );
-		if( $number = count( $rows ) )
-		{
-			$this->table->delete();
-			foreach( $rows as $row )
-			{
-				switch( $this->fetchMode )
-				{
-					case PDO::FETCH_CLASS:
-					case PDO::FETCH_OBJ:
+		if( count( $rows ) ){
+			$number = $this->table->delete();
+			foreach( $rows as $row ){
+				switch( $this->fetchMode ){
+					case \PDO::FETCH_CLASS:
+					case \PDO::FETCH_OBJ:
 						$id	= $row->{$this->primaryKey};
 						break;
 					default:
@@ -528,22 +522,19 @@ class CMF_Hydrogen_Model
 	 *	@param		array			$indices		Map of Index Keys and Values
 	 *	@return		integer			Number of removed entries
 	 */
-	public function removeByIndices( $indices )
-	{
+	public function removeByIndices( $indices ){
 		$indices	= $this->checkIndices( $indices, TRUE, TRUE );
 		foreach( $indices as $key => $value )
 			$this->table->focusIndex( $key, $value );
 
+		$number	= 0;
 		$rows	= $this->table->get( FALSE );
-		if( $number = count( $rows ) )
-		{
-			$this->table->delete();
-			foreach( $rows as $row )
-			{
-				switch( $this->fetchMode )
-				{
-					case PDO::FETCH_CLASS:
-					case PDO::FETCH_OBJ:
+		if( count( $rows ) ){
+			$number	= $this->table->delete();
+			foreach( $rows as $row ){
+				switch( $this->fetchMode ){
+					case \PDO::FETCH_CLASS:
+					case \PDO::FETCH_OBJ:
 						$id	= $row->{$this->primaryKey};
 						break;
 					default:
