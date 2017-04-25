@@ -114,14 +114,14 @@ class CMF_Hydrogen_Model
 		if( !is_string( $field ) ){
 			if( !$strict )
 				return FALSE;
-			throw new InvalidArgumentException( 'Field must be a string' );
+			throw new \InvalidArgumentException( 'Field must be a string' );
 		}
 		$field	= trim( $field );
 		if( !strlen( $field ) ){
 			if( $mandatory ){
 				if( !$strict )
 					return FALSE;
-				throw new InvalidArgumentException( 'Field must have a value' );
+				throw new \InvalidArgumentException( 'Field must have a value' );
 			}
 			return NULL;
 		}
@@ -129,7 +129,7 @@ class CMF_Hydrogen_Model
 			if( !$strict )
 				return FALSE;
 			$message	= 'Field "%s" is not an existing column of table %s';
-			throw new InvalidArgumentException( sprintf( $message, $field, $this->getName() ) );
+			throw new \InvalidArgumentException( sprintf( $message, $field, $this->getName() ) );
 		}
 		return $field;
 	}
@@ -182,7 +182,7 @@ class CMF_Hydrogen_Model
 	 */
 	public function countByIndex( $key, $value ){
 		$conditions	= array( $key => $value );
-		return $this->count( $conditions );
+		return $this->table->count( $conditions );
 	}
 
 	/**
@@ -313,8 +313,13 @@ class CMF_Hydrogen_Model
 	 *	@param		boolean			$strict			Flag: throw exception if result is empty (default: FALSE)
 	 *	@return		mixed			Structure depending on fetch type, string if field selected, NULL if field selected and no entries
 	 *	@todo		change argument order: move fields to end
+	 *	@throws		InvalidArgumentException			If given fields list is neither a list nor a string
 	 */
 	public function getByIndex( $key, $value, $orders = array(), $fields = array(), $strict = FALSE ){
+		if( is_string( $fields ) )
+			$fields	= strlen( trim( $fields ) ) ? array( trim( $fields ) ) : array();
+		if( !is_array( $fields ) )
+			throw new \InvalidArgumentException( 'Fields must be of array or string' );
 		foreach( $fields as $field )
 			$this->checkField( $field, FALSE, TRUE );
 		$this->table->focusIndex( $key, $value );
@@ -331,9 +336,14 @@ class CMF_Hydrogen_Model
 	 *	@param		string			$fields			List of fields or one field to return from result
 	 *	@param		boolean			$strict			Flag: throw exception if result is empty (default: FALSE)
 	 *	@return		mixed			Structure depending on fetch type, string if field selected, NULL if field selected and no entries
+	 *	@throws		InvalidArgumentException			If given fields list is neither a list nor a string
 	 *	@todo  		change default value of argument 'strict' to TRUE
 	 */
 	public function getByIndices( $indices, $orders = array(), $fields = array(), $strict = FALSE ){
+		if( is_string( $fields ) )
+			$fields	= strlen( trim( $fields ) ) ? array( trim( $fields ) ) : array();
+		if( !is_array( $fields ) )
+			throw new \InvalidArgumentException( 'Fields must be of array or string' );
 		foreach( $fields as $field )
 			$field	= $this->checkField( $field, FALSE, TRUE );
 		$this->checkIndices( $indices, TRUE, TRUE );
@@ -359,6 +369,8 @@ class CMF_Hydrogen_Model
 	 *	@param		mixed			$result			Query result as array or object
 	 *	@param		array|string	$fields			List of fields or one field
 	 *	@param		boolean			$strict			Flag: throw exception if result is empty
+	 *	@return		string|array|object			Structure depending on result and field list length
+	 *	@throws		InvalidArgumentException			If given fields list is neither a list nor a string
 	 */
 	protected function getFieldsFromResult( $result, $fields = array(), $strict = TRUE ){
 		if( is_string( $fields ) )
@@ -382,8 +394,12 @@ class CMF_Hydrogen_Model
 			switch( $this->fetchMode ){
 				case \PDO::FETCH_CLASS:
 				case \PDO::FETCH_OBJ:
+					if( !isset( $result->$field ) )
+						throw new \DomainException( 'Field "'.$field.'" is not an column of result set' );
 					return $result->$field;
 				default:
+					if( !isset( $result[$field] ) )
+						throw new \DomainException( 'Field "'.$field.'" is not an column of result set' );
 					return $result[$field];
 			}
 		}
@@ -391,13 +407,19 @@ class CMF_Hydrogen_Model
 			case \PDO::FETCH_CLASS:
 			case \PDO::FETCH_OBJ:
 				$map	= (object) array();
-				foreach( $fields as $field )
+				foreach( $fields as $field ){
+					if( !isset( $result->$field ) )
+						throw new \DomainException( 'Field "'.$field.'" is not an column of result set' );
 					$map->$field	= $result->$field;
+				}
 				return $map;
 			default:
 				$list	= array();
-				foreach( $fields as $field )
+				foreach( $fields as $field ){
+					if( !isset( $result[$field] ) )
+						throw new \DomainException( 'Field "'.$field.'" is not an column of result set' );
 					$list[$field]	= $result[$field];
+				}
 				return $list;
 		}
 	}
