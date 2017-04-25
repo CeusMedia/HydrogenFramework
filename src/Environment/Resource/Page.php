@@ -189,13 +189,24 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 	}
 
 	public function build( $bodyAttributes = array(), $htmlAttributes = array() ){
-		$controller	= str_replace( '/', '-', $this->env->getRequest()->get( 'controller' ) );
-		$action		= str_replace( '/', '-', $this->env->getRequest()->get( 'action' ) );
-		$moduleKey	= join( explode( ' ', ucwords( str_replace( '-', ' ', $controller ) ) ) );
-		$this->addBodyClass( 'module'.$moduleKey );
-		$this->addBodyClass( 'controller-'.$controller );
-		$this->addBodyClass( 'action-'.$action );
-		$this->addBodyClass( 'site-'.$controller.'-'.$action );
+		$controller			= $this->env->getRequest()->get( 'controller' );
+		$action				= $this->env->getRequest()->get( 'action' );
+		$controllerKey		= str_replace( '/', '-', $controller );
+		$actionKey			= str_replace( '/', '-', $action );										//  @todo to be removed
+		$moduleKeyOld		= join( explode( ' ', ucwords( str_replace( '/', ' ', $controller ) ) ) );		//  @todo to be removed
+		$this->addBodyClass( 'module'.$moduleKeyOld );
+
+		$modules			= $this->env->getModules();												//  get installed modules
+		$controllerClass	= str_replace( ' ', '_', ucwords( str_replace( '/', ' ', $controller ) ) );
+		$module				= $modules->getModuleFromControllerClassName( $controllerClass );		//  try to get module of controller
+		if( $module ){																				//  module has been identified
+			$moduleKey		= str_replace( '_', '', $module->id );
+			$this->addBodyClass( 'module'.$moduleKey );
+		}
+
+		$this->addBodyClass( 'controller-'.$controllerKey );
+		$this->addBodyClass( 'action-'.$actionKey );
+		$this->addBodyClass( 'site-'.$controllerKey.'-'.$actionKey );
 
 		if( ( $modules = $this->env->getModules() ) ){												//  get module handler resource if existin
 			$data	= (object) array(

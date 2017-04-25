@@ -75,6 +75,24 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydr
 		return $this->modules;
 	}
 
+	/**
+	 *	Returns module providing class of given controller, if resolvable.
+	 *	@access		public
+	 *	@param		string			$controller			Name of controller class to get module for
+	 *	@return		object|NULL
+	 */
+	public function getModuleFromControllerClassName( $controller ){
+		$controllerPathName	= "Controller/".str_replace( "_", "/", $controller );
+		foreach( $this->env->getModules()->getAll() as $module ){
+			foreach( $module->files->classes as $file ){
+				$path	= pathinfo( $file->file, PATHINFO_DIRNAME ).'/';
+				$base	= pathinfo( $file->file, PATHINFO_FILENAME );
+				if( $path.$base === $controllerPathName )
+					return $module;
+			}
+		}
+	}
+
 	public function has( $moduleId ){
 		return array_key_exists( $moduleId, $this->modules );
 	}
