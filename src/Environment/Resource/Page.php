@@ -71,6 +71,7 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 		if( $env->config->get( 'app.revision' ) ){
 			$this->css->primer->setRevision( $env->config->get( 'app.revision' ) );
 			$this->css->theme->setRevision( $env->config->get( 'app.revision' ) );
+			$this->js->setRevision( $env->config->get( 'app.revision' ) );
 		}
 
 		if( strlen( $title	= $env->config->get( 'app.name' ) ) )
