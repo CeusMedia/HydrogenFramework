@@ -42,9 +42,9 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	public static $classRouter			= 'CMF_Hydrogen_Environment_Router_Single';
 	public static $configKeyBaseHref	= 'app.base.url';
 
-	/**	@var	Net_HTTP_Request_Receiver						$request	HTTP Request Object */
+	/**	@var	Net_HTTP_Request								$request	HTTP Request Object */
 	protected $request;
-	/**	@var	Net_HTTP_Request_Response						$request	HTTP Response Object */
+	/**	@var	Net_HTTP_Response								$response	HTTP Response Object */
 	protected $response;
 	/**	@var	CMF_Hydrogen_Environment_Router_Abstract		$router		Router Object */
 	protected $router;
