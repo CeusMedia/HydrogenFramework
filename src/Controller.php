@@ -82,12 +82,12 @@ class CMF_Hydrogen_Controller
 			$this->setupView( !$env->getRequest()->isAjax() );
 		$env->clock->profiler->tick( 'CMF_Controller('.get_class( $this ).'): got view object' );
 
-		$moduleClassName	= preg_replace( "/^Controller_/", "", get_class( $this ) );				//  cut controller class name ...
-		$this->defaultPath	= strtolower( str_replace( '_', '/', $moduleClassName ) );				//  to guess default controller URI path
+		$controllerName		= preg_replace( "/^Controller_/", "", get_class( $this ) );				//  get controller name from class name
+		$this->defaultPath	= strtolower( str_replace( '_', '/', $controllerName ) );				//  to guess default controller URI path
 		$this->path			= $this->defaultPath;													//  and note this as controller path
 
 		$captain			= $this->env->getCaptain();												//  prepare hook call
-		$data				= array( 'moduleClassName' => $moduleClassName );						//  with cut controller class name
+		$data				= array( 'controllerName' => $controllerName );							//  with cut controller name
 		if( $path = $captain->callHook( 'Controller', 'onDetectPath', $this, $data ) )				//  to get preferred controller URI path
 			$this->path		= $path;																//  and set if has been resolved
 
