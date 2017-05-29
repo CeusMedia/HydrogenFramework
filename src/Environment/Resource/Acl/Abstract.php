@@ -189,30 +189,54 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 	 *	Sets a list of links with public access.
 	 *	@access		public
 	 *	@param		array		$links			Map of links, eg. auth_login
+	 *	@param		string		$mode			Mode: set (default) or append
 	 *	@return		void
 	 */
-	public function setPublicLinks( $links ){
-		$this->linksPublic	= $links;
+	public function setPublicLinks( $links, $mode = 'set' ){
+		if( is_array( $links ) && count( $links ) ){
+			if( $mode === 'append' )
+				foreach( $links as $link )
+					$this->linksPublic[]	= $link;
+			else
+				$this->linksPublic	= $links;
+		}
+		return $this->linksPublic;
 	}
 
 	/**
 	 *	Sets a list of links with public access.
 	 *	@access		public
 	 *	@param		array		$links			Map of links, eg. auth_login
+	 *	@param		string		$mode			Mode: set (default) or append
 	 *	@return		void
 	 */
-	public function setPublicInsideLinks( $links ){
-		$this->linksPublicInside	= $links;
+	public function setPublicInsideLinks( $links, $mode = 'set' ){
+		if( is_array( $links ) && count( $links ) ){
+			if( $mode === 'append' )
+				foreach( $links as $link )
+					$this->linksPublicInside[]	= $link;
+			else
+				$this->linksPublicInside	= $links;
+		}
+		return $this->linksPublicInside;
 	}
 
 	/**
 	 *	Sets a list of links with public access.
 	 *	@access		public
 	 *	@param		array		$links			Map of links, eg. auth_login
+	 *	@param		string		$mode			Mode: set (default) or append
 	 *	@return		void
 	 */
-	public function setPublicOutsideLinks( $links ){
-		$this->linksPublicOutside	= $links;
+	public function setPublicOutsideLinks( $links, $mode = 'set' ){
+		if( is_array( $links ) && count( $links ) ){
+			if( $mode === 'append' )
+				foreach( $links as $link )
+					$this->linksPublicOutside[]	= $link;
+			else
+				$this->linksPublicOutside	= $links;
+		}
+		return $this->linksPublicOutside;
 	}
 
 	/**
