@@ -276,10 +276,13 @@ class CMF_Hydrogen_Model
 	 *	@todo		add arguments 'fields' using method 'getFieldsFromResult'
 	 *	@todo		OR add ...
 	 */
-	public function getAllByIndex( $key, $value, $orders = array(), $limits = array() ){
+	public function getAllByIndex( $key, $value, $orders = array(), $limits = array(), $fields = array(), $strict = FALSE ){
 		$this->table->focusIndex( $key, $value );
 		$data	= $this->table->get( FALSE, $orders, $limits );
 		$this->table->defocus();
+		if( $fields )
+			foreach( $data as $nr => $set )
+				$data[$nr]	= $this->getFieldsFromResult( $set, $fields, $strict );
 		return $data;
 	}
 
@@ -294,12 +297,15 @@ class CMF_Hydrogen_Model
 	 *	@todo		add arguments 'fields' using method 'getFieldsFromResult'
 	 *	@todo		note throwable exceptions
 	 */
-	public function getAllByIndices( $indices = array(), $orders = array(), $limits = array() ){
+	public function getAllByIndices( $indices = array(), $orders = array(), $limits = array(), $fields = array(), $strict = FALSE ){
 		$indices	= $this->checkIndices( $indices, TRUE, TRUE );
 		foreach( $indices as $key => $value )
 			$this->table->focusIndex( $key, $value );
 		$data	= $this->table->get( FALSE, $orders, $limits );
 		$this->table->defocus();
+		if( $fields )
+			foreach( $data as $nr => $set )
+				$data[$nr]	= $this->getFieldsFromResult( $set, $fields, $strict );
 		return $data;
 	}
 
