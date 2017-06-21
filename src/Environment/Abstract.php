@@ -68,6 +68,8 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	protected $disclosure;
 	/**	@var	CMF_Hydrogen_Environment_Resource_LogicPool				$logic			Pool for logic class instances */
 	protected $logic;
+	/**	@var	integer													$mode			Environment mode (dev,test,live,...) */
+	protected $mode							= 0;
 	/**	@var	CMF_Hydrogen_Environment_Resource_Module_Library_Local	$modules	Handler for local modules */
 	protected $modules						= array();
 	/**	@var	array													$options		Set options to override static properties */
@@ -154,6 +156,30 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		unset( $this->application );																//  unbind relation to application instance object
 		if( !$keepAppAlive )																		//  application is not meant to live without this environment
 			exit( 0 );																				//  so end of environment is end of application
+	}
+
+	protected function detectMode(){
+		$modes	= preg_split( '/[_.:;>#@\/-]/', strtolower( $this->config->get( 'app.mode' ) ) );
+		foreach( $modes as $mode ){
+			switch( $mode ){
+				case 'dev':
+				case 'devel':
+					$this->mode		|= CMF_Hydrogen_Environment::MODE_DEV;
+					break;
+				case 'test':
+				case 'testing':
+					$this->mode		|= CMF_Hydrogen_Environment::MODE_TEST;
+					break;
+				case 'stage':
+				case 'staging':
+					$this->mode		|= CMF_Hydrogen_Environment::MODE_STAGE;
+					break;
+				case 'live':
+				case 'production':
+					$this->mode		|= CMF_Hydrogen_Environment::MODE_LIVE;
+					break;
+			}
+		}
 	}
 
 	public function get( $key, $strict = TRUE )
@@ -401,6 +427,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		$this->config	= new ADT_List_Dictionary( $data );											//  create dictionary from array
 		if( $this->config->has( 'config.error.reporting' ) )										//  error reporting is defined
 			error_reporting( $this->config->get( 'config.error.reporting' ) );						//  set error reporting level
+		$this->detectMode();
 		$this->clock->profiler->tick( 'env: config', 'Finished setup of base app configuration.' );
 	}
 
