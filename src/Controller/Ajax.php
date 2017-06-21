@@ -8,27 +8,47 @@
 abstract class CMF_Hydrogen_Controller_Ajax{
 
 	protected $request;
+	protected $response;
 	protected $session;
-//	protected $messenger;
 
+	/**
+	 *	Constructor.
+	 *	@access		public
+	 *	@param		CMF_Hydrogen_Environment_Abstract	$env		Environment object
+	 *	@return		void
+	 */
 	public function __construct( CMF_Hydrogen_Environment_Abstract $env ){
 		$this->env	= $env;
 		try{
 			$this->request		= $this->env->getRequest();
 			$this->session		= $this->env->getSession();
-			$this->response	= new Net_HTTP_Response();
+			$this->response		= new Net_HTTP_Response();
 		}
 		catch( Exception $e ){
 			$this->respondException( $e, 500 );
 		}
-		try{
+		if( $this->env->mode & CMF_Hydrogen_Environment::MODE_LIVE ){
 			if( !method_exists( $this->request, 'isAjax' ) || !$this->request->isAjax() )
-				throw new BadMethodCallException( 'Access denied for non-AJAX requests', 400000 );
+				$this->respondError( 400000, 'Access denied for non-AJAX requests', 406 );
+		}
+		try{
+			$this->__onInit();
 		}
 		catch( Exception $e ){
-			$this->respondException( $e, 400 );
+			$this->respondException( $e, 500 );
 		}
 	}
+
+	/**
+	 *	Use this method to extend construction in you inherited AJAX controller.
+	 *	Please remember to declare any new members as protected!
+	 *	Please note any throwable exception!
+	 *	@access		protected
+	 *	@return		void
+	 */
+	protected function __onInit(){
+	}
+
 
 	protected function respondData( $data ){
 		$response	= array(
@@ -38,7 +58,7 @@ abstract class CMF_Hydrogen_Controller_Ajax{
 		$this->respond( json_encode( $response ) );
 	}
 
-	protected function respondError( $code, $message = NULL ){
+	protected function respondError( $code, $message = NULL, $httpCode = 412 ){
 		$response	= array(
 			'status'	=> 'error',
 			'code'		=> $code,
@@ -55,7 +75,7 @@ abstract class CMF_Hydrogen_Controller_Ajax{
 			'file'		=> $exception->getFile(),
 			'line'		=> $exception->getLine(),
 		);
-		$this->respond( json_encode( $response ) );
+		$this->respond( json_encode( $response ), $httpCode );
 	}
 
 	protected function respond( $string, $status = NULL ){
@@ -63,7 +83,7 @@ abstract class CMF_Hydrogen_Controller_Ajax{
 		if( $status )
 			$this->response->setStatus( $status );
 		$this->response->addHeaderPair( 'Content-Type', 'text/json' );
-		Net_HTTP_Response_Sender::sendResponse( $this->response, 'gzip', TRUE );
+		Net_HTTP_Response_Sender::sendResponse( $this->response, 'gzip', TRUE, TRUE );
 	}
 }
 ?>
