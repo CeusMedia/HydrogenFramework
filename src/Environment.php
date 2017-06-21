@@ -35,5 +35,10 @@
  */
 interface CMF_Hydrogen_Environment
 {
+	const MODE_UNKNOWN	= 0;
+	const MODE_DEV		= 1;
+	const MODE_TEST		= 2;
+	const MODE_STAGE	= 4;
+	const MODE_LIVE		= 8;
 }
 ?>
