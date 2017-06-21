@@ -47,6 +47,13 @@ abstract class CMF_Hydrogen_Application_Web_Abstract extends CMF_Hydrogen_Applic
 		// ...
 	}
 
+	/**
+	 *	Display report of missing modules as HTML.
+	 *	This method can be customized in applications.
+	 *	@access		protected
+	 *	@param		array		$modules		List of module IDs
+	 *	@return		void
+	 */
 	protected function reportMissingModules( $modules ){
 		$config	= $this->env->getConfig();
 		if( !$config->get( 'app.setup.url' ) )
@@ -65,7 +72,7 @@ abstract class CMF_Hydrogen_Application_Web_Abstract extends CMF_Hydrogen_Applic
 	}
 
 	/**
-	 *	Sets collacted View Components for Master View.
+	 *	Sets collected View Components for Master View.
 	 *	@access		protected
 	 *	@return		void
 	 */
@@ -75,7 +82,6 @@ abstract class CMF_Hydrogen_Application_Web_Abstract extends CMF_Hydrogen_Applic
 		{
 			if( !array_key_exists( $key, $this->components ) )
 				$this->components[$key]	= $component;
-
 		}
 	}
 
