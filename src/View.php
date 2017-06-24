@@ -235,7 +235,7 @@ class CMF_Hydrogen_View
 		if( !file_exists( $uri ) )																	//  content file is not existing
 			throw new RuntimeException( 'Locale content file "'.$fileKey.'" is missing.', 321 );	//  throw exception
 //		$data	= array_merge( $this->data, $data );
-		if( $this->env->getPage()->tea ){															//  template engine abstraction is enabled
+		if( 0 && $this->env->getPage()->tea ){															//  template engine abstraction is enabled
 			$this->env->getPage()->tea->setDefaultType( 'STE' );									//
 			$template	= $this->env->getPage()->tea->getTemplate( $uri );							//  create template object for content file
 			$template->setData( $data );															//  set given data
