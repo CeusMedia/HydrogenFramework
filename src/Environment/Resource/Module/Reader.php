@@ -147,7 +147,8 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 			$title		= $pair->hasAttribute( 'title' ) ? $pair->getAttribute( 'title' ) : NULL;
 			if( !$title && $pair->hasAttribute( 'info' ) )
 				$title	= $pair->getAttribute( 'info' );
-			$value		= trim( (string) $pair );
+//			$value		= trim( (string) $pair );
+			$value		= (string) $pair;
 			if( in_array( strtolower( $type ), array( 'boolean', 'bool' ) ) )						//  value is boolean
 				$value	= !in_array( strtolower( $value ), array( 'no', 'false', '0', '' ) );		//  value is not negative
 			$obj->config[$key]	= (object) array(
