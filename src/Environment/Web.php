@@ -170,12 +170,13 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 			}
 		}
 
+		$this->scheme	= getEnv( "HTTPS" ) ? 'https' : 'http';										//  note used URL scheme
+		$defaultPort	= $this->scheme === 'https' ? 443 : 80;										//  default port depends on HTTP scheme
 		$this->host		= preg_replace( "/:[0-9]{2,5}$/", "", getEnv( 'HTTP_HOST' ) );				//  note requested HTTP host name without port
-		$this->port		= getEnv( 'SERVER_PORT' ) == 80 ? '' : getEnv( 'SERVER_PORT' );				//  note requested HTTP port
-		$hostWithPort	= $this->host.( $this->port ? ':'.$this->port : '' );
+		$this->port		= getEnv( 'SERVER_PORT' ) == $defaultPort ? '' : getEnv( 'SERVER_PORT' );	//  note requested HTTP port
+		$hostWithPort	= $this->host.( $this->port ? ':'.$this->port : '' );						//  append port if different from default port
 		$this->root		= getEnv( 'DOCUMENT_ROOT' );												//  note document root of web server or virtual host
 		$this->path		= preg_replace( "@^/$@", "", dirname( getEnv( 'SCRIPT_NAME' ) ) )."/";		//  note requested working path
-		$this->scheme	= getEnv( "HTTPS" ) ? 'https' : 'http';										//  note used URL scheme
 		$this->url		= $this->scheme.'://'.$hostWithPort.$this->path;							//  note calculated base application URI
 		$this->uri		= $this->root.$this->path;													//  note calculated absolute base application path
 	}
