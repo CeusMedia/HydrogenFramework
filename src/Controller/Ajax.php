@@ -64,7 +64,7 @@ abstract class CMF_Hydrogen_Controller_Ajax{
 			'code'		=> $code,
 			'message'	=> $message,
 		);
-		$this->respond( json_encode( $response ) );
+		$this->respond( json_encode( $response ), $httpCode );
 	}
 
 	protected function respondException( $exception, $httpCode = 500 ){
