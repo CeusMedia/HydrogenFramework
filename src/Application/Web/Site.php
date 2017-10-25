@@ -92,35 +92,11 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 		}
 		catch( Exception $e )
 		{
-//			$captain->callHook( 'App', 'onDispatchException', $this, array() );						//  @todo use a hook call like this, extend by output handling
-			if( $e->getCode() == 403 && $this->env->getModules()->has( 'Resource_Authentication' ) ){
-				if( !$this->env->getSession()->get( 'userId' ) ){
-					$forwardUrl	= $request->get( 'controller' );
-					if( $request->get( 'action' ) )
-						$forwardUrl	.= '/'.$request->get( 'action' );
-					if( $request->get( 'arguments' ) )
-						foreach( $request->get( 'arguments' ) as $argument )
-							$forwardUrl	.= '/'.$argument;
-					$url	= $this->env->url.'auth/login?from='.$forwardUrl;
-					Net_HTTP_Status::sendHeader( 403 );
-					if( !$this->env->getRequest()->isAjax() )
-						header( 'Location: '.$url );
-					exit;
-				}
-			}
-			if( class_exists( 'Controller_Error' ) )
-			{
-				$controller	= new Controller_Error( $this->env );
-				$controller->handleException( $e );
-			}
-			if( class_exists( 'View_Error' ) )
-			{
-				$view	= new View_Error( $this->env );
-				$result	= $view->handleException( $e );
-				if( $result )
-					return $result;
-			}
-			else if( $this->env->getRequest()->has( 'showException' ) ){							//  @todo: kriss: you need to secure this view by a configurable run mode etc.
+			$captain	= $this->env->getCaptain();
+			$data		= array( 'exception' => $e );
+		 	$result		= $captain->callHook( 'App', 'onException', $this, $data );
+
+			if( $this->env->getRequest()->has( 'showException' ) ){									//  @todo: kriss: you need to secure this view by a configurable run mode etc.
 				$this->env->getResponse()->setBody( UI_HTML_Exception_Page::render( $e ) );			//  fill response with exception page
 				$this->env->getResponse()->setStatus( 500 );										//  indicate HTTP status 500 - internal server error
 				$this->env->getResponse()->send();													//  send response
@@ -133,6 +109,9 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 					header( 'Location: '.$this->env->getBaseUrl() );								//  redirect to home
 					exit;																			//  and quit
 				}
+				$this->env->getResponse()->setBody( 'Error: '.$e->getMessage() );					//  fill response with exception page
+				$this->env->getResponse()->send();													//  send response
+				exit;																				//  and quit
 			}
 //			throw new RuntimeException( "Unhandled exception: ".$e->getMessage(), 0, $e );			//  last call: throw exception with unhandled exception nested
 		}
