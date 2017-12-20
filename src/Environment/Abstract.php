@@ -251,6 +251,16 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		return $this->disclosure;
 	}
 
+	/**
+	 *	Returns Language Object.
+	 *	@access		public
+	 *	@return		CMF_Hydrogen_Environment_Resource_Language
+	 */
+	public function getLanguage()
+	{
+		return $this->language;
+	}
+
 	public function getLog()
 	{
 		return $this->log;
@@ -467,6 +477,12 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	 */
 	protected function initLog(){
 		$this->log	= new CMF_Hydrogen_Environment_Resource_Log( $this );
+	}
+
+	protected function initLanguage()
+	{
+		$this->language		= new CMF_Hydrogen_Environment_Resource_Language( $this );
+		$this->clock->profiler->tick( 'env: language' );
 	}
 
 	protected function initLogic(){

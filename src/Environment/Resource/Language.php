@@ -59,12 +59,13 @@ class CMF_Hydrogen_Environment_Resource_Language
 		$this->env			= $env;
 		$config				= $env->getConfig();
 
-		$this->filePath		= 'locales/';															//  assume default folder name
+		$this->filePath		= $env->uri.'locales/';													//  assume default folder name
 		if( $config->get( 'path.locales' ) )														//  a locales folder has been configured
-			$this->filePath	= $config->get( 'path.locales' );										//  take the configured folder name
-		if( !file_exists( $this->filePath ) )														//  locales folder is not existing
-			throw new RuntimeException( 'Locales folder is missing' );								//  quit with exception
-
+			$this->filePath	= $env->uri.$config->get( 'path.locales' );								//  take the configured folder name
+		if( !file_exists( $this->filePath ) ){														//  locales folder is not existing
+			$message	= sprintf( 'Locales folder "%s" is missing', $this->filePath );
+			throw new RuntimeException( $message );													//  quit with exception
+		}
 		if( $config->get( 'locale.allowed' ) )														//  allowed languages have been set
 			foreach( explode( ',', $config['locale.allowed'] ) as $nr => $language )				//  iterate extracted languages
 				$this->languages[]	= trim( $language );											//  save language without surrounding spaces

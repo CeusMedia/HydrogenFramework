@@ -182,16 +182,6 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	}
 
 	/**
-	 *	Returns Language Object.
-	 *	@access		public
-	 *	@return		CMF_Hydrogen_Environment_Resource_Language
-	 */
-	public function getLanguage()
-	{
-		return $this->language;
-	}
-
-	/**
 	 *	Returns Messenger Object.
 	 *	@access		public
 	 *	@return		CMF_Hydrogen_Environment_Resource_Messenger
@@ -261,12 +251,6 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 		$this->definition->setChannel( "html" );
 	}
 */
-	protected function initLanguage()
-	{
-		$this->language		= new CMF_Hydrogen_Environment_Resource_Language( $this );
-		$this->clock->profiler->tick( 'env: language' );
-	}
-
 	protected function initMessenger( $enabled = "auto" )
 	{
 		if( $enabled === "auto" )																	//  auto detect mode

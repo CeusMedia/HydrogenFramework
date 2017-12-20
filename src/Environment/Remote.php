@@ -51,8 +51,11 @@ class CMF_Hydrogen_Environment_Remote extends CMF_Hydrogen_Environment_Abstract{
 		self::$defaultPaths	= CMF_Hydrogen_Environment_Web::$defaultPaths;
 		$this->options	= $options;
 		$this->path		= isset( $options['pathApp'] ) ? $options['pathApp'] : getCwd().'/';
+		$this->uri		= isset( $options['pathApp'] ) ? $options['pathApp'] : getCwd().'/';											//
 
 		Loader::registerNew( 'php5', NULL, $this->path.'classes/' );								//  enable autoloader for remote app classes
+
+		self::$configFile	= $this->path."/config/config.ini";
 
 		$this->initClock();																			//  setup clock
 #		$this->initMessenger();																		//  setup user interface messenger
@@ -60,9 +63,9 @@ class CMF_Hydrogen_Environment_Remote extends CMF_Hydrogen_Environment_Abstract{
 		$this->initModules();																		//  setup module support
 		$this->initDatabase();																		//  setup database connection
 		$this->initCache();																			//  setup cache support
+		$this->initLanguage();
 
 		$this->hasDatabase	= (bool) $this->dbc;													//  note if database is available
-		$this->path	= $options['pathApp'];															//
 		$this->__onInit();
 	}
 
