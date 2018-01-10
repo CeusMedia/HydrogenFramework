@@ -53,8 +53,10 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	protected $clock;
 	/**	@var	ADT_List_Dictionary										$config			Configuration Object */
 	protected $config;
+	/**	@var	string													$configPath		Folder path to base configuration */
+	public static $configPath				= "config/";
 	/**	@var	string													$configFile		File path to base configuration */
-	public static $configFile				= "config.ini.inc";
+	public static $configFile				= "config.ini";
 	/**	@var	CMF_Hydrogen_Environment_Resource_Database_PDO			$dbc			Database Connection Object */
 	protected $dbc;
 	/**	@var	array													$defaultPaths	Map of default paths to extend base configuration */
@@ -406,7 +408,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	 */
 	protected function initConfiguration()
 	{
-		$configFile	= self::$configFile;															//  get config file @todo remove this old way
+		$configFile	= static::$configPath.self::$configFile;										//  get config file @todo remove this old way
 		if( !empty( $this->options['configFile'] ) )												//  get config file from options @todo enforce this new way
 			$configFile	= $this->options['configFile'];												//  get config file from options
 		if( !file_exists( $configFile ) ){															//  config file not found
@@ -416,7 +418,7 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 
 		$data			= parse_ini_file( $configFile, FALSE );										//  parse configuration file (without section support)
 
-		$configHost	= 'config/'.getEnv( 'HTTP_HOST' ).'.ini';
+		$configHost	= static::$configPath.getEnv( 'HTTP_HOST' ).'.ini';
 		if( file_exists( $configHost ) )
 			$data	= array_merge( $data, parse_ini_file( $configHost, FALSE ) );
 		foreach( $data as $key => $value ){															//  iterate config pairs for evaluation
