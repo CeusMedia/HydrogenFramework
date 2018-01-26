@@ -43,7 +43,8 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydr
 	public function __construct( CMF_Hydrogen_Environment_Abstract $env ){
 		$this->env		= $env;
 		$config			= $this->env->getConfig();
-		$this->path		= $this->env::$configPath.'modules/';
+		$envReflection	= new ReflectionObject( $this->env );
+		$this->path		= $envReflection->getConstant( 'configPath' ).'modules/';
 		if( $config->get( 'path.module.config' ) )
 			$this->path	= $config->get( 'path.module.config' );
 		$this->path		= $env->uri.$this->path;
