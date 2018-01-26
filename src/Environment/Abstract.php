@@ -94,6 +94,9 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 	 */
 	public function __construct( $options = array(), $isFinal = TRUE )
 	{
+		$pattern			= '/^'.preg_quote( self::$configPath ).'/';								//  fix for migration
+		self::$configFile	= preg_replace( $pattern, '', self::$configFile );						//  @todo remove in 0.8.6
+
 		self::$defaultPaths['cache']	= sys_get_temp_dir().'/cache/';
 		$this->options		= $options;																//  store given environment options
 		$this->path			= isset( $options['pathApp'] ) ? $options['pathApp'] : getCwd().'/';	//  detect application path
