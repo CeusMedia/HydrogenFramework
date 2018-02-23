@@ -259,10 +259,15 @@ class CMF_Hydrogen_Model
 	 *	@param		array			$fields			Map of Columns to include in SQL Query
 	 *	@param		array			$groupings		List of columns to group by
 	 *	@param		array			$havings		List of conditions to apply after grouping
+	 *	@param		boolean			$strict			Flag: throw exception if result is empty and fields are selected (default: FALSE)
 	 *	@return		array
 	 */
-	public function getAll( $conditions = array(), $orders = array(), $limits = array(), $fields = array(), $groupings = array(), $havings = array() ){
-		return $this->table->find( $fields, $conditions, $orders, $limits, $groupings, $havings );
+	public function getAll( $conditions = array(), $orders = array(), $limits = array(), $fields = array(), $groupings = array(), $havings = array(), $strict = FALSE ){
+		$data	= $this->table->find( $fields, $conditions, $orders, $limits, $groupings, $havings );
+		if( $fields )
+			foreach( $data as $nr => $set )
+				$data[$nr]	= $this->getFieldsFromResult( $set, $fields, $strict );
+		return $data;
 	}
 
 	/**
@@ -272,9 +277,9 @@ class CMF_Hydrogen_Model
 	 *	@param		string			$value			Value of Index
 	 *	@param		array			$orders			Map of Orders to include in SQL Query
 	 *	@param		array			$limits			List of Limits to include in SQL Query
+	 *	@param		boolean			$fields			List of fields or one field to return from result
+	 *	@param		boolean			$strict			Flag: throw exception if result is empty and fields are selected (default: FALSE)
 	 *	@return		array
-	 *	@todo		add arguments 'fields' using method 'getFieldsFromResult'
-	 *	@todo		OR add ...
 	 */
 	public function getAllByIndex( $key, $value, $orders = array(), $limits = array(), $fields = array(), $strict = FALSE ){
 		$this->table->focusIndex( $key, $value );
@@ -293,9 +298,9 @@ class CMF_Hydrogen_Model
 	 *	@param		array			$conditions		Map of Conditions to include in SQL Query
 	 *	@param		array			$orders			Map of Orders to include in SQL Query
 	 *	@param		array			$limits			List of Limits to include in SQL Query
+	 *	@param		boolean			$fields			List of fields or one field to return from result
+	 *	@param		boolean			$strict			Flag: throw exception if result is empty and fields are selected (default: FALSE)
 	 *	@return		array
-	 *	@todo		add arguments 'fields' using method 'getFieldsFromResult'
-	 *	@todo		note throwable exceptions
 	 */
 	public function getAllByIndices( $indices = array(), $orders = array(), $limits = array(), $fields = array(), $strict = FALSE ){
 		$indices	= $this->checkIndices( $indices, TRUE, TRUE );
