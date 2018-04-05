@@ -30,14 +30,14 @@ class CMF_Hydrogen_Environment_Resource_Log {
 	/**
 	 *	@trigger		Env::log
 	 */
-	public function log( $type, $message, $file = NULL, $line = NULL ){
+	public function log( $type, $message, $context = NULL, $file = NULL, $line = NULL ){
 		$data	= array(
 			'type'		=> $type,
 			'message'	=> $message,
 			'file'		=> $file,
 			'line'		=> $line,
 		);
-		if( $this->env->getCaptain()->callHook( 'Env', 'log', $this, $data ) )
+		if( $this->env->getCaptain()->callHook( 'Env', 'log', $context, $data ) )
 			return;
 		error_log( time().': '.$message."\n", 3, $this->path.$type.'.log' );
 	}
@@ -45,9 +45,9 @@ class CMF_Hydrogen_Environment_Resource_Log {
 	/**
 	 *	@trigger		Env::logException
 	 */
-	public function logException( $exception ){
+	public function logException( $exception, $context = NULL ){
 		$data	= array( 'exception' => $exception );
-		if( $this->env->getCaptain()->callHook( 'Env', 'logException', $this, $data ) )
+		if( $this->env->getCaptain()->callHook( 'Env', 'logException', $context, $data ) )
 			return;
 		error_log( time().': '.$exception->getMessage()."\n", 3, $this->path.'exception.log' );
 	}
