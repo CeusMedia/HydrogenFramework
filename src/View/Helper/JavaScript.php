@@ -54,7 +54,9 @@ class CMF_Hydrogen_View_Helper_JavaScript
 	 *	@access		protected
 	 *	@return		void
 	 */
-	protected function __construct(){}
+	protected function __construct( $env ){
+		$this->env	= $env;
+	}
 
 	/**
 	 *	Cloning this object is not allowed.
@@ -62,6 +64,13 @@ class CMF_Hydrogen_View_Helper_JavaScript
 	 *	@return		void
 	 */
 	private function __clone(){}
+
+	public function addModuleScript( $script, $level = 'mid', $key = NULL ){
+		$path	= $this->env->getConfig()->get( 'path.scripts' );
+		$level	= $this->sanitizeLevel( $level );
+		$this->addUrl( $path.$script, $level === 1 );
+//		$this->scripts[$level][$key][]	= $path.$script;
+	}
 
 	/**
 	 *	Collect a JavaScript block.
@@ -150,9 +159,9 @@ class CMF_Hydrogen_View_Helper_JavaScript
 	 *	@access		public
 	 *	@return		ADT_Singleton						Single instance of this Singleton class
 	 */
-	public static function getInstance(){
+	public static function getInstance( $env ){
 		if( !self::$instance )
-			self::$instance	= new self();
+			self::$instance	= new self( $env );
 		return self::$instance;
 	}
 

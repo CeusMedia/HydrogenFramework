@@ -56,7 +56,7 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 			$language	= $this->env->getLanguage()->getLanguage();
 
 		parent::__construct( 'XHTML_10_STRICT', $language );
-		$this->js			= CMF_Hydrogen_View_Helper_JavaScript::getInstance();
+		$this->js			= CMF_Hydrogen_View_Helper_JavaScript::getInstance( $env );
 
 		$path	= preg_replace( '/\/+$/', '', $env->config->get( 'path.themes' ) ).'/';
 		$this->pathPrimer	= $path;
