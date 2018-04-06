@@ -50,6 +50,8 @@ class CMF_Hydrogen_Environment_Resource_Disclosure{
 			$controller	= str_replace( '/', '_', $fileBase );
 			$className	= $options['classPrefix'].$controller;
 
+			if( !class_exists( $className ) )
+				continue;
 			$classReflection	= new ReflectionClass( $className );
 			$class	= new stdClass();
 			$class->name			= $className;
