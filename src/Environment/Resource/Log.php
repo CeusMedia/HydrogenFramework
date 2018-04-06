@@ -22,34 +22,62 @@ class CMF_Hydrogen_Environment_Resource_Log {
 	protected $env;
 	protected $path;
 
+	/**
+	 *	...
+	 *	@access		public
+	 *	@return		void
+	 */
 	public function __construct( $env ){
 		$this->env	= $env;
 		$this->path	= $env->getConfig()->get( 'path.logs' );
 	}
 
 	/**
-	 *	@trigger		Env::log
+	 *	Logs message by registered hooks or local log file failback.
+	 *	@access		public
+	 *	@param		int|string			$type			Message type as string (debug,info,note,warn,error) or constant value (see Model_Log_Message::TYPE_*)
+	 *	@param		mixed				$message		Message as string, array or data object
+	 *	@param		string|object		$context		Context of message as object or string
+	 *	@return		void
+	 *	@trigger	Env::log			Calls hook for handling by installed modules
 	 */
-	public function log( $type, $message, $context = NULL, $file = NULL, $line = NULL ){
+	public function log( $type, $message, $context = NULL/*, $file = NULL, $line = NULL*/ ){
 		$data	= array(
 			'type'		=> $type,
 			'message'	=> $message,
-			'file'		=> $file,
-			'line'		=> $line,
+//			'file'		=> $file,
+//			'line'		=> $line,
 		);
 		if( $this->env->getCaptain()->callHook( 'Env', 'log', $context, $data ) )
-			return;
-		error_log( time().': '.$message."\n", 3, $this->path.$type.'.log' );
+			return TRUE;
+		if( !is_string( $message ) && !is_numeric( $message ) )
+			$message	= json_encode( $message );
+		$entry	= array( microtime( TRUE ), '['.$type.']', $message );
+		error_log( join( ' ', $entry )."\n", 3, $this->path.'app.log' );
+
+//		$entry	= array( microtime( TRUE ), $message );
+//		error_log( join( ' ', $entry )."\n", 3, $this->path.'app.'.$type.'.log' );
+		return FALSE;
 	}
 
 	/**
-	 *	@trigger		Env::logException
+	 *	Logs exception by registered hooks or local log file failback.
+	 *	@access		public
+	 *	@param		exception			$exception		Exception to log
+	 *	@param		string|object		$context		Context of message as object or string
+	 *	@return		boolean				TRUE if handled by called module hooks
+	 *	@trigger	Env::logException	Calls hook for handling by installed modules
 	 */
 	public function logException( $exception, $context = NULL ){
 		$data	= array( 'exception' => $exception );
 		if( $this->env->getCaptain()->callHook( 'Env', 'logException', $context, $data ) )
-			return;
-		error_log( time().': '.$exception->getMessage()."\n", 3, $this->path.'exception.log' );
+			return TRUE;
+
+		$entry	= array( microtime( TRUE ), '[exception]', $exception->getMessage() );
+		error_log( join( ' ', $entry )."\n", 3, $this->path.'app.log' );
+
+//		error_log( time().': '.$exception->getMessage()."\n", 3, $this->path.'exception.log' );
+		return FALSE;
 	}
 }
 ?>
