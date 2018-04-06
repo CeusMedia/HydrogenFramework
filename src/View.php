@@ -288,57 +288,22 @@ class CMF_Hydrogen_View
 
 	public function loadTemplateFile( $fileName, $data = array(), $renderContent = TRUE )
 	{
-		$___templateUri	= $this->getTemplateUriFromFile( $fileName );
-		if( !file_exists( $___templateUri ) )
-			throw new RuntimeException( 'Template "'.$fileName.'" is not existing', 311 );
+		$filePath	= $this->getTemplateUriFromFile( $fileName );
+		if( !file_exists( $filePath ) )
+			throw new RuntimeException( 'Template "'.$filePath.'" is not existing', 311 );
 
-		if( $this->env->getPage()->tea ){
-			$data['this']		= $this;															//
-			$data['view']		= $this;															//
-			$data['env']		= $this->env;														//
-			$data['config']		= $this->env->getConfig();											//
-			$data['request']	= $this->env->getRequest();											//
-			$data['session']	= $this->env->getSession();											//
-			$data['helpers']	= $this->helpers;													//
-			$data	+= $this->data;																	//
-			$this->env->getPage()->tea->setDefaultType( 'PHP' );									//
-			$template	= $this->env->getPage()->tea->getTemplate( $___templateUri );				//
-			$template->setData( $data );															//
-			$content	= $template->render();														//  render content with template engine
-		}
-		else{
-			$___content	= '';
-			ob_start();
-			$view		= $___view		= $this;													//
-			$env		= $___env		= $this->env;												//
-			$config		= $___config	= $this->env->getConfig();									//
-			$request	= $___request	= $this->env->getRequest();									//
-			$session	= $___session	= $this->env->getSession();									//
-			$___data	= $data;																	//
-			extract( $this->data );																	//
-			extract( $___data );																	//
-			$helpers	= $this->helpers;															//
-			try{
-				$content	= include( $___templateUri );											//  render template by include
-			}
-			catch( Exception $e ){
-				$message	= 'Rendering template file "%s" failed: %s';
-				$message	= sprintf( $message, $___templateUri, $e->getMessage() );
-				$this->env->getCaptain()->callHook( 'Server:System', 'logException', $this, $e );
-				throw new RuntimeException( $message, 0, $e  );
-			}
-			if( $content === FALSE )
-				throw new RuntimeException( 'Template file "'.$___templateUri.'" is not existing' );
-			$buffer		= trim( preg_replace( '/^(<br( ?\/)?>)+/s', "", ob_get_clean() ) );			//  get standard output buffer
-			if( strlen( $buffer ) ){																//  there is something in buffer
-				if( !is_string( $content ) )														//  the view did not return content
-					$content	= $buffer;															//  use buffer as content
-				else if( $this->env->getMessenger() )												//  otherwise use messenger
-					$this->env->getMessenger()->noteFailure( nl2br( $buffer ) );					//  note as failure
-				else																				//  otherwise
-					throw new RuntimeException( $buffer );											//  throw exception
-			}
-		}
+		/*  --  PREPARE DATA BY ASSIGNED AND ADDITIONAL  --  */
+		if( isset( $this->data['this' ] ) )
+			unset( $this->data['this'] );
+		if( isset( $data['this' ] ) )
+			unset( $data['this'] );
+		$data		= array_merge( $this->data, $data );											//
+
+		/*  --  LOAD TEMPLATE AND APPLY DATA  --  */
+		if( $this->env->getPage()->tea )
+			$content	= $this->realizeTemplateWithTEA( $filePath, $data );
+		else
+			$content	= $this->realizeTemplate( $filePath, $data );								//
 		if( $renderContent )
 			$content	= $this->renderContent( $content );											//  apply modules to content
 		return $content;																			//  return loaded and rendered content
@@ -361,6 +326,74 @@ class CMF_Hydrogen_View
 			$list[$id]	= $value;																	//  append content to map
 		}
 		return $list;																				//  return map of collected files
+	}
+
+	/**
+	 *	...
+	 *	Check if template file is existing MUST be done beforehand.
+	 *	@param		string		$filePath		Template file path name with templates folder
+	 *	@param		array		$data			Additional template data, appened to assigned view data
+	 *	@return		string		Template content with applied data
+	 */
+	protected function realizeTemplate( $filePath, $data ){
+		$___content	= '';
+		$___templateUri	= $filePath;
+		ob_start();
+		extract( $data );																		//
+		$view		= $___view		= $this;													//
+		$env		= $___env		= $this->env;												//
+		$config		= $___config	= $this->env->getConfig();									//
+		$request	= $___request	= $this->env->getRequest();									//
+		$session	= $___session	= $this->env->getSession();									//
+		$helpers	= $___helpers	= $this->helpers;											//
+		try{
+			$content	= include( $___templateUri );											//  render template by include
+			if( $content === FALSE )
+				throw new RuntimeException( 'Template file "'.$___templateUri.'" is not existing' );
+		}
+		catch( Exception $e ){
+			UI_HTML_Exception_Page::display( $e );die;
+			$message	= 'Rendering template file "%1$s" failed: %2$s';
+			$message	= sprintf( $message, $filePath, $e->getMessage() );
+			$this->env->getLog()->log( 'error', $message, $this );
+			if( !$this->env->getLog()->logException( $e, $this ) )
+				throw new RuntimeException( $message, 0, $e  );
+			else if( $this->env->getMessenger() )
+				$this->env->getMessenger()->noteFailure( $message );
+		}
+		$buffer		= trim( preg_replace( '/^(<br( ?\/)?>)+/s', "", ob_get_clean() ) );			//  get standard output buffer
+		if( strlen( $buffer ) ){																//  there is something in buffer
+			if( !is_string( $content ) )														//  the view did not return content
+				$content	= $buffer;															//  use buffer as content
+			else if( $this->env->getMessenger() )												//  otherwise use messenger
+				$this->env->getMessenger()->noteFailure( nl2br( $buffer ) );					//  note as failure
+			else{																				//  otherwise
+				if( !$this->env->getLog()->log( 'error', $buffer, $this ) )
+					throw new RuntimeException( $buffer );											//  throw exception
+			}
+		}
+		return $content;
+	}
+
+	/**
+	 *	...
+	 *	Check if template file is existing MUST be done beforehand.
+	 *	@param		string		$filePath		Template file path name with templates folder
+	 *	@param		array		$data			Additional template data, appened to assigned view data
+	 *	@return		string		Template content with applied data
+	 */
+	protected function realizeTemplateWithTEA( $filePath, $data = array() )
+	{
+		$data['view']		= $this;															//
+		$data['env']		= $this->env;														//
+		$data['config']		= $this->env->getConfig();											//
+		$data['request']	= $this->env->getRequest();											//
+		$data['session']	= $this->env->getSession();											//
+		$data['helpers']	= $this->helpers;													//
+		$this->env->getPage()->tea->setDefaultType( 'PHP' );									//
+		$template	= $this->env->getPage()->tea->getTemplate( $filePath );						//
+		$template->setData( $data );															//
+		return $template->render();																//  render content with template engine
 	}
 
 	protected function registerHelper( $name, $class, $parameters = array() )
