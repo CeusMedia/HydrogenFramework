@@ -317,6 +317,8 @@ class CMF_Hydrogen_View
 	 *	@return		array		Prefixed map of collected file contents mapped by prefixed IDs
      */
 	public function populateTexts( $keys, $path, $data = array(), $prefix = "text" ){
+		if( is_string( $keys ) )																	//  list if keys is comma separated
+			$keys	= preg_split( '/\s*,\s*/', trim( trim( $keys, ',' ) ) );						//  split string into array
 		$list	= array();																			//  prepare empty list
 		$files	= $this->loadContentFiles( $path, $keys, $data );									//  try to load files
 		foreach( $files as $key => $value ){														//  iterate file contents
