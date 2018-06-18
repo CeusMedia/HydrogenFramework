@@ -41,26 +41,29 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 	protected $suffix				= "";
 	protected $revision;
 	/**	@var	array				$styles		List of StyleSheet blocks */
-	protected $styles				= array( 'top' => array(), 'mid' => array(), 'end' => array() );
-	protected $urls					= array( 'top' => array(), 'mid' => array(), 'end' => array() );
+	protected $styles				= array();
+	protected $urls					= array();
 	protected $useCompression		= FALSE;
 	public $indent					= "\t\t";
 
 	public function __construct( $basePath = NULL ){
 		if( $basePath !== NULL )
 			$this->setBasePath( $basePath );
+		for( $i=0; $i<=9; $i++ ){
+			$this->styles[$i]	= array();
+			$this->urls[$i]		= array();
+		}
 	}
 
 	/**
 	 *	Collect a StyleSheet block.
 	 *	@access		public
 	 *	@param		string		$style		StyleSheet block
-	 *	@param		integer		$level		Run level, values: (top, mid, end), default: mid
+	 *	@param		integer		$level		Optional: Load level (0-9 or {top(=1),mid(=4),end(=8)}, default: mid)
 	 *	@return		void
 	 */
 	public function addStyle( $style, $level = 'mid' ){
-		$level	= is_bool( $level ) ? ( $level ? 'top' : 'mid' ) : $level;				//  hack: map older boolean values to levels @todo remove if modules are adjusted
-		$level	= in_array( $level, array( 'top', 'mid', 'end' ) ) ? $level : 'mid';
+		$level	= $this->interpretLoadLevel( $level );
 		$this->styles[$level][]		= $style;
 	}
 
@@ -68,12 +71,12 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 	 *	Add a StyleSheet URL.
 	 *	@access		public
 	 *	@param		string		$url		StyleSheet URL
-	 *	@param		integer		$level		Run level between 0 and 9
+	 *	@param		integer		$level		Optional: Load level (0-9 or {top(=1),mid(=4),end(=8)}, default: mid)
+	 *	@param		array		$attributes	Optional: Additional style tag attributes
 	 *	@return		void
 	 */
-	public function addUrl( $url, $level = 'mid', $attributes = array() ){
-		$level	= is_bool( $level ) ? ( $level ? 'top' : 'mid' ) : $level; // hack: map older boolean values to levels @todo remove if modules are adjusted
-		$level	= in_array( $level, array( 'top', 'mid', 'end' ) ) ? $level : 'mid';
+	public function addUrl( $url, $level = NULL, $attributes = array() ){
+		$level	= $this->interpretLoadLevel( $level );
 		$this->urls[$level][]		= array( $url, $attributes );
 	}
 
@@ -160,13 +163,13 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 	 *	@return		array
 	 */
 	public function getStyleList(){
-		$list	= array( 'top' => array(), 'mid' => array(), 'end' => array() );
+		$list	= array();
 		foreach( $this->styles as $level => $map ){
 			foreach( $map as $style ){
-				$list[$level][]	= $style;
+				$list[]	= $style;
 			}
 		}
-		return $list['top'] + $list['mid'] + $list['end'];
+		return $list;
 	}
 
 	/**
@@ -175,15 +178,53 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 	 *	@return		array
 	 */
 	public function getUrlList(){
-		$list	= array( 'top' => array(), 'mid' => array(), 'end' => array() );
+		$list	= array();
 		foreach( $this->urls as $level => $map ){
 			foreach( $map as $url ){
 				if( !preg_match( "@^[a-z]+://@", $url[0] ) )
 					$url[0]	= $this->pathBase.$url[0];
-				$list[$level][]	= $url;
+				$list[]	= $url;
 			}
 		}
-		return array_merge( $list['top'], $list['mid'], $list['end'] );
+		return $list;
+	}
+
+	/**
+	 *	Try to understand given load level.
+	 *	Matches given value into a scale between 0 and 9.
+	 *	Fallback for older module version.
+	 *	Understands:
+	 *	- NULL or empty string as level 4 (mid).
+	 *	- boolean TRUE as level 1 (top).
+	 *	- boolean FALSE as level 4 (mid).
+	 *	- string {top,head,start} as level 1.
+	 *	- string {mid,center,normal,default} as level 4.
+	 *	- string {end,tail,bottom} as level 8.
+	 *	- NULL or empty string as level 4.
+	 *	@access		protected
+	 *	@param		mixed			$level 			Load level: 0-9 or {top(1),mid(4),end(8)} or {TRUE(1),FALSE(4)} or NULL(4)
+	 *	@return		integer			Level as integer value between 0 and 9
+	 *	@throws		InvalidArgumentException		if level is not if type NULL, boolean, integer or string
+	 *	@throws		RangeException					if given string is not within {top,head,start,mid,center,normal,default,end,tail,bottom}
+	 */
+	protected function interpretLoadLevel( $level ){
+		if( is_null( $level ) || !strlen( trim( $level ) ) )
+			return 4;
+		if( is_int( $level ) )
+			return min( max( $level, 0 ), 9 );
+		if( is_bool( $level ) )
+			return $level ? 1 : 4;
+		if( is_string( $level ) && preg_match( '/^[0-9]$/', trim( $level ) ) )
+			return (int) $level;
+		if( !is_string( $level ) )
+			throw new InvalidArgumentException( 'Load level must be integer or string' );
+		if( in_array( $level, array( 'top', 'head', 'start' ) ) )
+			return 1;
+		if( in_array( $level, array( 'mid', 'center', 'normal', 'default' ) ) )
+			return 4;
+		if( in_array( $level, array( 'end', 'tail', 'bottom' ) ) )
+			return 8;
+		throw new RangeException( 'Invalid load level: '.$level );
 	}
 
 	/**
@@ -215,12 +256,12 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 				foreach( $urls as $url ){
 					if( $this->revision )
 						$url[0]	.= '?r'.$this->revision;
-					$attributes	= array(
+					$attributes	= array_merge( array(
 						'rel'		=> 'stylesheet',
 						'type'		=> 'text/css',
 						'media'		=> 'all',
 						'href'		=> $url[0]
-					) + $url[1];
+					), array( $url[1] ) );
 					$list[]	= UI_HTML_Tag::create( 'link', NULL, $attributes );
 				}
 				$links	= implode( "\n".$this->indent, $list  );
