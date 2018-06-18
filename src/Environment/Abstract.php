@@ -312,6 +312,13 @@ abstract class CMF_Hydrogen_Environment_Abstract implements CMF_Hydrogen_Environ
 		return $this->getConfig()->get( 'module.roles' );
 	}
 
+	public function hasModule( $moduleId )
+	{
+		if( !$this->hasModules() )
+			return FALSE;
+		return $this->getModules()->has( $moduleId );
+	}
+
 	public function hasModules()
 	{
 		return $this->modules !== NULL;
