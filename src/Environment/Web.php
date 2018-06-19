@@ -28,7 +28,7 @@
  *	Setup for Resource Environment for Hydrogen Applications.
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment
- *	@extends		CMF_Hydrogen_Environment_Abstract
+ *	@extends		CMF_Hydrogen_Environment
  *	@uses			Net_HTTP_Request_Receiver
  *	@uses			Net_HTTP_Request_Response
  *	@uses			Net_HTTP_Session
@@ -37,7 +37,7 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract{
+class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment{
 
 	public static $classRouter			= 'CMF_Hydrogen_Environment_Router_Single';
 

@@ -28,7 +28,7 @@
  *	Setup for Resource Environment for Hydrogen Applications.
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment
- *	@extends		CMF_Hydrogen_Environment_Abstract
+ *	@extends		CMF_Hydrogen_Environment
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2012-2016 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -36,7 +36,7 @@
  *	@todo			is a web environment needed instead? try to avoid this - maybe a console messenger needs to be implemented therefore
  *	@todo			finish path resolution (path is set twice at the moment)
  */
-class CMF_Hydrogen_Environment_Remote extends CMF_Hydrogen_Environment_Abstract{
+class CMF_Hydrogen_Environment_Remote extends CMF_Hydrogen_Environment{
 
 	/**	@var	boolean		$hasDatabase		Flag: indicates availability of a database connection */
 	public $hasDatabase		= FALSE;

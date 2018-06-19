@@ -19,7 +19,9 @@
  */
 class CMF_Hydrogen_Environment_Resource_Log {
 
+	/**	@var	CMF_Hydrogen_Environment		$env		Environment instance */
 	protected $env;
+
 	protected $path;
 
 	/**
@@ -27,7 +29,7 @@ class CMF_Hydrogen_Environment_Resource_Log {
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function __construct( $env ){
+	public function __construct( CMF_Hydrogen_Environment $env ){
 		$this->env	= $env;
 		$this->path	= $env->getConfig()->get( 'path.logs' );
 	}

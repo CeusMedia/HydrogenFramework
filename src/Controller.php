@@ -46,7 +46,7 @@ class CMF_Hydrogen_Controller
 	const RESTART_FROM_SET			= 8;
 	const RESTART_FROM_PUSH			= 16;
 
-	/**	@var		CMF_Hydrogen_Environment_Abstract	$env			Application Environment Object */
+	/**	@var		CMF_Hydrogen_Environment			$env			Application Environment Object */
 	protected $env;
 	/**	@var		string								$defaultPath	Default controller URI path */
 	protected $defaultPath;
@@ -69,11 +69,11 @@ class CMF_Hydrogen_Controller
 	 *	Will set up related view class by default. Disable this for controllers without views.
 	 *	Calls __onInit() in the end.
 	 *	@access		public
-	 *	@param		CMF_Hydrogen_Environment_Abstract	$env			Application Environment Object
+	 *	@param		CMF_Hydrogen_Environment			$env			Application Environment Object
 	 *	@param		boolean								$setupView		Flag: auto create view object for controller (default: TRUE)
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment_Abstract $env, $setupView = TRUE )
+	public function __construct( CMF_Hydrogen_Environment $env, $setupView = TRUE )
 	{
 		$env->clock->profiler->tick( 'CMF_Controller('.get_class( $this ).')' );
 		$this->setEnv( $env );
@@ -350,7 +350,7 @@ class CMF_Hydrogen_Controller
 	 *	Sets Data for View.
 	 *	@access		protected
 	 *	@param		array		$data			Array of Data for View
-	 *	@param		string		[$topic]			Topic Name of Data
+	 *	@param		string		$topic			Optionaal: Topic Name of Data
 	 *	@return		void
 	 */
 	protected function setData( $data, $topic = "" ){
@@ -374,10 +374,10 @@ class CMF_Hydrogen_Controller
 	/**
 	 *	Sets Environment of Controller by copying Framework Member Variables.
 	 *	@access		protected
-	 *	@param		CMF_Hydrogen_Environment_Abstract	$env			Framework Resource Environment Object
+	 *	@param		CMF_Hydrogen_Environment	$env			Framework Resource Environment Object
 	 *	@return		void
 	 */
-	protected function setEnv( CMF_Hydrogen_Environment_Abstract &$env ){
+	protected function setEnv( CMF_Hydrogen_Environment $env ){
 		$this->env			= $env;
 		$this->controller	= $env->getRequest()->get( 'controller' );
 		$this->action		= $env->getRequest()->get( 'action' );

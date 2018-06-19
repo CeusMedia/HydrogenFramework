@@ -46,7 +46,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source implements CMF_Hyd
 	protected $modules		= array();
 	protected $source;
 
-	public function __construct( CMF_Hydrogen_Environment_Abstract $env, $source ){
+	public function __construct( CMF_Hydrogen_Environment $env, $source ){
 		$this->env		= $env;
 		$this->source	= $source;
 		$this->scan();

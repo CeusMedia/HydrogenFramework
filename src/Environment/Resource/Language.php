@@ -38,7 +38,7 @@ class CMF_Hydrogen_Environment_Resource_Language{
 	/**	@var		array								$data			Array of loaded Language File Definitions */
 	protected $data;
 
-	/**	@var		CMF_Hydrogen_Environment_Abstract	$env			Application Environment Object */
+	/**	@var		CMF_Hydrogen_Environment			$env			Application Environment Object */
 	protected $env;
 
 	/**	@var		string								$filePath		Path to Language Files */
@@ -54,11 +54,11 @@ class CMF_Hydrogen_Environment_Resource_Language{
 	 *	Constructor.
 	 *	Uses config::path.locales and defaults to 'locales/'.
 	 *	@access		public
-	 *	@param		CMF_Hydrogen_Environment_Abstract	$env			Application Environment Object
+	 *	@param		CMF_Hydrogen_Environment			$env			Application Environment Object
 	 *	@param		string								$language		Language to select
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment_Abstract $env ){
+	public function __construct( CMF_Hydrogen_Environment $env ){
 		$this->env			= $env;
 		$config				= $env->getConfig();
 

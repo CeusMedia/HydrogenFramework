@@ -40,7 +40,7 @@ abstract class CMF_Hydrogen_Application_Abstract{
 	/**	@var		string								$classEnvironment		Class Name of Application Environment to build */
 	public static $classEnvironment						= 'CMF_Hydrogen_Environment_Web';
 
-	/**	@var		CMF_Hydrogen_Environment_Abstract	$env					Application Environment Object */
+	/**	@var		CMF_Hydrogen_Environment			$env					Application Environment Object */
 	protected $env;
 
 	public static $modulesNeeded						= array();				//  @todo for PHP 5.3+: make protected and use static:: instead of self:: on use -> now you can set value on App class construction
@@ -48,10 +48,10 @@ abstract class CMF_Hydrogen_Application_Abstract{
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		CMF_Hydrogen_Environment_Abstract	$env					Framework Environment
+	 *	@param		CMF_Hydrogen_Environment			$env					Framework Environment
 	 *	@return		void
 	 */
-	public function __construct( $env = NULL ){
+	public function __construct( CMF_Hydrogen_Environment $env = NULL ){
 		if( !$env )
 			$env		= Alg_Object_Factory::createObject( self::$classEnvironment );
 		else if( is_string( $env ) )

@@ -38,7 +38,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Editor{
 	protected $path;
 	protected $nsXml	= 'http://www.w3.org/XML/1998/namespace';
 
-	public function __construct( CMF_Hydrogen_Environment_Abstract $env ){
+	public function __construct(CMF_Hydrogen_Environment $env ){
 		$this->path		= 'config/modules/';
 		if( $env->getConfig()->get( 'path.module.config' ) )
 			$this->path	= $env->getConfig()->get( 'path.module.config' );

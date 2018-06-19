@@ -19,18 +19,18 @@
  */
 class CMF_Hydrogen_Environment_Resource_LogicPool {
 
-	/**	@var			CMF_Hydrogen_Environment_Abstract	$env		Environment object */
+	/**	@var			CMF_Hydrogen_Environment	$env		Environment object */
 	protected $env;
-	/**	@var			array								$pool		Map of logic class names or instances */
+	/**	@var			array						$pool		Map of logic class names or instances */
 	protected $pool		= array();
 
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		CMF_Hydrogen_Environment_Abstract	$env	Environment object
+	 *	@param		CMF_Hydrogen_Environment		$env		Environment object
 	 *	@return		void
 	 */
-	public function  __construct( CMF_Hydrogen_Environment_Abstract $env ) {
+	public function  __construct( CMF_Hydrogen_Environment $env ) {
 		$this->env		= $env;
 	}
 

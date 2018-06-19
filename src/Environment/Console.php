@@ -17,7 +17,7 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment_Abstract{
+class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment{
 
 	/**	@var	Console_RequestReceiver		$request	Console Request Object */
 	protected $request;

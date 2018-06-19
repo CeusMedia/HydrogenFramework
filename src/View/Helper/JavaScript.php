@@ -33,28 +33,38 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_View_Helper_JavaScript
-{
+class CMF_Hydrogen_View_Helper_JavaScript{
+
 	protected static $instance;
+
 	protected $pathCache			= "cache/";
+
 	protected $prefix				= "";
+
 	protected $suffix				= "";
+
 	protected $revision;
+
 	/**	@var	array				$scripts			List of JavaScript blocks */
 	protected $scripts				= array();
+
 	/**	@var	array				$scriptsOnReady		List if JavaScripts to run on load if browser is ready */
 	protected $scriptsOnReady		= array();
+
 	protected $urls					= array();
+
 	protected $useCompression		= FALSE;
+
 	public $indent					= "\t\t";
 
 	/**
 	 *	Constructor is disabled from public context.
 	 *	Use static call 'getInstance()' instead of 'new'.
 	 *	@access		protected
+	 *	@param		CMF_Hydrogen_Environment	$env		Environment object
 	 *	@return		void
 	 */
-	protected function __construct( $env ){
+	protected function __construct( CMF_Hydrogen_Environment $env ){
 		$this->env	= $env;
 	}
 

@@ -35,7 +35,7 @@
  *	@todo			Code Documentation
  */
 class CMF_Hydrogen_Application_Console extends CMF_Hydrogen_Application_Abstract{
-	public function __construct( CMF_Hydrogen_Environment_Abstract $env = NULL ){
+	public function __construct( CMF_Hydrogen_Environment $env = NULL ){
 		if( self::$classEnvironment === 'CMF_Hydrogen_Environment_Web' )
 			self::$classEnvironment	= 'CMF_Hydrogen_Environment_Console';
 		parent::__construct( $env );

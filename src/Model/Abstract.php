@@ -5,7 +5,7 @@ abstract class CMF_Hydrogen_Model_Abstract{
 	protected $idKey;
 	protected $className;
 
-	public function __construct( $env ){
+	public function __construct( CMF_Hydrogen_Environment $env ){
 		$this->env	= $env;
 		$this->__onInit();
 		$this->className	= get_class( $this );

@@ -29,16 +29,16 @@ class CMF_Hydrogen_Environment_Resource_Logic
 	);
 	public $fileNameLogDev		= 'logs/dev.log';
 
-	/**	@var	CMF_Hydrogen_Environment_Abstract	$env	Environment object */
+	/**	@var	CMF_Hydrogen_Environment			$env	Environment object */
 	protected $env;
 
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		CMF_Hydrogen_Environment_Abstract	$env	Environment
+	 *	@param		CMF_Hydrogen_Environment		$env	Environment
 	 *	@return		void
 	 */
-	public function  __construct( CMF_Hydrogen_Environment_Abstract $env ) {
+	public function  __construct( CMF_Hydrogen_Environment $env ) {
 		$this->env		= $env;
 		$this->config	= $env->getConfig();
 		$this->os		= self::OS_LINUX;															//  set OS to Linux by default

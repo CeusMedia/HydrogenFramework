@@ -34,10 +34,12 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-interface CMF_Hydrogen_View_Helper
-{
+interface CMF_Hydrogen_View_Helper{
+
 	public function hasEnv();
+
 	public function needsEnv();
+
 	public function setEnv( CMF_Hydrogen_Environment $env );
 
 //	@todo 	kriss: see if this pattern (having render method) is realizable for all existing helpers

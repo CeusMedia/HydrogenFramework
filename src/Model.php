@@ -36,7 +36,7 @@
  */
 class CMF_Hydrogen_Model
 {
-	/**	@var		CMF_Hydrogen_Environment_Abstract	$env			Application Environment Object */
+	/**	@var		CMF_Hydrogen_Environment		$env			Application Environment Object */
 	protected $env;
 	/**	@var		string							$name			Name of Database Table without Prefix */
 	protected $name									= "";
@@ -60,11 +60,11 @@ class CMF_Hydrogen_Model
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		CMF_Hydrogen_Environment_Abstract	$env			Application Environment Object
+	 *	@param		CMF_Hydrogen_Environment		$env			Application Environment Object
 	 *	@param		integer							$id				ID to focus on
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment_Abstract $env, $id = NULL ){
+	public function __construct( CMF_Hydrogen_Environment $env, $id = NULL ){
 		$this->setEnv( $env );
 		$this->table	= new DB_PDO_TableWriter(
 			$this->env->getDatabase(),
@@ -591,11 +591,11 @@ class CMF_Hydrogen_Model
 	/**
 	 *	Sets Environment of Controller by copying Framework Member Variables.
 	 *	@access		protected
-	 *	@param		CMF_Hydrogen_Environment_Abstract	$env			Application Environment Object
+	 *	@param		CMF_Hydrogen_Environment	$env			Application Environment Object
 	 *	@return		void
-	 *	@throws		RuntimeException		if no database resource is available in given environment
+	 *	@throws		RuntimeException			if no database resource is available in given environment
 	 */
-	protected function setEnv( CMF_Hydrogen_Environment_Abstract $env )
+	protected function setEnv( CMF_Hydrogen_Environment $env )
 	{
 		$this->env		= $env;
 		if( !$env->getDatabase() )

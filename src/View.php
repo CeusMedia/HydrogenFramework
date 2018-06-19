@@ -35,34 +35,42 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_View
-{
+class CMF_Hydrogen_View{
+
 	/**	@var		array						$data			Collected Data for View */
 	protected $data			= array();
+
 	/**	@var		CMF_Hydrogen_Environment_Web	$env			Environment Object */
 	protected $env;
+
 	/**	@var		string						$controller		Name of called Controller */
 	protected $controller	= NULL;
+
 	/**	@var		string						$action			Name of called Action */
 	protected $action		= NULL;
+
 	/**	@var		array						$helpers		Map of view helper classes/objects */
 	protected $helpers;
+
 	/**	@var		string						$time			Instance of time converter */
 	protected $time;
+
 	/**	@var		string						$html			Instance of HTML library class */
 	protected $html;
+
 	/**	@var		CMM_TEA_Factory				$tea			Instance of TEA (Template Engine Abstraction) Factory (from cmModules) OR empty if TEA is not available */
 	protected $tea			= NULL;
+
 	/**	@var		string						$pathTemplates	Path to template file, can be set by config::path.templates */
 	protected $pathTemplates	= 'templates/';
 
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		CMF_Hydrogen_Environment_Abstract	$env			Framework Resource Environment Object
+	 *	@param		CMF_Hydrogen_Environment_Web	$env			Framework Resource Environment Object
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment_Abstract $env )
+	public function __construct( CMF_Hydrogen_Environment_Web $env )
 	{
 		$env->clock->profiler->tick( 'CMF_View('.get_class( $this ).')::init start' );
 		$this->setEnv( $env );
@@ -448,10 +456,10 @@ class CMF_Hydrogen_View
 	/**
 	 *	Sets Environment of Controller by copying Framework Member Variables.
 	 *	@access		protected
-	 *	@param		CMF_Hydrogen_Environment_Abstract	$env			Framework Resource Environment Object
+	 *	@param		CMF_Hydrogen_Environment		$env			Framework Resource Environment Object
 	 *	@return		void
 	 */
-	protected function setEnv( CMF_Hydrogen_Environment_Abstract $env )
+	protected function setEnv( CMF_Hydrogen_Environment $env )
 	{
 		$this->env			= $env;
 		if( $env instanceof CMF_Hydrogen_Environment_Web ){

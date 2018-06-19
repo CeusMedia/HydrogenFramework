@@ -14,10 +14,10 @@ abstract class CMF_Hydrogen_Controller_Ajax{
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		CMF_Hydrogen_Environment_Abstract	$env		Environment object
+	 *	@param		CMF_Hydrogen_Environment		$env		Environment object
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment_Abstract $env ){
+	public function __construct( CMF_Hydrogen_Environment $env ){
 		$this->env	= $env;
 		try{
 			$this->request		= $this->env->getRequest();

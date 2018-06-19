@@ -23,25 +23,25 @@
  */
 class CMF_Hydrogen_Logic{
 
-	/**	@var	CMF_Hydrogen_Environment_Abstract						$env		Environment object */
+	/**	@var	CMF_Hydrogen_Environment								$env			Application Environment Object */
 	protected $env;
 
-	/**	@var	CMF_Hydrogen_Environment_Resource_Captain				$captain	Event handler */
+	/**	@var	CMF_Hydrogen_Environment_Resource_Captain				$captain		Event handler */
 	protected $captain;
 
-	/**	@var	ADT_List_Dictionary										$config		Configuration collection */
+	/**	@var	ADT_List_Dictionary										$config			Configuration collection */
 	protected $config;
 
-	/**	@var	CMF_Hydrogen_Environment_Resource_Module_Library_Local	$modules	Module library */
+	/**	@var	CMF_Hydrogen_Environment_Resource_Module_Library_Local	$modules		Module library */
 	protected $modules;
 
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		CMF_Hydrogen_Environment_Abstract	$env	Environment
+	 *	@param		CMF_Hydrogen_Environment		$env		Environment instance
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment_Abstract $env ){
+	public function __construct( CMF_Hydrogen_Environment $env ){
 		$key	= $env->getLogic()->getKeyFromClassName( get_class( $this ) );
 		if( $env->logic->has( $key ) && $env->logic->isInstantiated( $key ) )
 			return $env->logic->get( $key );

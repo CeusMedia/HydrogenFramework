@@ -37,7 +37,7 @@
  */
 abstract class CMF_Hydrogen_View_Helper_Abstract implements CMF_Hydrogen_View_Helper{
 
-	/**	@var		CMF_Hydrogen_Environment_Abstract	$env			Environment Object */
+	/**	@var		CMF_Hydrogen_Environment			$env			Environment Object */
 	protected		$env								= NULL;
 
 	/**	@var		boolean								$needsEnv		Flag: needs Environment to be set */

@@ -35,7 +35,7 @@
  */
 class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame{
 
-	/**	@var	CMF_Hydrogen_Environment_Abstract		$env				Environment object */
+	/**	@var	CMF_Hydrogen_Environment				$env				Environment object */
 	public $env;
 
 	protected $bodyClasses		= array();
@@ -57,7 +57,7 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame{
 	/**	@var		CMM_TEA_Factory						$tea				Instance of TEA (Template Engine Abstraction) Factory (from cmModules) OR empty if TEA is not available */
 	public $tea					= NULL;
 
-	public function __construct( CMF_Hydrogen_Environment_Abstract $env ){
+	public function __construct( CMF_Hydrogen_Environment $env ){
 		$language	= 'en';
 		$this->env	= $env;
 		if( $this->env->has( 'language' ) )

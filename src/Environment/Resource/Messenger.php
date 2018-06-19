@@ -38,7 +38,7 @@
  */
 class CMF_Hydrogen_Environment_Resource_Messenger{
 
-	/**	@var		CMF_Hydrogen_Environment_Abstract	$env			Application Environment Object */
+	/**	@var		CMF_Hydrogen_Environment		$env			Application Environment Object */
 	protected $env;
 
 	/**	@var		array							$classes		CSS Classes of Message Types */
@@ -56,10 +56,10 @@ class CMF_Hydrogen_Environment_Resource_Messenger{
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		CMF_Hydrogen_Environment_Abstract	$env			Instance of any Session Handler
+	 *	@param		CMF_Hydrogen_Environment		$env			Instance of any Session Handler
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment_Abstract $env, $enabled = TRUE  ){
+	public function __construct( CMF_Hydrogen_Environment $env, $enabled = TRUE  ){
 		$this->env		= $env;
 		$this->enabled	= $enabled;
 	}

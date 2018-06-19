@@ -34,8 +34,10 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
-{
+abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract{
+
+	protected $env;
+
 	public $roleAccessNone	= 0;
 	public $roleAccessFull	= 1;
 	public $roleAccessAcl	= 2;
@@ -51,10 +53,10 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		CMF_Hydrogen_Environment_Abstract	$env	Environment Object
+	 *	@param		CMF_Hydrogen_Environment	$env	Environment Object
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment_Abstract $env )
+	public function __construct(CMF_Hydrogen_Environment $env )
 	{
 		$this->env	= $env;
 	}

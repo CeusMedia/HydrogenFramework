@@ -40,7 +40,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydr
 	protected $env;
 	protected $modules		= array();
 
-	public function __construct( CMF_Hydrogen_Environment_Abstract $env ){
+	public function __construct(CMF_Hydrogen_Environment $env ){
 		$this->env		= $env;
 		$config			= $this->env->getConfig();
 		$envClass		= get_class( $this->env );
