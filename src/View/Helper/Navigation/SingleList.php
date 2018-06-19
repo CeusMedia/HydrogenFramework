@@ -47,6 +47,7 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_H
 
 	public function __construct( $linkMap, $innerClass = NULL, $innerId = NULL )
 	{
+		trigger_error( 'Class '.__CLASS__.' is deprecated, please use modules Info_Pages + UI_Navigation instead', E_USER_DEPRECATED );
 		$this->linkMap		= $linkMap;
 		if( $innerClass )
 			$this->innerClass	= $innerClass;

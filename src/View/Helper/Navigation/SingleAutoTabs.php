@@ -46,6 +46,7 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAutoTabs extends CMF_Hydrogen_Vi
 	protected $container	= FALSE;
 
 	public function __construct( CMF_Hydrogen_Environment_Abstract $env ){
+		trigger_error( 'Class '.__CLASS__.' is deprecated, please use modules Info_Pages + UI_Navigation instead', E_USER_DEPRECATED );
 		$this->env	= $env;
 	}
 

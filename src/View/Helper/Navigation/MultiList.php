@@ -43,6 +43,7 @@ class CMF_Hydrogen_View_Helper_Navigation_MultiList extends CMF_Hydrogen_View_He
 
 	public function __construct( $words )
 	{
+		trigger_error( 'Class '.__CLASS__.' is deprecated, please use modules Info_Pages + UI_Navigation instead', E_USER_DEPRECATED );
 		$this->words	= $words;
 	}
 
