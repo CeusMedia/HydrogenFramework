@@ -21,8 +21,7 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Logic
-{
+class CMF_Hydrogen_Logic{
 
 	/**	@var	CMF_Hydrogen_Environment_Abstract						$env		Environment object */
 	protected $env;
@@ -42,8 +41,7 @@ class CMF_Hydrogen_Logic
 	 *	@param		CMF_Hydrogen_Environment_Abstract	$env	Environment
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment_Abstract $env )
-	{
+	public function __construct( CMF_Hydrogen_Environment_Abstract $env ){
 		$key	= $env->getLogic()->getKeyFromClassName( get_class( $this ) );
 		if( $env->logic->has( $key ) && $env->logic->isInstantiated( $key ) )
 			return $env->logic->get( $key );
@@ -54,16 +52,21 @@ class CMF_Hydrogen_Logic
 		$this->__onInit();
 	}
 
-	protected function __clone()
-	{
+	protected function __clone(){
 	}
 
-	protected function __onInit()
-	{
+	/**
+	 *	Magic function called at the end of construction.
+	 *	ATTENTION: In case of overriding, you MUST bubble down using parent::__onInit();
+	 *	Otherwise you will lose the trigger for hook Env::init.
+	 *
+	 *	@access		protected
+	 *	@return		void
+	 */
+	protected function __onInit(){
 	}
 
-	static public function getInstance( CMF_Hydrogen_Environment $env )
-	{
+	static public function getInstance( CMF_Hydrogen_Environment $env ){
 		$className	= get_called_class();
 		$key		= $env->getLogic()->getKeyFromClassName( $className );
 		if( !$env->logic->has( $key ) )
