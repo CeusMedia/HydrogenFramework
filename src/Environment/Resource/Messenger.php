@@ -36,10 +36,11 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Environment_Resource_Messenger
-{
+class CMF_Hydrogen_Environment_Resource_Messenger{
+
 	/**	@var		CMF_Hydrogen_Environment_Abstract	$env			Application Environment Object */
 	protected $env;
+
 	/**	@var		array							$classes		CSS Classes of Message Types */
 	protected $classes	= array(
 		'0'	=> 'failure',
@@ -49,6 +50,7 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 	);
 
 	protected $keyHeadings	= 'messenger_headings';
+
 	protected $keyMessages	= 'messenger_messages';
 
 	/**
@@ -57,8 +59,7 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 	 *	@param		CMF_Hydrogen_Environment_Abstract	$env			Instance of any Session Handler
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment_Abstract $env, $enabled = TRUE  )
-	{
+	public function __construct( CMF_Hydrogen_Environment_Abstract $env, $enabled = TRUE  ){
 		$this->env		= $env;
 		$this->enabled	= $enabled;
 	}
@@ -69,8 +70,7 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 	 *	@param		string		$heading			Text of Heading
 	 *	@return		void
 	 */
-	public function addHeading( $heading )
-	{
+	public function addHeading( $heading ){
 		$headings	= $this->env->getSession()->get( $this->keyHeadings );
 		if( !is_array( $headings ) )
 			$headings	= array();
@@ -84,10 +84,8 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 	 *	@param		string		$arguments			List with message and parameters to apply using sprintf
 	 *	@return		string		Resulting message or original message if insufficient parameters
 	 */
-	protected function applyParametersToMessage( $arguments )
-	{
-		if( count( $arguments ) > 1 )
-		{
+	protected function applyParametersToMessage( $arguments ){
+		if( count( $arguments ) > 1 ){
 			foreach( $arguments as $nr => $argument )
 				if( $nr )
 					$arguments[$nr]	= htmlentities( $argument, ENT_QUOTES, 'UTF-8' );
@@ -104,8 +102,7 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 	 *	@access		public
 	 *	@return		string
 	 */
-	public function buildHeadings()
-	{
+	public function buildHeadings(){
 		$headings	= $this->env->getSession()->get( $this->keyHeadings );
 		$heading		= implode( " / ", $headings );
 		return $heading;
@@ -119,16 +116,13 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 	 *	@param		bool		$linkResources	Flag: try to link resources in message
 	 *	@return		string
 	 */
-	public function buildMessages( $timeFormat = NULL, $clear = TRUE, $linkResources = FALSE )
-	{
+	public function buildMessages( $timeFormat = NULL, $clear = TRUE, $linkResources = FALSE ){
 		$messages	= (array) $this->env->getSession()->get( $this->keyMessages );
 		$list		= '';
 		$ids		= array();
-		if( count( $messages ) )
-		{
+		if( count( $messages ) ){
 			$list	= array();
-			foreach( $messages as $message )
-			{
+			foreach( $messages as $message ){
 				if( $linkResources )																//  @todo	kriss: check what is the point of this? where is it used? can it be removed?
 					$message['message']	= preg_replace( '/(http.+)("|\'| )/U', '<a href="\\1">\\1</a>\\2', $message['message'] );
 
@@ -141,8 +135,7 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 
 				$class		= $this->classes[$message['type']];
 				$message	= UI_HTML_Tag::create( 'span', $message['message'], array( 'class' => 'message' ) );
-				if( $timeFormat && !empty( $message['timestamp'] ) )
-				{
+				if( $timeFormat && !empty( $message['timestamp'] ) ){
 					$time		= $message['timestamp'];
 					$time		= Alg_Time_Converter::convertToHuman( $time, $timeFormat );
 					$time		= '['.$time.'] ';
@@ -172,8 +165,7 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function clear()
-	{
+	public function clear(){
 		$this->env->getSession()->set( $this->keyHeadings, array() );
 		$this->env->getSession()->set( $this->keyMessages, array() );
 	}
@@ -191,8 +183,7 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 	 *	@access		public
 	 *	@return		integer		Number of noted errors or failures
 	 */
-	public function gotError()
-	{
+	public function gotError(){
 		$count		= 0;
 		$messages	= (array) $this->env->getSession()->get( $this->keyMessages );
 		foreach( $messages as $message )
@@ -208,8 +199,7 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 	 *	@param		string		[$arg1]*			Arguments to be set into Message
 	 *	@return		void
 	 */
-	public function noteError( $message, $arg1 = NULL )
-	{
+	public function noteError( $message, $arg1 = NULL ){
 		$message	= $this->applyParametersToMessage( func_get_args() );
 		$this->noteMessage( 1, $message);
 	}
@@ -221,8 +211,7 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 	 *	@param		string		[$arg1]*			Arguments to be set into Message
 	 *	@return		void
 	 */
-	public function noteFailure( $message, $arg1 = NULL )
-	{
+	public function noteFailure( $message, $arg1 = NULL ){
 		$message	= $this->applyParametersToMessage( func_get_args() );
 		$this->noteMessage( 0, $message);
 	}
@@ -235,8 +224,7 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 	 *	@param		string		$arg2				Argument to be set into Message
 	 *	@return		void
 	 */
-	public function noteNotice( $message, $arg1 = NULL, $arg2 = NULL )
-	{
+	public function noteNotice( $message, $arg1 = NULL, $arg2 = NULL ){
 		$message	= $this->applyParametersToMessage( func_get_args() );
 		$this->noteMessage( 2, $message);
 	}
@@ -249,8 +237,7 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 	 *	@param		string		$arg2				Argument to be set into Message
 	 *	@return		void
 	 */
-	public function noteSuccess( $message, $arg1 = NULL, $arg2 = NULL )
-	{
+	public function noteSuccess( $message, $arg1 = NULL, $arg2 = NULL ){
 		$message	= $this->applyParametersToMessage( func_get_args() );
 		$this->noteMessage( 3, $message);
 	}
@@ -262,8 +249,7 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 	 *	@param		string		$message			Message to display
 	 *	@return		void
 	 */
-	protected function noteMessage( $type, $message)
-	{
+	protected function noteMessage( $type, $message){
 		if( $this->enabled ){
 			if( is_array( $message ) || is_object( $message ) || is_resource( $message ) )
 				throw new InvalidArgumentException( 'Message must be a string or numeric' );

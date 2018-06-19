@@ -37,36 +37,48 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
-{
+class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract{
+
 	public static $classRouter			= 'CMF_Hydrogen_Environment_Router_Single';
+
 	public static $configKeyBaseHref	= 'app.base.url';
 
 	/**	@var	Net_HTTP_Request								$request	HTTP Request Object */
 	protected $request;
+
 	/**	@var	Net_HTTP_Response								$response	HTTP Response Object */
 	protected $response;
+
 	/**	@var	CMF_Hydrogen_Environment_Router_Abstract		$router		Router Object */
 	protected $router;
+
 	/**	@var	Net_HTTP_Session								$session	Session Object */
 	protected $session;
+
 	/** @var	CMF_Hydrogen_Environment_Resource_Messenger		$messenger	Messenger Object */
 	protected $messenger;
+
 	/** @var	CMF_Hydrogen_Environment_Resource_Language		$language	Language Object */
 	protected $language;
+
 	/**	@var	CMF_Hydrogen_Environment_Resource_Page			$page		Page Object */
 	protected $page;
 
 	/**	@var	string											$host		Detected HTTP host */
 	public $host;
+
 	/**	@var	string											$path		Detected HTTP path */
 	public $path;
+
 	/**	@var	string											$root		Detected  */
 	public $root;
+
 	/**	@var	string											$scheme		Detected  */
 	public $scheme;
+
 	/**	@var	string											$uri		Detected  */
 	public $uri;
+
 	/**	@var	string											$url		Detected application base URL */
 	public $url;
 
@@ -88,11 +100,9 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function __construct( $options = array() )
-	{
+	public function __construct( $options = array() ){
 		ob_start();
-		try
-		{
+		try{
 			parent::__construct( $options, FALSE );
 			$this->detectSelf();
 			$this->initSession();																	//  setup session support
@@ -107,8 +117,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 			$this->__onInit();																		//  default callback for construction end
 			$this->clock->profiler->tick( 'Environment (Web): construction end' );					//  log time of construction
 		}
-		catch( Exception $e )
-		{
+		catch( Exception $e ){
 			if( getEnv( 'HTTP_HOST' ) )
 				die( UI_HTML_Exception_Page::render( $e ) );
 			else{
@@ -127,8 +136,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	 *	@param		boolean		$keepAppAlive			Flag: do not end execution right now if turned on
 	 *	@return		void
 	 */
-	public function close( $additionalResources = array(), $keepAppAlive = FALSE )
-	{
+	public function close( $additionalResources = array(), $keepAppAlive = FALSE ){
 		$resources	= array(
 			'session',																				//  HTTP session handler
 			'request',																				//  HTTP request handler
@@ -150,8 +158,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	 *	@throws		CMF_Hydrogen_Environment_Exception	if strict mode and no document root path has been provided by web server
 	 *	@throws		CMF_Hydrogen_Environment_Exception	if strict mode and no script file path has been provided by web server
 	 */
-	protected function detectSelf( $strict = TRUE )
-	{
+	protected function detectSelf( $strict = TRUE ){
 		if( $strict ){
 			if( !getEnv( 'HTTP_HOST' ) ){															//  application has been executed outside a valid web server environment or no HTTP host has been provided by web server
 				throw new CMF_Hydrogen_Environment_Exception(
@@ -186,8 +193,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	 *	@access		public
 	 *	@return		CMF_Hydrogen_Environment_Resource_Messenger
 	 */
-	public function getMessenger()
-	{
+	public function getMessenger(){
 		return $this->messenger;
 	}
 
@@ -196,8 +202,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	 *	@access		public
 	 *	@return		CMF_Hydrogen_Environment_Resource_Page
 	 */
-	public function getPage()
-	{
+	public function getPage(){
 		return $this->page;
 	}
 
@@ -206,8 +211,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	 *	@access		public
 	 *	@return		CMF_Hydrogen_Router_Abstract
 	 */
-	public function getRouter()
-	{
+	public function getRouter(){
 		return $this->router;
 	}
 
@@ -216,8 +220,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	 *	@access		public
 	 *	@return		Net_HTTP_Request_Receiver
 	 */
-	public function getRequest()
-	{
+	public function getRequest(){
 		return $this->request;
 	}
 
@@ -226,8 +229,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	 *	@access		public
 	 *	@return		Net_HTTP_Request_Response
 	 */
-	public function getResponse()
-	{
+	public function getResponse(){
 		return $this->response;
 	}
 
@@ -236,8 +238,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	 *	@access		public
 	 *	@return		Net_HTTP_Session
 	 */
-	public function getSession()
-	{
+	public function getSession(){
 		return $this->session;
 	}
 
@@ -251,8 +252,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 		$this->definition->setChannel( "html" );
 	}
 */
-	protected function initMessenger( $enabled = "auto" )
-	{
+	protected function initMessenger( $enabled = "auto" ){
 		if( $enabled === "auto" )																	//  auto detect mode
 			$enabled	= preg_match( "/html/", getEnv( 'HTTP_ACCEPT' ) );							//  enabled if HTML is requested
 		$this->messenger	= new CMF_Hydrogen_Environment_Resource_Messenger( $this, $enabled );
@@ -266,8 +266,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 	 *	@param		boolean		$packStyleSheets	Flag: compress Stylesheet, default: TRUE
 	 *	@return		void
 	 */
-	protected function initPage( $pageJavaScripts = TRUE, $packStyleSheets = TRUE )
-	{
+	protected function initPage( $pageJavaScripts = TRUE, $packStyleSheets = TRUE ){
 		$this->page	= new CMF_Hydrogen_Environment_Resource_Page( $this );
 		$this->page->setPackaging( $pageJavaScripts, $packStyleSheets );
 		$this->page->setBaseHref( $this->getBaseUrl( self::$configKeyBaseHref ) );
@@ -279,28 +278,24 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment_Abstract
 		$this->clock->profiler->tick( 'env: page' );
 	}
 
-	protected function initRequest()
-	{
+	protected function initRequest(){
 		$this->request		= new Net_HTTP_Request();
 		$this->request->fromEnv( FALSE/*$this->has( 'session' )*/ );
 		$this->clock->profiler->tick( 'env: request' );
 	}
 
-	protected function initResponse()
-	{
+	protected function initResponse(){
 		$this->response	= new Net_HTTP_Response();
 		$this->clock->profiler->tick( 'env: response' );
 	}
 
-	protected function initRouter( $routerClass = NULL )
-	{
+	protected function initRouter( $routerClass = NULL ){
 		$classRouter	= $routerClass ? $routerClass : self::$classRouter;
 		$this->router	= Alg_Object_Factory::createObject( $classRouter, array( $this ) );
 		$this->clock->profiler->tick( 'env: router' );
 	}
 
-	protected function initSession( $keyPartitionName = NULL, $keySessionName = NULL )
-	{
+	protected function initSession( $keyPartitionName = NULL, $keySessionName = NULL ){
 		$partitionName	= md5( getCwd() );
 		$sessionName	= 'sid';
 		if( $keyPartitionName && $this->config->get( $keyPartitionName ) )

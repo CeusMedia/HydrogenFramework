@@ -29,11 +29,9 @@ class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment_Abstract
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function __construct( $options = array(), $isFinal = TRUE )
-	{
+	public function __construct( $options = array(), $isFinal = TRUE ){
 //		ob_start();
-		try
-		{
+		try{
 			parent::__construct( $options, FALSE );													//  construct parent but dont call __onInit
 			$this->detectSelf();
 			$this->initMessenger();																	//  setup user interface messenger
@@ -50,15 +48,13 @@ class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment_Abstract
 			$this->__onInit();																		//  default callback for construction end
 
 		}
-		catch( Exception $e )
-		{
+		catch( Exception $e ){
 			print( $e->getMessage() );
 			die();
 		}
 	}
 
-	protected function detectSelf()
-	{
+	protected function detectSelf(){
 		$this->url = $this->config->get( 'app.url' );												//  get application URL from config
 		if( !$this->url )																			//  application URL not set
 			$this->url = $this->config->get( 'app.base.url' );										//  get application base URL from config
@@ -103,12 +99,6 @@ class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment_Abstract
 	public function initRequest(){
 		$this->request	= new CLI_ArgumentParser();
 		$this->request->parseArguments();
-	}
-}
-class Messenger extends CMF_Hydrogen_Environment_Resource_Messenger{
-	protected function noteMessage($type, $message) {
-		remark( $message );
-		flush();
 	}
 }
 ?>

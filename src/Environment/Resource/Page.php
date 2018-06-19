@@ -33,19 +33,27 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
-{
+class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame{
+
 	/**	@var	CMF_Hydrogen_Environment_Abstract		$env				Environment object */
 	public $env;
+
 	protected $bodyClasses		= array();
+
 	protected $packJavaScripts	= FALSE;
+
 	protected $packStyleSheets	= FALSE;
+
 	protected $pathPrimer;
+
 	protected $pathTheme;
+
 	/**	@var	CMF_Hydrogen_View_Helper_JavaScript		$js					JavaScript Collector Helper */
 	public $js;
+
 	/**	@var	stdClass								$css				CSS containers (primer, theme) */
 	public $css;
+
 	/**	@var		CMM_TEA_Factory						$tea				Instance of TEA (Template Engine Abstraction) Factory (from cmModules) OR empty if TEA is not available */
 	public $tea					= NULL;
 
