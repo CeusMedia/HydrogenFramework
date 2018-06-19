@@ -98,14 +98,15 @@ class CMF_Hydrogen_Controller
 	}
 
 	/**
-	 *	Empty method which is called after construction and can be customised.
+	 *	Magic function called at the end of construction.
+	 *	Override to implement custom resource construction.
+	 *
 	 *	@access		protected
 	 *	@return		void
 	 */
 	protected function __onInit(){}
 
-	protected function addData( $key, $value, $topic = NULL )
-	{
+	protected function addData( $key, $value, $topic = NULL ){
 		return $this->view->setData( array( $key => $value ), $topic );
 	}
 
@@ -147,8 +148,7 @@ class CMF_Hydrogen_Controller
 	 *	@access		protected
 	 *	@return		array
 	 */
-	protected function getData( $key = NULL )
-	{
+	protected function getData( $key = NULL ){
 		return $this->view->getData( $key );
 	}
 
@@ -211,8 +211,7 @@ class CMF_Hydrogen_Controller
 	 *	@param		array		$parameters		Map of additional parameters to set in request
 	 *	@return		void
 	 */
-	protected function redirect( $controller = 'index', $action = "index", $arguments = array(), $parameters = array() )
-	{
+	protected function redirect( $controller = 'index', $action = "index", $arguments = array(), $parameters = array() ){
 		$request	= $this->env->getRequest();
 		$request->set( 'controller', $controller );
 		$request->set( 'action', $action );
@@ -247,8 +246,7 @@ class CMF_Hydrogen_Controller
 	 *	@access		public
 	 *	@return		string
 	 */
-	public function renderView()
-	{
+	public function renderView(){
 		$this->env->clock->profiler->tick( 'Controller::getView: start' );
 		if( !$this->view )
 			throw new RuntimeException( 'No view object created in Constructor' );
@@ -309,8 +307,7 @@ class CMF_Hydrogen_Controller
 	 *	@todo		kriss: implement handling of FROM request parameter, see controller constants
 	 *	@todo		kriss: concept and implement anti-loop {@see http://dev.(ceusmedia.de)/cmKB/?MTI}
 	 */
-	protected function restart( $uri, $withinModule = FALSE, $status = NULL, $allowForeignHost = FALSE, $modeFrom = 0 )
-	{
+	protected function restart( $uri, $withinModule = FALSE, $status = NULL, $allowForeignHost = FALSE, $modeFrom = 0 ){
 		$base	= "";
 		if( !preg_match( "/^http/", $uri ) ){														//  URI is not starting with HTTP scheme
 			$base	= $this->env->getBaseUrl();														//  get application base URI
@@ -356,22 +353,19 @@ class CMF_Hydrogen_Controller
 	 *	@param		string		[$topic]			Topic Name of Data
 	 *	@return		void
 	 */
-	protected function setData( $data, $topic = "" )
-	{
+	protected function setData( $data, $topic = "" ){
 		if( $this->view )
 			$this->view->setData( $data, $topic );
 		return;
 		if( !is_array( $data ) )
 			throw new InvalidArgumentException( 'Must be array' );
-		if( is_string( $topic) && !empty( $topic ) )
-		{
+		if( is_string( $topic) && !empty( $topic ) ){
 			if( !isset( $this->_data[$topic] ) )
 				$this->_data[$topic]	= array();
 			foreach( $data as $key => $value )
 				$this->_data[$topic][$key]	= $value;
 		}
-		else
-		{
+		else{
 			foreach( $data as $key => $value )
 				$this->_data[$key]	= $value;
 		}
@@ -383,13 +377,11 @@ class CMF_Hydrogen_Controller
 	 *	@param		CMF_Hydrogen_Environment_Abstract	$env			Framework Resource Environment Object
 	 *	@return		void
 	 */
-	protected function setEnv( CMF_Hydrogen_Environment_Abstract &$env )
-	{
+	protected function setEnv( CMF_Hydrogen_Environment_Abstract &$env ){
 		$this->env			= $env;
 		$this->controller	= $env->getRequest()->get( 'controller' );
 		$this->action		= $env->getRequest()->get( 'action' );
-		if( $this->env->has( 'language' ) && $this->controller )
-		{
+		if( $this->env->has( 'language' ) && $this->controller ){
 			$language	= $this->env->getLanguage();
 			$language->load( $this->controller, FALSE, FALSE );
 		}
@@ -400,8 +392,7 @@ class CMF_Hydrogen_Controller
 	 *	@access		protected
 	 *	@return		void
 	 */
-	protected function setupView( $force = TRUE )
-	{
+	protected function setupView( $force = TRUE ){
 		$name		= str_replace( ' ', '_', ucwords( str_replace( '/', ' ', $this->controller ) ) );
 		$class		= self::$prefixView.$name;
 		$this->view	= new CMF_Hydrogen_View( $this->env );

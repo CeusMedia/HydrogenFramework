@@ -36,8 +36,8 @@
 class CMF_Hydrogen_Environment_Resource_Module_Reader{
 
 	static public function load( $fileName, $id ){
-		$xml	= XML_ElementReader::readFile( $fileName );
-		$obj	= new stdClass();
+		$xml						= XML_ElementReader::readFile( $fileName );
+		$obj						= new stdClass();
 		$obj->id					= $id;
 		$obj->title					= (string) $xml->title;
 		$obj->category				= (string) $xml->category;

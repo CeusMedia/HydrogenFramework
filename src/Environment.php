@@ -541,8 +541,8 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 				}
 			}
 		}
-		if( !$this->captain )
-			$this->initCaptain();
+		if( !$this->captain )																		//  just in case custom env did not init captain
+			$this->initCaptain();																	//  init caption for handling hooks
 		if( !( $this instanceof CMF_Hydrogen_Environment_Remote ) )
 			$this->modules->callHook( 'Env', 'initModules', $this );								//  call related module event hooks
 		$this->config->set( 'module.acl.public', implode( ',', array_unique( $public ) ) );			//  save public link list

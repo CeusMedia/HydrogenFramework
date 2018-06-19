@@ -34,12 +34,13 @@
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			Code Documentation
  */
-class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abstract
-{
+class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abstract{
+
 	public static $checkClassActionArguments	= TRUE;
 
 	/**	@var		string						$content				Collected Content to respond */
 	protected $content							= '';
+
 	protected $_dev;
 
 	/**
@@ -51,13 +52,11 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 	 *	@throws		Exception	if a exception is caught and neither error view not messenger is available
 	 *	@todo		handle exception by hook call "App@onDispatchException", see below
 	 */
-	protected function control( $defaultController = NULL, $defaultAction = NULL )
-	{
+	protected function control( $defaultController = NULL, $defaultAction = NULL ){
 		$request	= $this->env->getRequest();
 		$captain	= $this->env->getCaptain();
 		$captain->callHook( 'App', 'onControl', $this, array() );
-		try
-		{
+		try{
 			$result		= $captain->callHook( 'App', 'onDispatch', $this, array() );
 			if( is_string( $result ) && strlen( trim( $result ) ) ){
 				return $result;
@@ -90,8 +89,7 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 				exit;
 			}
 		}
-		catch( Exception $e )
-		{
+		catch( Exception $e ){
 			$captain	= $this->env->getCaptain();
 			$data		= array( 'exception' => $e );
 		 	$result		= $captain->callHook( 'App', 'onException', $this, $data );
@@ -122,8 +120,7 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 	 *	@access		protected
 	 *	@return		void
 	 */
-	protected function main()
-	{
+	protected function main(){
 		ob_start();
 		$request	= $this->env->getRequest();
 		$content	= $this->control();																//  dispatch and run request
@@ -134,7 +131,7 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 		$data		 = array(
 			'page'			=> $this->env->getPage(),												//  HTML
 			'config'		=> $this->env->getConfig(),												//  configuration object
-			'request'		=> $request,											//  request object
+			'request'		=> $request,															//  request object
 			'content'		=> $content,															//  rendered response page view content
 			'clock'			=> $this->env->getClock(),												//  system clock for performance messure
 			'dev'			=> ob_get_clean(),														//  warnings, notices or development messages
@@ -142,13 +139,11 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 
 		if( $this->env->has( 'messenger' ) )
 			$data['messenger']	= $this->env->getMessenger();										//  UI messages for user
-		if( $this->env->has( 'language' ) )															//  language support is available
-		{
+		if( $this->env->has( 'language' ) ){														//  language support is available
 			$data['language']	= $this->env->getLanguage()->getLanguage();							//  note document language
 			$data['words']		= $this->env->getLanguage()->getWords( 'main', FALSE, FALSE );		//  note main UI word pairs
 		}
-		if( $this->env->has( 'database' ) )															//  database support is available
-		{
+		if( $this->env->has( 'database' ) ){														//  database support is available
 			$data['dbQueries']		= (int) $this->env->getDatabase()->numberExecutes;				//  note number of SQL queries executed
 			$data['dbStatements']	= (int) $this->env->getDatabase()->numberStatements;			//  note number of SQL statements sent
 		}
@@ -162,10 +157,8 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 	 *	@param		string		$body		Response content body
 	 *	@return		int			Number of sent bytes
 	 */
-	protected function respond( $body, $headers = array() )
-	{
+	protected function respond( $body, $headers = array() ){
 		$response	= $this->env->getResponse();
-
 		$body		= ob_get_clean().$body;
 		if( $body )
 			$response->setBody( $body );
@@ -179,8 +172,7 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 		$type		= NULL;
 		$encodings	= $this->env->getRequest()->headers->getField( 'Accept-Encoding' );
 		$isAjax		= $this->env->request->isAjax();
-		if( 0 && $encodings && !$isAjax )
-		{
+		if( 0 && $encodings && !$isAjax ){
 			$typesSupported	= array( 'gzip', 'deflate' );
 			$typesRequested	= array_keys( $encodings[0]->getValue( TRUE ) );
 			foreach( $typesRequested as $code ){
@@ -200,17 +192,14 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run()
-	{
+	public function run(){
 		error_reporting( E_ALL );
-		try
-		{
+		try{
 			$this->respond( $this->main() );														//
 			$this->logOnComplete();																	//
 			$this->env->close();																	//  teardown environment and quit application execution
 		}
-		catch( Exception $e )
-		{
+		catch( Exception $e ){
 			UI_HTML_Exception_Page::display( $e );
 		}
 	}

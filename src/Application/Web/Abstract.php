@@ -40,8 +40,7 @@ abstract class CMF_Hydrogen_Application_Web_Abstract extends CMF_Hydrogen_Applic
 
 	protected $components			= array();
 
-	protected function logOnComplete()
-	{
+	protected function logOnComplete(){
 		$responseLength	= $this->env->getResponse()->getLength();
 		$responseTime	= $this->env->getClock()->stop( 6, 0 );
 		// ...
@@ -76,10 +75,8 @@ abstract class CMF_Hydrogen_Application_Web_Abstract extends CMF_Hydrogen_Applic
 	 *	@access		protected
 	 *	@return		void
 	 */
-	protected function setViewComponents( $components = array() )
-	{
-		foreach( $components as $key => $component )
-		{
+	protected function setViewComponents( $components = array() ){
+		foreach( $components as $key => $component ){
 			if( !array_key_exists( $key, $this->components ) )
 				$this->components[$key]	= $component;
 		}
@@ -90,8 +87,7 @@ abstract class CMF_Hydrogen_Application_Web_Abstract extends CMF_Hydrogen_Applic
 	 *	@access		protected
 	 *	@return		void
 	 */
-	protected function view( $templateFile = "master.php" )
-	{
+	protected function view( $templateFile = "master.php" ){
 		$view	= new CMF_Hydrogen_View( $this->env );
 		return $view->loadTemplateFile( $templateFile, $this->components );
 	}

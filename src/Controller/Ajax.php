@@ -49,7 +49,6 @@ abstract class CMF_Hydrogen_Controller_Ajax{
 	protected function __onInit(){
 	}
 
-
 	protected function respondData( $data ){
 		$response	= array(
 			'status'	=> 'data',
