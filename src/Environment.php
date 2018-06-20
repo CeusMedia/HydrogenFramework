@@ -75,7 +75,11 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 	/**	@var	array													$defaultPaths	Map of default paths to extend base configuration */
 	public static $defaultPaths				= array(
 		'classes'	=> 'classes/',
-		'locales'	=> 'locales/',
+		'contents'	=> 'contents/',
+		'images'	=> 'contents/images/',
+		'locales'	=> 'contents/locales/',
+		'scripts'	=> 'contents/scripts/',
+		'themes'	=> 'contents/themes/',
 		'logs'		=> 'logs/',
 		'templates'	=> 'templates/',
 	);

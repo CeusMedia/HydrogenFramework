@@ -82,17 +82,6 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment{
 	/**	@var	string											$url		Detected application base URL */
 	public $url;
 
-	public static $defaultPaths					= array(
-		'classes'	=> 'classes/',
-		'images'	=> 'images/',
-		'locales'	=> 'locales/',
-		'logs'		=> 'logs/',
-		'scripts'	=> 'javascripts/',
-		'styles'	=> 'styles/',
-		'templates'	=> 'templates/',
-		'themes'	=> 'themes/',
-	);
-
 	protected $resourcesToClose					= array();
 
 	/**

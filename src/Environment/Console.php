@@ -93,12 +93,19 @@ class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment{
 	}
 
 	public function initMessenger(){
-		$this->messenger	= new Messenger( $this );
+		$this->messenger	= new CMF_Hydrogen_Environment_Console_Messenger( $this );
 	}
 
 	public function initRequest(){
 		$this->request	= new CLI_ArgumentParser();
 		$this->request->parseArguments();
+	}
+}
+class CMF_Hydrogen_Environment_Console_Messenger extends CMF_Hydrogen_Environment_Resource_Messenger{
+
+	protected function noteMessage( $type, $message ){
+		remark( $message );
+		flush();
 	}
 }
 ?>

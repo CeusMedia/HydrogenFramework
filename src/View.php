@@ -67,10 +67,10 @@ class CMF_Hydrogen_View{
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		CMF_Hydrogen_Environment_Web	$env			Framework Resource Environment Object
+	 *	@param		CMF_Hydrogen_Environment	$env			Framework Resource Environment Object
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment_Web $env )
+	public function __construct( CMF_Hydrogen_Environment $env )
 	{
 		$env->clock->profiler->tick( 'CMF_View('.get_class( $this ).')::init start' );
 		$this->setEnv( $env );

@@ -48,7 +48,7 @@ class CMF_Hydrogen_Environment_Remote extends CMF_Hydrogen_Environment{
 	 *	@return		void
 	 */
 	public function __construct( $options ){
-		self::$defaultPaths	= CMF_Hydrogen_Environment_Web::$defaultPaths;
+//		self::$defaultPaths	= CMF_Hydrogen_Environment::$defaultPaths;
 		$this->options	= $options;
 		$this->path		= isset( $options['pathApp'] ) ? $options['pathApp'] : getCwd().'/';
 		$this->uri		= isset( $options['pathApp'] ) ? $options['pathApp'] : getCwd().'/';											//
@@ -58,7 +58,7 @@ class CMF_Hydrogen_Environment_Remote extends CMF_Hydrogen_Environment{
 		self::$configFile	= $this->path."/config/config.ini";
 
 		$this->initClock();																			//  setup clock
-#		$this->initMessenger();																		//  setup user interface messenger
+		$this->initMessenger();																		//  setup user interface messenger
 		$this->initConfiguration();																	//  setup configuration
 		$this->initModules();																		//  setup module support
 		$this->initDatabase();																		//  setup database connection
@@ -78,6 +78,21 @@ class CMF_Hydrogen_Environment_Remote extends CMF_Hydrogen_Environment{
 	 */
 	public function close( $additionalResources = array(), $keepAppAlive = FALSE){
 		parent::close( array(), FALSE );															//  unbind bound resources but keep application alive
+	}
+
+	public function getMessenger(){
+		return $this->messenger;
+	}
+
+	public function initMessenger(){
+		$this->messenger	= new CMF_Hydrogen_Environment_Remote_Messenger( $this );
+	}
+}
+class CMF_Hydrogen_Environment_Remote_Messenger extends CMF_Hydrogen_Environment_Resource_Messenger{
+
+	protected function noteMessage( $type, $message ){
+		remark( $message );
+		flush();
 	}
 }
 ?>
