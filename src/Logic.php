@@ -45,7 +45,7 @@ class CMF_Hydrogen_Logic{
 		$key	= $env->getLogic()->getKeyFromClassName( get_class( $this ) );
 		if( $env->logic->has( $key ) && $env->logic->isInstantiated( $key ) )
 			return $env->logic->get( $key );
-		$this->env	= $env;
+		$this->env		= $env;
 		$this->config	= $env->getConfig();
 		$this->modules	= $env->getModules();
 		$this->captain	= $env->getCaptain();

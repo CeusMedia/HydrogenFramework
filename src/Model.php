@@ -413,11 +413,11 @@ class CMF_Hydrogen_Model
 			switch( $this->fetchMode ){
 				case \PDO::FETCH_CLASS:
 				case \PDO::FETCH_OBJ:
-					if( !isset( $result->$field ) )
+					if( !property_exists( $result, $field ) )
 						throw new \DomainException( 'Field "'.$field.'" is not an column of result set' );
 					return $result->$field;
 				default:
-					if( !isset( $result[$field] ) )
+					if( !array_key_exists( $field, $result ) )
 						throw new \DomainException( 'Field "'.$field.'" is not an column of result set' );
 					return $result[$field];
 			}
@@ -427,7 +427,7 @@ class CMF_Hydrogen_Model
 			case \PDO::FETCH_OBJ:
 				$map	= (object) array();
 				foreach( $fields as $field ){
-					if( !isset( $result->$field ) )
+					if( !property_exists( $result, $field ) )
 						throw new \DomainException( 'Field "'.$field.'" is not an column of result set' );
 					$map->$field	= $result->$field;
 				}
@@ -435,7 +435,7 @@ class CMF_Hydrogen_Model
 			default:
 				$list	= array();
 				foreach( $fields as $field ){
-					if( !isset( $result[$field] ) )
+					if( !array_key_exists( $field, $result ) )
 						throw new \DomainException( 'Field "'.$field.'" is not an column of result set' );
 					$list[$field]	= $result[$field];
 				}

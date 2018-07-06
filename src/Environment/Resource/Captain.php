@@ -94,23 +94,16 @@ class CMF_Hydrogen_Environment_Resource_Captain {
 			if( !is_array( $module->hooks[$resource][$event] ) )
 				$module->hooks[$resource][$event]	= array( $module->hooks[$resource][$event] );
 			foreach( $module->hooks[$resource][$event] as $nr => $function ){
-				if( preg_match( $regexMethod, $function ) ){
-					$function	= preg_split( "/::/", $function );
-					if( !method_exists( $function[0], $function[1] ) )
-						throw new RuntimeException( 'Method '.$function[0].'::'.$function[1].' is not existing' );
-/*	@deprecated		replaced by the 3 lines above
-	@todo 			remove this old version of the 3 lines above after testing
-					$className	= preg_replace( $regexMethod, "\\1", $function );
-					$methodName	= preg_replace( $regexMethod, "\\2", $function );
-					$function	= array( $className, $methodName );
-					if( !method_exists( $className, $methodName ) )
-						throw new RuntimeException( 'Method '.$className.'::'.$methodName.' is not existing' );
-*/				}
-				else{
-					$function	= '$data = $payload;'.PHP_EOL.$function;
-					$function	= create_function( '$env, $context, $module, $payload = array()', $function );
-				}
 				try{
+					if( preg_match( $regexMethod, $function ) ){
+						$function	= preg_split( "/::/", $function );
+						if( !method_exists( $function[0], $function[1] ) )
+							throw new RuntimeException( 'Method '.$function[0].'::'.$function[1].' is not existing' );
+					}
+					else{
+						$function	= '$data = $payload;'.PHP_EOL.$function;
+						$function	= create_function( '$env, $context, $module, $payload = array()', $function );
+					}
 					$count++;
 					ob_start();
 					$args	= array( $this->env, &$context, $module, $payload );
