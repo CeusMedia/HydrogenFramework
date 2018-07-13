@@ -93,7 +93,14 @@ class CMF_Hydrogen_Controller
 
 //		$arguments		= array_slice( func_get_args(), 1 );										//  collect additional arguments for extended logic classes
 //		Alg_Object_MethodFactory::callObjectMethod( $this, '__onInit', $arguments, TRUE, TRUE );	//  invoke possibly extended init method
-		$this->__onInit();																			//  default callback for construction end
+		try{
+			$this->__onInit();																			//  default callback for construction end
+		}
+		catch( \Exception $e ){
+			$payload	= array( 'exception' => $e );
+			$this->env->getCaptain()->callHook( 'App', 'onException', $this, $payload );
+			throw new \Exception( $e->getMessage(), $e->getCode(), $e );
+		}
 		$env->clock->profiler->tick( 'CMF_Controller('.get_class( $this ).'): done' );				//  log time of construction
 	}
 
@@ -150,6 +157,43 @@ class CMF_Hydrogen_Controller
 	 */
 	protected function getData( $key = NULL ){
 		return $this->view->getData( $key );
+	}
+
+	/**
+	 *	Tries to find logic class for short logic key and returns instance.
+	 *	This protected method can be used within your custom controller to load logic classes.
+	 *	Example: $this->getLogic( 'mailGroupMember' ) for instance of class 'Logic_Mail_Group_Member'
+	 *
+	 *	If no short logic key is given, the logic pool resource of environment will be returned.
+	 *	So, you can use $this->getLogic() as shortcut for $this->env->getLogic().
+	 *
+	 *	@access		protected
+	 *	@param		string		$key		Key for logic class (ex: 'mailGroupMember' for 'Logic_Mail_Group_Member')
+	 *	@return		CMF_Hydrogen_Logic|CMF_Hydrogen_Environment_Resource_LogicPool	Logic instance or logic pool if no key given
+	 *	@throws		\RuntimeException		if no logic class could be found for given short logic key
+	 */
+	protected function getLogic( $key = NULL ){
+		if( is_null( $key ) || strlen( trim( $key ) ) )
+			return $this->env->getLogic();
+		return $this->env->getLogic()->get( $key );
+	}
+
+	/**
+	 *	Tries to find model class for short model key and returns instance.
+	 *	@access		protected
+	 *	@param		string		$key		Key for model class (eG. 'mailGroupMember' for 'Model_Mail_Group_Member')
+	 *	@return		object					Model instance
+	 *	@throws		\RuntimeException		if no model class could be found for given short model key
+	 *	@todo		create model pool environment resource and apply to created shared single instances instead of new instances
+	 *	@todo		change \@return to CMF_Hydrogen_Model after CMF model refactoring
+	 *	@see		duplicate code with CMF_Hydrogen_Logic::getModel
+	 */
+	protected function getModel( $key ){
+		$classNameWords	= ucwords( \Alg_Text_CamelCase::decode( $key ) );
+		$className		= str_replace( ' ', '_', 'Model '.$classNameWords );
+		if( !class_exists( $className ) )
+			throw new \RuntimeException( 'Model class "'.$className.'" not found' );
+		return \Alg_Object_Factory::createObject( $className, array( $this->env ) );
 	}
 
 	public function getView(){
