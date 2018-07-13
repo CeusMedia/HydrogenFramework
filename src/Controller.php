@@ -173,7 +173,7 @@ class CMF_Hydrogen_Controller
 	 *	@throws		\RuntimeException		if no logic class could be found for given short logic key
 	 */
 	protected function getLogic( $key = NULL ){
-		if( is_null( $key ) || strlen( trim( $key ) ) )
+		if( is_null( $key ) || !strlen( trim( $key ) ) )
 			return $this->env->getLogic();
 		return $this->env->getLogic()->get( $key );
 	}
