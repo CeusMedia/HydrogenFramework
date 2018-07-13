@@ -73,5 +73,23 @@ class CMF_Hydrogen_Logic{
 			$env->logic->add( $key, $className );
 		return $env->logic->get( $key );
 	}
+
+	/**
+	 *	Tries to find model class for short model key and returns instance.
+	 *	@access		protected
+	 *	@param		string		$key		Key for model class (eG. 'mailGroupMember' for 'Model_Mail_Group_Member')
+	 *	@return		object					Model instance
+	 *	@throws		\RuntimeException		if no model class could be found for given short model key
+	 *	@todo		create model pool environment resource and apply to created shared single instances instead of new instances
+	 *	@todo		change \@return to CMF_Hydrogen_Model after CMF model refactoring
+	 *	@see		duplicate code with CMF_Hydrogen_Controller::getModel
+	 */
+	protected function getModel( $key ){
+		$classNameWords	= ucwords( \Alg_Text_CamelCase::decode( $key ) );
+		$className		= str_replace( ' ', '_', 'Model '.$classNameWords );
+		if( !class_exists( $className ) )
+			throw new \RuntimeException( 'Model class "'.$className.'" not found' );
+		return \Alg_Object_Factory::createObject( $className, array( $this->env ) );
+	}
 }
 ?>
