@@ -43,12 +43,14 @@ class CMF_Hydrogen_Logic{
 	 */
 	public function __construct( CMF_Hydrogen_Environment $env ){
 		$key	= $env->getLogic()->getKeyFromClassName( get_class( $this ) );
-		if( $env->logic->has( $key ) && $env->logic->isInstantiated( $key ) )
-			return $env->logic->get( $key );
+//		if( $env->logic->has( $key ) && $env->logic->isInstantiated( $key ) )
+//			return $env->logic->get( $key );
 		$this->env		= $env;
 		$this->config	= $env->getConfig();
 		$this->modules	= $env->getModules();
 		$this->captain	= $env->getCaptain();
+		if( !$env->logic->has( $key ) )
+			$env->logic->add( $key, $this );
 		$this->__onInit();
 	}
 
@@ -68,10 +70,11 @@ class CMF_Hydrogen_Logic{
 
 	static public function getInstance( CMF_Hydrogen_Environment $env ){
 		$className	= get_called_class();
-		$key		= $env->getLogic()->getKeyFromClassName( $className );
-		if( !$env->logic->has( $key ) )
-			$env->logic->add( $key, $className );
-		return $env->logic->get( $key );
+		$logicPool	= $env->getLogic();
+		$key		= $logicPool->getKeyFromClassName( $className );
+		if( !$logicPool->has( $key ) )
+			$logicPool->add( $key, $className );
+		return $logicPool->get( $key );
 	}
 
 	/**
