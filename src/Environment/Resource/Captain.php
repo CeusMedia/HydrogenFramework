@@ -85,6 +85,11 @@ class CMF_Hydrogen_Environment_Resource_Captain {
 		if( array_key_exists( $resource."::".$event, $this->disabledHooks ) )
 			return FALSE;
 //		$this->env->clock->profiler->tick( 'Resource_Module_Library_Local::callHook: '.$event.'@'.$resource.' start' );
+
+		$hooks	= array();
+		for( $i=0; $i<10; $i++)
+			$hooks[$i]	= array();
+
 		$count			= 0;
 		$result			= NULL;
 		$regexMethod	= "/^([a-z0-9_]+)::([a-z0-9_]+)$/i";
@@ -93,10 +98,25 @@ class CMF_Hydrogen_Environment_Resource_Captain {
 				continue;
 			if( !is_array( $module->hooks[$resource][$event] ) )
 				$module->hooks[$resource][$event]	= array( $module->hooks[$resource][$event] );
-			foreach( $module->hooks[$resource][$event] as $nr => $function ){
+
+			foreach( $module->hooks[$resource][$event] as $hook ){
+				$hooks[$hook->level][]	= (object) array(
+					'event'		=> $event,
+					'resource'	=> $resource,
+					'function'	=> $hook->hook,
+				);
+			}
+		}
+		foreach( $hooks as $level => $levelHooks ){
+			foreach( $levelHooks as $hook ){
+				$resource	= $hook->resource;
+				$event		= $hook->event;
+				$function	= $hook->function;
 				try{
 					if( preg_match( $regexMethod, $function ) ){
 						$function	= preg_split( "/::/", $function );
+						if( !class_exists( $function[0] ) )
+							throw new RuntimeException( 'Hook handling class '.$function[0].' is not existing' );
 						if( !method_exists( $function[0], $function[1] ) )
 							throw new RuntimeException( 'Method '.$function[0].'::'.$function[1].' is not existing' );
 					}
@@ -110,7 +130,7 @@ class CMF_Hydrogen_Environment_Resource_Captain {
 					$result	= call_user_func_array( $function, $args );
 					$this->env->clock->profiler->tick( '<!--Resource_Module_Library_Local::call-->Hook: '.$event.'@'.$resource.': '.$module->id );
 					$stdout	= ob_get_clean();
-					if( strlen( $stdout ) )
+					if( strlen( trim( $stdout ) ) )
 						if( $this->env->has( 'messenger' ) )
 							$this->env->getMessenger()->noteNotice( 'Call on event '.$event.'@'.$resource.' hooked by module '.$module->id.' reported: '.$stdout );
 						else

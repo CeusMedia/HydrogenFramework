@@ -213,7 +213,13 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 		foreach( $xml->hook as $hook ){
 			$resource	= $hook->getAttribute( 'resource' );
 			$event		= $hook->getAttribute( 'event' );
-			$obj->hooks[$resource][$event][]	= trim( (string) $hook, ' ' );
+			$level		= 5;
+			if( $hook->hasAttribute( 'level' ) )
+				$level	= (int) $hook->getAttribute( 'level' );
+			$obj->hooks[$resource][$event][]	= (object) array(
+				'level'	=> $level,
+				'hook'	=> trim( (string) $hook, ' ' ),
+			);
 		}
 		return $obj;
 	}
