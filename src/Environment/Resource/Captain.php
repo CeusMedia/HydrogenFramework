@@ -109,6 +109,7 @@ class CMF_Hydrogen_Environment_Resource_Captain {
 		}
 		foreach( $hooks as $level => $levelHooks ){
 			foreach( $levelHooks as $hook ){
+				$module		= $hook->module;
 				$resource	= $hook->resource;
 				$event		= $hook->event;
 				$function	= $hook->function;
