@@ -50,6 +50,19 @@
  */
 class CMF_Hydrogen_Environment_Resource_Captain {
 
+	const LEVEL_UNKNOWN		= 0;
+	const LEVEL_TOP			= 1;
+	const LEVEL_START		= 1;
+	const LEVEL_HIGHEST		= 2;
+	const LEVEL_HIGH		= 3;
+	const LEVEL_HIGHER		= 4;
+	const LEVEL_MID			= 5;
+	const LEVEL_LOWER		= 6;
+	const LEVEL_LOW			= 7;
+	const LEVEL_LOWEST		= 8;
+	const LEVEL_BOTTOM		= 9;
+	const LEVEL_END			= 9;
+
 	/**	@var		CMF_Hydrogen_Environment			$env		Environment object */
 	protected $env;
 
@@ -101,6 +114,7 @@ class CMF_Hydrogen_Environment_Resource_Captain {
 
 			foreach( $module->hooks[$resource][$event] as $hook ){
 				$hooks[$hook->level][]	= (object) array(
+					'module'	=> $module,
 					'event'		=> $event,
 					'resource'	=> $resource,
 					'function'	=> $hook->hook,
@@ -181,6 +195,45 @@ class CMF_Hydrogen_Environment_Resource_Captain {
 			return FALSE;
 		$this->disabledHooks[$key]	= TRUE;
 		return TRUE;
+	}
+
+	/**
+	 *	Try to understand given load level.
+	 *	Matches given value into a scale between 0 and 9.
+	 *	Contains fallback for older module versions using level as string (top,mid,end) or boolean.
+	 *	Understands:
+	 *	- integer (limited to [0-9])
+	 *	- NULL or empty string as level 4 (mid).
+	 *	- boolean TRUE as level 1 (top).
+	 *	- boolean FALSE as level 4 (mid).
+	 *	- string {top,head,start} as level 1.
+	 *	- string {mid,center,normal,default} as level 4.
+	 *	- string {end,tail,bottom} as level 8.
+	 *	@static
+	 *	@access		public
+	 *	@param		mixed			$level 			Load level: 0-9 or {top(1),mid(4),end(8)} or {TRUE(1),FALSE(4)} or NULL(4)
+	 *	@return		integer			Level as integer value between 0 and 9
+	 *	@throws		InvalidArgumentException		if level is not if type NULL, boolean, integer or string
+	 *	@throws		RangeException					if given string is not within {top,head,start,mid,center,normal,default,end,tail,bottom}
+	 */
+	static public function interpretLoadLevel( $level ){
+		if( is_null( $level ) || !strlen( trim( $level ) ) )
+			return 4;
+		if( is_int( $level ) )
+			return min( max( abs( $level ), 0 ), 9 );
+		if( is_bool( $level ) )
+			return $level ? 1 : 4;
+		if( is_string( $level ) && preg_match( '/^[0-9]$/', trim( $level ) ) )
+			return (int) $level;
+		if( !is_string( $level ) )
+			throw new InvalidArgumentException( 'Load level must be integer or string' );
+		if( in_array( $level, array( 'top', 'head', 'start' ) ) )
+			return 1;
+		if( in_array( $level, array( 'mid', 'center', 'normal', 'default' ) ) )
+			return 4;
+		if( in_array( $level, array( 'end', 'tail', 'bottom' ) ) )
+			return 8;
+		throw new RangeException( 'Invalid load level: '.$level );
 	}
 }
 ?>
