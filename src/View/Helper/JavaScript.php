@@ -75,10 +75,40 @@ class CMF_Hydrogen_View_Helper_JavaScript{
 	 */
 	private function __clone(){}
 
-	public function addModuleScript( $script, $level = 'mid', $key = NULL ){
+	/**
+	 *	Adds a module JavaScript by path name within configured local JavaScript folder.
+	 *	Uses addUrl with configured  local JavaScript folder.
+	 *	@access		public
+	 *	@param		string		$script		JavaScript block
+	 *	@param		integer		$level		Optional: Load level (1-9 or {top(1),mid(=5),end(9)}, default: 5)
+	 *	@return		void
+	 */
+	public function addModuleFile( $script, $level = CMF_Hydrogen_Environment_Resource_Captain::LEVEL_MID, $key = NULL ){
 		$path	= $this->env->getConfig()->get( 'path.scripts' );
-		$level	= $this->sanitizeLevel( $level );
-		$this->addUrl( $path.$script, $level === 1 );
+		$level	= CMF_Hydrogen_Environment_Resource_Captain::interpretLoadLevel( $level );
+		$this->addUrl( $path.$script, $level );
+//		$this->scripts[$level][$key][]	= $path.$script;
+	}
+
+	/**
+	 *	Adds a module JavaScript by path name within configured local JavaScript folder.
+	 *	Uses addUrl with configured  local JavaScript folder.
+	 *	@access		public
+	 *	@param		string		$script		JavaScript block
+	 *	@param		integer		$level		Optional: Load level (1-9 or {top(1),mid(=5),end(9)}, default: 5)
+	 *	@return		void
+	 *	@deprecated	use addModuleFile instead
+	 *	@todo		remove in v0.8.7
+	 */
+	public function addModuleScript( $script, $level = CMF_Hydrogen_Environment_Resource_Captain::LEVEL_MID, $key = NULL ){
+		CMF_Hydrogen_Deprecation::getInstance()
+			->setErrorVersion( '0.8.6.3' )
+			->setExceptionVersion( '0.8.7' )
+			->message( 'Please use addModuleFile instead' );
+
+		$path	= $this->env->getConfig()->get( 'path.scripts' );
+		$level	= CMF_Hydrogen_Environment_Resource_Captain::interpretLoadLevel( $level );
+		$this->addUrl( $path.$script, $level );
 //		$this->scripts[$level][$key][]	= $path.$script;
 	}
 
@@ -86,15 +116,19 @@ class CMF_Hydrogen_View_Helper_JavaScript{
 	 *	Collect a JavaScript block.
 	 *	@access		public
 	 *	@param		string		$script		JavaScript block
-	 *	@param		integer		$level		Run level, values: (top, mid, end), default: mid
+	 *	@param		integer		$level		Optional: Load level (1-9 or {top(1),mid(=5),end(9)}, default: 5)
+	 *	@param		string		$key		Optional: script key in case of later removal
 	 *	@return		void
+	 *	@todo		remove support for level "ready", see below
 	 */
-	public function addScript( $script, $level = 'mid', $key = NULL ){
+	public function addScript( $script, $level = CMF_Hydrogen_Environment_Resource_Captain::LEVEL_MID, $key = NULL ){
+		/* @todo		remove after all ->addScript( '...', 'ready' ) are replaced by ->addScriptOnReady( '...' ) */
 		if( $level === "ready" )
-			return $this->addScriptOnReady( $script, 5 );
-		$level	= $this->sanitizeLevel( $level );
-		if( !array_key_exists( $level, $this->scripts ) )
-			$this->scripts[$level]	= array();
+			return $this->addScriptOnReady( $script, $level );
+
+		$level	= CMF_Hydrogen_Environment_Resource_Captain::interpretLoadLevel( $level );		//  sanitize level supporting old string values
+		if( !array_key_exists( $level, $this->scripts ) )										//  level is not yet defined in scripts list
+			$this->scripts[$level]	= array();													//  create empty scripts list for level
 		$key	= strlen( $key ) ? md5( $key ) : 'default';
 		if( !array_key_exists( $key, $this->scripts[$level] ) )
 			$this->scripts[$level][$key]	= array();
@@ -104,29 +138,37 @@ class CMF_Hydrogen_View_Helper_JavaScript{
 	/**
 	 *	Appends JavaScript code to be run after Browser finished rendering (document.ready).
 	 *	@access		public
-	 *	@param		string		$script			JavaScript code to execute on ready
-	 *	@param		integer		$runlevel		Run order level of JavaScript code, default: 5, less: earlier, more: later
+	 *	@param		string		$script		JavaScript code to execute on ready
+	 *	@param		integer		$level		Optional: Load level (1-9 or {top(1),mid(=5),end(9)}, default: 5)
+	 *	@param		string		$key		Optional: script key in case of later removal
 	 *	@return		void
 	 */
-	public function addScriptOnReady( $script, $runlevel = 5, $key = NULL ){
-		$runlevel	= $this->sanitizeLevel( $runlevel );
-		if( !isset( $this->scriptsOnReady[$runlevel] ) )											//  runlevel is not yet defined in scripts list
-			$this->scriptsOnReady[$runlevel]	= array();											//  create empty scripts list for runlevel
+	public function addScriptOnReady( $script, $level = CMF_Hydrogen_Environment_Resource_Captain::LEVEL_MID, $key = NULL ){
+		$level	= CMF_Hydrogen_Environment_Resource_Captain::interpretLoadLevel( $level );		//  sanitize level supporting old string values
+		if( !array_key_exists( $level, $this->scriptsOnReady ) )								//  level is not yet defined in scripts list
+			$this->scriptsOnReady[$level]	= array();											//  create empty scripts list for level
 		$key	= strlen( $key ) ? md5( $key ) : 'default';
-		if( !array_key_exists( $key, $this->scriptsOnReady[$runlevel] ) )
-			$this->scriptsOnReady[$runlevel][$key]	= array();
-		$this->scriptsOnReady[$runlevel][$key][]	= $script;										//  note JavaScript code on runlevel
+		if( !array_key_exists( $key, $this->scriptsOnReady[$level] ) )
+			$this->scriptsOnReady[$level][$key]	= array();
+		$this->scriptsOnReady[$level][$key][]	= $script;										//  note JavaScript code on runlevel
 	}
 
 	/**
 	 *	Add a JavaScript URL.
 	 *	@access		public
 	 *	@param		string		$url		JavaScript URL
-	 *	@param		bool		$onTop		Flag: add this URL on top of all others
+	 *	@param		integer		$level		Optional: Load level (1-9 or {top(1),mid(=5),end(9)}, default: 5)
+	 *	@param		string		$key		Optional: script key in case of later removal
 	 *	@return		void
 	 */
-	public function addUrl( $url, $onTop = FALSE ){
-		$onTop ? array_unshift( $this->urls, $url ) : array_push( $this->urls, $url );
+	public function addUrl( $url, $level = CMF_Hydrogen_Environment_Resource_Captain::LEVEL_MID, $key = NULL ){
+		$level	= CMF_Hydrogen_Environment_Resource_Captain::interpretLoadLevel( $level );		//  sanitize level supporting old string values
+		if( !array_key_exists( $level, $this->urls ) )											//  level is not yet defined in scripts list
+			$this->urls[$level]	= array();														//  create empty scripts list for level
+		$key	= strlen( $key ) ? md5( $key ) : 'default';
+		if( !array_key_exists( $key, $this->urls[$level] ) )
+			$this->urls[$level][$key]	= array();
+		$this->urls[$level][$key][]	= $url;														//  note JavaScript code on runlevel
 	}
 
 	/**
@@ -181,7 +223,7 @@ class CMF_Hydrogen_View_Helper_JavaScript{
 	 *	@return		string
 	 */
 	public function getPackageHash() {
-		$copy	= $this->urls;
+		$copy	= $this->getPlainUrlList();
 		sort( $copy );
 		$key	= implode( '_', $copy );
 		return md5( $this->revision.$key );
@@ -209,7 +251,7 @@ class CMF_Hydrogen_View_Helper_JavaScript{
 			$contents	= array();
 			if( $this->revision )
 				$content	= "/* @revision ".$this->revision." */\n";
-			foreach( $this->urls as $url ){
+			foreach( $this->getPlainUrlList() as $url ){
 				if( preg_match( "/^http/", $url ) )
 					$content	= Net_Reader::readUrl( $url );
 				else
@@ -231,8 +273,37 @@ class CMF_Hydrogen_View_Helper_JavaScript{
 	 *	Returns a list of collected JavaScripts URLs.
 	 *	@access		public
 	 *	@return		array
+	 *	@deprecated	use getPlainUrlList instead
+	 *	@todo		remove in v0.8.7
 	 */
 	public function getUrlList(){
+		CMF_Hydrogen_Deprecation::getInstance()
+			->setErrorVersion( '0.8.6.3' )
+			->setExceptionVersion( '0.8.7' )
+			->message( 'Please use getPlainUrlList or getStructuredUrlList instead' );
+		return $this->getPlainUrlList();
+	}
+
+	/**
+	 *	Returns a flat list of collected JavaScripts URLs ordered by run level.
+	 *	@access		public
+	 *	@return		array		List of registered script URLS ordered by run level and script key
+	 */
+	public function getPlainUrlList(){
+		$list	= array();
+		foreach( $this->urls as $level => $levelUrls )
+			foreach( $levelUrls as $key => $keyedUrls )
+				foreach( $keyedUrls as $url )
+					$list[]	= $url;
+		return $list;
+	}
+
+	/**
+	 *	Returns a list of collected JavaScripts URLs structured by run level and script key.
+	 *	@access		public
+	 *	@return		array		List of registered script URLS structured by run level and script key
+	 */
+	public function getStructuredUrlList(){
 		return $this->urls;
 	}
 
@@ -278,7 +349,7 @@ class CMF_Hydrogen_View_Helper_JavaScript{
 	 *	Renders block of collected JavaScript code with directive to run if Browser finished loading (using jQuery event document.ready).
 	 *	@access		protected
 	 *	@param		boolean		$wrapInTag		Flag: wrap code in HTML script tag
-	 *	@return		string		Combinded JavaScript code to run if Browser is ready
+	 *	@return		string		Combined JavaScript code to run if Browser is ready
 	 */
 	protected function renderScriptsOnReady( $compress = FALSE, $wrapInTag = FALSE ){
 		$list	= array();
@@ -286,7 +357,13 @@ class CMF_Hydrogen_View_Helper_JavaScript{
 		foreach( $this->scriptsOnReady as $level => $map ){
 			foreach( $map as $key => $scripts ){
 				foreach( $scripts as $script ){
-					$script		= preg_replace( "/;+$/", ";", trim( $script ) );
+					if( !$compress ){
+						$script		= preg_replace( "/;+$/", ";", trim( $script ) );
+						if( preg_match( "/\r?\n/", $script ) ){
+							$lines	= preg_split( "/\r?\n/", PHP_EOL.$script.PHP_EOL );
+							$script	= join( PHP_EOL."\t", $lines );
+						}
+					}
 					$list[]		= "jQuery(document).ready(function(){".$script."});";
 				}
 			}
@@ -294,7 +371,6 @@ class CMF_Hydrogen_View_Helper_JavaScript{
 		if( !count( $list ) )
 			return '';
 		$content	= PHP_EOL.trim( join( PHP_EOL, $list ) ).PHP_EOL;
-	//	$content		= "jQuery(document).ready(function(){\n".$content."\n});";
 		if( $compress )
 			$content	= $this->compress( $content );
 		if( !$wrapInTag )
@@ -303,7 +379,7 @@ class CMF_Hydrogen_View_Helper_JavaScript{
 	}
 
 	protected function renderUrls( $compress, $wrapInTag = FALSE, $forceFresh = FALSE ){
-		if( !count( $this->urls ) )
+		if( !count( $this->getPlainUrlList() ) )
 			return '';
 		if( $this->useCompression ){
 			$fileJs	= $this->getPackageFileName( $forceFresh );
@@ -318,7 +394,7 @@ class CMF_Hydrogen_View_Helper_JavaScript{
 		}
 		else{
 			$list	= array();
-			foreach( $this->urls as $url ){
+			foreach( $this->getPlainUrlList() as $url ){
 				if( $this->revision )
 					$url	.= ( preg_match( '/\?/', $url ) ? '&amp;' : '?' ).$this->revision;
 				$attributes	= array(
@@ -331,16 +407,6 @@ class CMF_Hydrogen_View_Helper_JavaScript{
 			$links	= implode( "\n".$this->indent, $list  );
 		}
 		return $links;
-	}
-
-	protected function sanitizeLevel( $level ){
-		if( $level === "top" )
-			return $level	= 2;
-		if( $level === "mid" )
-			return $level	= 5;
-		if( $level === "bottom" )
-			return $level	= 8;
-		return min( 9, max( 1, (int) $level ) );
 	}
 
 	/**

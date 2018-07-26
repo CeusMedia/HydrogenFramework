@@ -59,11 +59,11 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 	 *	Collect a StyleSheet block.
 	 *	@access		public
 	 *	@param		string		$style		StyleSheet block
-	 *	@param		integer		$level		Optional: Load level (0-9 or {top(=1),mid(=4),end(=8)}, default: mid)
+	 *	@param		integer		$level		Optional: Load level (1-9 or {top(1),mid(=5),end(9)}, default: 5)
 	 *	@return		void
 	 */
-	public function addStyle( $style, $level = 'mid' ){
-		$level	= $this->interpretLoadLevel( $level );
+	public function addStyle( $style, $level = CMF_Hydrogen_Environment_Resource_Captain::LEVEL_MID ){
+		$level	= CMF_Hydrogen_Environment_Resource_Captain::interpretLoadLevel( $level );		//  sanitize level supporting old string values
 		$this->styles[$level][]		= $style;
 	}
 
@@ -71,12 +71,12 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 	 *	Add a StyleSheet URL.
 	 *	@access		public
 	 *	@param		string		$url		StyleSheet URL
-	 *	@param		integer		$level		Optional: Load level (0-9 or {top(=1),mid(=4),end(=8)}, default: mid)
+	 *	@param		integer		$level		Optional: Load level (1-9 or {top(1),mid(=5),end(9)}, default: 5)
 	 *	@param		array		$attributes	Optional: Additional style tag attributes
 	 *	@return		void
 	 */
-	public function addUrl( $url, $level = NULL, $attributes = array() ){
-		$level	= $this->interpretLoadLevel( $level );
+	public function addUrl( $url, $level = CMF_Hydrogen_Environment_Resource_Captain::LEVEL_MID, $attributes = array() ){
+		$level	= CMF_Hydrogen_Environment_Resource_Captain::interpretLoadLevel( $level );		//  sanitize level supporting old string values
 		$this->urls[$level][]		= array( $url, $attributes );
 	}
 
@@ -187,44 +187,6 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 			}
 		}
 		return $list;
-	}
-
-	/**
-	 *	Try to understand given load level.
-	 *	Matches given value into a scale between 0 and 9.
-	 *	Fallback for older module version.
-	 *	Understands:
-	 *	- NULL or empty string as level 4 (mid).
-	 *	- boolean TRUE as level 1 (top).
-	 *	- boolean FALSE as level 4 (mid).
-	 *	- string {top,head,start} as level 1.
-	 *	- string {mid,center,normal,default} as level 4.
-	 *	- string {end,tail,bottom} as level 8.
-	 *	- NULL or empty string as level 4.
-	 *	@access		protected
-	 *	@param		mixed			$level 			Load level: 0-9 or {top(1),mid(4),end(8)} or {TRUE(1),FALSE(4)} or NULL(4)
-	 *	@return		integer			Level as integer value between 0 and 9
-	 *	@throws		InvalidArgumentException		if level is not if type NULL, boolean, integer or string
-	 *	@throws		RangeException					if given string is not within {top,head,start,mid,center,normal,default,end,tail,bottom}
-	 */
-	protected function interpretLoadLevel( $level ){
-		if( is_null( $level ) || !strlen( trim( $level ) ) )
-			return 4;
-		if( is_int( $level ) )
-			return min( max( $level, 0 ), 9 );
-		if( is_bool( $level ) )
-			return $level ? 1 : 4;
-		if( is_string( $level ) && preg_match( '/^[0-9]$/', trim( $level ) ) )
-			return (int) $level;
-		if( !is_string( $level ) )
-			throw new InvalidArgumentException( 'Load level must be integer or string' );
-		if( in_array( $level, array( 'top', 'head', 'start' ) ) )
-			return 1;
-		if( in_array( $level, array( 'mid', 'center', 'normal', 'default' ) ) )
-			return 4;
-		if( in_array( $level, array( 'end', 'tail', 'bottom' ) ) )
-			return 8;
-		throw new RangeException( 'Invalid load level: '.$level );
 	}
 
 	/**
