@@ -67,6 +67,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydr
 	}
 
 	public function get( $moduleId ){
+		$moduleId	= str_replace( ':', '_', $moduleId );
 		if( !$this->has( $moduleId ) )
 			throw new RuntimeException( 'Module "'.$moduleId.'" is not installed' );
 		return $this->modules[$moduleId];
@@ -95,6 +96,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local implements CMF_Hydr
 	}
 
 	public function has( $moduleId ){
+		$moduleId	= str_replace( ':', '_', $moduleId );
 		return array_key_exists( $moduleId, $this->modules );
 	}
 
