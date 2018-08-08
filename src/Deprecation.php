@@ -63,7 +63,8 @@ class CMF_Hydrogen_Deprecation extends Deprecation{
 	public function message( $message ){
 		$trace	= debug_backtrace();
 		$caller = next( $trace );
-		$message .= ', invoked in '.$caller['file'].' on line '.$caller['line'];
+		if( isset( $caller['file'] ) && isset( $caller['line'] ) )
+			$message .= ', invoked in '.$caller['file'].' on line '.$caller['line'];
 		if( $this->exceptionVersion )
 			if( version_compare( $this->version, $this->exceptionVersion ) >= 0 )
 				throw new Exception( 'Deprecated: '.$message );
@@ -101,6 +102,19 @@ class CMF_Hydrogen_Deprecation extends Deprecation{
 	 */
 	public function setExceptionVersion( $version ){
 		$this->exceptionVersion		= $version;
+		return $this;
+	}
+
+	/**
+	 *	Set version of currently installed component.
+	 *	By default, the "component" is the framework itself and the version will be detected.
+	 *	On handling deprecations within modules, you can use this method to set the module version.
+	 *	@access		public
+	 *	@param		string		$version		Version of component to compare with
+	 *	@return		Deprecation
+	 */
+	public function setVersion( $version ){
+		$this->version	= $version;
 		return $this;
 	}
 }
