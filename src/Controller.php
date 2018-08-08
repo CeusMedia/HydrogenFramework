@@ -248,14 +248,19 @@ class CMF_Hydrogen_Controller
 	/**
 	 *	Redirects by calling different Controller and Action.
 	 *	Attention: This will *NOT* effect the URL in browser nor need cURL requests to allow forwarding.
-	 *	Attention: This is not recommended, please user restart in favour.
+	 *	Attention: This is not recommended, please use restart in favour.
 	 *	@access		protected
 	 *	@param		string		$controller		Controller to be called, default: index
 	 *	@param		string		$action			Action to be called, default: index
+	 *	@param		array		$arguments		List of arguments to add to URL
 	 *	@param		array		$parameters		Map of additional parameters to set in request
 	 *	@return		void
 	 */
 	protected function redirect( $controller = 'index', $action = "index", $arguments = array(), $parameters = array() ){
+		CMF_Hydrogen_Deprecation::getInstance()
+			->setErrorVersion( '0.8.6.4' )
+			->setExceptionVersion( '0.8.9' )
+			->message( 'Redirecting is usable for hooks within dispatching, only. Please use restart instead!' );
 		$request	= $this->env->getRequest();
 		$request->set( 'controller', $controller );
 		$request->set( 'action', $action );
@@ -352,41 +357,14 @@ class CMF_Hydrogen_Controller
 	 *	@todo		kriss: concept and implement anti-loop {@see http://dev.(ceusmedia.de)/cmKB/?MTI}
 	 */
 	protected function restart( $uri, $withinModule = FALSE, $status = NULL, $allowForeignHost = FALSE, $modeFrom = 0 ){
-		$base	= "";
 		if( !preg_match( "/^http/", $uri ) ){														//  URI is not starting with HTTP scheme
-			$base	= $this->env->getBaseUrl();														//  get application base URI
 			if( $withinModule ){																	//  redirection is within module
 				$controller	= $this->env->getRequest()->get( 'controller' );						//  get current controller
-				$base	.= $this->alias ? $this->alias : $controller;								//
-				$base	.= strlen( $uri ) ? '/' : '';												//
+				$controller	= $this->alias ? $this->alias : $controller;							//
+				$uri		= $controller.( strlen( $uri ) ? '/'.$uri : '' );						//
 			}
 		}
-		if( !$allowForeignHost ){																	//  redirect to foreign domain not allowed
-			$hostFrom	= parse_url( 'http://'.getEnv( 'HTTP_HOST' ), PHP_URL_HOST );				//  current host domain
-			$hostTo		= parse_url( $base.$uri, PHP_URL_HOST );									//  requested host domain
-			if( $hostFrom !== $hostTo ){															//  both are not matching
-				$message	= 'Redirection to foreign host is not allowed.';						//  error message
-				if( $this->env->has( 'messenger' ) ){												//  messenger is available
-					$this->env->getMessenger()->noteFailure( $message );							//  note message
-					$this->restart( NULL, FALSE, NULL, TRUE );															//  redirect to start
-				}
-				print( $message );																	//  otherwise print message
-				exit;																				//  and exit
-			}
-		}
-	#	$this->dbc->close();																		//  close database connection
-	#	$this->session->close();																	//  close session
-		if( $status )																				//  a HTTP status code is to be set
-			Net_HTTP_Status::sendHeader( (int) $status );											//  send HTTP status code header
-		header( "Location: ".$base.$uri );															//  send HTTP redirect header
-
-		$link	= UI_HTML_Tag::create( 'a', $base.$uri, array( 'href' => $base.$uri ) );
-		$text	= UI_HTML_Tag::create( 'small', 'Redirecting to '.$link.' ...' );
-		$page	= new UI_HTML_PageFrame();
-		$page->addMetaTag( 'http-equiv', 'refresh', '0; '.$base.$uri );
-		$page->addBody( $text );
-		print( $page->build() );
-		exit;																						//  and exit application
+		$this->env->restart( $uri, $status, $allowForeignHost, $modeFrom );
 	}
 
 	/**
