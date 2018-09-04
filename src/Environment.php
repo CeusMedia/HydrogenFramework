@@ -102,6 +102,9 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 	/**	@var	string													$path			Absolute folder path of application */
 	public $path							= NULL;
 
+	/**	@var	CMF_Hydrogen_Environment_Php							$php			Instance of PHP environment collection */
+	public $php;
+
 	/**	@var	string													$uri			Application URI (absolute local path) */
 	public $uri;
 
@@ -128,6 +131,7 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 		if( !empty( self::$timezone ) )																//  a timezone has be set externally before
 			date_default_timezone_set( self::$timezone );											//  set this timezone
 
+		$this->initPhp();
 		$this->initClock();																			//  setup clock
 		$this->initConfiguration();																	//  setup configuration
 		$this->initCaptain();																		//  setup captain
@@ -551,6 +555,10 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 			$this->modules->callHook( 'Env', 'initModules', $this );								//  call related module event hooks
 		$this->config->set( 'module.acl.public', implode( ',', array_unique( $public ) ) );			//  save public link list
 		$this->clock->profiler->tick( 'env: initModules', 'Finished setup of modules.' );
+	}
+
+	protected function initPhp(){
+		$this->php		= new CMF_Hydrogen_Environment_Resource_Php();
 	}
 
 	public function offsetExists( $key ){
