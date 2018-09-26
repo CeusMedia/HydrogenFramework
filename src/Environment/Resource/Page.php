@@ -192,6 +192,15 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame{
 		}
 		$modules->callHook( 'Page', 'applyModules', $this );										//  call related module event hooks
 //		$script		= 'var config = '.json_encode( $listConfig ).';';								//  @deprecated leave only next line
+		$settings['Env']	= array(
+			'host'		=> $this->env->host,
+			'port'		=> $this->env->port,
+			'protocol'	=> $this->env->scheme,
+			'domain'	=> $this->env->host.( $this->env->port ? ':'.$this->env->port : '' ),
+			'path'		=> $this->env->path,
+			'title'		=> $this->env->title,
+			'secure'	=> getEnv( 'HTTPS' ),
+		);
 		$script		= 'var settings = '.json_encode( $settings ).';';
 		$script		= UI_HTML_Tag::create( 'script', "<!--\n".$script."\n-->", array( 'type' => "text/javascript" ) );
 		$this->addHead( $script );
