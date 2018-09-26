@@ -55,6 +55,9 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment{
 	/**	@var	Net_HTTP_Session								$session	Session Object */
 	protected $session;
 
+	/**	@var	Net_HTTP_Cookie									$cookie		Cookie Object */
+	protected $cookie;
+
 	/** @var	CMF_Hydrogen_Environment_Resource_Messenger		$messenger	Messenger Object */
 	protected $messenger;
 
@@ -96,6 +99,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment{
 			$this->detectSelf();
 			$this->initSession();																	//  setup session support
 			$this->initMessenger();																	//  setup user interface messenger
+			$this->initCookie();																	//  setup cookie support
 			$this->initRequest();																	//  setup HTTP request handler
 			$this->initResponse();																	//  setup HTTP response handler
 			$this->initRouter();																	//  setup request router
@@ -178,6 +182,17 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment{
 	}
 
 	/**
+	 *	Returns Cookie Object.
+	 *	@access		public
+	 *	@return		Net_HTTP_Cookie
+	 */
+	public function getCookie(){
+		if( !is_object( $this->cookie ) )
+			throw new RuntimeException( 'Cookie resource not initialized within environment' );
+		return $this->cookie;
+	}
+
+	/**
 	 *	Returns Messenger Object.
 	 *	@access		public
 	 *	@return		CMF_Hydrogen_Environment_Resource_Messenger
@@ -231,6 +246,22 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment{
 		return $this->session;
 	}
 
+	/**
+	 *	Initialize cookie resource instance.
+	 *	@access		protected
+	 *	@return		CMF_Hydrogen_Environment_Resource_Messenger
+	 *	@throws		RuntimeException			if cookie resource has not been initialized before
+	 */
+	protected function initCookie(){
+		if( !$this->url )
+			throw new RuntimeException( 'URL not detected yet, run detectSelf beforehand' );
+		$this->cookie	= new Net_HTTP_Cookie(
+			parse_url( $this->url, PHP_URL_PATH ),
+			parse_url( $this->url, PHP_URL_HOST ),
+			(bool) getEnv( 'HTTPS' )
+		);
+	}
+
 /*	protected function initFieldDefinition()
 	{
 		$this->definition	= new CMF_Hydrogen_FieldDefinition(
@@ -267,12 +298,23 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment{
 		$this->clock->profiler->tick( 'env: page' );
 	}
 
+	/**
+	 *	Initialize HTTP request resource instance.
+	 *	Request data will be imported from given web server environment.
+	 *	@access		protected
+	 *	@return		Net_HTTP_Request
+	 */
 	protected function initRequest(){
 		$this->request		= new Net_HTTP_Request();
 		$this->request->fromEnv( FALSE/*$this->has( 'session' )*/ );
 		$this->clock->profiler->tick( 'env: request' );
 	}
 
+	/**
+	 *	Initialize HTTP respone resource instance.
+	 *	@access		protected
+	 *	@return		Net_HTTP_Response
+	 */
 	protected function initResponse(){
 		$this->response	= new Net_HTTP_Response();
 		$this->clock->profiler->tick( 'env: response' );
