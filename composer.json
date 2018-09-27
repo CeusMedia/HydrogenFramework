@@ -20,7 +20,8 @@
     "ceus-media/common": "^0.8"
   },
   "require-dev": {
-    "ceus-media/doc-creator": "*"
+    "ceus-media/doc-creator": "*",
+    "phpunit/phpunit": "^4"
   },
   "autoload": {
     "classmap": ["src/"]
