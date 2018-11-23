@@ -42,7 +42,7 @@ class CMF_Hydrogen_Environment_Resource_Php{
 		$this->version	= new CMF_Hydrogen_Environment_Resource_Php_Version();
 		$this->applyConfig();																		//  apply PHP configuration from config file
 	}
--
+
 	public function applyConfig(){
 		$settings	= $this->env->getConfig()->getAll( 'php.', TRUE );								//  get PHP configuration from config file
 		foreach( $settings as $key => $value ){														//  iterate set PHP configuration pairs

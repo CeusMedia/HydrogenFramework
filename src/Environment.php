@@ -113,11 +113,11 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 	 *	@todo		possible error: call to onInit is to soon of another environment if existing
 	 */
 	public function __construct( $options = array(), $isFinal = TRUE ){
-		$pattern			= '/^'.preg_quote( static::$configPath, '/' ).'/';								//  fix for migration
-		static::$configFile	= preg_replace( $pattern, '', static::$configFile );						//  @todo remove in 0.8.6
+		$pattern			= '/^'.preg_quote( static::$configPath, '/' ).'/';						//  fix for migration
+		static::$configFile	= preg_replace( $pattern, '', static::$configFile );					//  @todo remove in 0.8.6
 
 		static::$defaultPaths['cache']	= sys_get_temp_dir().'/cache/';
-		static::$defaultPaths['config']	= static::$configPath
+		static::$defaultPaths['config']	= static::$configPath;
 		$this->options		= $options;																//  store given environment options
 		$this->path			= isset( $options['pathApp'] ) ? $options['pathApp'] : getCwd().'/';	//  detect application path
 		$this->uri			= getCwd().'/';															//  detect application base URI
@@ -126,9 +126,9 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 		if( !empty( static::$timezone ) )																//  a timezone has be set externally before
 			date_default_timezone_set( static::$timezone );											//  set this timezone
 
-		$this->initPhp();
 		$this->initClock();																			//  setup clock
 		$this->initConfiguration();																	//  setup configuration
+		$this->initPhp();																			//  setup PHP environment
 		$this->initCaptain();																		//  setup captain
 		$this->initLogic();																			//  setup logic pool
 		$this->initModules();																		//  setup module support
@@ -561,7 +561,7 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 	}
 
 	protected function initPhp(){
-		$this->php		= new CMF_Hydrogen_Environment_Resource_Php();
+		$this->php		= new CMF_Hydrogen_Environment_Resource_Php( $this );
 	}
 
 	public function offsetExists( $key ){
