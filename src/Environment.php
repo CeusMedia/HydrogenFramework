@@ -74,14 +74,8 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 
 	/**	@var	array													$defaultPaths	Map of default paths to extend base configuration */
 	public static $defaultPaths				= array(
-		'classes'	=> 'classes/',
-		'contents'	=> 'contents/',
-		'images'	=> 'contents/images/',
-		'locales'	=> 'contents/locales/',
-		'scripts'	=> 'contents/scripts/',
-		'themes'	=> 'contents/themes/',
+		'config'	=> 'config/',
 		'logs'		=> 'logs/',
-		'templates'	=> 'templates/',
 	);
 
 	/**	@var	array													$disclosure		Map of classes ready to reflect */
@@ -119,17 +113,18 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 	 *	@todo		possible error: call to onInit is to soon of another environment if existing
 	 */
 	public function __construct( $options = array(), $isFinal = TRUE ){
-		$pattern			= '/^'.preg_quote( self::$configPath, '/' ).'/';								//  fix for migration
-		self::$configFile	= preg_replace( $pattern, '', self::$configFile );						//  @todo remove in 0.8.6
+		$pattern			= '/^'.preg_quote( static::$configPath, '/' ).'/';								//  fix for migration
+		static::$configFile	= preg_replace( $pattern, '', static::$configFile );						//  @todo remove in 0.8.6
 
-		self::$defaultPaths['cache']	= sys_get_temp_dir().'/cache/';
+		static::$defaultPaths['cache']	= sys_get_temp_dir().'/cache/';
+		static::$defaultPaths['config']	= static::$configPath
 		$this->options		= $options;																//  store given environment options
 		$this->path			= isset( $options['pathApp'] ) ? $options['pathApp'] : getCwd().'/';	//  detect application path
 		$this->uri			= getCwd().'/';															//  detect application base URI
 
 		date_default_timezone_set( @date_default_timezone_get() );									//  avoid having no timezone set
-		if( !empty( self::$timezone ) )																//  a timezone has be set externally before
-			date_default_timezone_set( self::$timezone );											//  set this timezone
+		if( !empty( static::$timezone ) )																//  a timezone has be set externally before
+			date_default_timezone_set( static::$timezone );											//  set this timezone
 
 		$this->initPhp();
 		$this->initClock();																			//  setup clock
@@ -313,6 +308,20 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 	}
 
 	/**
+	 *	Return configured path by path key.
+	 *	@access		public
+	 *	@param		string		$key		...
+	 *	@param		boolean		$strict		Flag: ... (default: yes)
+	 *	@return		string|NULL
+	 *	@throws		RangeException			if path is not configured using strict mode
+	 */
+	public function getPath( $key, $strict = TRUE ){
+		if( $strict && !$this->hasPath( $key ) )
+			throw new RangeException( 'Path "'.$key.'" is not configured' );
+		return $this->config->get( 'path.'.$key );
+	}
+
+	/**
 	 *	Indicates wheter a resource is an available object by its access method key.
 	 *	@access		public
 	 *	@param		string		$key		Resource access method key, ie. session, language, request
@@ -340,6 +349,16 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 
 	public function hasModules(){
 		return $this->modules !== NULL;
+	}
+
+	/**
+	 *	Indicated whether a path is configured path key.
+	 *	@access		public
+	 *	@param		string		$key		...
+	 *	@return		boolean
+	 */
+	public function hasPath( $key ){
+		return $this->config->has( 'path.'.$key );
 	}
 
 	/**
@@ -436,37 +455,21 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 	 */
 	protected function initConfiguration()
 	{
-		$configFile	= static::$configPath.self::$configFile;										//  get config file @todo remove this old way
+		$configFile	= static::$configPath.static::$configFile;										//  get config file @todo remove this old way
 		if( !empty( $this->options['configFile'] ) )												//  get config file from options @todo enforce this new way
 			$configFile	= $this->options['configFile'];												//  get config file from options
 		if( !file_exists( $configFile ) ){															//  config file not found
 			$message	= sprintf( 'Config file "%s" not existing', $configFile );
 			throw new CMF_Hydrogen_Environment_Exception( $message );								//  quit with exception
 		}
-
 		$data			= parse_ini_file( $configFile, FALSE );										//  parse configuration file (without section support)
-
-		$configHost	= static::$configPath.getEnv( 'HTTP_HOST' ).'.ini';
-		if( file_exists( $configHost ) )
-			$data	= array_merge( $data, parse_ini_file( $configHost, FALSE ) );
-		foreach( $data as $key => $value ){															//  iterate config pairs for evaluation
-			$data[$key]	= trim( $value );															//  trim value string
-			if( in_array( strtolower( $data[$key] ), array( "yes", "ja" ) ) )						//  value *means* yes
-				$data[$key]	= TRUE;																	//  change value to boolean TRUE
-			else if( in_array( strtolower( $data[$key] ), array( "no", "nein" ) ) )					//  value *means* no
-				$data[$key]	= FALSE;																//  change value to boolean FALSE
-		}
-
-		foreach( self::$defaultPaths as $key => $value ){
-			if( isset( $data['path.'.$key] ) )
-				$value	= $data['path.'.$key];
-			$value	= preg_replace( "@/+$@", "", $value )."/";
-			$data['path.'.$key]	= $value;
-		}
 		ksort( $data );
 		$this->config	= new ADT_List_Dictionary( $data );											//  create dictionary from array
-		if( $this->config->has( 'config.error.reporting' ) )										//  error reporting is defined
-			error_reporting( $this->config->get( 'config.error.reporting' ) );						//  set error reporting level
+
+		/*  -- DEFAULT PATHS  --  */
+		foreach( static::$defaultPaths as $key => $value )											//  iterate default paths
+			if( !$this->config->has( 'path.'.$key ) )												//  path is not set in config
+				$this->config->set( 'path.'.$key, rtrim( trim( $value ), '/' ).'/' );				//  set path in config (in memory)
 		$this->detectMode();
 		$this->clock->profiler->tick( 'env: config', 'Finished setup of base app configuration.' );
 	}
@@ -592,6 +595,22 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 			throw new InvalidArgumentException( sprintf( $message, $key ) );
 		}
 		$this->$key	= $object;
+	}
+
+	/**
+	 *	Sets configured path in config instance.
+	 *	This will NOT affect config files - only config instance in memory.
+	 *	Returns self for chaining.
+	 *	@access		public
+	 *	@param		string		$key		Path key to set in config instance
+	 *	@param		string		$path		Path to set in config instance
+	 *	@return		self
+	 */
+	public function setPath( $key, $path, $override = TRUE, $strict = TRUE ){
+		if( $this->hasPath( $key ) && !$override && $strict )
+			throw new RuntimeException( 'Path "'.$key.'" is already set' );
+		$this->config->set( 'path.'.$key, $value );
+		return $this;
 	}
 }
 ?>

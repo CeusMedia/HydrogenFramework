@@ -85,6 +85,19 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment{
 	/**	@var	string											$url		Detected application base URL */
 	public $url;
 
+	/**	@var	array											$defaultPaths	Map of default paths to extend base configuration */
+	public static $defaultPaths				= array(
+		'config'	=> 'config/',
+		'classes'	=> 'classes/',
+		'contents'	=> 'contents/',
+		'images'	=> 'contents/images/',
+		'locales'	=> 'contents/locales/',
+		'scripts'	=> 'contents/scripts/',
+		'themes'	=> 'contents/themes/',
+		'logs'		=> 'logs/',
+		'templates'	=> 'templates/',
+	);
+
 	protected $resourcesToClose					= array();
 
 	/**
@@ -244,6 +257,37 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment{
 	 */
 	public function getSession(){
 		return $this->session;
+	}
+
+	/**
+	 *	Sets up configuration resource reading main config file and module config files.
+	 *	@access		protected
+	 *	@return		void
+	 */
+	protected function initConfiguration()
+	{
+		parent::initConfiguration();
+
+		/*  -- DEFAULT PATHS  --  */
+		foreach( self::$defaultPaths as $key => $value )											//  iterate default paths
+			if( !$this->config->has( 'path.'.$key ) )												//  path is not set in config
+				$this->config->set( 'path.'.$key, rtrim( trim( $value ), '/' ).'/' );				//  set path in config (in memory)
+
+		/*  -- HOST BASED CONFIG  --  */
+		$configHost	= static::$configPath.getEnv( 'HTTP_HOST' ).'.ini';
+		if( file_exists( $configHost ) ){															//  config file for host is existing
+			foreach( parse_ini_file( $configHost, FALSE ) as $key => $value ){						//  read host config pairs
+				if( preg_match( '/^[0-9.]+$/', $value ) )											//  value is integer or float
+					$value	= (float) $value;														//  convert value to numeric
+				else if( in_array( strtolower( $value ), array( "yes", "true" ) ) )					//  value *means* yes
+					$value	= TRUE;																	//  change value to boolean TRUE
+				else if( in_array( strtolower( $value ), array( "no", "false" ) ) )					//  value *means* no
+					$value	= FALSE;																//  change value to boolean FALSE
+				$this->config->set( $key, $value );
+			}
+		}
+
+		$this->clock->profiler->tick( 'env: config', 'Finished setup of web app configuration.' );
 	}
 
 	/**
