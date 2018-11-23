@@ -2,7 +2,7 @@
 /**
  *	Interface for module libraries.
  *
- *	Copyright (c) 2012-2016 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2012-2018 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -18,26 +18,26 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *	@category		Library
- *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module
+ *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module.Libary
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2012-2016 Christian Würker
+ *	@copyright		2012-2018 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
 /**
  *	Interface for module libraries.
  *	@category		Library
- *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module
+ *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module.Libary
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2012-2016 Christian Würker
+ *	@copyright		2012-2018 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-interface CMF_Hydrogen_Environment_Resource_Module_Library{
+interface CMF_Hydrogen_Environment_Resource_Module_Library_Interface{
 
-	public function get( $moduleId );
-	public function getAll();
-	public function has( $moduleId );
+	public function get( $moduleId, $activeOnly = TRUE, $strict = TRUE );
+	public function getAll( $activeOnly = TRUE );
+	public function has( $moduleId, $activeOnly = TRUE );
 	public function scan();
 }
 ?>

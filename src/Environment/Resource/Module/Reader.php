@@ -35,10 +35,15 @@
  */
 class CMF_Hydrogen_Environment_Resource_Module_Reader{
 
-	static public function load( $fileName, $id ){
-		$xml						= XML_ElementReader::readFile( $fileName );
+	static public function load( $filePath, $id ){
+		if( !file_exists( $filePath ) )
+			throw new RuntimeException( 'Module file "'.$filePath.'" is not existing' );
+		$xml						= XML_ElementReader::readFile( $filePath );
 		$obj						= new stdClass();
 		$obj->id					= $id;
+		$obj->file					= $filePath;
+		$obj->uri					= realpath( $filePath );
+		$obj->path					= NULL;
 		$obj->title					= (string) $xml->title;
 		$obj->category				= (string) $xml->category;
 		$obj->description			= (string) $xml->description;
@@ -46,6 +51,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 		$obj->versionAvailable		= NULL;
 		$obj->versionInstalled		= NULL;
 		$obj->versionLog			= array();
+		$obj->isActive				= TRUE;
 		$obj->isInstalled			= FALSE;
 		$obj->companies				= array();
 		$obj->authors				= array();
@@ -67,17 +73,18 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 		$obj->sql					= array();
 		$obj->links					= array();
 		$obj->hooks					= array();
-		$obj->installType			= 0;
-		$obj->installDate			= NULL;
-		$obj->installSource			= NULL;
+		$obj->install				= new stdClass();
+		$obj->install->type			= 0;
+		$obj->install->date			= NULL;
+		$obj->install->source		= NULL;
 
 		/*	--  LOCALLY INSTALLED MODULE  --  */
 		if( $xml->version->hasAttribute( 'install-type' ) )											//  install type is set
-			$obj->installType	= (int) $xml->version->getAttribute( 'install-type' );				//  note install type
+			$obj->install->type	= (int) $xml->version->getAttribute( 'install-type' );				//  note install type
 		if( $xml->version->hasAttribute( 'install-date' ) )											//  install date is set
-			$obj->installDate	= strtotime( $xml->version->getAttribute( 'install-date' ) );		//  note install date
+			$obj->install->date	= strtotime( $xml->version->getAttribute( 'install-date' ) );		//  note install date
 		if( $xml->version->hasAttribute( 'install-source' ) )										//  install source is set
-			$obj->installSource	= $xml->version->getAttribute( 'install-source' );					//  note install source
+			$obj->install->source	= $xml->version->getAttribute( 'install-source' );				//  note install source
 
 		foreach( $xml->log as $entry ){																//  iterate version log entries if available
 			if( $entry->hasAttribute( "version" ) ){												//  only if log entry is versioned

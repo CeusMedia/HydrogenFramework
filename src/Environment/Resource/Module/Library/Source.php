@@ -20,7 +20,7 @@
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module.Library
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2012-2016 Christian Würker
+ *	@copyright		2012-2018 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -28,19 +28,20 @@
  *	Handler for module source library.
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module.Library
- *	@implements		CMF_Hydrogen_Environment_Resource_Module_Library
+ *	@extends		CMF_Hydrogen_Environment_Resource_Module_Library_Abstract
+ *	@implements		CMF_Hydrogen_Environment_Resource_Module_Library_Interface
  *	@uses			CMF_Hydrogen_Environment_Resource_Module_Reader
  *	@uses			FS_File_RecursiveNameFilter
  *	@uses			Net_HTTP_Request_Sender
  *	@uses			Net_Reader
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2012-2016 Christian Würker
+ *	@copyright		2012-2018 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			Code Documentation
- *	@todo			Finish by usind CMM::SEA
+ *	@todo			Finish by using CMM::SEA
  */
-class CMF_Hydrogen_Environment_Resource_Module_Library_Source implements CMF_Hydrogen_Environment_Resource_Module_Library{
+class CMF_Hydrogen_Environment_Resource_Module_Library_Source extends CMF_Hydrogen_Environment_Resource_Module_Library_Abstract implements CMF_Hydrogen_Environment_Resource_Module_Library_Interface{
 
 	protected $env;
 	protected $modules		= array();
@@ -50,20 +51,6 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source implements CMF_Hyd
 		$this->env		= $env;
 		$this->source	= $source;
 		$this->scan();
-	}
-
-	public function get( $moduleId ){
-		if( $this->isInstalled( $moduleId ) )
-			return $this->modulesInstalled[$moduleId];
-		throw new RuntimeException( 'Module "'.$moduleId.'" is not installed' );
-	}
-
-	public function getAll(){
-		return $this->modules;
-	}
-
-	public function has( $moduleId ){
-		return array_key_exists( $moduleId, $this->modules );
 	}
 
 	protected function scanFolder(){
@@ -81,7 +68,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source implements CMF_Hyd
 
 		$list	= array();
 		$index	= new FS_File_RecursiveNameFilter( $this->source->path, 'module.xml' );
-		$this->env->clock->profiler->tick( 'CMFR_Library_Source::scanFolder: init' );
+		$this->env->clock->profiler->tick( 'Hydrogen: Environment_Resource_Module_Library_Source::scanFolder: init' );
 		foreach( $index as $entry ){
 			if( preg_match( "@/templates$@", $entry->getPath() ) )
 				continue;
@@ -91,7 +78,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source implements CMF_Hyd
 			$cacheKey	= 'Modules/'.$this->source->id.'/'.$id;
 			if( $cache->has( $cacheKey ) ){
 				$list[$id]	= $cache->get( $cacheKey );
-#				$this->env->clock->profiler->tick( 'CMF_Library_Source::scanFolder: Module #'.$id.':cache' );
+#				$this->env->clock->profiler->tick( 'Hydrogen: Environment_Resource_Module_Library_Source::scanFolder: Module #'.$id.':cache' );
 				continue;
 			}
 			$icon	= $entry->getPath().'/icon';
@@ -100,27 +87,26 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source implements CMF_Hyd
 				$this->env->messenger->noteFailure( 'Module file "'.$filePath.'" is not readable.' );
 			else{
 				try{
-					$obj	= CMF_Hydrogen_Environment_Resource_Module_Reader::load( $filePath, $id );
-					$obj->path		= $entry->getPath();
-					$obj->file		= $filePath;
-					$obj->source	= $this->source->id;
-					$obj->_source	= $this->source;
-					$obj->id		= $id;
-					$obj->versionAvailable	= $obj->version;
-					$obj->icon	= NULL;
+					$module	= CMF_Hydrogen_Environment_Resource_Module_Reader::load( $filePath, $id );
+					$module->path				= $entry->getPath();
+					$module->source				= $this->source->id;
+					$module->versionAvailable	= $module->version;
+					if( isset( $module->config['active'] ) )
+						$module->isActive		= $module->config['active']->value;
+					$module->icon	= NULL;
 					if( file_exists( $icon.'.png' ) )
-						$obj->icon	= 'data:image/png;base64,'.base64_encode( FS_File_Reader::load( $icon.'.png' ) );
+						$module->icon	= 'data:image/png;base64,'.base64_encode( FS_File_Reader::load( $icon.'.png' ) );
 					else if( file_exists( $icon.'.ico' ) )
-						$obj->icon	= 'data:image/x-icon;base64,'.base64_encode( FS_File_Reader::load( $icon.'.ico' ) );
-					$list[$id]	= $obj;
+						$module->icon	= 'data:image/x-icon;base64,'.base64_encode( FS_File_Reader::load( $icon.'.ico' ) );
+					$list[$id]	= $module;
 				}
 				catch( Exception $e ){
 					$this->env->messenger->noteFailure( 'XML of available Module "'.$id.'" is broken ('.$e->getMessage().').' );
 				}
 				if( $cache )
-					$cache->set( $cacheKey, $obj );
+					$cache->set( $cacheKey, $module );
 			}
-#			$this->env->clock->profiler->tick( 'CMFR_Library_Source::scanFolder: Module #'.$id.':file' );
+#			$this->env->clock->profiler->tick( 'Hydrogen: Environment_Resource_Module_Library_Source::scanFolder: Module #'.$id.':file' );
 		}
 		ksort( $list );
 		$this->modules	= $list;

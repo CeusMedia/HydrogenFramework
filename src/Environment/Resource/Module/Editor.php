@@ -38,10 +38,15 @@ class CMF_Hydrogen_Environment_Resource_Module_Editor{
 	protected $path;
 	protected $nsXml	= 'http://www.w3.org/XML/1998/namespace';
 
-	public function __construct(CMF_Hydrogen_Environment $env ){
-		$this->path		= 'config/modules/';
-		if( $env->getConfig()->get( 'path.module.config' ) )
+	public function __construct( CMF_Hydrogen_Environment $env ){
+		$this->path		= $this->getConfig()->get( 'path.config' ).'/modules/';
+		if( $env->getConfig()->get( 'path.module.config' ) ){
+			CMF_Hydrogen_Deprecation::getInstance()
+				->setErrorVersion( '0.8.6.6' )
+				->setExceptionVersion( '0.8.9' )
+				->message( 'Using config path "module.config" is deprecated. Please remove this config pair!' );
 			$this->path	= $env->getConfig()->get( 'path.module.config' );
+		}
 		$this->path		= $env->path.$this->path;
 	}
 
