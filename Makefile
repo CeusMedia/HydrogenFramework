@@ -12,7 +12,7 @@ composer-update-dev:
 	composer update
 
 dev-doc: composer-install-dev
-	@test -f doc/API/search.html && rm -Rf doc/API || true
+	@test -f doc/api/search.html && rm -Rf doc/api || true
 	@php vendor/ceus-media/doc-creator/doc.php --config-file=doc.xml
 
 dev-test: composer-install-dev
