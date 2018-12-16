@@ -89,21 +89,58 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame{
 //		$this->applyModules();																		//  @todo kriss: remove, is called by environment now
 	}
 
+	/**
+	 *	Note to class to be set on body tag.
+	 *	@access		public
+	 *	@param		string		$class			Class to be set on body tag
+	 *	@return		self						Instance for chainability
+	 */
 	public function addBodyClass( $class ){
-		if( strlen( trim( $class ) ) )
-			$this->bodyClasses[]	= trim( htmlentities( $class, ENT_QUOTES, 'UTF-8' ) );
+		if( strlen( trim( $class ) ) ){
+			$classFixed	= trim( htmlentities( $class, ENT_QUOTES, 'UTF-8' ) );
+			if( !in_array( $classFixed, $this->bodyClasses ) )
+				$this->bodyClasses[]	= $classFixed;
+		}
+		return $this;
 	}
 
-	public function addCommonStyle( $fileName, $level = 'mid', $attributes = array() ){
+	/**
+	 *	Note to load style file from common style folder.
+	 *	@access		public
+	 *	@param		string		$fileName		Style file to load from common style folder
+	 *	@param		integer		$level			Load level, default: 5 (mid), less: earlier, more: later
+	 *	@param		array		$attributes		Map of style tag attributes
+	 *	@return		self						Instance for chainability
+	 */
+	public function addCommonStyle( $fileName, $level = 5, $attributes = array() ){
 		$this->css->common->addUrl( $fileName, $level, $attributes );
+		return $this;
 	}
 
-	public function addPrimerStyle( $fileName, $level = 'mid', $attributes = array() ){
+	/**
+	 *	Note to load style file from primer style folder.
+	 *	@access		public
+	 *	@param		string		$fileName		Style file to load from primer style folder
+	 *	@param		integer		$level			Load level, default: 5 (mid), less: earlier, more: later
+	 *	@param		array		$attributes		Map of style tag attributes
+	 *	@return		self						Instance for chainability
+	 */
+	public function addPrimerStyle( $fileName, $level = 5, $attributes = array() ){
 		$this->css->primer->addUrl( $fileName, $level, $attributes );
+		return $this;
 	}
 
-	public function addThemeStyle( $fileName, $level = 'mid', $attributes = array() ){
+	/**
+	 *	Note to load style file from theme style folder.
+	 *	@access		public
+	 *	@param		string		$fileName		Style file to load from theme style folder
+	 *	@param		integer		$level			Load level, default: 5 (mid), less: earlier, more: later
+	 *	@param		array		$attributes		Map of style tag attributes
+	 *	@return		self						Instance for chainability
+	 */
+	public function addThemeStyle( $fileName, $level = 5, $attributes = array() ){
 		$this->css->theme->addUrl( $fileName, $level, $attributes );
+		return $this;
 	}
 
 	/**
@@ -274,31 +311,35 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame{
 	 *	Notes to load a JavaScript in local scripts folder.
 	 *	@access		public
 	 *	@param		string		$filePath		Script file path within scripts folder
-	 *	@return		void
+	 *	@param		integer		$level			Run level (load order), default: 5 (mid), less: earlier, more: later
+	 *	@return		self						Instance for chainability
 	 *	@throws		RuntimeException			if script file is not existint
 	 */
-	public function loadLocalScript( $filePath ){
+	public function loadLocalScript( $filePath, $level = 5 ){
 		$path	= $this->env->getConfig()->get( 'path.scripts' );
 		if( !file_exists( $path.$filePath ) )
 			throw new RuntimeException( 'Local script "'.$filePath.'" not found in folder "'.$path.'"' );
-		$this->js->addUrl( $path.$filePath );
+		$this->js->addUrl( $path.$filePath, $level );
+		return $this;
 	}
 
 	/**
-	 *	Appends JavaScript code to be run after Browser finished rendering (document.ready).
+	 *	Appends JavaScript code to be run after browser finished rendering (document.ready).
 	 *	@access		public
 	 *	@param		string		$script			JavaScript code to execute on ready
-	 *	@param		integer		$runlevel		Run order level of JavaScript code, default: 5, less: earlier, more: later
-	 *	@return		void
+	 *	@param		integer		$level			Run level (load order), default: 5 (mid), less: earlier, more: later
+	 *	@return		self						Instance for chainability
 	 */
-	public function runScript( $script, $runlevel = 5 ){
-		return $this->js->addScriptOnReady( $script, $runlevel );
+	public function runScript( $script, $level = 5 ){
+		$this->js->addScriptOnReady( $script, $level );
+		return $this;
 	}
 
 	/**
 	 *	Deprecated.
 	 *	@param type $packJavaScripts
 	 *	@param type $packStyleSheets
+	 *	@return		self						Instance for chainability
 	 *	@deprecated		will be removed
 	 *	@todo			step 1: enable messenger note and let apps adjust
 	 *	@todo			step 2: remove method
@@ -311,6 +352,7 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame{
 #		$this->css->theme->setCompression( $packStyleSheets );
 		$this->packJavaScripts	= $packJavaScripts;
 		$this->packStyleSheets	= $packStyleSheets;
+		return $this;
 	}
 }
 ?>
