@@ -21,3 +21,28 @@ Now you are ready to install application modules:
 
 
 
+
+
+## Event System
+
+Besides the usual Request->Dispatch->Render->Response behavior, a event system exists to inject module code with the bootstrap process.
+Therefore events can be attach on hooks, which will be called by the system during boot or later within modules.
+
+### Default Hook Calls
+
+These hooks will be called by the system during boot:
+
+- Env::initModules
+- Database::init
+- Env::initCache
+- Session::init
+- Page::init
+- Page::applyModules
+- Env::constructEnd
+- Env::init
+- App::onControl
+- App::onDispatch
+    - Controller::onDetectPath
+    - Page::build
+- App::respond
+
