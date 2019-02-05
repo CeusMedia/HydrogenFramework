@@ -89,7 +89,6 @@ class CMF_Hydrogen_Environment_Resource_Module_Handler{
 	}
 
 	public function isActive( $moduleId ){
-
 		return array_key_exists( $moduleId, $this->modulesAvailable );
 	}
 

@@ -64,6 +64,8 @@ class CMF_Hydrogen_Controller
 	/**	@var		bool								$redirect		Flag for Redirection */
 	var $redirect				= FALSE;
 
+	protected $logRestarts		= FALSE;
+
 	/**
 	 *	Constructor.
 	 *	Will set up related view class by default. Disable this for controllers without views.
@@ -357,13 +359,23 @@ class CMF_Hydrogen_Controller
 	 *	@todo		kriss: concept and implement anti-loop {@see http://dev.(ceusmedia.de)/cmKB/?MTI}
 	 */
 	protected function restart( $uri, $withinModule = FALSE, $status = NULL, $allowForeignHost = FALSE, $modeFrom = 0 ){
+		$mode	= 'ext';
 		if( !preg_match( "/^http/", $uri ) ){														//  URI is not starting with HTTP scheme
+			$mode	= 'int';
 			if( $withinModule ){																	//  redirection is within module
+				$mode	= 'mod';
 				$controller	= $this->env->getRequest()->get( 'controller' );						//  get current controller
 				$controller	= $this->alias ? $this->alias : $controller;							//
 				$uri		= $controller.( strlen( $uri ) ? '/'.$uri : '' );						//
 			}
 		}
+		if( $this->logRestarts )
+			error_log( vsprintf( '%s %s %s %s'."\n", array(
+				date(),
+				$status ? $status : 200,
+				$mode,
+				$uri
+			) ), 3, 'logs/restart.log' );
 		$this->env->restart( $uri, $status, $allowForeignHost, $modeFrom );
 	}
 
@@ -407,6 +419,17 @@ class CMF_Hydrogen_Controller
 			$language	= $this->env->getLanguage();
 			$language->load( $this->controller, FALSE, FALSE );
 		}
+	}
+
+	/**
+	 *	Set activity of logging of restarts.
+	 *	@access		public
+	 *	@param		boolean		$log		Flag: Activate logging of restarts (default)
+	 *	@return		self
+	 */
+	public function setLogRestarts( $log = TRUE ){
+		$this->logRestarts	= (bool) $log;
+		return $this;
 	}
 
 	/**

@@ -63,16 +63,19 @@ class CMF_Hydrogen_Environment_Resource_Captain {
 	const LEVEL_BOTTOM		= 9;
 	const LEVEL_END			= 9;
 
-	/**	@var		CMF_Hydrogen_Environment			$env		Environment object */
+	/**	@var		CMF_Hydrogen_Environment			$env			Environment object */
 	protected $env;
 
 	/**	@var		array								$disabledHooks	List of disabled hooks */
 	protected $disabledHooks	= array();
 
+	/**	@var		boolean								$logCalls		Flag: log hook calls */
+	protected $logCalls			= FALSE;
+
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		CMF_Hydrogen_Environment			$env		Environment object
+	 *	@param		CMF_Hydrogen_Environment			$env			Environment object
 	 *	@return		void
 	 */
 	public function __construct( CMF_Hydrogen_Environment $env ){
@@ -98,6 +101,9 @@ class CMF_Hydrogen_Environment_Resource_Captain {
 		if( array_key_exists( $resource."::".$event, $this->disabledHooks ) )
 			return FALSE;
 //		$this->env->clock->profiler->tick( 'Resource_Module_Library_Local::callHook: '.$event.'@'.$resource.' start' );
+
+		if( $this->logCalls )
+			error_log( microtime( TRUE ).' '.$resource.'>'.$event."\n", 3, 'logs/hook_calls.log' );
 
 		$hooks	= array();
 		for( $i=0; $i<10; $i++)
@@ -234,6 +240,18 @@ class CMF_Hydrogen_Environment_Resource_Captain {
 		if( in_array( $level, array( 'end', 'tail', 'bottom' ) ) )
 			return 8;
 		throw new RangeException( 'Invalid load level: '.$level );
+	}
+
+
+	/**
+	 *	Set activity of logging of hook calls.
+	 *	@access		public
+	 *	@param		boolean		$log		Flag: Activate logging of hook calls (disabled by default)
+	 *	@return		self
+	 */
+	public function setLogCalls( $log = TRUE ){
+		$this->logCalls	= (bool) $log;
+		return $this;
 	}
 }
 ?>

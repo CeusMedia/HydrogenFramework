@@ -36,7 +36,7 @@
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			Code Documentation
  */
-class CMF_Hydrogen_Environment_Resource_Module_Library_Local extends  CMF_Hydrogen_Environment_Resource_Module_Library_Abstract implements CMF_Hydrogen_Environment_Resource_Module_Library_Interface{
+class CMF_Hydrogen_Environment_Resource_Module_Library_Local extends CMF_Hydrogen_Environment_Resource_Module_Library_Abstract implements CMF_Hydrogen_Environment_Resource_Module_Library_Interface{
 
 	protected $env;
 	protected $modules		= array();
