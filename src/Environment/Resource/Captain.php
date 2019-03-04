@@ -72,6 +72,9 @@ class CMF_Hydrogen_Environment_Resource_Captain {
 	/**	@var		boolean								$logCalls		Flag: log hook calls */
 	protected $logCalls			= FALSE;
 
+	/**	@var		array								$openHooks		List of hooks open right now */
+	protected $openHooks		= array();
+
 	/**
 	 *	Constructor.
 	 *	@access		public
@@ -101,6 +104,11 @@ class CMF_Hydrogen_Environment_Resource_Captain {
 		if( array_key_exists( $resource."::".$event, $this->disabledHooks ) )
 			return FALSE;
 //		$this->env->clock->profiler->tick( 'Resource_Module_Library_Local::callHook: '.$event.'@'.$resource.' start' );
+
+		if( array_key_exists( $resource.'::'.$event, $this->openHooks ) )
+			return false;
+
+		$this->openHooks[$resource.'::'.$event]	= microtime( TRUE );
 
 		if( $this->logCalls )
 			error_log( microtime( TRUE ).' '.$resource.'>'.$event."\n", 3, 'logs/hook_calls.log' );
@@ -169,6 +177,7 @@ class CMF_Hydrogen_Environment_Resource_Captain {
 			if( (bool) $result )
 				return $result;
 		}
+		unset( $this->openHooks[$resource.'::'.$event]);
 //		$this->env->clock->profiler->tick( 'Resource_Module_Library_Local::callHook: '.$event.'@'.$resource.' done' );
 		return $result;
 	}
