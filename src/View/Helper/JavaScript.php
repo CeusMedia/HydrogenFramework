@@ -79,15 +79,14 @@ class CMF_Hydrogen_View_Helper_JavaScript{
 	 *	Adds a module JavaScript by path name within configured local JavaScript folder.
 	 *	Uses addUrl with configured  local JavaScript folder.
 	 *	@access		public
-	 *	@param		string		$script		JavaScript block
-	 *	@param		integer		$level		Optional: Load level (1-9 or {top(1),mid(=5),end(9)}, default: 5)
+	 *	@param		string		$filePath	Path of file within JavaScript folder
+	 *	@param		integer		$level		Optional: Load level (1-9 or {top(1),mid(5),end(9)}, default: 5)
 	 *	@return		void
 	 */
-	public function addModuleFile( $script, $level = CMF_Hydrogen_Environment_Resource_Captain::LEVEL_MID, $key = NULL ){
+	public function addModuleFile( $filePath, $level = CMF_Hydrogen_Environment_Resource_Captain::LEVEL_MID, $key = NULL ){
 		$path	= $this->env->getConfig()->get( 'path.scripts' );
 		$level	= CMF_Hydrogen_Environment_Resource_Captain::interpretLoadLevel( $level );
-		$this->addUrl( $path.$script, $level );
-//		$this->scripts[$level][$key][]	= $path.$script;
+		$this->addUrl( $path.$filePath, $level );
 	}
 
 	/**
@@ -95,10 +94,10 @@ class CMF_Hydrogen_View_Helper_JavaScript{
 	 *	Uses addUrl with configured  local JavaScript folder.
 	 *	@access		public
 	 *	@param		string		$script		JavaScript block
-	 *	@param		integer		$level		Optional: Load level (1-9 or {top(1),mid(=5),end(9)}, default: 5)
+	 *	@param		integer		$level		Optional: Load level (1-9 or {top(1),mid(5),end(9)}, default: 5)
 	 *	@return		void
 	 *	@deprecated	use addModuleFile instead
-	 *	@todo		remove in v0.8.7
+	 *	@todo		remove in v0.8.8
 	 */
 	public function addModuleScript( $script, $level = CMF_Hydrogen_Environment_Resource_Captain::LEVEL_MID, $key = NULL ){
 		CMF_Hydrogen_Deprecation::getInstance()
@@ -109,7 +108,6 @@ class CMF_Hydrogen_View_Helper_JavaScript{
 		$path	= $this->env->getConfig()->get( 'path.scripts' );
 		$level	= CMF_Hydrogen_Environment_Resource_Captain::interpretLoadLevel( $level );
 		$this->addUrl( $path.$script, $level );
-//		$this->scripts[$level][$key][]	= $path.$script;
 	}
 
 	/**

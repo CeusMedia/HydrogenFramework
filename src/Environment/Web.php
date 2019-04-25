@@ -383,6 +383,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment{
 			$sessionName
 		);
 
+		// @todo check if this old workaround public URL paths extended by module is still needed and remove
 		$isInside	= (int) $this->session->get( 'userId' );
 		$inside		= explode( ',', $this->config->get( 'module.acl.inside' ) );					//  get current inside link list
 		$outside	= explode( ',', $this->config->get( 'module.acl.outside' ) );					//  get current outside link list
