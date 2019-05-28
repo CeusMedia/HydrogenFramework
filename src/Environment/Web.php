@@ -41,8 +41,6 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment{
 
 	public static $classRouter			= 'CMF_Hydrogen_Environment_Router_Single';
 
-	public static $configKeyBaseHref	= 'app.base.url';
-
 	/**	@var	Net_HTTP_Request								$request	HTTP Request Object */
 	protected $request;
 
@@ -333,7 +331,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment{
 	protected function initPage( $pageJavaScripts = TRUE, $packStyleSheets = TRUE ){
 		$this->page	= new CMF_Hydrogen_Environment_Resource_Page( $this );
 		$this->page->setPackaging( $pageJavaScripts, $packStyleSheets );
-		$this->page->setBaseHref( $this->getBaseUrl( self::$configKeyBaseHref ) );
+		$this->page->setBaseHref( $this->getBaseUrl() );
 		$this->page->applyModules();
 
 		$words		= $this->getLanguage()->getWords( 'main' );
