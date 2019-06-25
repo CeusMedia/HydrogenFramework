@@ -1,4 +1,4 @@
-<phpunit bootstrap="vendor/autoload.php" colors="true">
+<phpunit bootstrap="test/bootstrap.php" colors="true">
   <testsuites>
     <testsuite name="CeusMedia/HydrogenFramework">
       <directory>test</directory>
