@@ -35,6 +35,9 @@
  */
 class CMF_Hydrogen_Environment_Resource_Language{
 
+	/**	@var		string								$fileExtension	File extension of language files (default: ini) */
+	static public $fileExtension						= 'ini';
+
 	/**	@var		array								$data			Array of loaded Language File Definitions */
 	protected $data;
 
@@ -74,7 +77,7 @@ class CMF_Hydrogen_Environment_Resource_Language{
 				$this->languages[]	= trim( $language );											//  save language without surrounding spaces
 
 		else																						//  otherwise scan locales folder
-			foreach( Folder_Lister::getFolderList( $this->filePath ) as $folder )					//  iterate found locale folders
+			foreach( FS_Folder_Lister::getFolderList( $this->filePath ) as $folder )				//  iterate found locale folders
 				$this->languages[]	= $folder->getFilename();										//  save locale folder as language
 		$language			= $config->has( 'locale.default' ) ? $config['locale.default'] : 'en';
 
@@ -185,7 +188,8 @@ class CMF_Hydrogen_Environment_Resource_Language{
 	 *	@return		void
 	 */
 	protected function getFilenameOfLanguage( $topic ){
-		return $this->filePath.$this->language."/".$topic.".ini";
+		$ext	= strlen( trim( static::$fileExtension ) ) ? '.'.trim( static::$fileExtension ) : '';
+		return $this->filePath.$this->language.'/'.$topic.$ext;
 	}
 
 	/**
