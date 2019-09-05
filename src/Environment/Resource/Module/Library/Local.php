@@ -2,7 +2,7 @@
 /**
  *	Handler for local module library.
  *
- *	Copyright (c) 2012-2016 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2012-2019 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module.Library
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2012-2018 Christian Würker
+ *	@copyright		2012-2019 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -31,7 +31,7 @@
  *	@extends		CMF_Hydrogen_Environment_Resource_Module_Library_Abstract
  *	@implements		CMF_Hydrogen_Environment_Resource_Module_Library_Interface
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2012-2018 Christian Würker
+ *	@copyright		2012-2019 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			Code Documentation
