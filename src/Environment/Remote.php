@@ -64,6 +64,7 @@ class CMF_Hydrogen_Environment_Remote extends CMF_Hydrogen_Environment{
 		$this->initDatabase();																		//  setup database connection
 		$this->initCache();																			//  setup cache support
 		$this->initLanguage();
+		$this->initLogic();
 
 		$this->hasDatabase	= (bool) $this->dbc;													//  note if database is available
 		$this->__onInit();
