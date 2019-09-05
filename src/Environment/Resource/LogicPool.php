@@ -134,11 +134,17 @@ class CMF_Hydrogen_Environment_Resource_LogicPool {
 
 	/**
 	 *	Returns class name of registered logic pool key.
+	 *	Logic pool key can be either a shortened class name (without prefix Logic_)
+	 *	or a camelcased shortened class name.
+	 *	For example, logic pool key for class Logic_Catalog_Bookstore can be
+	 *	Catalog_Bookstore or catalogBookstore.
 	 *	@access		public
 	 *	@param		string			$key			Key of logic object
 	 *	@return		string
 	 */
 	public function getClassNameFromKey( $key ){
+		if( preg_match( '/^[A-Z]/', $key ) )
+			return 'Logic_'.$key;
 		$classNameWords	= ucwords( Alg_Text_CamelCase::decode( $key ) );
 		return str_replace( ' ', '_', 'Logic '.$classNameWords );
 	}

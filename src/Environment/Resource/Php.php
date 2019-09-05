@@ -37,6 +37,8 @@ class CMF_Hydrogen_Environment_Resource_Php{
 
 	public $version;
 
+	protected $env;
+
 	public function __construct( CMF_Hydrogen_Environment $env ){
 		$this->env		= $env;
 		$this->version	= new CMF_Hydrogen_Environment_Resource_Php_Version();

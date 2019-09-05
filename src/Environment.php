@@ -326,6 +326,15 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 	}
 
 	/**
+	 *	Returns PHP configuration and version management.
+	 *	@access		public
+	 *	@return		CMF_Hydrogen_Environment_Resource_Php
+	 */
+	public function getPhp(){
+		return $this->php;
+	}
+
+	/**
 	 *	Indicates wheter a resource is an available object by its access method key.
 	 *	@access		public
 	 *	@param		string		$key		Resource access method key, ie. session, language, request
