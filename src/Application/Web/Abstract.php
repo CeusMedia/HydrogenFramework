@@ -88,6 +88,20 @@ abstract class CMF_Hydrogen_Application_Web_Abstract extends CMF_Hydrogen_Applic
 	 *	@return		void
 	 */
 	protected function view( $templateFile = "master.php" ){
+		$masterTemplate	= (string) $this->env->getCaptain()->callHook( 'App', 'getMasterTemplate', $this );
+		switch( $masterTemplate ){
+			case '':
+			case 'default':
+			case 'inherit':
+				$templateFile	= 'master.php';
+				break;
+			case 'theme':
+				$pathTheme		= $this->env->getPage()->getThemePath();
+				$templateFile	= $pathTheme.'master.php';
+				break;
+			default:
+				$templateFile	= $masterTemplate;
+		}
 		$view	= new CMF_Hydrogen_View( $this->env );
 		return $view->loadTemplateFile( $templateFile, $this->components );
 	}
