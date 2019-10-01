@@ -69,9 +69,6 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 	/**	@var	string													$configFile		File path to base configuration */
 	public static $configFile				= 'config.ini';
 
-	/**	@var	string													$configKeyBaseHref	Key for base URL in config file  */
-	public static $configKeyBaseHref		= 'app.base.url';
-
 	/**	@var	CMF_Hydrogen_Environment_Resource_Database_PDO			$dbc			Database Connection Object */
 	protected $dbc;
 
@@ -238,8 +235,7 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 		return $this->acl;
 	}
 
-	public function getBaseUrl( $keyConfig = NULL ){
-		$keyConfig	= strlen( trim( $keyConfig ) ) ? $keyConfig : static::$configKeyBaseHref;
+	public function getBaseUrl( $keyConfig = 'app.base.url' ){
 		if( $this->config && $this->config->get( $keyConfig ) )
 			return $this->config->get( $keyConfig );
 		$host	= getEnv( 'HTTP_HOST' );
