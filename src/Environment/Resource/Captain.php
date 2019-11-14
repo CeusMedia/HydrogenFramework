@@ -141,6 +141,8 @@ class CMF_Hydrogen_Environment_Resource_Captain {
 				$resource	= $hook->resource;
 				$event		= $hook->event;
 				$function	= $hook->function;
+				if( !trim( $function ) )
+					continue;
 				try{
 					if( preg_match( $regexMethod, $function ) ){
 						$function	= preg_split( "/::/", $function );
