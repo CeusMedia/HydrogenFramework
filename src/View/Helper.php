@@ -50,4 +50,3 @@ interface CMF_Hydrogen_View_Helper{
 //	@todo 	mind the idea of a "helper pool", like the logic pool
 
 }
-?>

@@ -45,4 +45,3 @@ interface CMF_Hydrogen_Environment_Router_Interface
 
 	public function realizeInResponse();
 }
-?>

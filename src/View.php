@@ -486,4 +486,3 @@ class CMF_Hydrogen_View{
 			$this->env->getPage()->setTitle( $data['words'][$section][$key], $mode );
 	}
 }
-?>

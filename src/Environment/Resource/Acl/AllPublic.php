@@ -108,4 +108,3 @@ class CMF_Hydrogen_Environment_Resource_Acl_AllPublic extends CMF_Hydrogen_Envir
 		return 1;
 	}
 }
-?>

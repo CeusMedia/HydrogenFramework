@@ -96,4 +96,3 @@ class CMF_Hydrogen_Environment_Remote_Messenger extends CMF_Hydrogen_Environment
 		flush();
 	}
 }
-?>

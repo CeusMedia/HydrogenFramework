@@ -74,4 +74,3 @@ class CMF_Hydrogen_Application_Console extends CMF_Hydrogen_Application_Abstract
 		}*/
 	}
 }
-?>

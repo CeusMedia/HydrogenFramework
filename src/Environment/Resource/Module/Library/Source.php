@@ -168,4 +168,3 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source extends CMF_Hydrog
 		}
 	}
 }
-?>

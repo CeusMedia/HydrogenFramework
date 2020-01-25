@@ -51,4 +51,3 @@ class CMF_Hydrogen_View_Helper_Diff{
 		return $ret;
 	}
 }
-?>

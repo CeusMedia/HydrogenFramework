@@ -89,5 +89,3 @@ class CMF_Hydrogen_Environment_Router_Recursive extends CMF_Hydrogen_Environment
 		die;*/
 	}
 }
-
-?>

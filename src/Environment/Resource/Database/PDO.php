@@ -133,4 +133,3 @@ class CMF_Hydrogen_Environment_Resource_Database_PDO extends Database_PDO_Connec
 
 	public function tearDown(){}
 }
-?>

@@ -447,4 +447,3 @@ class CMF_Hydrogen_Controller
 			throw new RuntimeException( 'View "'.$name.'" is missing', 301 );
 	}
 }
-?>

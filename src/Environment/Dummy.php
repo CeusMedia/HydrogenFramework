@@ -45,4 +45,3 @@ class CMF_Hydrogen_Environment_Dummy extends CMF_Hydrogen_Environment {
 		$this->config		= new ADT_List_Dictionary();											//  create empty configuration object
 	}
 }
-?>

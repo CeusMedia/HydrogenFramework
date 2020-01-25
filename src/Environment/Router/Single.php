@@ -63,4 +63,3 @@ class CMF_Hydrogen_Environment_Router_Single extends CMF_Hydrogen_Environment_Ro
 		$request->set( 'arguments', $arguments );
 	}
 }
-?>

@@ -86,4 +86,3 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAclList extends CMF_Hydrogen_Vie
 		return UI_HTML_Tag::create( 'div', $list, $attr );
 	}
 }
-?>

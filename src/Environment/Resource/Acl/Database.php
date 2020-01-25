@@ -169,4 +169,3 @@ class CMF_Hydrogen_Environment_Resource_Acl_Database extends CMF_Hydrogen_Enviro
 		return $model->add( $data );
 	}
 }
-?>

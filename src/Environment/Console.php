@@ -108,4 +108,3 @@ class CMF_Hydrogen_Environment_Console_Messenger extends CMF_Hydrogen_Environmen
 		flush();
 	}
 }
-?>

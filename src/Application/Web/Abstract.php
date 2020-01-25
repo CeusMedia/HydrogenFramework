@@ -106,4 +106,3 @@ abstract class CMF_Hydrogen_Application_Web_Abstract extends CMF_Hydrogen_Applic
 		return $view->loadTemplateFile( $templateFile, $this->components );
 	}
 }
-?>

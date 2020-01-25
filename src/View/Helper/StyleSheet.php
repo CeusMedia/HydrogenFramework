@@ -275,4 +275,3 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 		$this->revision	= $revision;
 	}
 }
-?>

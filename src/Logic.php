@@ -95,4 +95,3 @@ class CMF_Hydrogen_Logic{
 		return \Alg_Object_Factory::createObject( $className, array( $this->env ) );
 	}
 }
-?>

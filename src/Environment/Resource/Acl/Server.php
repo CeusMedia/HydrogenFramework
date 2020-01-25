@@ -106,4 +106,3 @@ class CMF_Hydrogen_Environment_Resource_Acl_Server extends CMF_Hydrogen_Environm
 		return $this->env->getServer()->postData( 'role', 'setRight', array( $roleId ), $data );
 	}
 }
-?>

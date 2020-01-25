@@ -614,4 +614,3 @@ class CMF_Hydrogen_Model
 		$this->table->truncate();
 	}
 }
-?>

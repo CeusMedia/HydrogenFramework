@@ -355,4 +355,3 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame{
 		return $this;
 	}
 }
-?>

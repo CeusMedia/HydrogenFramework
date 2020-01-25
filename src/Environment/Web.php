@@ -526,4 +526,3 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment{
 		exit;																						//  and exit application
 	}
 }
-?>

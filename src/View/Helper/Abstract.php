@@ -100,4 +100,3 @@ abstract class CMF_Hydrogen_View_Helper_Abstract implements CMF_Hydrogen_View_He
 		}
 	}
 }
-?>

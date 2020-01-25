@@ -32,4 +32,3 @@ class CMF_Hydrogen_Model_File_JSON extends CMF_Hydrogen_Model_File_Abstract{
 		return \FS_File_Writer::save( $this->path.$fileName, $json );
 	}
 }
-?>

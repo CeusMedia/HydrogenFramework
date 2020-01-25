@@ -252,4 +252,3 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract{
 	 */
 	abstract public function setRight( $roleId, $controller, $action );
 }
-?>

@@ -104,4 +104,3 @@ class CMF_Hydrogen_Environment_Resource_Disclosure{
 		return $classes;
 	}
 }
-?>

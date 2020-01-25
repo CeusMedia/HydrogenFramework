@@ -439,4 +439,3 @@ class CMF_Hydrogen_View_Helper_JavaScript{
 		$this->pathCache = $path;
 	}
 }
-?>

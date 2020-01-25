@@ -118,4 +118,3 @@ class CMF_Hydrogen_Deprecation extends Deprecation{
 		return $this;
 	}
 }
-?>

@@ -176,4 +176,3 @@ class CMF_Hydrogen_Dispatcher_General
 			$this->request->set( 'arguments', $this->defaultArguments );
 	}
 }
-?>

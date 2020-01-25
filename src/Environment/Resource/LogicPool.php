@@ -230,4 +230,3 @@ class CMF_Hydrogen_Environment_Resource_LogicPool {
 		$this->pool[$key]	= $logicClassOrObject;
 	}
 }
-?>

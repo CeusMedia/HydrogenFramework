@@ -87,4 +87,3 @@ abstract class CMF_Hydrogen_Application_Abstract{
 
 	abstract public function run();
 }
-?>

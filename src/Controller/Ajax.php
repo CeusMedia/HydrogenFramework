@@ -85,4 +85,3 @@ abstract class CMF_Hydrogen_Controller_Ajax{
 		Net_HTTP_Response_Sender::sendResponse( $this->response, 'gzip', TRUE, TRUE );
 	}
 }
-?>

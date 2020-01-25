@@ -97,4 +97,3 @@ abstract class CMF_Hydrogen_Environment_Router_Abstract implements CMF_Hydrogen_
 		xmp( $body );
 		die;
 	}}
-?>

@@ -130,4 +130,3 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local extends CMF_Hydroge
 		$this->env->clock->profiler->tick( 'Hydrogen: Environment_Resource_Module_Library_Local::scan (files)' );
 	}
 }
-?>

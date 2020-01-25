@@ -625,4 +625,3 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 		return $this;
 	}
 }
-?>

@@ -112,4 +112,3 @@ class CMF_Hydrogen_Environment_Resource_Module_Handler{
 		return CMF_Hydrogen_Environment_Resource_Module_Reader::load( $fileName, $moduleId );
 	}
 }
-?>

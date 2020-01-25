@@ -125,4 +125,3 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_H
 		$this->innerId	= $id;
 	}
 }
-?>

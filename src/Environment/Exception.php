@@ -18,4 +18,3 @@
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
 class CMF_Hydrogen_Environment_Exception extends Exception{}
-?>

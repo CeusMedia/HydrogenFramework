@@ -109,4 +109,3 @@ class CMF_Hydrogen_View_Helper_Timestamp extends CMF_Hydrogen_View_Helper_Abstra
 		return $instance->toPhrase( $env, $html, $languageTopic, $languageSection );
 	}
 }
-?>

@@ -127,4 +127,3 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAutoTabs extends CMF_Hydrogen_Vi
 		return $linkMap;
 	}
 }
-?>

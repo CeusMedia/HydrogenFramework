@@ -40,4 +40,3 @@ interface CMF_Hydrogen_Environment_Resource_Module_Library_Interface{
 	public function has( $moduleId, $activeOnly = TRUE );
 	public function scan();
 }
-?>
