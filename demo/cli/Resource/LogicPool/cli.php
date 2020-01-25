@@ -11,13 +11,18 @@ class DemoApp extends CMF_Hydrogen_Application_Console{
 	public function run(){
 		$logicPool	= $this->env->getLogic();
 
+		CLI::out();
+		CLI::out( 'Hydrogen CLI Demo: Resource/LogicPool' );
+		CLI::out();
+
+		$logicPool		= $this->env->getLogic();
 		$logicClassName	= 'Logic_IP_Lock_Transport';
 		$logicPoolKey	= $logicPool->getKeyFromClassName( $logicClassName );
 
-		remark( 'Logic class "'.$logicClassName.'" is pooled by key "'.$logicPoolKey.'"' );
+		CLI::out( 'Logic class "'.$logicClassName.'" would be stored in logic pool by key "'.$logicPoolKey.'"' );
+		CLI::out();
 	}
 }
 
 $app	= new DemoApp();
 $app->run();
-

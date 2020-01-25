@@ -3,13 +3,11 @@ if( !@include_once dirname( dirname( dirname( dirname( __DIR__ ) ) ) ).'/vendor/
     die( 'You need to "composer install" first.' );
 
 CMF_Hydrogen_Environment::$configPath	= '';
+Loader::registerNew( 'php', '', 'classes/' );
 
-class DemoApp extends CMF_Hydrogen_Application_Console{
-	public function run(){
-		print "Hello World!";
-	}
-}
+CLI::out();
+CLI::out( 'Hydrogen CLI Demo: App/Hello' );
+CLI::out();
 
-$app	= new DemoApp();
+$app	= new App();
 $app->run();
-

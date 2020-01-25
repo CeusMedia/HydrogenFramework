@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<module>
+	<title>This is a test.</title>
+	<category>CLI</category>
+	<description>Empty module just for demonstration purposes.</description>
+	<version>0.3</version>
+	<log version="0.1">Empty module definition for demo.</log>
+	<log version="0.2">Add controller, called by demo app.</log>
+	<log version="0.3">Add hook, called by demp app.</log>
+	<files>
+		<class>Controller/CLI/Demo.php</class>
+		<class>Hook/CLI/Demo.php</class>
+	</files>
+	<hook type="event" resource="Demo" event="demonstrateHook">Hook_CLI_Demo::onDemonstrateHook</hook>
+</module>
