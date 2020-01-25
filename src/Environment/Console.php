@@ -19,9 +19,18 @@
  */
 class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment{
 
-	/**	@var	Console_RequestReceiver		$request	Console Request Object */
+	/**	@var	CLI_ArgumentParser								$request	Console Request Object */
 	protected $request;
+
+	/** @var	CMF_Hydrogen_Environment_Console_Messenger		$messenger	Messenger Object */
 	protected $messenger;
+
+	/** @var	CMF_Hydrogen_Environment_Resource_Language		$language	Language Object */
+	protected $language;
+
+	/** @var	ADT_List_Dictionary								$session	Session Storage Object */
+	protected $session;
+
 	protected $pathConfig	= "";
 
 	/**
@@ -35,8 +44,9 @@ class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment{
 			parent::__construct( $options, FALSE );													//  construct parent but dont call __onInit
 			$this->detectSelf();
 			$this->initMessenger();																	//  setup user interface messenger
-			$this->initRequest();																	//  setup HTTP request handler
-#			$this->initResponse();																	//  setup HTTP response handler
+			$this->initRequest();																	//  setup console request handler
+			$this->initSession();																	//  setup session storage
+#			$this->initResponse();																	//  setup console response handler
 #			$this->initRouter();																	//  setup request router
 			$this->initLanguage();																	//  setup language support
 #			$this->initPage();																		//
@@ -54,19 +64,6 @@ class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment{
 		}
 	}
 
-	protected function detectSelf(){
-		$this->url = $this->config->get( 'app.url' );												//  get application URL from config
-		if( !$this->url )																			//  application URL not set
-			$this->url = $this->config->get( 'app.base.url' );										//  get application base URL from config
-		if( !$this->url )																			//  application base URL not set
-			throw new RuntimeException( 'Please define app.base.url in config.ini, first!' );		//  quit with exception
-
-		$this->scheme	= parse_url( $this->url, PHP_URL_SCHEME );									//  note used URL scheme
-		$this->host		= parse_url( $this->url, PHP_URL_HOST );									//  note requested HTTP host name
-		$this->port		= parse_url( $this->url, PHP_URL_PORT );									//  note requested HTTP port
-		$this->path		= $this->config->get( 'app.base.path' );									//  note absolute working path
-	}
-
 	public function getLanguage(){
 		return $this->language;
 	}
@@ -80,31 +77,55 @@ class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment{
 	}
 
 	public function getSession(){
-		return new ADT_List_Dictionary();
+		return $this->session;
 	}
 
-//	public function initConfiguration(){
+
+	//  --  PROTECTED  --  //
+
+	protected function detectSelf(){
+		$this->url = $this->config->get( 'app.url' );												//  get application URL from config
+		if( !$this->url )																			//  application URL not set
+			$this->url = $this->config->get( 'app.base.url' );										//  get application base URL from config
+		if( !$this->url )																			//  application base URL not set
+			throw new RuntimeException( 'Please define app.base.url in config.ini, first!' );		//  quit with exception
+
+		$this->scheme	= parse_url( $this->url, PHP_URL_SCHEME );									//  note used URL scheme
+		$this->host		= parse_url( $this->url, PHP_URL_HOST );									//  note requested HTTP host name
+		$this->port		= parse_url( $this->url, PHP_URL_PORT );									//  note requested HTTP port
+		$this->path		= $this->config->get( 'app.base.path' );									//  note absolute working path
+	}
+
+//	protected function initConfiguration(){
 //		$this->config	= new ADT_List_Dictionary();
 //	}
 
-	public function initLanguage(){
+	protected function initLanguage(){
 		$this->language		= new CMF_Hydrogen_Environment_Resource_Language( $this );
 		$this->clock->profiler->tick( 'env: language' );
 	}
 
-	public function initMessenger(){
+	protected function initMessenger(){
 		$this->messenger	= new CMF_Hydrogen_Environment_Console_Messenger( $this );
 	}
 
-	public function initRequest(){
+	protected function initRequest(){
 		$this->request	= new CLI_ArgumentParser();
 		$this->request->parseArguments();
+	}
+
+	/**
+	 * Setup a "session", which is persistent storage for this run only.
+	 */
+	protected function initSession(){
+		$this->session	= new ADT_List_Dictionary();
+		return $this;
 	}
 }
 class CMF_Hydrogen_Environment_Console_Messenger extends CMF_Hydrogen_Environment_Resource_Messenger{
 
 	protected function noteMessage( $type, $message ){
-		remark( $message );
+		CLI::out( $message );
 		flush();
 	}
 }
