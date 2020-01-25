@@ -511,7 +511,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment{
 				exit;																				//  and exit
 			}
 		}
-	#	$this->dbc->close();																		//  close database connection
+	#	$this->database->close();																		//  close database connection
 	#	$this->session->close();																	//  close session
 		if( $status )																				//  a HTTP status code is to be set
 			Net_HTTP_Status::sendHeader( (int) $status );											//  send HTTP status code header

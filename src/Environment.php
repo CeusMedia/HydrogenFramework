@@ -69,8 +69,8 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 	/**	@var	string													$configFile		File path to base configuration */
 	public static $configFile				= 'config.ini';
 
-	/**	@var	CMF_Hydrogen_Environment_Resource_Database_PDO			$dbc			Database Connection Object */
-	protected $dbc;
+	/**	@var	object													$database		Database Connection Object */
+	protected $database;
 
 	/**	@var	array													$defaultPaths	Map of default paths to extend base configuration */
 	public static $defaultPaths				= array(
@@ -170,7 +170,7 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 			'config',																				//  ... base application configuration handler
 			'clock',																				//  ... internal clock handler
 			'cache',																				//  ... cache handler
-			'dbc',																					//  ... database handler
+			'database',																					//  ... database handler
 			'logic',																				//  ... logic handler
 			'modules',																				//  ... module handler
 			'acl',																					//  ... cache handler
@@ -269,7 +269,7 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 	}
 
 	public function getDatabase(){
-		return $this->dbc;
+		return $this->database;
 	}
 
 	public function getDisclosure(){
@@ -485,16 +485,19 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 
 	/**
 	 *	Sets up database support.
+	 *	Calls hook Env::initDatabase to get resource.
+	 *	Calls hook Database::init if resource is available and retrieved
 	 *	@access		protected
-	 *	@todo		remove deprecation in 0.7.0
 	 *	@return		void
 	 */
 	protected function initDatabase()
 	{
-		if( !$this->modules || !$this->getModules()->has( 'Resource_Database' ) )					//  database module is not available
-			return;
-		$this->dbc	= new Resource_Database( $this );												//  try to configure and connect database
-		$this->modules->callHook( 'Database', 'init', $this->dbc );									//  call events hooked to database init
+		$data	= (object) array( 'managers' => array() );
+		$this->modules->callHook( 'Env', 'initDatabase', $this, $data );									//  call events hooked to database init
+		if( count( $data->managers ) ){
+			$this->database	= current( $data->managers );
+			$this->modules->callHook( 'Database', 'init', $this->database );									//  call events hooked to database init
+		}
 		$this->clock->profiler->tick( 'env: database', 'Finished setup of database connection.' );
 	}
 

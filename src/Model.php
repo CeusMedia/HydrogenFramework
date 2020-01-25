@@ -66,7 +66,7 @@ class CMF_Hydrogen_Model
 	 */
 	public function __construct( CMF_Hydrogen_Environment $env, $id = NULL ){
 		$this->setEnv( $env );
-		$this->table	= new DB_PDO_TableWriter(
+		$this->table	= new \CeusMedia\Database\PDO\Table\Writer(
 			$this->env->getDatabase(),
 			$this->prefix.$this->name,
 			$this->columns,

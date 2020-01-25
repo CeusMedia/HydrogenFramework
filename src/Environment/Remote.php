@@ -66,7 +66,7 @@ class CMF_Hydrogen_Environment_Remote extends CMF_Hydrogen_Environment{
 		$this->initLanguage();
 		$this->initLogic();
 
-		$this->hasDatabase	= (bool) $this->dbc;													//  note if database is available
+		$this->hasDatabase	= (bool) $this->database;													//  note if database is available
 		$this->__onInit();
 	}
 
