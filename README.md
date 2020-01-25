@@ -1,5 +1,5 @@
 # HydrogenFramework
-PHP5 Framework with Design Patterns and Modules.
+PHP Framework with design patterns and modules.
 
 ## Installation
 
@@ -33,6 +33,7 @@ Therefore events can be attach on hooks, which will be called by the system duri
 These hooks will be called by the system during boot:
 
 - Env::initModules
+- Env::initDatabase
 - Database::init
 - Env::initCache
 - Session::init
