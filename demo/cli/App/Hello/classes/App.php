@@ -24,4 +24,3 @@ class App extends CMF_Hydrogen_Application_Console
 		CLI::out();
 	}
 }
-?>
