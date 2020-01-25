@@ -103,6 +103,9 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 	public $uri;
 
 	public static $timezone					= NULL;
+	/** @var	string													$version		Framework version */
+	public $version;
+
 
 	/**
 	 *	Constructor, sets up Resource Environment.
@@ -113,6 +116,9 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 	 *	@todo		possible error: call to onInit is to soon of another environment if existing
 	 */
 	public function __construct( $options = array(), $isFinal = TRUE ){
+		$frameworkConfig	= parse_ini_file( dirname( __DIR__ ).'/hydrogen.ini' );
+		$this->version		= $frameworkConfig['version'];
+
 		$pattern			= '/^'.preg_quote( static::$configPath, '/' ).'/';						//  fix for migration
 		static::$configFile	= preg_replace( $pattern, '', static::$configFile );					//  @todo remove in 0.8.6
 
