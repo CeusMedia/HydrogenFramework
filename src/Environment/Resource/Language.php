@@ -75,16 +75,16 @@ class CMF_Hydrogen_Environment_Resource_Language{
 		if( $config->get( 'locale.allowed' ) )														//  allowed languages have been set
 			foreach( explode( ',', $config['locale.allowed'] ) as $nr => $language )				//  iterate extracted languages
 				$this->languages[]	= trim( $language );											//  save language without surrounding spaces
-
 		else																						//  otherwise scan locales folder
 			foreach( FS_Folder_Lister::getFolderList( $this->filePath ) as $folder )				//  iterate found locale folders
 				$this->languages[]	= $folder->getFilename();										//  save locale folder as language
 		$language			= $config->has( 'locale.default' ) ? $config['locale.default'] : 'en';
 
 		if( $this->env->has( 'session' ) ){
+			$session	= $this->env->getSession();
 			$switchTo	= $this->env->getRequest()->get( 'switchLanguageTo' );
 			if( $switchTo && in_array( $switchTo, $this->languages ) ){
-				$this->env->getSession()->set( 'language', $switchTo );
+				$session->set( 'language', $switchTo );
 				if( !empty( $_SERVER['HTTP_REFERER'] ) ){
 					$referer = $_SERVER['HTTP_REFERER'];
 					if( !preg_match( '/switchLanguageTo/', $referer ) ){
@@ -93,8 +93,8 @@ class CMF_Hydrogen_Environment_Resource_Language{
 					}
 				}
 			}
-			if( $this->env->getSession()->get( 'language' ) )
-				$language		= $this->env->getSession()->get( 'language' );
+			if( $session->get( 'language' ) )
+				$language	= $session->get( 'language' );
 		}
 		$this->setLanguage( $language );
 		$words	= $this->getWords( 'main' );
