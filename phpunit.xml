@@ -15,7 +15,7 @@
     <log type="coverage-php" target="doc/test/coverage.php.serialized"/>
     <log type="json" target="doc/test/logfile.json"/>
     <log type="tap" target="doc/test/logfile.tap"/>
-    <log type="junit" target="doc/test/logfile.xml" logIncompleteSkipped="false"/>
+    <log type="junit" target="doc/test/logfile.xml"/>
     <log type="testdox-html" target="doc/test/testdox.html"/>
     <log type="testdox-text" target="doc/test/testdox.txt"/>
   </logging>

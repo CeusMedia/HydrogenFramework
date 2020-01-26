@@ -1,6 +1,9 @@
 <?php
 if( !@include_once dirname( dirname( dirname( dirname( __DIR__ ) ) ) ).'/vendor/autoload.php' )
     die( 'You need to "composer install" first.' );
+if( !CLI::checkIsCLi( FALSE ) )
+	die( 'Access denied: Execution via CLI, only.' );
+
 new UI_DevOutput;
 
 //CMF_Hydrogen_Environment::$configFile	= 'config.ini';
