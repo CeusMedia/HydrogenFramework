@@ -5,4 +5,3 @@ class Test_Environment_Resource_LogicPool extends PHPUnit\Framemwork\TestCase{
 		$this->assertTrue( TRUE );
 	}
 }
-

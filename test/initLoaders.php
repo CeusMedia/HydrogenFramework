@@ -31,4 +31,3 @@ $pathTests		= dirname( __FILE__ ).DIRECTORY_SEPARATOR;
 $pathLibrary	= dirname( $pathTests ).DIRECTORY_SEPARATOR;
 require_once $pathLibrary.'autoload.php5';
 //print( 'init loaders at '.date( 'H:i:s' )."\n" );
-?>
