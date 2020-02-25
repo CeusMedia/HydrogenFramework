@@ -41,8 +41,13 @@ abstract class CMF_Hydrogen_Application_Web_Abstract extends CMF_Hydrogen_Applic
 	protected $components			= array();
 
 	protected function logOnComplete(){
-		$responseLength	= $this->env->getResponse()->getLength();
-		$responseTime	= $this->env->getClock()->stop( 6, 0 );
+		$captain	= $this->env->getCaptain();
+		$data		= (object) array(
+			'response'	=> $this->env->getResponse(),
+			'microtime'	=> $this->env->getClock()->stop( 6, 0 ),
+			// ...
+		);
+		$captain->callHook( 'App', 'onLogOnComplete', $this, $data );
 		// ...
 	}
 

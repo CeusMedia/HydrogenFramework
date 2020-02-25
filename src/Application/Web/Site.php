@@ -118,6 +118,7 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 	 *	Main Method of Framework calling Controller (and View) and Master View.
 	 *	@access		protected
 	 *	@return		void
+	 *	@todo		use UI_OutputBuffer
 	 */
 	protected function main(){
 		ob_start();
@@ -154,7 +155,8 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 	 *	Simple implementation of content response. Can be overridden for special moves.
 	 *	@access		public
 	 *	@param		string		$body		Response content body
-	 *	@return		int			Number of sent bytes
+	 *	@return		object		Map of final response and number of sent bytes (members: bytesSent, compression, response)
+	 *	@todo		use UI_OutputBuffer
 	 */
 	protected function respond( $body, $headers = array() ){
 		$response	= $this->env->getResponse();
@@ -162,26 +164,23 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 		if( $body )
 			$response->setBody( $body );
 
-		foreach( $headers as $key => $value )
+		foreach( $headers as $key => $value ){
 			if( $value instanceof Net_HTTP_Header_Field )
 				$response->addHeader( $header );
 			else
 				$response->addHeaderPair( $key, $value );
-
-		$type		= NULL;
-		$encodings	= $this->env->getRequest()->headers->getField( 'Accept-Encoding' );
-		$isAjax		= $this->env->request->isAjax();
-		if( 0 && $encodings && !$isAjax ){
-			$typesSupported	= array( 'gzip', 'deflate' );
-			$typesRequested	= array_keys( $encodings[0]->getValue( TRUE ) );
-			foreach( $typesRequested as $code ){
-				if( in_array( $code, $typesSupported ) ){
-					$type	= $code;
-					break;
-				}
-			}
 		}
-		return Net_HTTP_Response_Sender::sendResponse( $response, $type, TRUE );
+
+		$compression	= NULL;
+//		$encodings		= $this->env->getRequest()->headers->getField( 'Accept-Encoding' );
+//		$isAjax			= $this->env->request->isAjax();
+		$sender			= new Net_HTTP_Response_Sender( $response );
+		$nrBytes		= $sender->send( $compression, TRUE, FALSE );
+		return (object) array(
+			'bytesSent'		=> $nrBytes,
+			'compression'	=> $compression,
+			'response'		=> $response,
+		);
 	}
 
 	/**
