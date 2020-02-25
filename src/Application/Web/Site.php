@@ -174,8 +174,7 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 		$compression	= NULL;
 //		$encodings		= $this->env->getRequest()->headers->getField( 'Accept-Encoding' );
 //		$isAjax			= $this->env->request->isAjax();
-		$sender			= new Net_HTTP_Response_Sender( $response );
-		$nrBytes		= $sender->send( $compression, TRUE, FALSE );
+		$nrBytes		= $response->send( $compression, TRUE, FALSE );
 		return (object) array(
 			'bytesSent'		=> $nrBytes,
 			'compression'	=> $compression,
@@ -191,10 +190,12 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 	 *	@return		void
 	 */
 	public function run(){
-		error_reporting( E_ALL );
+		$displayErrors	= $this->env->getConfig( 'system.display.errors' );							//  get error mode from config
+		$displayErrors	= is_null( $displayErrors ) ? TRUE : (bool) $displayErrors;					//  if not set: enable error display by default
+		error_reporting( $displayErrors ? E_ALL : 0 );												//  set error reporting
 		try{
-			$this->respond( $this->main() );														//
-			$this->logOnComplete();																	//
+			$this->respond( $this->main() );														//	send rendered result of dispatched controller action
+			$this->logOnComplete();																	//  handle logging after responding
 			$this->env->close();																	//  teardown environment and quit application execution
 		}
 		catch( Exception $e ){

@@ -47,7 +47,7 @@ abstract class CMF_Hydrogen_Application_Web_Abstract extends CMF_Hydrogen_Applic
 			'microtime'	=> $this->env->getClock()->stop( 6, 0 ),
 			// ...
 		);
-		$captain->callHook( 'App', 'onLogOnComplete', $this, $data );
+		$captain->callHook( 'App', 'logOnComplete', $this, $data );
 		// ...
 	}
 
