@@ -383,6 +383,19 @@ class CMF_Hydrogen_Model
 	}
 
 	/**
+	 *	Returns list of distinct column values.
+	 *	@access		public
+	 *	@param		string			$column			Column to get distinct values for
+	 *	@param		array			$conditions		Map of Conditions to include in SQL Query
+	 *	@param		array			$orders			Map of Orders to include in SQL Query
+	 *	@param		array			$limits			List of Limits to include in SQL Query
+	 *	@return		List of distinct column values
+	 */
+	public function getDistinct( $column, $conditions, $orders = array(), $limits = array() ){
+		return $this->table->getDistinctColumnValues( $column, $conditions, $orders, $limits );
+	}
+
+	/**
 	 *	Returns any fields or one field from a query result.
 	 *	@access		protected
 	 *	@param		mixed			$result			Query result as array or object
