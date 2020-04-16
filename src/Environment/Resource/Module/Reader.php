@@ -77,14 +77,12 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 		$obj->install->type			= 0;
 		$obj->install->date			= NULL;
 		$obj->install->source		= NULL;
+		$obj->jobs					= array();
 
 		/*	--  LOCALLY INSTALLED MODULE  --  */
-		if( $xml->version->hasAttribute( 'install-type' ) )											//  install type is set
-			$obj->install->type	= (int) $xml->version->getAttribute( 'install-type' );				//  note install type
-		if( $xml->version->hasAttribute( 'install-date' ) )											//  install date is set
-			$obj->install->date	= strtotime( $xml->version->getAttribute( 'install-date' ) );		//  note install date
-		if( $xml->version->hasAttribute( 'install-source' ) )										//  install source is set
-			$obj->install->source	= $xml->version->getAttribute( 'install-source' );				//  note install source
+		$obj->install->type		= self::castNodeAttributes( $xml->version, 'install-type', 'int' );	//  note install type
+		$obj->install->date		= self::castNodeAttributes( $xml->version, 'install-date', 'time' );//  note install date
+		$obj->install->source	= self::castNodeAttributes( $xml->version, 'install-source' );		//  note install source
 
 		foreach( $xml->log as $entry ){																//  iterate version log entries if available
 			if( $entry->hasAttribute( "version" ) ){												//  only if log entry is versioned
@@ -116,55 +114,45 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 		}
 
 		foreach( $xml->license as $license ){
-			$source	= $license->hasAttribute( 'source' ) ? $license->getAttribute( 'source' ) : '';
-			$title	= $license->hasAttribute( 'title' ) ? $license->getAttribute( 'title' ) : '';
 			$obj->licenses[]	= (object) array(
 				'label'		=> (string) $license,
-				'source'	=> $source,
-				'title'		=> $title,
+				'source'	=> self::castNodeAttributes( $license, 'source' ),
+				'title'		=> self::castNodeAttributes( $license, 'title' ),
 			);
 		}
 
 		foreach( $xml->company as $company ){
-			$email	= $company->hasAttribute( 'email' ) ? $company->getAttribute( 'email' ) : '';
-			$site	= $company->hasAttribute( 'site' ) ? $company->getAttribute( 'site' ) : '';
 			$obj->companies[]	= (object) array(
 				'name'		=> (string) $company,
-				'email'		=> $email,
-				'site'		=> $site
+				'email'		=> self::castNodeAttributes( $company, 'email' ),
+				'site'		=> self::castNodeAttributes( $company, 'site' )
 			);
 		}
 
 		foreach( $xml->author as $author ){
-			$email	= $author->hasAttribute( 'email' ) ? $author->getAttribute( 'email' ) : '';
-			$site	= $author->hasAttribute( 'site' ) ? $author->getAttribute( 'site' ) : '';
 			$obj->authors[]	= (object) array(
 				'name'	=> (string) $author,
-				'email'	=> $email,
-				'site'	=> $site
+				'email'	=> self::castNodeAttributes( $author, 'email' ),
+				'site'	=> self::castNodeAttributes( $author, 'site' )
 			);
 		}
 
 		foreach( $xml->config as $pair ){
-			$key		= $pair->getAttribute( 'name' );
-			$type		= $pair->hasAttribute( 'type' ) ? $pair->getAttribute( 'type' ) : 'string';
-			$values		= $pair->hasAttribute( 'values' ) ? explode( ',', $pair->getAttribute( 'values' ) ) : array();
-			$mandatory	= $pair->hasAttribute( 'mandatory' ) ? $pair->getAttribute( 'mandatory' ) : FALSE;
-			$protected	= $pair->hasAttribute( 'protected' ) ? $pair->getAttribute( 'protected' ) : FALSE;
-			$title		= $pair->hasAttribute( 'title' ) ? $pair->getAttribute( 'title' ) : NULL;
-			if( !$title && $pair->hasAttribute( 'info' ) )
-				$title	= $pair->getAttribute( 'info' );
-//			$value		= trim( (string) $pair );
+			$title		= self::castNodeAttributes( $pair, 'title' );
+			$type		= trim( strtolower( self::castNodeAttributes( $pair, 'type' ) ) );
+			$key		= self::castNodeAttributes( $pair, 'name' );
+			$info		= self::castNodeAttributes( $pair, 'info' );
+			$title		= ( !$title && $info ) ? $info : $title;
 			$value		= (string) $pair;
-			if( in_array( strtolower( $type ), array( 'boolean', 'bool' ) ) )						//  value is boolean
+			if( in_array( $type, array( 'boolean', 'bool' ) ) )						//  value is boolean
 				$value	= !in_array( strtolower( $value ), array( 'no', 'false', '0', '' ) );		//  value is not negative
 			$obj->config[$key]	= (object) array(
 				'key'		=> trim( $key ),
-				'type'		=> trim( strtolower( $type ) ),
+				'type'		=> $type,
 				'value'		=> $value,
-				'values'	=> $values,
-				'mandatory'	=> $mandatory,
-				'protected'	=> $protected,
+				'values'	=> self::castNodeAttributes( $pair, 'values', 'array' ),
+				'mandatory'	=> self::castNodeAttributes( $pair, 'mandatory', 'bool' ),
+				'protected'	=> self::castNodeAttributes( $pair, 'protected', 'bool' ),
 				'title'		=> $title,
 			);
 		}
@@ -175,12 +163,11 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 				$obj->relations->supports[]	= (string) $moduleName;
 		}
 		foreach( $xml->sql as $sql ){
-			$event		= $sql->getAttribute( 'on' );
-			$to			= $sql->hasAttribute( 'version-to' ) ? $sql->getAttribute( 'version-to' ) : NULL;
-			$version	= $sql->hasAttribute( 'version' ) ? $sql->getAttribute( 'version' ) : $to; 		//NULL;			//  @todo: remove fallback
-			$type		= $sql->hasAttribute( 'type' ) ? $sql->getAttribute( 'type' ) : '*';
-
-			if( $event == "update" )
+			$event		= self::castNodeAttributes( $sql, 'on' );
+			$to			= self::castNodeAttributes( $sql, 'version-to' );
+			$version	= self::castNodeAttributes( $sql, 'version', 'string', $to );				//  @todo: remove fallback
+			$type		= self::castNodeAttributes( $sql, 'type', 'string', '*' );
+			if( $event === 'update' )
 				if( !$version )
 					throw new Exception( 'SQL type "update" needs attribute "version"' );
 
@@ -198,36 +185,80 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 		}
 
 		foreach( $xml->link as $link ){
-			$access		= $link->hasAttribute( 'access' ) ? $link->getAttribute( 'access' ) : NULL;
 			$language	= $link->hasAttribute( 'lang', 'xml' ) ? $link->getAttribute( 'lang', 'xml' ) : NULL;
 			$label		= (string) $link;
-			$path		= $link->hasAttribute( 'path' ) ? $link->getAttribute( 'path' ) : $label;
-			$rank		= $link->hasAttribute( 'rank' ) ? (int) $link->getAttribute( 'rank' ) : 10;
-			$parent		= $link->hasAttribute( 'parent' ) ? $link->getAttribute( 'parent' ) : NULL;
-			$link		= $link->hasAttribute( 'link' ) ? $link->getAttribute( 'link' ) : NULL;
 			$obj->links[]	= (object) array(
-				'parent'	=> $parent,
-				'access'	=> $access,
+				'parent'	=> self::castNodeAttributes( $link, 'parent' ),
+				'access'	=> self::castNodeAttributes( $link, 'access' ),
 				'language'	=> $language,
-				'path'		=> $path,
-				'link'		=> $link,
-				'rank'		=> $rank,
+				'path'		=> self::castNodeAttributes( $link, 'path', 'string', $label ),
+				'link'		=> self::castNodeAttributes( $link, 'link' ),
+				'rank'		=> self::castNodeAttributes( $link, 'rank', 'int', 10 ),
 				'label'		=> $label,
 			);
 			(string) $link;
 		}
 
 		foreach( $xml->hook as $hook ){
-			$resource	= $hook->getAttribute( 'resource' );
-			$event		= $hook->getAttribute( 'event' );
-			$level		= 5;
-			if( $hook->hasAttribute( 'level' ) )
-				$level	= (int) $hook->getAttribute( 'level' );
+			$resource	= self::castNodeAttributes( $hook, 'resource' );
+			$event		= self::castNodeAttributes( $hook, 'event' );
 			$obj->hooks[$resource][$event][]	= (object) array(
-				'level'	=> $level,
+				'level'	=> self::castNodeAttributes( $hook, 'level', 'int', 5 ),
 				'hook'	=> trim( (string) $hook, ' ' ),
 			);
 		}
+
+		if( $xml->jobs ){
+			foreach( $xml->jobs->job as $job ){
+				$callable		= explode( '::', (string) $job, 2 );
+				$obj->jobs[]	= (object) array(
+					'id'			=> self::castNodeAttributes( $job, 'id' ),
+					'class'			=> $callable[0],
+					'method'		=> $callable[1],
+					'arguments'		=> self::castNodeAttributes( $job, 'arguments' ),
+					'mode'			=> self::castNodeAttributes( $job, 'mode', 'array', array() ),
+					'interval'		=> self::castNodeAttributes( $job, 'interval' ),
+					'multiple'		=> self::castNodeAttributes( $job, 'multiple', 'bool' ),
+					'deprecated'	=> self::castNodeAttributes( $job, 'deprecated' ),
+				);
+			}
+		}
 		return $obj;
+	}
+
+	static protected function castNodeAttributes( $node, $attribute, $type = 'string', $default = NULL ){
+		if( !$node->hasAttribute( $attribute ) ){
+			switch( $type ){
+				case 'array':
+					return !is_null( $default ) ? $default : array();
+				case 'string':
+					return !is_null( $default ) ? $default : '';
+				case 'bool':
+				case 'boolean':
+					return !is_null( $default ) ? $default : FALSE;
+				case 'int':
+				case 'integer':
+					return !is_null( $default ) ? $default : 0;
+				default:
+					return !is_null( $default ) ? $default : NULL;
+			}
+		}
+		$value	= $node->getAttribute( $attribute );
+		switch( $type ){
+			case 'array':
+				return preg_split( '/\s*,\s*/', trim( $value ) );
+			case 'string':
+				return trim( (string) $value );
+			case 'time':
+				return strtotime( (string) $value );
+			case 'bool':
+			case 'boolean':
+				return in_array( strtolower( $value ), array( 'true', 'yes', '1', TRUE ) );
+			case 'int':
+			case 'integer':
+				return (int) $value;
+			default:
+				return $value;
+		}
 	}
 }
