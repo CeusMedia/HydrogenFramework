@@ -58,20 +58,20 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame{
 	public $tea					= NULL;
 
 	public function __construct( CMF_Hydrogen_Environment $env ){
-		$language	= 'en';
 		$this->env	= $env;
+		$language	= 'en';
 		if( $this->env->has( 'language' ) )
 			$language	= $this->env->getLanguage()->getLanguage();
 
 		parent::__construct( 'XHTML_10_STRICT', $language );
-		$this->js			= CMF_Hydrogen_View_Helper_JavaScript::getInstance( $env );
+		$this->js		= CMF_Hydrogen_View_Helper_JavaScript::getInstance( $env );
 
-		$path	= preg_replace( '/\/+$/', '', $env->config->get( 'path.themes' ) ).'/';
-		$this->pathPrimer	= $path;
+		$pathThemes		= rtrim( $env->config->get( 'path.themes' ), '/' ).'/';
+		$this->pathPrimer	= $pathThemes;
 		if( $env->config->get( 'layout.primer' ) )
-			$this->pathPrimer	= $path.$env->config->get( 'layout.primer' ).'/';
-		$this->pathCommon	= $path.'common/';
-		$this->pathTheme	= $path.$env->config->get( 'layout.theme' ).'/';
+			$this->pathPrimer	= $pathThemes.$env->config->get( 'layout.primer' ).'/';
+		$this->pathCommon	= $pathThemes.'common/';
+		$this->pathTheme	= $pathThemes.$env->config->get( 'layout.theme' ).'/';
 		$this->css			= new stdClass;
 		$this->css->primer	= new CMF_Hydrogen_View_Helper_StyleSheet( $this->pathPrimer.'css/' );
 		$this->css->common	= new CMF_Hydrogen_View_Helper_StyleSheet( $this->pathCommon.'css/' );
@@ -220,22 +220,19 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame{
 				if( !empty( $pair->protected ) && $pair->protected !== 'yes' ){
 					$value	= $config->get( strtolower( $module->id ).'.'.$pair->key );				//  get (user modified) module setting value
 					$settings[$module->id][str_replace( '.', '_', $pair->key )]	= $value;			//  note module setting
-					$key	= 'module.'.strtolower( $module->id ).'.'.$pair->key;					//  @deprecated see line below
-					$listConfig[str_replace( '.', '_', $key )]	 = $pair->value;					//  @deprecated in favour of settings
 				}
 			}
 			if( !$settings[$module->id] )
 				unset( $settings[$module->id] );
 		}
 		$modules->callHook( 'Page', 'applyModules', $this );										//  call related module event hooks
-//		$script		= 'var config = '.json_encode( $listConfig ).';';								//  @deprecated leave only next line
 		$settings['Env']	= array(
 			'host'		=> $this->env->host,
 			'port'		=> $this->env->port,
 			'protocol'	=> $this->env->scheme,
 			'domain'	=> $this->env->host.( $this->env->port ? ':'.$this->env->port : '' ),
 			'path'		=> $this->env->path,
-			'title'		=> $this->env->title,
+//			'title'		=> $this->env->title,
 			'secure'	=> getEnv( 'HTTPS' ),
 		);
 		$script		= 'var settings = '.json_encode( $settings ).';';
@@ -290,8 +287,6 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame{
 			foreach( explode( " ", trim( $bodyAttributes['class'] ) ) as $class )
 				$classes[]	= $class;
 		$bodyAttributes['class']	= join( ' ', $classes );
-#		if( empty( $bodyAttributes['id'] ) )
-#			$bodyAttributes['id']	=
 		if( ( $modules = $this->env->getModules() ) )												//  get module handler resource if existing
 			$modules->callHook( 'App', 'respond', $this );											//  call related module event hooks
 		return parent::build( $bodyAttributes, $htmlAttributes );
@@ -340,13 +335,13 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame{
 	 *	@param type $packJavaScripts
 	 *	@param type $packStyleSheets
 	 *	@return		self						Instance for chainability
-	 *	@deprecated		will be removed
+	 *	@deprecated		will be removed in favour of module UI_Compressor
 	 *	@todo			step 1: enable messenger note and let apps adjust
 	 *	@todo			step 2: remove method
+	 *	@todo			step 3: remove compression in JS and CSS helpers
 	 */
 	public function setPackaging( $packJavaScripts = FALSE, $packStyleSheets = FALSE ){
 //		$this->env->getMessenger()->noteNotice( '<b>Deprecation: </b>Calling Page::setPackaging is deprecated. Please use module UI:Compressor instead.' );
-
 #		$this->js->setCompression( $packJavaScripts );
 #		$this->css->primer->setCompression( $packStyleSheets );
 #		$this->css->theme->setCompression( $packStyleSheets );
