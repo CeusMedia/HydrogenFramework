@@ -35,16 +35,19 @@
  */
 class CMF_Hydrogen_Controller
 {
-	public static $prefixModel		= "Model_";
-	public static $prefixView		= "View_";
-	public $alias					= "";
-
 	const RESTART_FROM_IGNORE		= 0;
 	const RESTART_FROM_POP			= 1;
 	const RESTART_FROM_APPLY		= 2;
 	const RESTART_FROM_CARRY		= 4;
 	const RESTART_FROM_SET			= 8;
 	const RESTART_FROM_PUSH			= 16;
+
+	public static $moduleId			= '';
+	public static $prefixModel		= 'Model_';
+	public static $prefixView		= 'View_';
+
+	/**	@var		string								$alias			Optional alternative path for restarting */
+	public $alias					= '';
 
 	/**	@var		CMF_Hydrogen_Environment			$env			Application Environment Object */
 	protected $env;
@@ -54,8 +57,8 @@ class CMF_Hydrogen_Controller
 	protected $path;
 	/**	@var		CMF_Hydrogen_View					$view			View instance for controller */
 	protected $view;
-	/**	@var		array								$_data			Collected Data for View */
-	protected $_data									= array();
+	/**	@var		ADT_List_Dictionary					$moduleConfig	Map of module configuration pairs */
+	protected $moduleConfig;
 
 	/**	@var		string								$controller		Name of called Controller */
 	protected $controller		= "";
@@ -75,10 +78,12 @@ class CMF_Hydrogen_Controller
 	 *	@param		boolean								$setupView		Flag: auto create view object for controller (default: TRUE)
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment $env, $setupView = TRUE )
+	public function __construct( CMF_Hydrogen_Environment $env, bool $setupView = TRUE )
 	{
 		$env->clock->profiler->tick( 'CMF_Controller('.get_class( $this ).')' );
+		static::$moduleId	= trim( static::$moduleId );
 		$this->setEnv( $env );
+
 //		$env->clock->profiler->tick( 'CMF_Controller('.get_class( $this ).'): env set' );
 		if( !( $env instanceof CMF_Hydrogen_Environment_Console ) && $setupView )
 			$this->setupView( !$env->getRequest()->isAjax() );
@@ -106,6 +111,65 @@ class CMF_Hydrogen_Controller
 		$env->clock->profiler->tick( 'CMF_Controller('.get_class( $this ).'): done' );				//  log time of construction
 	}
 
+	public function getView()
+	{
+		return $this->view;
+	}
+
+	/**
+	 *	Returns View Content of called Action.
+	 *	@access		public
+	 *	@return		string
+	 *	@throws		\RuntimeException			if no view has been set up
+	 *	@throws		\RuntimeException			if
+	 *	@throws		\RuntimeException			if
+	 */
+	public function renderView(): string
+	{
+		$this->env->clock->profiler->tick( 'Controller::getView: start' );
+		if( !$this->view )
+			throw new \RuntimeException( 'No view object created in constructor' );
+		if( !method_exists( $this->view, $this->action ) )
+			throw new \RuntimeException( 'View Action "'.$this->action.'" not defined yet', 302 );
+		$language		= $this->env->getLanguage();
+		$this->env->clock->profiler->tick( 'Controller::getView: got language' );
+		if( $language->hasWords( $this->controller ) )
+			$this->view->setData( $language->getWords( $this->controller ), 'words' );
+		$this->env->clock->profiler->tick( 'Controller::getView: set words' );
+		$result			= \Alg_Object_MethodFactory::callObjectMethod( $this->view, $this->action );
+		if( is_string( $result ) ){
+			$this->env->clock->profiler->tick( 'Controller::getView: Action called' );
+		}
+		else if( $this->view->hasTemplate( $this->controller, $this->action ) ){
+			$result	= $this->view->loadTemplate( $this->controller, $this->action );
+			$this->env->clock->profiler->tick( 'Controller::getView: loadTemplate' );
+		}
+		else if( $this->view->hasContent( $this->controller, $this->action, 'html/' ) ){
+			$result	= $this->view->loadContent( $this->controller, $this->action, NULL, 'html/' );
+			$this->env->clock->profiler->tick( 'Controller::getView: loadContent' );
+		}
+		else{
+			$message	= 'Neither view template nor content file defined for request path "%s/%s"';
+			throw new \RuntimeException( sprintf( $message, $this->controller, $this->action ) );
+		}
+		$this->env->clock->profiler->tick( 'Controller::getView: done' );
+		return $result;
+	}
+
+	/**
+	 *	Set activity of logging of restarts.
+	 *	@access		public
+	 *	@param		boolean		$log		Flag: Activate logging of restarts (default)
+	 *	@return		self
+	 */
+	public function setLogRestarts( $log = TRUE ): self
+	{
+		$this->logRestarts	= (bool) $log;
+		return $this;
+	}
+
+	//  --  PROTECTED  --  //
+
 	/**
 	 *	Magic function called at the end of construction.
 	 *	Override to implement custom resource construction.
@@ -113,13 +177,17 @@ class CMF_Hydrogen_Controller
 	 *	@access		protected
 	 *	@return		void
 	 */
-	protected function __onInit(){}
+	protected function __onInit()
+	{
+	}
 
-	protected function addData( $key, $value, $topic = NULL ){
+	protected function addData( string $key, $value, string $topic = NULL )
+	{
 		return $this->view->setData( array( $key => $value ), $topic );
 	}
 
-	protected function callHook( $resource, $event, $context = NULL, $data = array() ){
+	protected function callHook( string $resource, string $event, $context = NULL, $data = array() )
+	{
 		$context	= $context ? $context : $this;
 		return $this->env->getCaptain()->callHook( $resource, $event, $context, $data );
 	}
@@ -132,14 +200,16 @@ class CMF_Hydrogen_Controller
 	 *	@return		void
 	 *	@todo		locale support (use main.ini section msg etc.)
 	 */
-	protected function checkAjaxRequest(){
+	protected function checkAjaxRequest()
+	{
 		if( !$this->env->getRequest()->isAjax() ){
 			$this->messenger->noteFailure( 'Invalid AJAX/AJAJ access attempt.' );
 			$this->restart( NULL, FALSE, 401 );
 		}
 	}
 
-	protected function compactFilterInput( $input ){
+	protected function compactFilterInput( $input )
+	{
 		if( is_object( $input ) || is_resource( $input ) || is_null( $input ) )						//  input is of invalid type
 			return NULL;																			//  break with empty result
 		if( is_array( $input ) ){																	//  input is an array
@@ -155,10 +225,13 @@ class CMF_Hydrogen_Controller
 	/**
 	 *	Returns Data for View.
 	 *	@access		protected
-	 *	@return		array
+	 *	@param		string		$key			Key of data to return
+	 *	@param		string		$fallback		String to return if no data is set by key
+	 *	@return		mixed
 	 */
-	protected function getData( $key = NULL ){
-		return $this->view->getData( $key );
+	protected function getData( string $key = NULL, string $fallback = NULL )
+	{
+		return $this->view->getData( $key, $fallback );
 	}
 
 	/**
@@ -171,12 +244,13 @@ class CMF_Hydrogen_Controller
 	 *
 	 *	@access		protected
 	 *	@param		string		$key		Key for logic class (ex: 'mailGroupMember' for 'Logic_Mail_Group_Member')
-	 *	@return		CMF_Hydrogen_Logic|CMF_Hydrogen_Environment_Resource_LogicPool	Logic instance or logic pool if no key given
+	 *	@return		CMF_Hydrogen_Logic		Logic instance or logic pool if no key given
 	 *	@throws		\RuntimeException		if no logic class could be found for given short logic key
 	 */
-	protected function getLogic( $key = NULL ){
-		if( is_null( $key ) || !strlen( trim( $key ) ) )
-			return $this->env->getLogic();
+	protected function getLogic( string $key ): CMF_Hydrogen_Logic
+	{
+//		if( is_null( $key ) || !strlen( trim( $key ) ) )
+//			return $this->env->getLogic();
 		return $this->env->getLogic()->get( $key );
 	}
 
@@ -190,16 +264,17 @@ class CMF_Hydrogen_Controller
 	 *	@todo		change \@return to CMF_Hydrogen_Model after CMF model refactoring
 	 *	@see		duplicate code with CMF_Hydrogen_Logic::getModel
 	 */
-	protected function getModel( $key ){
-		$classNameWords	= ucwords( \Alg_Text_CamelCase::decode( $key ) );
-		$className		= str_replace( ' ', '_', 'Model '.$classNameWords );
+	protected function getModel( string $key )
+	{
+		if( preg_match( '/^[A-Z][A-Za-z0-9_]+$/', $key ) )
+			$className	= self::$prefixModel.$key;
+		else{
+			$classNameWords	= ucwords( \Alg_Text_CamelCase::decode( $key ) );
+			$className		= str_replace( ' ', '_', 'Model '.$classNameWords );
+		}
 		if( !class_exists( $className ) )
 			throw new \RuntimeException( 'Model class "'.$className.'" not found' );
 		return \Alg_Object_Factory::createObject( $className, array( $this->env ) );
-	}
-
-	public function getView(){
-		return $this->view;
 	}
 
 	/**
@@ -207,9 +282,10 @@ class CMF_Hydrogen_Controller
 	 *	@access		protected
 	 *	@param		string		$section	Section in locale file
 	 *	@param		string		$topic		Locale file key, eg. test/my, default: current controller
-	 *	@return		void
+	 *	@return		array
 	 */
-	protected function getWords( $section = NULL, $topic = NULL ){
+	protected function getWords( string $section = NULL, string $topic = NULL ): array
+	{
 		if( empty( $topic )/* && $this->env->getLanguage()->hasWords( $this->controller )*/ )
 			$topic = $this->controller;
 		if( empty( $section ) )
@@ -217,10 +293,11 @@ class CMF_Hydrogen_Controller
 		return $this->env->getLanguage()->getSection( $topic, $section );
 	}
 
-	protected function handleJsonResponse( $status, $data, $httpStatusCode = NULL ){
+	protected function handleJsonResponse( $status, $data, $httpStatusCode = NULL )
+	{
 		$type			= $status;
 		$httpStatusCode	= $httpStatusCode ? $httpStatusCode : 200;
-		if( in_array( $status, array( TRUE, "data", "success", "succeeded" ), TRUE ) )
+		if( in_array( $status, array( TRUE, 'data', 'success', 'succeeded' ), TRUE ) )
 			$type	= "data";
 		else if( in_array( $status, array( FALSE, "error", "fail", "failed" ), TRUE ) )
 			$type	= "error";
@@ -232,18 +309,19 @@ class CMF_Hydrogen_Controller
 		);
 		$json	= json_encode( $response, JSON_PRETTY_PRINT );
 		if( headers_sent() ){
-			print( "Headers already sent." );
+			print( 'Headers already sent.' );
 		}
 		else{
-			header( "HTTP/1.1 ".$httpStatusCode." ".Net_HTTP_Status::getText( $httpStatusCode ) );
-			header( "Content-Type: application/json" );
-			header( "Content-Length: ".strlen( $json ) );
+			header( 'HTTP/1.1 '.$httpStatusCode.' '.Net_HTTP_Status::getText( $httpStatusCode ) );
+			header( 'Content-Type: application/json' );
+			header( 'Content-Length: '.strlen( $json ) );
 			print( $json );
 		}
 		exit;
 	}
 
-	protected function handleJsonErrorResponse( $data, $httpStatusCode = NULL ){
+	protected function handleJsonErrorResponse( $data, $httpStatusCode = NULL )
+	{
 		$this->handleJsonResponse( 'error', $data, $httpStatusCode );
 	}
 
@@ -258,7 +336,8 @@ class CMF_Hydrogen_Controller
 	 *	@param		array		$parameters		Map of additional parameters to set in request
 	 *	@return		void
 	 */
-	protected function redirect( $controller = 'index', $action = "index", $arguments = array(), $parameters = array() ){
+	protected function redirect( string $controller = 'index', string $action = "index", array $arguments = array(), array$parameters = array() )
+	{
 		CMF_Hydrogen_Deprecation::getInstance()
 			->setErrorVersion( '0.8.6.4' )
 			->setExceptionVersion( '0.8.9' )
@@ -288,44 +367,9 @@ class CMF_Hydrogen_Controller
 	 *	@return		void
 	 *	@todo		kriss: check for better HTTP status
 	 */
-	protected function relocate( $uri, $status = NULL ){
+	protected function relocate( string $uri, $status = NULL )
+	{
 		$this->restart( $uri, FALSE, $status, TRUE );
-	}
-
-	/**
-	 *	Returns View Content of called Action.
-	 *	@access		public
-	 *	@return		string
-	 */
-	public function renderView(){
-		$this->env->clock->profiler->tick( 'Controller::getView: start' );
-		if( !$this->view )
-			throw new RuntimeException( 'No view object created in Constructor' );
-		if( !method_exists( $this->view, $this->action ) )
-			throw new RuntimeException( 'View Action "'.$this->action.'" not defined yet', 302 );
-		$language		= $this->env->getLanguage();
-		$this->env->clock->profiler->tick( 'Controller::getView: got language' );
-		if( $language->hasWords( $this->controller ) )
-			$this->view->setData( $language->getWords( $this->controller ), 'words' );
-		$this->env->clock->profiler->tick( 'Controller::getView: set words' );
-		$result			= Alg_Object_MethodFactory::callObjectMethod( $this->view, $this->action );
-		if( is_string( $result ) ){
-			$this->env->clock->profiler->tick( 'Controller::getView: Action called' );
-		}
-		else if( $this->view->hasTemplate( $this->controller, $this->action ) ){
-			$result	= $this->view->loadTemplate( $this->controller, $this->action );
-			$this->env->clock->profiler->tick( 'Controller::getView: loadTemplate' );
-		}
-		else if( $this->view->hasContent( $this->controller, $this->action, 'html/' ) ){
-			$result	= $this->view->loadContent( $this->controller, $this->action, NULL, 'html/' );
-			$this->env->clock->profiler->tick( 'Controller::getView: loadContent' );
-		}
-		else{
-			$message	= 'Neither view template nor content file defined for request path "%s/%s"';
-			throw new RuntimeException( sprintf( $message, $this->controller, $this->action ) );
-		}
-		$this->env->clock->profiler->tick( 'Controller::getView: done' );
-		return $result;
 	}
 
 	/**
@@ -358,7 +402,8 @@ class CMF_Hydrogen_Controller
 	 *	@todo		kriss: implement handling of FROM request parameter, see controller constants
 	 *	@todo		kriss: concept and implement anti-loop {@see http://dev.(ceusmedia.de)/cmKB/?MTI}
 	 */
-	protected function restart( $uri, $withinModule = FALSE, $status = NULL, $allowForeignHost = FALSE, $modeFrom = 0 ){
+	protected function restart( $uri, $withinModule = FALSE, $status = NULL, $allowForeignHost = FALSE, $modeFrom = 0 )
+	{
 		$mode	= 'ext';
 		if( !preg_match( "/^http/", $uri ) ){														//  URI is not starting with HTTP scheme
 			$mode	= 'int';
@@ -385,33 +430,23 @@ class CMF_Hydrogen_Controller
 	 *	@access		protected
 	 *	@param		array		$data			Array of Data for View
 	 *	@param		string		$topic			Optionaal: Topic Name of Data
-	 *	@return		void
+	 *	@return		self
 	 */
-	protected function setData( $data, $topic = "" ){
+	protected function setData( array $data, string $topic = '' ): self
+	{
 		if( $this->view )
 			$this->view->setData( $data, $topic );
-		return;
-		if( !is_array( $data ) )
-			throw new InvalidArgumentException( 'Must be array' );
-		if( is_string( $topic) && !empty( $topic ) ){
-			if( !isset( $this->_data[$topic] ) )
-				$this->_data[$topic]	= array();
-			foreach( $data as $key => $value )
-				$this->_data[$topic][$key]	= $value;
-		}
-		else{
-			foreach( $data as $key => $value )
-				$this->_data[$key]	= $value;
-		}
+		return $this;
 	}
 
 	/**
 	 *	Sets Environment of Controller by copying Framework Member Variables.
 	 *	@access		protected
 	 *	@param		CMF_Hydrogen_Environment	$env			Framework Resource Environment Object
-	 *	@return		void
+	 *	@return		self
 	 */
-	protected function setEnv( CMF_Hydrogen_Environment $env ){
+	protected function setEnv( CMF_Hydrogen_Environment $env ): self
+	{
 		$this->env			= $env;
 		$this->controller	= $env->getRequest()->get( 'controller' );
 		$this->action		= $env->getRequest()->get( 'action' );
@@ -419,31 +454,36 @@ class CMF_Hydrogen_Controller
 			$language	= $this->env->getLanguage();
 			$language->load( $this->controller, FALSE, FALSE );
 		}
-	}
-
-	/**
-	 *	Set activity of logging of restarts.
-	 *	@access		public
-	 *	@param		boolean		$log		Flag: Activate logging of restarts (default)
-	 *	@return		self
-	 */
-	public function setLogRestarts( $log = TRUE ){
-		$this->logRestarts	= (bool) $log;
+		//  load module configuration
+		$list	= array();
+		if( strlen( static::$moduleId ) && $env->getModules()->has( static::$moduleId ) )
+			foreach( $env->getModules()->get( static::$moduleId )->config as $entry )
+				$list[$entry->key]	= $entry->value;
+		$this->moduleConfig	= new \ADT_List_Dictionary( $list );
 		return $this;
 	}
 
 	/**
 	 *	Loads View Class of called Controller.
 	 *	@access		protected
-	 *	@return		void
+	 *	@param		boolean		$force			Flag: throw exception if view class is missing, default: yes
+	 *	@return		self
+	 *	@throws		RuntimeException			in force mode if view class for controller is not existing
+	 *	@throws		RuntimeException			if view class is not inheriting Hydrogen view class
 	 */
-	protected function setupView( $force = TRUE ){
+	protected function setupView( $force = TRUE ): self
+	{
 		$name		= str_replace( ' ', '_', ucwords( str_replace( '/', ' ', $this->controller ) ) );
 		$class		= self::$prefixView.$name;
 		$this->view	= new CMF_Hydrogen_View( $this->env );
-		if( class_exists( $class, TRUE ) )
+		if( class_exists( $class, TRUE ) ){
 			$this->view	= Alg_Object_Factory::createObject( $class, array( &$this->env ) );
+			if( !$this->view instanceof CMF_Hydrogen_View)
+				throw new RuntimeException( 'View class is not a Hydrogen view', 301 );
+			$this->view->addData( 'moduleConfig', $this->moduleConfig );
+		}
 		else if( $force )
 			throw new RuntimeException( 'View "'.$name.'" is missing', 301 );
+		return $this;
 	}
 }

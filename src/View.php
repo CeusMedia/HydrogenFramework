@@ -137,7 +137,7 @@ class CMF_Hydrogen_View{
 	{
 		if( !$key )
 			return $this->data;
-		if( !isset( $this->data[$key] ) &&  !is_null( $autoSetTo ) )
+		if( !isset( $this->data[$key] ) && !is_null( $autoSetTo ) )
 			$this->addData( $key, $autoSetTo );
 		if( isset( $this->data[$key] ) )
 			return $this->data[$key];
