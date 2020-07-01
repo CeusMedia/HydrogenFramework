@@ -548,7 +548,17 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 	 */
 	protected function initModules(){
 		$this->modules	= new CMF_Hydrogen_Environment_Resource_Module_Library_Local( $this );
-		$public			= explode( ',', $this->config->get( 'module.acl.public' ) );				//  get current public link list
+		$this->modules->stripFeatures( array( 'sql' ) );
+
+		$public	= array();
+		if( strlen( trim( $this->config->get( 'module.acl.public' ) ) ){
+			CMF_Hydrogen_Deprecation::getInstance()
+				->setErrorVersion( '0.8.7.2' )
+				->setExceptionVersion( '0.8.9' )
+				->message( 'Using config::module.acl.public is deprecated. Use ACL instead!' );
+			$public	= explode( ',', $this->config->get( 'module.acl.public' ) );					//  get current public link list
+		}
+
 		foreach( $this->modules->getAll() as $moduleId => $module ){								//  iterate all local app modules
 			$prefix	= 'module.'.strtolower( $moduleId );											//  build config key prefix of module
 			$this->config->set( $prefix, TRUE );													//  enable module in configuration

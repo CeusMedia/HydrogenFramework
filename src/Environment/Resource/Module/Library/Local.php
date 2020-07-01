@@ -161,4 +161,34 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local extends CMF_Hydroge
 			'count'		=> count( $this->modules ),
 		);
 	}
+
+	/**
+	 *	Remove parts of loaded module definitions for security and memory reasons.
+	 *	Changes are made directly to the list of loaded modules.
+	 *	@access		public
+	 *	@param		array		$features		List of module definition features to remove
+	 */
+	public function stripFeatures( array $features ){
+		if( !count( $features ) )
+			return;
+		foreach( $this->modules as $moduleId => $module ){
+			foreach( $features as $feature ){
+				if( property_exists( $module, $feature ) ){
+					$currentValue	= $module->{$feature};
+					$newValue		= $currentValue;
+					if( is_bool( $currentValue ) )
+						$newValue	= FALSE;
+					else if( is_array( $value ) )
+						$newValue	= array();
+					else if( is_string( $value ) )
+						$newValue	= '';
+					else if( is_numeric( $value ) )
+						$newValue	= 0;
+
+					if( $newValue !== $currentValue )
+						$this->modules[$moduleId]->{$feature}	= $newValue;
+				}
+			}
+		}
+	}
 }
