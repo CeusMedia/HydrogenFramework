@@ -33,10 +33,45 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-interface CMF_Hydrogen_Environment_Resource_Module_Library_Interface{
+interface CMF_Hydrogen_Environment_Resource_Module_Library_Interface
+{
+	/**
+	 *	Returns a module by its ID if found in source.
+	 *	By default, only active modules are enlisted.
+	 *	@access		public
+	 *	@param		string		$moduleId		ID of module to check in source
+	 *	@param		boolean		$activeOnly		Flag: enlist only active modules (default: yes)
+	 *	@param		boolean		$strict			Flag: throw exception if not found (default: yes)
+	 *	@return		object|NULL
+	 */
+	public function get( string $moduleId, bool $activeOnly = TRUE, bool $strict = TRUE );
 
-	public function get( $moduleId, $activeOnly = TRUE, $strict = TRUE );
-	public function getAll( $activeOnly = TRUE );
-	public function has( $moduleId, $activeOnly = TRUE );
-	public function scan();
+	/**
+	 *	Return a list of all modules found in source.
+	 *	By default, only active modules are enlisted.
+	 *	@access		public
+	 *	@param		boolean		$activeOnly		Flag: enlist only active modules (default: yes)
+	 *	@return		array
+	 */
+	public function getAll( bool $activeOnly = TRUE ): array;
+
+	/**
+	 *	Indicates whether source has a module by a given module ID.
+	 *	By default, only active modules are enlisted.
+	 *	@access		public
+	 *	@param		string		$moduleId		ID of module to check in source
+	 *	@param		boolean		$activeOnly		Flag: enlist only active modules (default: yes)
+	 *	@return		boolean
+	 */
+	public function has( string $moduleId, bool $activeOnly = TRUE ): bool;
+
+	/**
+	 *	Scan modules of source.
+	 *	Should return a data object containing the result source and number of found modules.
+	 *	@access	public
+	 *	@param		boolean		$useCache		Flag: use cache if available
+	 *	@param		boolean		$forceReload	Flag: clear cache beforehand if available
+	 *	@return		object		Data object containing the result source and number of found modules
+	 */
+	public function scan( bool $useCache = FALSE, bool $forceReload = FALSE );
 }

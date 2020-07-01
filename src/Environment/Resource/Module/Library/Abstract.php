@@ -33,7 +33,23 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-abstract class CMF_Hydrogen_Environment_Resource_Module_Library_Abstract implements CMF_Hydrogen_Environment_Resource_Module_Library_Interface{
+abstract class CMF_Hydrogen_Environment_Resource_Module_Library_Abstract implements CMF_Hydrogen_Environment_Resource_Module_Library_Interface
+{
+	protected $modules			= array();
+	protected $scanResult		= array(
+		'source'	=> 'unscanned',
+		'count'		=> 0,
+	);
+
+	/**
+	 *	@todo		remove after interface changed not auto-scanning on construction
+	 *	@access		public
+	 *	@return		object
+	 */
+	public function getScanResults()
+	{
+		return $this->scanResult;
+	}
 
 	/**
 	 *	Return module definition by module ID.
@@ -47,7 +63,8 @@ abstract class CMF_Hydrogen_Environment_Resource_Module_Library_Abstract impleme
 	 *	@throws		RangeException				if module is not installed (using strict mode)
 	 *	@throws		RuntimeException			if module is not active (using strict mode and activeOnly)
 	 */
-	public function get( $moduleId, $activeOnly = TRUE, $strict = TRUE ){
+	public function get( string $moduleId, bool $activeOnly = TRUE, bool $strict = TRUE )
+	{
 		$moduleId	= $this->sanitizeId( $moduleId );
 		if( !array_key_exists( $moduleId, $this->modules ) ){										//  module is not installed
 			if( $strict )
@@ -68,7 +85,8 @@ abstract class CMF_Hydrogen_Environment_Resource_Module_Library_Abstract impleme
 	 *	@param		boolean		$activeOnly		Flag: exclude deactivated modules (default: yes)
 	 *	@return		array
 	 */
-	public function getAll( $activeOnly = TRUE ){
+	public function getAll( bool $activeOnly = TRUE ): array
+	{
 		if( !$activeOnly )
 			return $this->modules;
 		$modules	= array();
@@ -88,7 +106,8 @@ abstract class CMF_Hydrogen_Environment_Resource_Module_Library_Abstract impleme
 	 *	@param		boolean		$activeOnly		Flag: exclude deactivated modules (default: yes)
 	 *	@return		boolean
 	 */
-	public function has( $moduleId, $activeOnly = TRUE ){
+	public function has( string $moduleId, bool $activeOnly = TRUE ): bool
+	{
 		$moduleId	= $this->sanitizeId( $moduleId );
 		if( !array_key_exists( $moduleId, $this->modules ) )										//  module is not installed
 			return FALSE;																			//
@@ -97,7 +116,8 @@ abstract class CMF_Hydrogen_Environment_Resource_Module_Library_Abstract impleme
 		return TRUE;																				//  otherwise
 	}
 
-	protected function sanitizeId( $moduleId ){
+	protected function sanitizeId( string $moduleId ): string
+	{
 		return str_replace( ':', '_', $moduleId );
 	}
 }

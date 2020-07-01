@@ -33,9 +33,10 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Environment_Resource_Module_Reader{
-
-	static public function load( $filePath, $id ){
+class CMF_Hydrogen_Environment_Resource_Module_Reader
+{
+	public static function load( string $filePath, string $id )
+	{
 		if( !file_exists( $filePath ) )
 			throw new RuntimeException( 'Module file "'.$filePath.'" is not existing' );
 		$xml						= XML_ElementReader::readFile( $filePath );
@@ -73,11 +74,11 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 		$obj->sql					= array();
 		$obj->links					= array();
 		$obj->hooks					= array();
+		$obj->jobs					= array();
 		$obj->install				= new stdClass();
 		$obj->install->type			= 0;
 		$obj->install->date			= NULL;
 		$obj->install->source		= NULL;
-		$obj->jobs					= array();
 
 		/*	--  LOCALLY INSTALLED MODULE  --  */
 		$obj->install->type		= self::castNodeAttributes( $xml->version, 'install-type', 'int' );	//  note install type
@@ -208,25 +209,26 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader{
 			);
 		}
 
-		if( $xml->jobs ){
-			foreach( $xml->jobs->job as $job ){
-				$callable		= explode( '::', (string) $job, 2 );
-				$obj->jobs[]	= (object) array(
-					'id'			=> self::castNodeAttributes( $job, 'id' ),
-					'class'			=> $callable[0],
-					'method'		=> $callable[1],
-					'arguments'		=> self::castNodeAttributes( $job, 'arguments' ),
-					'mode'			=> self::castNodeAttributes( $job, 'mode', 'array', array() ),
-					'interval'		=> self::castNodeAttributes( $job, 'interval' ),
-					'multiple'		=> self::castNodeAttributes( $job, 'multiple', 'bool' ),
-					'deprecated'	=> self::castNodeAttributes( $job, 'deprecated' ),
-				);
-			}
+		foreach( $xml->job as $job ){
+			$callable		= explode( '::', (string) $job, 2 );
+			$obj->jobs[]	= (object) array(
+				'id'			=> self::castNodeAttributes( $job, 'id' ),
+				'class'			=> $callable[0],
+				'method'		=> $callable[1],
+				'commands'		=> self::castNodeAttributes( $job, 'commands' ),
+				'arguments'		=> self::castNodeAttributes( $job, 'arguments' ),
+				'mode'			=> self::castNodeAttributes( $job, 'mode', 'array', array() ),
+				'interval'		=> self::castNodeAttributes( $job, 'interval' ),
+				'multiple'		=> self::castNodeAttributes( $job, 'multiple', 'bool' ),
+				'deprecated'	=> self::castNodeAttributes( $job, 'deprecated' ),
+				'disabled'		=> self::castNodeAttributes( $job, 'disabled' ),
+			);
 		}
 		return $obj;
 	}
 
-	static protected function castNodeAttributes( $node, $attribute, $type = 'string', $default = NULL ){
+	protected static function castNodeAttributes( $node, string $attribute, string $type = 'string', $default = NULL )
+	{
 		if( !$node->hasAttribute( $attribute ) ){
 			switch( $type ){
 				case 'array':

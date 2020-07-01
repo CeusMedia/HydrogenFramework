@@ -36,10 +36,11 @@
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			Code Documentation
  */
-class CMF_Hydrogen_Environment_Resource_Module_Library_Local extends CMF_Hydrogen_Environment_Resource_Module_Library_Abstract implements CMF_Hydrogen_Environment_Resource_Module_Library_Interface{
-
+class CMF_Hydrogen_Environment_Resource_Module_Library_Local extends CMF_Hydrogen_Environment_Resource_Module_Library_Abstract implements CMF_Hydrogen_Environment_Resource_Module_Library_Interface
+{
 	protected $env;
 	protected $modules		= array();
+	protected $cacheFile;
 
 	/**
 	 *	Constructor.
@@ -47,30 +48,40 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local extends CMF_Hydroge
 	 *	@param		CMF_Hydrogen_Environment		$env			Environment instance
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment $env ){
-		$this->env		= $env;
-		$config			= $this->env->getConfig();
-		$envClass		= get_class( $this->env );
-		$this->path		= $envClass::$configPath.'modules/';
+	public function __construct( CMF_Hydrogen_Environment $env )
+	{
+		$this->env			= $env;
+		$config				= $this->env->getConfig();
+		$envClass			= get_class( $this->env );
+		$this->path			= $envClass::$configPath.'modules/';
+		$this->cacheFile	= $this->path.'../modules.cache.serial';
 		if( $config->get( 'path.module.config' ) )
 			$this->path	= $config->get( 'path.module.config' );
-		$this->path		= $env->uri.$this->path;
+		$this->path			= $env->uri.$this->path;
 		$this->env->clock->profiler->tick( 'Hydrogen: Environment_Resource_Module_Library_Local::' );
 		$this->scan( $config->get( 'system.cache.modules' ) );
 	}
 
-	public function callHook( $resource, $event, $context, $arguments = array() ){
+	/**
+	 *	@todo		check if this is needed anymore and remove otherwise
+	 */
+	public function callHook( $resource, $event, $context, $arguments = array() )
+	{
 		$captain	= $this->env->getCaptain();
 		$countHooks	= $captain->callHook( $resource, $event, $context, $arguments );
 //		remark( 'Library_Local@'.$event.': '.$countHooks );
 		return $countHooks;
 	}
 
-	public function clearCache(){
+	/**
+	 *	Removes module cache file if enabled in base config.
+	 *	@access		public
+	 */
+	public function clearCache()
+	{
 		$useCache	= $this->env->getConfig()->get( 'system.cache.modules' );
-		$cacheFile	= $this->path.'../modules.cache.serial';
-		if( $useCache && file_exists( $cacheFile ) )
-			@unlink( $cacheFile );
+		if( $useCache && file_exists( $this->cacheFile ) )
+			@unlink( $this->cacheFile );
 	}
 
 	/**
@@ -79,7 +90,8 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local extends CMF_Hydroge
 	 *	@param		string			$controller			Name of controller class to get module for
 	 *	@return		object|NULL
 	 */
-	public function getModuleFromControllerClassName( $controller ){
+	public function getModuleFromControllerClassName( string $controller )
+	{
 		$controllerPathName	= "Controller/".str_replace( "_", "/", $controller );
 		foreach( $this->env->getModules()->getAll() as $module ){
 			foreach( $module->files->classes as $file ){
@@ -91,19 +103,34 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local extends CMF_Hydroge
 		}
 	}
 
-	public function scan( $useCache = FALSE, $forceReload = FALSE ){
-		if( !file_exists( $this->path ) )
-			return;
-
-		$cacheFile	= $this->path.'../modules.cache.serial';
-		if( $forceReload )
-			$this->clearCache();
-		if( $useCache && file_exists( $cacheFile ) ){
-			$this->modules	= unserialize( FS_File_Reader::load( $cacheFile ) );
-			$this->env->clock->profiler->tick( 'Hydrogen: Environment_Resource_Module_Library_Local::scan (cache)' );
-			return;
+	/**
+	 *	Scan modules of source.
+	 *	Should return a data object containing the result source and number of found modules.
+	 *	@access	public
+	 *	@param		boolean		$useCache		Flag: use cache if available
+	 *	@param		boolean		$forceReload	Flag: clear cache beforehand if available
+	 *	@return		object		Data object containing the result source and number of found modules
+	 */
+	public function scan( bool $useCache = FALSE, bool $forceReload = FALSE )
+	{
+		if( $useCache ){
+			if( $forceReload )
+				$this->clearCache();
+			if( file_exists( $this->cacheFile ) ){
+				$this->modules	= unserialize( FS_File_Reader::load( $this->cacheFile ) );
+				$this->env->clock->profiler->tick( 'Hydrogen: Environment_Resource_Module_Library_Local::scan (cache)' );
+				return (object) array(
+					'source' 	=> 'cache',
+					'count'		=> count( $this->modules ),
+				);
+			}
 		}
 
+		if( !file_exists( $this->path ) )
+			return $this->scanResult = (object) array(
+				'source' 	=> 'none',
+				'count'		=> 0,
+			);
 		$index	= new FS_File_RegexFilter( $this->path, '/^[a-z0-9_]+\.xml$/i' );
 		foreach( $index as $entry ){
 			$moduleId		= preg_replace( '/\.xml$/i', '', $entry->getFilename() );
@@ -122,11 +149,16 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local extends CMF_Hydroge
 				$module->icon	= 'data:image/png;base64,'.base64_encode( FS_File_Reader::load( $icon.'.png' ) );
 			else if( file_exists( $icon.'.ico' ) )
 				$module->icon	= 'data:image/x-icon;base64,'.base64_encode( FS_File_Reader::load( $icon.'.ico' ) );*/
+
 			$this->modules[$moduleId]	= $module;
 		}
 		ksort( $this->modules );
 		if( $useCache )
-			FS_File_Writer::save( $cacheFile, serialize( $this->modules ) );
+			FS_File_Writer::save( $this->cacheFile, serialize( $this->modules ) );
 		$this->env->clock->profiler->tick( 'Hydrogen: Environment_Resource_Module_Library_Local::scan (files)' );
+		return $this->scanResult = (object) array(
+			'source' 	=> 'files',
+			'count'		=> count( $this->modules ),
+		);
 	}
 }

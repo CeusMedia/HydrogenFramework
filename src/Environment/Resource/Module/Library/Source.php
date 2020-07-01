@@ -41,30 +41,75 @@
  *	@todo			Code Documentation
  *	@todo			Finish by using CMM::SEA
  */
-class CMF_Hydrogen_Environment_Resource_Module_Library_Source extends CMF_Hydrogen_Environment_Resource_Module_Library_Abstract implements CMF_Hydrogen_Environment_Resource_Module_Library_Interface{
-
+class CMF_Hydrogen_Environment_Resource_Module_Library_Source extends CMF_Hydrogen_Environment_Resource_Module_Library_Abstract implements CMF_Hydrogen_Environment_Resource_Module_Library_Interface
+{
 	protected $env;
 	protected $modules		= array();
 	protected $source;
 
-	public function __construct( CMF_Hydrogen_Environment $env, $source ){
+	/**
+	 *	Constructor.
+	 *	@access		public
+	 *	@param		CMF_Hydrogen_Environment	$env			Environment instance
+	 *	@param		object						$source			Data object defining source by: {id: ..., type: [folder|http], path: ...}
+	 *	@return		void
+	 */
+	public function __construct( CMF_Hydrogen_Environment $env, $source )
+	{
 		$this->env		= $env;
 		$this->source	= $source;
-		$this->scan();
+		$this->scan( TRUE );
 	}
 
-	protected function scanFolder(){
+	/**
+	 *	Scan modules of source.
+	 *	Should return a data object containing the result source and number of found modules.
+	 *	@access	public
+	 *	@param		boolean		$useCache		Flag: use cache if available
+	 *	@param		boolean		$forceReload	Flag: clear cache beforehand if available
+	 *	@return		object		Data object containing the result source and number of found modules
+	 */
+	public function scan( bool $useCache = FALSE, bool $forceReload = FALSE )
+	{
+		if( $useCache ){
+			$cache			= $this->env->getCache();
+			$cacheKeySource	= 'Sources/'.$this->source->id;
+			if( $forceReload )
+				$cache->remove( $cacheKeySource );
+			if( $cache->has( $cacheKeySource ) ){
+				$this->modules	= $cache->get( $cacheKeySource );
+				return $this->scanResult = (object) array(
+					'source'	=> 'cache',
+					'count'		=> count( $this->modules ),
+				);
+			}
+		}
+
+		switch( $this->source->type ){
+			case 'folder':
+				$this->modules	= $this->getModulesFromFolder();
+				break;
+			case 'http':
+				$this->modules	= $this->getModulesFromHttp();
+				break;
+			default:
+				throw new RuntimeException( 'Source type "'.$this->source->type.'" is not supported' );
+		}
+		if( $useCache )
+			$cache->set( $cacheKeySource, $this->modules );
+		return $this->scanResult = (object) array(
+			'source'	=> $this->source->type,
+			'count'		=> count( $this->modules ),
+		);
+	}
+
+	protected function scanFolder(): array
+	{
 		if( !file_exists( $this->source->path ) )
 			throw new RuntimeException( 'Source path "'.$this->source->path.'" is not existing' );
 #		@todo activate if source handling is implemented
 #		if( !file_exists( $this->source->path.'source.xml' ) )
 #			throw new RuntimeException( 'Source XML "'.$this->source->path.'source.xml" is not existing' );
-		$cache			= $this->env->getCache();
-		$cacheKeySource	= 'Sources/'.$this->source->id;
-		if( $cache->has( $cacheKeySource ) ){
-			$this->modules	= $cache->get( $cacheKeySource );
-			return;
-		}
 
 		$list	= array();
 		$index	= new FS_File_RecursiveNameFilter( $this->source->path, 'module.xml' );
@@ -75,12 +120,13 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source extends CMF_Hydrog
 			$id		= preg_replace( '@^'.$this->source->path.'@', '', $entry->getPath() );
 			$id		= str_replace( '/', '_', $id );
 
+/*			@todo		remove this older module-wise caching
 			$cacheKey	= 'Modules/'.$this->source->id.'/'.$id;
 			if( $cache->has( $cacheKey ) ){
 				$list[$id]	= $cache->get( $cacheKey );
 #				$this->env->clock->profiler->tick( 'Hydrogen: Environment_Resource_Module_Library_Source::scanFolder: Module #'.$id.':cache' );
 				continue;
-			}
+			}*/
 			$icon	= $entry->getPath().'/icon';
 			$filePath	= $entry->getPathname();
 			if( !is_readable( $filePath ) )
@@ -103,17 +149,17 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source extends CMF_Hydrog
 				catch( Exception $e ){
 					$this->env->messenger->noteFailure( 'XML of available Module "'.$id.'" is broken ('.$e->getMessage().').' );
 				}
-				if( $cache )
-					$cache->set( $cacheKey, $module );
+//				if( $cache )
+//					$cache->set( $cacheKey, $module );
 			}
 #			$this->env->clock->profiler->tick( 'Hydrogen: Environment_Resource_Module_Library_Source::scanFolder: Module #'.$id.':file' );
 		}
 		ksort( $list );
-		$this->modules	= $list;
-		$cache->set( $cacheKeySource, $list );
+		return $list;
 	}
 
-	protected function scanHttp(){
+	protected function scanHttp(): array
+	{
 		$host		= parse_url( $this->source->path, PHP_URL_HOST );
 		$path		= parse_url( $this->source->path, PHP_URL_PATH );
 		$request	= new Net_HTTP_Request_Sender( $host, $path.'?do=list' );
@@ -135,7 +181,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source extends CMF_Hydrog
 
 			$icon	= $module->path.'/icon';
 			try{
-				$content = Net_Reader::readUrl( $icon.'.png' );
+				$content		= Net_Reader::readUrl( $icon.'.png' );
 				$module->icon	= 'data:image/png;base64,'.base64_encode( $content );
 			}
 			catch( Exception $e ){}
@@ -152,19 +198,6 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source extends CMF_Hydrog
 				$obj->icon	= NULL;
 */
 		}
-		$this->modules	= $modules;
-	}
-
-	public function scan(){
-		switch( $this->source->type ){
-			case 'folder':
-				$this->scanFolder();
-				break;
-			case 'http':
-				$this->scanHttp();
-				break;
-			default:
-				throw new RuntimeException( 'Source type "'.$this->source->type.'" is not supported' );
-		}
+		return $modules;
 	}
 }

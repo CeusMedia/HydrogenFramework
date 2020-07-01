@@ -32,13 +32,15 @@
  *	@copyright		2012-2020 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
+ *	@todo			add support for hooks and jobs
  */
-class CMF_Hydrogen_Environment_Resource_Module_Editor{
-
+class CMF_Hydrogen_Environment_Resource_Module_Editor
+{
 	protected $path;
 	protected $nsXml	= 'http://www.w3.org/XML/1998/namespace';
 
-	public function __construct( CMF_Hydrogen_Environment $env ){
+	public function __construct( CMF_Hydrogen_Environment $env )
+	{
 		$this->path		= $this->getConfig()->get( 'path.config' ).'/modules/';
 		if( $env->getConfig()->get( 'path.module.config' ) ){
 			CMF_Hydrogen_Deprecation::getInstance()
@@ -58,7 +60,8 @@ class CMF_Hydrogen_Environment_Resource_Module_Editor{
 	 *	@param		string		$email		Author email address
 	 *	@return		void
 	 */
-	public function addAuthor( $moduleId, $name, $email = NULL ){
+	public function addAuthor( string $moduleId, string $name, string $email = NULL )
+	{
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
 		$link		= $xml->addChild( 'author', $name );
 		if( strlen( trim( $email ) ) )
@@ -74,7 +77,8 @@ class CMF_Hydrogen_Environment_Resource_Module_Editor{
 	 *	@param		string		$site		Company web address
 	 *	@return		void
 	 */
-	public function addCompany( $moduleId, $name, $site = NULL ){
+	public function addCompany( string $moduleId, string $name, ?string $site = NULL )
+	{
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
 		$link		= $xml->addChild( 'company', $name );
 		if( strlen( trim( $site ) ) )
@@ -95,7 +99,8 @@ class CMF_Hydrogen_Environment_Resource_Module_Editor{
 	 *	@param		string		$title		Description
 	 *	@return		void
 	 */
-	public function addConfig( $moduleId, $name, $type, $value, $values, $mandatory, $protected, $title = NULL ){
+	public function addConfig( string $moduleId, string $name, string $type, string $value, string $values, string $mandatory, string $protected, ?string $title = NULL )
+	{
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
 		$link		= $xml->addChild( 'config', $value );											//  add pair node
 		$link->addAttribute( 'name', $name );														//  set name attribute
@@ -122,7 +127,8 @@ class CMF_Hydrogen_Environment_Resource_Module_Editor{
 	 *	@param		string		$load		Load mode, empty or "auto"
 	 *	@return		void
 	 */
-	public function addFile( $moduleId, $type, $resource, $source, $load ){
+	public function addFile( string $moduleId, string $type, string $resource, string $source, string $load = NULL )
+	{
 		$attributes	= array( 'source', 'load' );
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
 		if( !strlen( trim( $type ) ) )
@@ -142,18 +148,21 @@ class CMF_Hydrogen_Environment_Resource_Module_Editor{
 	 *	@access		public
 	 *	@param		string		$moduleId	Module ID
 	 *	@param		string		$path		Link path
+	 *	@param		string		$link		?
 	 *	@param		string		$label		Link label
 	 *	@param		string		$access		Access mode (public|inside|outside|acl)
 	 *	@param		string		$language	Link language
 	 *	@param		string		$rank		Link rank in navigation
 	 *	@return		void
-	 *	@todo		add support for attribute "link"
 	 */
-	public function addLink( $moduleId, $path, $label = NULL, $access = NULL, $language = NULL, $rank = NULL ){
+	public function addLink( string $moduleId, string $path, ?string $link = NULL, ?string $label = NULL, ?string $access = NULL, ?string $language = NULL, ?string $rank = NULL )
+	{
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
 		$link		= $xml->addChild( 'link', (string) $label );									//
 		if( strlen( trim( $path ) ) )																//  path attribute is given
 			$link->addAttribute( 'path', trim( $path ) );											//  set path attribute
+		if( strlen( trim( $link ) ) )																//  link attribute is given
+			$link->addAttribute( 'link', trim( $path ) );											//  set link attribute
 		if( strlen( trim( $access ) ) )																//  access attribute is given
 			$link->addAttribute( 'access', trim( $access ) );										//  set access attribute
 		if( strlen( trim( $rank ) ) )																//  rank attribute is given
@@ -163,35 +172,37 @@ class CMF_Hydrogen_Environment_Resource_Module_Editor{
 		$this->saveModuleXml( $moduleId, $xml );													//  save modified module XML
 	}
 
-	public function addRelation( $moduleId, $type, $relatedModuleId ){
+	public function addRelation( string $moduleId, string $type, string $relatedModuleId )
+	{
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
 		if( !$this->hasXmlNode( $xml, 'relations' ) )												//  relations node not yet existing
 			$xml->addChild( 'relations' );															//  create relations node
 		$node		= $xml->relations->addChild( $type, $relatedModuleId );							//  add new relation node
-		$node->addAttribute( 'type', 'module' );													//  set type attribute on new node
+		$node->addAttribute( 'type', $type );														//  set type attribute on new node
 		$this->saveModuleXml( $moduleId, $xml );													//  save modified module XML
 	}
 
-	public function addSql( $moduleId, $ddl, $event, $type, $versionFrom = NULL, $versionTo = NULL ){
+	public function addSql( string $moduleId, string $ddl, string $event, string $type, string $version )
+	{
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
 		$ddl		= str_replace( '&', '&amp;', "\n".$ddl."\n" );
 		$node		= $xml->addChildCData( 'sql', $ddl );											//  add SQL as CDATA node
 		$node->addAttribute( 'on', $event );														//  set event attribute on new node
 		$node->addAttribute( 'type', $type );														//  set type attribute on new node
 		if( $event === "update" ){																	//  only for update set versions
-			$node->addAttribute( 'version-from', $versionFrom );									//  set update source version
-			$node->addAttribute( 'version-to', $versionTo );										//  set update target version
+			$node->addAttribute( 'version', $version );												//  set update source version
 		}
 		$this->saveModuleXml( $moduleId, $xml );													//  save modified module XML
 
 	}
 
-	public function editLink( $moduleId, $number, $path, $link = NULL, $label = NULL, $access = NULL, $language = NULL, $rank = NULL ){
+	public function editLink( string $moduleId, int $number, string $path, ?string $link = NULL, ?string $label = NULL, ?string $access = NULL, ?string $language = NULL, $rank = NULL )
+	{
 		$xml	= $this->loadModuleXml( $moduleId );												//  load module XML
-		if( !isset( $xml->link[(int) $number] ) )
+		if( !isset( $xml->link[$number] ) )
 			throw new OutOfRangeException( 'Invalid link number' );
 
-		$node	= $xml->link[(int) $number];
+		$node	= $xml->link[$number];
 		$node->setValue( (string) $label );
 
 		$node->setAttribute( 'path', strlen( trim( $path ) ) );
@@ -200,19 +211,13 @@ class CMF_Hydrogen_Environment_Resource_Module_Editor{
 		$node->setAttribute( 'rank', strlen( trim( $rank ) ) ? trim( $rank ) : NULL );
 
 		$language	= strlen( trim( $language ) ) ? trim( $language ) : NULL;
-		$node->setAttribute( 'lang', $language, 'xml', $this->nsXml );				//  set language attribute
+		$node->setAttribute( 'lang', $language, 'xml', $this->nsXml );								//  set language attribute
 		$this->saveModuleXml( $moduleId, $xml );													//  save modified module XML
 	}
 
-	protected function hasXmlNode( $xml, $nodeName ){
-		$children	= array();
-		foreach( $xml->children() as $child )														//  iterate children
-			$children[]	= $child->getName();
-		return in_array( $nodeName, $children );
-	}
-
-	public function removeAuthor( $moduleId, $name ){
-		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
+	public function removeAuthor( string $moduleId, string $name ): bool
+	{
+		$xml	= $this->loadModuleXml( $moduleId );												//  load module XML
 		foreach( $xml->author as $author ){
 			if( $author->getValue() == $name ){
 				$author->remove();
@@ -223,8 +228,9 @@ class CMF_Hydrogen_Environment_Resource_Module_Editor{
 		return FALSE;
 	}
 
-	public function removeCompany( $moduleId, $name ){
-		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
+	public function removeCompany( string $moduleId, string $name ): bool
+	{
+		$xml	= $this->loadModuleXml( $moduleId );												//  load module XML
 		foreach( $xml->company as $company ){
 			if( $company->getValue() == $name ){
 				$company->remove();
@@ -235,7 +241,8 @@ class CMF_Hydrogen_Environment_Resource_Module_Editor{
 		return FALSE;
 	}
 
-	public function removeConfig( $moduleId, $name ){
+	public function removeConfig( string $moduleId, string $name ): bool
+	{
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
 		foreach( $xml->config as $config ){
 			if( $config->getAttribute( 'name' ) == $name ){
@@ -247,7 +254,8 @@ class CMF_Hydrogen_Environment_Resource_Module_Editor{
 		return FALSE;
 	}
 
-	public function removeFile( $moduleId, $type, $resource ){
+	public function removeFile( string $moduleId, string $type, string $resource ): bool
+	{
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
 		if( !isset( $xml->files->$type ) )
 			throw new InvalidArgumentException( 'Invalid type: '.$type );
@@ -261,15 +269,18 @@ class CMF_Hydrogen_Environment_Resource_Module_Editor{
 		return FALSE;
 	}
 
-	public function removeLink( $moduleId, $number ){
+	public function removeLink( string $moduleId, int $number ): bool
+	{
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
-		if( !isset( $xml->link[(int) $number] ) )
+		if( !isset( $xml->link[$number] ) )
 			throw new OutOfRangeException( 'Invalid link number' );
-		unset( $xml->link[(int) $number] );
+		unset( $xml->link[$number] );
 		$this->saveModuleXml( $moduleId, $xml );													//  save modified module XML
+		return TRUE;
 	}
 
-	public function removeRelation( $moduleId, $type, $relatedModuleId ){
+	public function removeRelation( string $moduleId, string $type, string $relatedModuleId ): bool
+	{
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
 		foreach( $xml->relations->$type as $relation ){
 			if( $relation->getValue() == $relatedModuleId ){
@@ -281,7 +292,8 @@ class CMF_Hydrogen_Environment_Resource_Module_Editor{
 		return FALSE;
 	}
 
-	public function removeSql( $moduleId, $event, $type, $versionFrom = NULL, $versionTo = NULL ){
+	public function removeSql( string $moduleId, string $event, string $type, ?string $versionFrom = NULL, ?string $versionTo = NULL ): bool
+	{
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
 		foreach( $xml->sql as $sql ){																//  iterate SQL entries
 			if( $sql->event === $event && $sql->type === $type ){									//  event and type are matching
@@ -296,19 +308,28 @@ class CMF_Hydrogen_Environment_Resource_Module_Editor{
 		return FALSE;
 	}
 
-	protected function loadModuleXml( $moduleId ){
+	protected function hasXmlNode( $xml, string $nodeName ): bool
+	{
+		$children	= array();
+		foreach( $xml->children() as $child )														//  iterate children
+			$children[]	= $child->getName();
+		return in_array( $nodeName, $children );
+	}
+
+	protected function loadModuleXml( string $moduleId )
+	{
 		$moduleFile	= $this->path.$moduleId.'.xml';
 		if( !file_exists( $moduleFile ) )
 			throw new RuntimeException( 'Module "'.$moduleId.'" is not installed' );
 		return XML_ElementReader::readFile( $moduleFile );
 	}
 
-	protected function saveModuleXml( $moduleId, SimpleXMLElement $xml ){
+	protected function saveModuleXml( string $moduleId, SimpleXMLElement $xml )
+	{
 		$moduleFile	= $this->path.$moduleId.'.xml';
 		if( !file_exists( $moduleFile ) )
 			throw new RuntimeException( 'Module "'.$moduleId.'" is not installed' );
 		$xml	= XML_DOM_Formater::format( $xml->asXML(), TRUE );
 		return File_Writer::save( $moduleFile, $xml );
 	}
-
 }
