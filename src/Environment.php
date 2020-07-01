@@ -548,10 +548,21 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 	 */
 	protected function initModules(){
 		$this->modules	= new CMF_Hydrogen_Environment_Resource_Module_Library_Local( $this );
-		$this->modules->stripFeatures( array( 'sql' ) );
+		$this->modules->stripFeatures( array(
+			'sql',
+			'versionLog',
+			'companies',
+			'authors',
+			'licenses',
+			'price',
+			'file',
+			'uri',
+			'category',
+			'description',
+		) );
 
 		$public	= array();
-		if( strlen( trim( $this->config->get( 'module.acl.public' ) ) ){
+		if( strlen( trim( $this->config->get( 'module.acl.public' ) ) ) ){
 			CMF_Hydrogen_Deprecation::getInstance()
 				->setErrorVersion( '0.8.7.2' )
 				->setExceptionVersion( '0.8.9' )

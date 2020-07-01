@@ -178,11 +178,11 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local extends CMF_Hydroge
 					$newValue		= $currentValue;
 					if( is_bool( $currentValue ) )
 						$newValue	= FALSE;
-					else if( is_array( $value ) )
+					else if( is_array( $currentValue ) )
 						$newValue	= array();
-					else if( is_string( $value ) )
+					else if( is_string( $currentValue ) )
 						$newValue	= '';
-					else if( is_numeric( $value ) )
+					else if( is_numeric( $currentValue ) )
 						$newValue	= 0;
 
 					if( $newValue !== $currentValue )
