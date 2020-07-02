@@ -103,7 +103,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source extends CMF_Hydrog
 		);
 	}
 
-	protected function scanFolder(): array
+	protected function getModulesFromFolder(): array
 	{
 		if( !file_exists( $this->source->path ) )
 			throw new RuntimeException( 'Source path "'.$this->source->path.'" is not existing' );
@@ -158,7 +158,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source extends CMF_Hydrog
 		return $list;
 	}
 
-	protected function scanHttp(): array
+	protected function getModulesFromHttp(): array
 	{
 		$host		= parse_url( $this->source->path, PHP_URL_HOST );
 		$path		= parse_url( $this->source->path, PHP_URL_PATH );
