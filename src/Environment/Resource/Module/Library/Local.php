@@ -59,7 +59,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local extends CMF_Hydroge
 			$this->path	= $config->get( 'path.module.config' );
 		$this->path			= $env->uri.$this->path;
 		$this->env->clock->profiler->tick( 'Hydrogen: Environment_Resource_Module_Library_Local::' );
-		$this->scan( $config->get( 'system.cache.modules' ) );
+		$this->scan( (bool) $config->get( 'system.cache.modules' ) );
 	}
 
 	/**
