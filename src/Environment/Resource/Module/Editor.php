@@ -41,7 +41,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Editor
 
 	public function __construct( CMF_Hydrogen_Environment $env )
 	{
-		$this->path		= $this->getConfig()->get( 'path.config' ).'/modules/';
+		$this->path		= $env->getConfig()->get( 'path.config' ).'/modules/';
 		if( $env->getConfig()->get( 'path.module.config' ) ){
 			CMF_Hydrogen_Deprecation::getInstance()
 				->setErrorVersion( '0.8.6.6' )
@@ -307,6 +307,8 @@ class CMF_Hydrogen_Environment_Resource_Module_Editor
 		}
 		return FALSE;
 	}
+
+	//  --  PROTECTED  --  //
 
 	protected function hasXmlNode( $xml, string $nodeName ): bool
 	{
