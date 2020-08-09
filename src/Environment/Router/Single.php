@@ -51,8 +51,8 @@ class CMF_Hydrogen_Environment_Router_Single extends CMF_Hydrogen_Environment_Ro
 			return;
 
 		$parts	= explode( '/', $path );
-		$request->set( 'controller',	array_shift( $parts ) );
-		$request->set( 'action',		array_shift( $parts ) );
+		$request->set( '__controller',	array_shift( $parts ) );
+		$request->set( '__action',		array_shift( $parts ) );
 		$arguments	= array();
 		while( count( $parts ) )
 		{
@@ -60,6 +60,6 @@ class CMF_Hydrogen_Environment_Router_Single extends CMF_Hydrogen_Environment_Ro
 			if( strlen( $part ) )
 				$arguments[]	= $part;
 		}
-		$request->set( 'arguments', $arguments );
+		$request->set( '__arguments', $arguments );
 	}
 }

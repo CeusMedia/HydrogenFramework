@@ -55,7 +55,7 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAutoTabs extends CMF_Hydrogen_Vi
 		$userId		= $this->env->getSession()->get( 'userId' );
 		$language	= $this->env->getLanguage()->getLanguage();
 
-		$current			= $request->get( 'controller' ).'/'.$request->get( 'action' );
+		$current			= $request->get( '__controller' ).'/'.$request->get( '__action' );
 		$linkMap			= $this->getUserModuleLinks( $userId, $language, TRUE );
 		$active				= $this->getCurrentKey( $linkMap, $current );
 		$linkItemList		= array();

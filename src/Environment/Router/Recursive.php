@@ -62,15 +62,15 @@ class CMF_Hydrogen_Environment_Router_Recursive extends CMF_Hydrogen_Environment
 				{
 	//				remark( 'Controller Class: '.$className );
 					$controller	= implode( '/', $left );
-					$request->set( 'controller', $controller );
+					$request->set( '__controller', $controller );
 					if( count( $right ) )
 					{
 						if( method_exists( $className, $right[0] ) )
 						{
 	//						remark( 'Controller Method: '.$right[0] );
-							$request->set( 'action', array_shift( $right ) );
+							$request->set( '__action', array_shift( $right ) );
 						}
-						$request->set( 'arguments', $right );
+						$request->set( '__arguments', $right );
 	//					if( $right )
 	//						remark( 'Arguments: '.implode( ', ', $right ) );
 					}
@@ -79,13 +79,13 @@ class CMF_Hydrogen_Environment_Router_Recursive extends CMF_Hydrogen_Environment
 				array_unshift( $right, array_pop( $left ) );
 			}
 		}
-		if( !$request->get( 'controller' ) && $right )
-			$request->set( 'arguments', $right );
+		if( !$request->get( '__controller' ) && $right )
+			$request->set( '__arguments', $right );
 
-/*		remark( "controller: ".$request->get( 'controller' ) );
-		remark( "action: ".$request->get( 'action' ) );
+/*		remark( "controller: ".$request->get( '__controller' ) );
+		remark( "action: ".$request->get( '__action' ) );
 		remark( "arguments: " );
-		print_m( $request->get( 'arguments' ) );
+		print_m( $request->get( '__arguments' ) );
 		die;*/
 	}
 }

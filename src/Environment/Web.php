@@ -435,9 +435,9 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment{
 			->message( 'Redirecting is usable for hooks within dispatching, only. Please use restart instead!' );
 
 		$request	= $this->getRequest();
-		$request->set( 'controller', $controller );
-		$request->set( 'action', $action );
-		$request->set( 'arguments', $arguments );
+		$request->set( '__controller', $controller );
+		$request->set( '__action', $action );
+		$request->set( '__arguments', $arguments );
 		foreach( $parameters as $key => $value )
 			if( !empty( $key ) )
 				$request->set( $key, $value );

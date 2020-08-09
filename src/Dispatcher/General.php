@@ -72,8 +72,8 @@ class CMF_Hydrogen_Dispatcher_General
 	}
 
 	protected function checkClassActionArguments( $className, $instance ){
-		$action		= $this->request->get( 'action' );
-		$arguments	= $this->request->get( 'arguments' );
+		$action		= $this->request->get( '__action' );
+		$arguments	= $this->request->get( '__arguments' );
 		$numberArgsAtLeast	= 0;
 		$numberArgsTotal	= 0;
 		$methodReflection	= new ReflectionMethod( $instance, $action );
@@ -96,8 +96,8 @@ class CMF_Hydrogen_Dispatcher_General
 	}
 
 	protected function checkForLoop(){
-		$controller	= $this->request->get( 'controller' );
-		$action		= $this->request->get( 'action' );
+		$controller	= $this->request->get( '__controller' );
+		$action		= $this->request->get( '__action' );
 		if( empty( $this->history[$controller][$action] ) )
 			$this->history[$controller][$action]	= 0;
 		if( $this->history[$controller][$action] > 2 ){
@@ -125,9 +125,9 @@ class CMF_Hydrogen_Dispatcher_General
 			$this->realizeCall();
 			$this->checkForLoop();
 
-			$controller	= trim( $this->request->get( 'controller' ) );
-			$action		= trim( $this->request->get( 'action' ) );
-			$arguments	= $this->request->get( 'arguments' );
+			$controller	= trim( $this->request->get( '__controller' ) );
+			$action		= trim( $this->request->get( '__action' ) );
+			$arguments	= $this->request->get( '__arguments' );
 
 			$className	= self::getControllerClassFromPath( $controller );							// get controller class name from requested controller path
 			$this->checkClass( $className );
@@ -163,16 +163,16 @@ class CMF_Hydrogen_Dispatcher_General
 			return;
 		if( $instance->redirect )
 			return;
-		$session->set( 'lastController', $this->request->get( 'controller' ) );
-		$session->set( 'lastAction', $this->request->get( 'action' ) );
+		$session->set( 'lastController', $this->request->get( '__controller' ) );
+		$session->set( 'lastAction', $this->request->get( '__action' ) );
 	}
 
 	protected function realizeCall(){
-		if( !trim( $this->request->get( 'controller' ) ) )
-			$this->request->set( 'controller', $this->defaultController );
-		if( !trim( $this->request->get( 'action' ) ) )
-			$this->request->set( 'action', $this->defaultAction );
-		if( !$this->request->get( 'arguments' ) )
-			$this->request->set( 'arguments', $this->defaultArguments );
+		if( !trim( $this->request->get( '__controller' ) ) )
+			$this->request->set( '__controller', $this->defaultController );
+		if( !trim( $this->request->get( '__action' ) ) )
+			$this->request->set( '__action', $this->defaultAction );
+		if( !$this->request->get( '__arguments' ) )
+			$this->request->set( '__arguments', $this->defaultArguments );
 	}
 }

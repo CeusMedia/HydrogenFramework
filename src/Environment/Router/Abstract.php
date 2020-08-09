@@ -53,8 +53,8 @@ abstract class CMF_Hydrogen_Environment_Router_Abstract implements CMF_Hydrogen_
 	public function getRelativeUri( $controller = NULL, $action = NULL, $arguments = NULL, $parameters = NULL, $fragmentId = NULL )
 	{
 		$data	= array(
-			'controller'	=> $this->env->request->get( 'controller' ),
-			'action'		=> $this->env->request->get( 'action' ),
+			'controller'	=> $this->env->request->get( '__controller' ),
+			'action'		=> $this->env->request->get( '__action' ),
 			'arguments'		=> array(),
 			'parameters'	=> array(),
 		);

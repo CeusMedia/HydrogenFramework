@@ -93,19 +93,18 @@ class CMF_Hydrogen_Controller
 		$this->defaultPath	= strtolower( str_replace( '_', '/', $controllerName ) );				//  to guess default controller URI path
 		$this->path			= $this->defaultPath;													//  and note this as controller path
 
-		$captain			= $this->env->getCaptain();												//  prepare hook call
 		$data				= array( 'controllerName' => $controllerName );							//  with cut controller name
-		if( $path = $captain->callHook( 'Controller', 'onDetectPath', $this, $data ) )				//  to get preferred controller URI path
+		if( $path = $this->callHook( 'Controller', 'onDetectPath', $this, $data ) )					//  to get preferred controller URI path
 			$this->path		= $path;																//  and set if has been resolved
 
 //		$arguments		= array_slice( func_get_args(), 1 );										//  collect additional arguments for extended logic classes
 //		Alg_Object_MethodFactory::callObjectMethod( $this, '__onInit', $arguments, TRUE, TRUE );	//  invoke possibly extended init method
 		try{
-			$this->__onInit();																			//  default callback for construction end
+			$this->__onInit();																		//  default callback for construction end
 		}
 		catch( \Exception $e ){
 			$payload	= array( 'exception' => $e );
-			$this->env->getCaptain()->callHook( 'App', 'onException', $this, $payload );
+			$this->callHook( 'App', 'onException', $this, $payload );
 			throw new \Exception( $e->getMessage(), $e->getCode(), $e );
 		}
 		$env->clock->profiler->tick( 'CMF_Controller('.get_class( $this ).'): done' );				//  log time of construction
@@ -343,9 +342,9 @@ class CMF_Hydrogen_Controller
 			->setExceptionVersion( '0.8.9' )
 			->message( 'Redirecting is usable for hooks within dispatching, only. Please use restart instead!' );
 		$request	= $this->env->getRequest();
-		$request->set( 'controller', $controller );
-		$request->set( 'action', $action );
-		$request->set( 'arguments', $arguments );
+		$request->set( '__controller', $controller );
+		$request->set( '__action', $action );
+		$request->set( '__arguments', $arguments );
 		foreach( $parameters as $key => $value )
 			if( !empty( $key ) )
 				$request->set( $key, $value );
@@ -409,7 +408,7 @@ class CMF_Hydrogen_Controller
 			$mode	= 'int';
 			if( $withinModule ){																	//  redirection is within module
 				$mode	= 'mod';
-				$controller	= $this->env->getRequest()->get( 'controller' );						//  get current controller
+				$controller	= $this->env->getRequest()->get( '__controller' );						//  get current controller
 				$controller	= $this->alias ? $this->alias : $controller;							//
 				$uri		= $controller.( strlen( $uri ) ? '/'.$uri : '' );						//
 			}
@@ -448,8 +447,8 @@ class CMF_Hydrogen_Controller
 	protected function setEnv( CMF_Hydrogen_Environment $env ): self
 	{
 		$this->env			= $env;
-		$this->controller	= $env->getRequest()->get( 'controller' );
-		$this->action		= $env->getRequest()->get( 'action' );
+		$this->controller	= $env->getRequest()->get( '__controller' );
+		$this->action		= $env->getRequest()->get( '__action' );
 		if( $this->env->has( 'language' ) && $this->controller ){
 			$language	= $this->env->getLanguage();
 			$language->load( $this->controller, FALSE, FALSE );

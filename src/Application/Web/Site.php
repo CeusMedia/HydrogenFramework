@@ -68,8 +68,8 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 				$dispatcher->defaultAction		= $defaultAction;
 			$output	= $dispatcher->dispatch();														//  get requested content
 			$this->setViewComponents( array(														//  note for main template
-				'controller'	=> $request->get( 'controller' ),									//  called controller
-				'action'		=> $request->get( 'action' )										//  called action
+				'controller'	=> $request->get( '__controller' ),									//  called controller
+				'action'		=> $request->get( '__action' )										//  called action
 			) );
 			return $output;																			//  return generated output
 		}
@@ -102,7 +102,7 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 			else if( $this->env->getMessenger() ){
 				$this->env->getMessenger()->noteFailure( $e->getMessage() );						//  fill messenger with exception message
 				$this->env->getResponse()->setStatus( 500 );										//  indicate HTTP status 500 - internal server error
-				if( strlen( trim( $request->get( 'controller' ) ) ) ){								//  a controller has been set
+				if( strlen( trim( $request->get( '__controller' ) ) ) ){							//  a controller has been set
 					header( 'Location: '.$this->env->getBaseUrl() );								//  redirect to home
 					exit;																			//  and quit
 				}

@@ -463,8 +463,8 @@ class CMF_Hydrogen_View{
 	{
 		$this->env			= $env;
 		if( $env instanceof CMF_Hydrogen_Environment_Web ){
-			$this->controller	= $this->env->getRequest()->get( 'controller' );
-			$this->action		= $this->env->getRequest()->get( 'action' );
+			$this->controller	= $this->env->getRequest()->get( '__controller' );
+			$this->action		= $this->env->getRequest()->get( '__action' );
 		}
 	}
 

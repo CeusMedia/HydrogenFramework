@@ -241,8 +241,8 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame{
 	}
 
 	public function build( $bodyAttributes = array(), $htmlAttributes = array() ){
-		$controller			= $this->env->getRequest()->get( 'controller' );
-		$action				= $this->env->getRequest()->get( 'action' );
+		$controller			= $this->env->getRequest()->get( '__controller' );
+		$action				= $this->env->getRequest()->get( '__action' );
 		$controllerKey		= str_replace( '/', '-', $controller );
 		$actionKey			= str_replace( '/', '-', $action );										//  @todo to be removed
 		$moduleKeyOld		= join( explode( ' ', ucwords( str_replace( '/', ' ', $controller ) ) ) );		//  @todo to be removed
