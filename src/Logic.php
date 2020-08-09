@@ -94,4 +94,10 @@ class CMF_Hydrogen_Logic{
 			throw new \RuntimeException( 'Model class "'.$className.'" not found' );
 		return \Alg_Object_Factory::createObject( $className, array( $this->env ) );
 	}
+
+	protected function callHook( string $resource, string $event, $context = NULL, $payload = NULL )
+	{
+		$context	= $context ? $context : $this;
+		return $this->captain->callHook( $resource, $event, $context, $payload );
+	}
 }
