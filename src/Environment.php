@@ -96,7 +96,7 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 	/**	@var	string													$path			Absolute folder path of application */
 	public $path							= NULL;
 
-	/**	@var	CMF_Hydrogen_Environment_Php							$php			Instance of PHP environment collection */
+	/**	@var	CMF_Hydrogen_Environment_Resource_Php					$php			Instance of PHP environment collection */
 	public $php;
 
 	/**	@var	string													$uri			Application URI (absolute local path) */

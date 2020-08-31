@@ -33,7 +33,7 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Environment_Resource_Database_PDO extends Database_PDO_Connection
+class CMF_Hydrogen_Environment_Resource_Database_PDO extends DB_PDO_Connection
 {
 	protected $env;
 
