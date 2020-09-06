@@ -4,7 +4,7 @@
  *	Abstract logic class for contextual singletons. Every environment can have one instance.
  *
  *	@category		Library
- *	@package		CeusMedia.HydrogenFramework.Environment.Resource
+ *	@package		CeusMedia.HydrogenFramework
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2010-2020 Ceus Media
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -15,7 +15,7 @@
  *	Abstract logic class for contextual singletons. Every environment can have one instance.
  *
  *	@category		Library
- *	@package		CeusMedia.HydrogenFramework.Environment.Resource
+ *	@package		CeusMedia.HydrogenFramework
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2010-2020 Ceus Media
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
