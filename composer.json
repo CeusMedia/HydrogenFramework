@@ -12,12 +12,12 @@
     }
   ],
   "support": {
-    "email": "office@ceusmedia.de",
+    "email": "christian.wuerker@ceusmedia.de",
     "jabber": "cwuerker@ceusmedia.de"
   },
   "require": {
     "php": "^5.3.0 || ^7",
-    "ceus-media/common": "^0.8"
+    "ceus-media/common": "^0.8 | dev-master"
   },
   "require-dev": {
     "ceus-media/doc-creator": "*",
