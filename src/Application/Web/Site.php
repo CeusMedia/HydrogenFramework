@@ -102,7 +102,8 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 			else if( $this->env->getMessenger() ){
 				$this->env->getMessenger()->noteFailure( $e->getMessage() );						//  fill messenger with exception message
 				$this->env->getResponse()->setStatus( 500 );										//  indicate HTTP status 500 - internal server error
-				if( strlen( trim( $request->get( '__controller' ) ) ) ){							//  a controller has been set
+				$controller	= trim( $request->get( '__controller' ) );
+				if( strlen( $controller ) && $controller !== 'index' ){								//  a controller has been set
 					header( 'Location: '.$this->env->getBaseUrl() );								//  redirect to home
 					exit;																			//  and quit
 				}
