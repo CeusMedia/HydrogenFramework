@@ -362,7 +362,7 @@ class CMF_Hydrogen_View_Helper_JavaScript{
 							$script	= join( PHP_EOL."\t", $lines );
 						}
 					}
-					$list[]		= "jQuery(document).ready(function(){".$script."});";
+					$list[]	= "jQuery(function(){".rtrim( $script, "\t;" )."});";
 				}
 			}
 		}
