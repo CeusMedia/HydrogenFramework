@@ -225,7 +225,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader
 				'value'				=> $value,
 				'values'			=> self::castNodeAttributes( $pair, 'values', 'array' ),
 				'mandatory'			=> self::castNodeAttributes( $pair, 'mandatory', 'bool' ),
-				'protected'			=> self::castNodeAttributes( $pair, 'protected', 'bool' ),
+				'protected'			=> self::castNodeAttributes( $pair, 'protected' ),
 				'title'				=> $title,
 			);
 		}
