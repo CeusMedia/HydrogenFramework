@@ -77,11 +77,12 @@ abstract class CMF_Hydrogen_Controller_Ajax{
 		$this->respond( json_encode( $response ), $httpCode );
 	}
 
-	protected function respond( $string, $status = NULL ){
+	protected function respond( $string, $status = NULL, $mimeType = NULL ){
 		$this->response->setBody( $string );
 		if( $status )
 			$this->response->setStatus( $status );
-		$this->response->addHeaderPair( 'Content-Type', 'text/json' );
+		$mimeType	= $mimeType ? $mimeType : 'text/json';
+		$this->response->addHeaderPair( 'Content-Type', $mimeType );
 		Net_HTTP_Response_Sender::sendResponse( $this->response, 'gzip', TRUE, TRUE );
 	}
 }
