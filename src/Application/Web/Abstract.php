@@ -90,9 +90,10 @@ abstract class CMF_Hydrogen_Application_Web_Abstract extends CMF_Hydrogen_Applic
 	/**
 	 *	Collates View Components and puts out Master View.
 	 *	@access		protected
-	 *	@return		void
+	 *	@return		string
 	 */
-	protected function view( $templateFile = "master.php" ){
+	protected function view( $templateFile = "master.php" ): string
+	{
 		$masterTemplate	= (string) $this->env->getCaptain()->callHook( 'App', 'getMasterTemplate', $this );
 		switch( $masterTemplate ){
 			case '':

@@ -41,6 +41,9 @@ class CMF_Hydrogen_Environment_Remote extends CMF_Hydrogen_Environment{
 	/**	@var	boolean		$hasDatabase		Flag: indicates availability of a database connection */
 	public $hasDatabase		= FALSE;
 
+	/** @var	CMF_Hydrogen_Environment_Remote_Messenger	$messenger		Fake messenger */
+	protected $messenger;
+
 	/**
 	 *	Constructor.
 	 *	@access		public
@@ -87,12 +90,5 @@ class CMF_Hydrogen_Environment_Remote extends CMF_Hydrogen_Environment{
 
 	public function initMessenger(){
 		$this->messenger	= new CMF_Hydrogen_Environment_Remote_Messenger( $this );
-	}
-}
-class CMF_Hydrogen_Environment_Remote_Messenger extends CMF_Hydrogen_Environment_Resource_Messenger{
-
-	protected function noteMessage( $type, $message ){
-		remark( $message );
-		flush();
 	}
 }

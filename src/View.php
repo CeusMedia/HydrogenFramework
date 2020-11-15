@@ -154,7 +154,7 @@ class CMF_Hydrogen_View{
 	}
 
 	public function getHelpers(){
-		return $helpers;
+		return $this->helpers;
 	}
 
 	protected function getTemplateUri( $controller, $action )
@@ -221,8 +221,7 @@ class CMF_Hydrogen_View{
 
 	public function hasTemplateFile( $fileKey )
 	{
-		$file	= $controller.'/'.$action.'.php';
-		$uri	= $this->getTemplateUriFromFile( $file );
+		$uri	= $this->getTemplateUriFromFile( $fileKey );
 		return file_exists( $uri );
 	}
 
@@ -263,6 +262,7 @@ class CMF_Hydrogen_View{
 	 *	@return		array		Map of collected file contents
      */
 	public function loadContentFiles( $path, $keys, $data = array() ){
+		$list	= array();
 		$path	= preg_replace( "/\/+$/", "", $path ).'/';											//  correct path
 		$keys	= is_string( $keys ) ? array( $keys ) : $keys;										//  convert single key to list
 		foreach( $keys as $key ){																	//  iterate keys
@@ -435,9 +435,9 @@ class CMF_Hydrogen_View{
 	 *	@access		public
 	 *	@param		array		$data			Array of Data for View
 	 *	@param		string		$topic			Optional: Topic Name of Data
-	 *	@return		void
+	 *	@return		self
 	 */
-	public function setData( $data, $topic = NULL )
+	public function setData( $data, $topic = NULL ): self
 	{
 		if( $topic )
 		{
@@ -451,6 +451,7 @@ class CMF_Hydrogen_View{
 			foreach( $data as $key => $value )
 				$this->data[$key]	= $value;
 		}
+		return $this;
 	}
 
 	/**
@@ -459,13 +460,14 @@ class CMF_Hydrogen_View{
 	 *	@param		CMF_Hydrogen_Environment		$env			Framework Resource Environment Object
 	 *	@return		void
 	 */
-	protected function setEnv( CMF_Hydrogen_Environment $env )
+	protected function setEnv( CMF_Hydrogen_Environment $env ): self
 	{
 		$this->env			= $env;
 		if( $env instanceof CMF_Hydrogen_Environment_Web ){
 			$this->controller	= $this->env->getRequest()->get( '__controller' );
 			$this->action		= $this->env->getRequest()->get( '__action' );
 		}
+		return $this;
 	}
 
 	/**
@@ -478,11 +480,13 @@ class CMF_Hydrogen_View{
 	 *	@param		string		$key			Pair key in this section
 	 *	@param		array		$data			List of arguments to insert using sprintf
 	 *	@param		mixed		$mode			Concat mode: 0 - set | 1 - append, -1 - prepend
-	 *	@return		void
+	 *	@return		self
 	 */
-	protected function setPageTitle( $section = 'index', $key = 'title', $data = array(), $mode = 1 ){
+	protected function setPageTitle( $section = 'index', $key = 'title', $data = array(), $mode = 1 ): self
+	{
 		$data	= $this->getData();
 		if( isset( $data['words'][$section][$key] ) )
 			$this->env->getPage()->setTitle( $data['words'][$section][$key], $mode );
+		return $this;
 	}
 }

@@ -1,7 +1,7 @@
 <?php
 class CMF_Hydrogen_Hook{
 
-	static public function callHook( $resource, $event, $context, $module, $data ){
+	static public function callHook( CMF_Hydrogen_Environment $env, $resource, $event, $context, $module, $data ){
 		return $env->getCaptain()->callHook( $resource, $event, $context, $data );
 	}
 

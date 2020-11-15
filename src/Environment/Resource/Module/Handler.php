@@ -37,11 +37,13 @@
  */
 class CMF_Hydrogen_Environment_Resource_Module_Handler{
 
+	protected $env;
+	protected $path;
 	protected $modulesInstalled		= array();
 	protected $modulesAvailable		= array();
 	protected $sources				= array();
 
-	public function __construct(CMF_Hydrogen_Environment $env ){
+	public function __construct( CMF_Hydrogen_Environment $env ){
 		CMF_Hydrogen_Deprecation::getInstance()
 			->setErrorVersion( '0.8.6.5' )
 			->setExceptionVersion( '0.8.7' )
@@ -62,7 +64,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Handler{
 		if( !file_exists( $this->path ) )
 			return;
 
-		$this->modulesInstalled	= new CMF_Hydrogen_Environment_Resource_Module_LibraryLocal( $env );
+		$this->modulesInstalled	= new CMF_Hydrogen_Environment_Resource_Module_Library_Local( $env );
 	}
 
 	public function clearCache(){

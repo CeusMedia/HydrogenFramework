@@ -82,9 +82,8 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 				return UI_HTML_Exception_Page::render( $e );
 			}
 			else{
-				remark( $e->getMessage() );
-				remark( $e->getTraceAsString() );
-				remark();
+				print( $e->getMessage().PHP_EOL );
+				print( $e->getTraceAsString().PHP_EOL.PHP_EOL );
 				exit;
 			}
 		}
@@ -118,7 +117,7 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 	/**
 	 *	Main Method of Framework calling Controller (and View) and Master View.
 	 *	@access		protected
-	 *	@return		void
+	 *	@return		string
 	 *	@todo		use UI_OutputBuffer
 	 */
 	protected function main(){
@@ -167,7 +166,7 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 
 		foreach( $headers as $key => $value ){
 			if( $value instanceof Net_HTTP_Header_Field )
-				$response->addHeader( $header );
+				$response->addHeader( $value );
 			else
 				$response->addHeaderPair( $key, $value );
 		}

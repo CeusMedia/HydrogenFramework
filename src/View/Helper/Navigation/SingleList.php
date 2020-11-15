@@ -35,6 +35,8 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			Code doc
+ *	@deprecated		use modules Info_Pages + UI_Navigation instead
+ *	@todo			remove in version 0.9
  */
 class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_Helper_Abstract
 {
@@ -47,7 +49,10 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_H
 
 	public function __construct( $linkMap, $innerClass = NULL, $innerId = NULL )
 	{
-		trigger_error( 'Class '.__CLASS__.' is deprecated, please use modules Info_Pages + UI_Navigation instead', E_USER_DEPRECATED );
+		CMF_Hydrogen_Deprecation::getInstance()
+			->setErrorVersion( '0.8.5' )
+			->ExceptionVersion( '0.9' )
+			->message( 'Use modules Info_Pages + UI_Navigation instead' );
 		$this->linkMap		= $linkMap;
 		if( $innerClass )
 			$this->innerClass	= $innerClass;
@@ -95,6 +100,7 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_H
 		$path	= empty( $_REQUEST[self::$pathRequestKey] ) ? $current : $_REQUEST[self::$pathRequestKey];
 		$active	= $this->getCurrentKey( $this->linkMap, $current );
 		$list	= array();
+		$class	= NULL;
 		foreach( $this->linkMap as $key => $label )
 		{
 			if( in_array( $key, $this->linksToSkip ) )

@@ -78,11 +78,11 @@ abstract class CMF_Hydrogen_Model_Abstract{
 		$items	= $this->index( array( $indexKey => $indexValue ) );
 		foreach( $items as $item ){
 			$item	= (array) $item;
-			if( !isset( $item[$idKey] ) ){
+			if( !isset( $item[$this->idKey] ) ){
 				$msg	= 'No value set for ID key %s for modul %s';
 				throw new DomainException( sprintf( $msg, $this->idKey, $this->className ) );
 			}
-			$this->delete( $item[$idKey] );
+			$this->delete( $item[$this->idKey] );
 		}
 		return count( $items );
 	}
@@ -91,11 +91,11 @@ abstract class CMF_Hydrogen_Model_Abstract{
 		$items	= $this->index( $indices );
 		foreach( $items as $item ){
 			$item	= (array) $item;
-			if( !isset( $item[$idKey] ) ){
+			if( !isset( $item[$this->idKey] ) ){
 				$msg	= 'No value set for ID key %s for modul %s';
 				throw new DomainException( sprintf( $msg, $this->idKey, $this->className ) );
 			}
-			$this->delete( $item[$idKey] );
+			$this->delete( $item[$this->idKey] );
 		}
 		return count( $items );
 	}

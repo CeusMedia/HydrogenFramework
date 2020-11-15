@@ -61,7 +61,7 @@ class CMF_Hydrogen_View_Helper_Timestamp extends CMF_Hydrogen_View_Helper_Abstra
 		return $date;
 	}
 
-	public function toDate( $format = NULL ){
+	public function toDate( $format = NULL, $html = FALSE ){
 		if( !$this->timestamp )
 			return '-';
 		$format	= $format ? $format : self::$formatDate;
@@ -73,7 +73,7 @@ class CMF_Hydrogen_View_Helper_Timestamp extends CMF_Hydrogen_View_Helper_Abstra
 		return $date;
 	}
 
-	public function toTime( $format = NULL ){
+	public function toTime( $format = NULL, $html = FALSE ){
 		if( !$this->timestamp )
 			return '-';
 		$format	= $format ? $format : self::$formatTime;

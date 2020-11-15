@@ -33,8 +33,8 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Environment_Resource_Language{
-
+class CMF_Hydrogen_Environment_Resource_Language
+{
 	/**	@var		string								$fileExtension	File extension of language files (default: ini) */
 	static public $fileExtension						= 'ini';
 
@@ -61,7 +61,8 @@ class CMF_Hydrogen_Environment_Resource_Language{
 	 *	@param		string								$language		Language to select
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment $env ){
+	public function __construct( CMF_Hydrogen_Environment $env )
+	{
 		$this->env			= $env;
 		$config				= $env->getConfig();
 
@@ -107,7 +108,8 @@ class CMF_Hydrogen_Environment_Resource_Language{
 	 *	@access		public
 	 *	@return		string
 	 */
-	public function getLanguage(){
+	public function getLanguage(): string
+	{
 		return $this->language;
 	}
 
@@ -116,16 +118,18 @@ class CMF_Hydrogen_Environment_Resource_Language{
 	 *	@access		public
 	 *	@return		string
 	 */
-	public function getLanguagePath(){
+	public function getLanguagePath(): string
+	{
 		return $this->filePath.$this->language.'/';
 	}
 
 	/**
 	 *	Returns list of allowed languages.
 	 *	@access		public
-	 *	@return		string
+	 *	@return		array
 	 */
-	public function getLanguages(){
+	public function getLanguages(): array
+	{
 		return $this->languages;
 	}
 
@@ -138,7 +142,8 @@ class CMF_Hydrogen_Environment_Resource_Language{
 	 *	@return		array
 	 *	@throws		RuntimeException if language topic is not loaded/existing and strict is on
 	 */
-	public function getWords( $topic, $strict = TRUE, $force = TRUE ){
+	public function getWords( $topic, $strict = TRUE, $force = TRUE ): array
+	{
 		if( !strlen( trim( $topic ) ) )
 			throw new InvalidArgumentException( "getWords: Topic cannot be empty" );
 
@@ -155,7 +160,8 @@ class CMF_Hydrogen_Environment_Resource_Language{
 		return array();
 	}
 
-	public function hasWords( $topic ){
+	public function hasWords( $topic ): bool
+	{
 		return isset( $this->data[$topic] );
 	}
 
@@ -185,9 +191,10 @@ class CMF_Hydrogen_Environment_Resource_Language{
 	 *	Returns File Name of Language Topic.
 	 *	@access		protected
 	 *	@param		string		$topic			Topic of Language
-	 *	@return		void
+	 *	@return		string
 	 */
-	protected function getFilenameOfLanguage( $topic ){
+	protected function getFilenameOfLanguage( $topic ): string
+	{
 		$ext	= strlen( trim( static::$fileExtension ) ) ? '.'.trim( static::$fileExtension ) : '';
 		return $this->filePath.$this->language.'/'.$topic.$ext;
 	}
@@ -243,16 +250,17 @@ class CMF_Hydrogen_Environment_Resource_Language{
 	 *	Sets a Language.
 	 *	@access		public
 	 *	@param		string		$language		Language to select
-	 *	@return		void
+	 *	@return		self
+	 *	@throws		DomainException				if language is not supporte
 	 */
-	public function setLanguage( $language ){
+	public function setLanguage( $language ): self
+	{
 		$language	= strtolower( $language );
 		if( !in_array( $language, $this->languages ) )
-			return FALSE;
+			throw new DomainException( 'Language "'.$language.'" is not supported' );
 		$this->data		= array();
 		$this->language	= $language;
-
 		$this->load( 'main' );
-		return TRUE;
+		return $this;
 	}
 }

@@ -1,6 +1,8 @@
 <?php
 abstract class CMF_Hydrogen_Model_File_Abstract{
 
+	protected $path;
+
 	public function __construct( $path ){
 		$this->path	= $path;
 	}

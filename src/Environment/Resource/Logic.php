@@ -21,6 +21,7 @@ class CMF_Hydrogen_Environment_Resource_Logic
 {
 	const OS_LINUX				= 1;
 	const OS_WINDOWS			= 2;
+	protected $config;
 	protected $os				= 0;
 	protected $timePrefixes		= array(
 		'u'		=> 1,

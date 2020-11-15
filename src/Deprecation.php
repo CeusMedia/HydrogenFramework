@@ -12,10 +12,10 @@
  *	Indicator for deprecated methods.
  *
  *	Example:
- *		Deprecation::getInstance()
+ *		CMF_Hydrogen_Deprecation::getInstance()
  *			->setErrorVersion( '0.9' )
  *			->ExceptionVersion( '0.9' )
- *			->message(  'Use method ... instead' );
+ *			->message( 'Use method ... instead' );
  *
  *	@category		Library
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>

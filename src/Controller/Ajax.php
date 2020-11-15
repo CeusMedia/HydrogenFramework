@@ -7,6 +7,7 @@
  */
 abstract class CMF_Hydrogen_Controller_Ajax{
 
+	protected $env;
 	protected $request;
 	protected $response;
 	protected $session;

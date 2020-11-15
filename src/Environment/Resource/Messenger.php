@@ -38,10 +38,13 @@
  */
 class CMF_Hydrogen_Environment_Resource_Messenger{
 
-	/**	@var		CMF_Hydrogen_Environment		$env			Application Environment Object */
+	/**	@var		CMF_Hydrogen_Environment	$env			Application Environment Object */
 	protected $env;
 
-	/**	@var		array							$classes		CSS Classes of Message Types */
+	/**	@var		boolean						$enabled		Flag: store messages in session */
+	protected $enabled;
+
+	/**	@var		array						$classes		CSS Classes of Message Types */
 	protected $classes	= array(
 		'0'	=> 'failure',
 		'1'	=> 'error',

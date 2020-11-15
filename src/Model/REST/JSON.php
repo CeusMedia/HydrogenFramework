@@ -6,6 +6,7 @@ abstract class CMF_Hydrogen_Model_REST_JSON extends CMF_Hydrogen_Model_Abstract{
 	static public $clientEnvKey				= 'restClient';
 
 	protected $basePath;
+	protected $client;
 
 	protected function __onInit(){
 		if( !strlen( trim( static::$resourceRouteBasePath ) ) ){

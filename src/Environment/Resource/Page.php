@@ -46,6 +46,8 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame{
 
 	protected $pathPrimer;
 
+	protected $pathCommon;
+
 	protected $pathTheme;
 
 	/**	@var	CMF_Hydrogen_View_Helper_JavaScript		$js					JavaScript Collector Helper */

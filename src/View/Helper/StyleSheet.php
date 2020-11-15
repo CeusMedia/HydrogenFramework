@@ -87,7 +87,7 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 	 */
 	public function clearCache(){
 		$prefix = preg_replace( "/^([a-z0-9]+)/", "\\1", $this->prefix );
-		$index	= new File_RegexFilter( $this->pathCache, '/^'.$prefix.'\w+\.css$/' );
+		$index	= new FS_File_RegexFilter( $this->pathCache, '/^'.$prefix.'\w+\.css$/' );
 		foreach( $index as $file ){
 			unlink( $file->getPathname() );
 		}

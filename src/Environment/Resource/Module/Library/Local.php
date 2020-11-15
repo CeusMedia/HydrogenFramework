@@ -39,6 +39,7 @@
 class CMF_Hydrogen_Environment_Resource_Module_Library_Local extends CMF_Hydrogen_Environment_Resource_Module_Library_Abstract implements CMF_Hydrogen_Environment_Resource_Module_Library_Interface
 {
 	protected $env;
+	protected $modulePath;
 	protected $modules		= array();
 	protected $cacheFile;
 
@@ -53,11 +54,10 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local extends CMF_Hydroge
 		$this->env			= $env;
 		$config				= $this->env->getConfig();
 		$envClass			= get_class( $this->env );
-		$this->path			= $env->path.$envClass::$configPath.'modules/';
-		$this->cacheFile	= $this->path.'../modules.cache.serial';
+		$this->modulePath	= $env->path.$envClass::$configPath.'modules/';
+		$this->cacheFile	= $this->modulePath.'../modules.cache.serial';
 		if( $config->get( 'path.module.config' ) )
-			$this->path	= $config->get( 'path.module.config' );
-		$this->path			= $env->uri.$this->path;
+			$this->modulePath	= $config->get( 'path.module.config' );
 		$this->env->clock->profiler->tick( 'Hydrogen: Environment_Resource_Module_Library_Local::' );
 		$this->scan( (bool) $config->get( 'system.cache.modules' ) );
 	}
@@ -126,18 +126,18 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local extends CMF_Hydroge
 			}
 		}
 
-		if( !file_exists( $this->path ) )
+		if( !file_exists( $this->modulePath ) )
 			return $this->scanResult = (object) array(
 				'source' 	=> 'none',
 				'count'		=> 0,
 			);
-		$index	= new FS_File_RegexFilter( $this->path, '/^[a-z0-9_]+\.xml$/i' );
+		$index	= new FS_File_RegexFilter( $this->modulePath, '/^[a-z0-9_]+\.xml$/i' );
 		foreach( $index as $entry ){
 			$moduleId		= preg_replace( '/\.xml$/i', '', $entry->getFilename() );
-			$moduleFile		= $this->path.$moduleId.'.xml';
+			$moduleFile		= $this->modulePath.$moduleId.'.xml';
 			$module			= CMF_Hydrogen_Environment_Resource_Module_Reader::load( $moduleFile, $moduleId );
 			$module->source				= 'local';													//  set source to local
-			$module->path				= $this->path;												//  assume app path as module path
+			$module->path				= $this->modulePath;												//  assume app path as module path
 			$module->isInstalled		= TRUE;														//  module is installed
 			$module->versionInstalled	= $module->version;											//  set installed version by found module version
 			if( isset( $module->config['active'] ) )												//  module has main switch in config

@@ -202,7 +202,7 @@ class CMF_Hydrogen_Controller
 	protected function checkAjaxRequest()
 	{
 		if( !$this->env->getRequest()->isAjax() ){
-			$this->messenger->noteFailure( 'Invalid AJAX/AJAJ access attempt.' );
+			$this->env->getMessenger()->noteFailure( 'Invalid AJAX/AJAJ access attempt.' );
 			$this->restart( NULL, FALSE, 401 );
 		}
 	}
@@ -415,7 +415,7 @@ class CMF_Hydrogen_Controller
 		}
 		if( $this->logRestarts )
 			error_log( vsprintf( '%s %s %s %s'."\n", array(
-				date(),
+				date( DateTime::ATOM ),
 				$status ? $status : 200,
 				$mode,
 				$uri

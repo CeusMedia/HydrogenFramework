@@ -62,7 +62,7 @@ class CMF_Hydrogen_Environment_Resource_LogicPool {
 	 *	@return		void
 	 */
 	public function __set( $key, $logicObject ){
-		return $this->set( $key, $logicObject );
+		$this->set( $key, $logicObject );
 	}
 
 	/**
@@ -72,7 +72,7 @@ class CMF_Hydrogen_Environment_Resource_LogicPool {
 	 *	@return		void
 	 */
 	public function __unset( $key ){
-		return $this->remove( $key );
+		$this->remove( $key );
 	}
 
 	/**

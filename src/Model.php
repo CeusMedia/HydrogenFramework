@@ -54,6 +54,8 @@ class CMF_Hydrogen_Model
 	protected $cache;
 	/**	@var		integer							$fetchMode		PDO fetch mode */
 	protected $fetchMode;
+	/**	@var		string							$cacheKey		Base key in cache */
+	protected $cacheKey;
 
 	public static $cacheClass						= 'ADT_List_Dictionary';
 

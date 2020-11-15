@@ -63,9 +63,9 @@ class CMF_Hydrogen_Environment_Resource_Php{
 		if( preg_match( '/^([A-Z_]+(\s*,\s*))+$/', $value ) ){										//  value is list of constants
 			$intVal = 0;																			//  prepare empty integer value
 			foreach( preg_split( '/\s*,\s*/', $value ) as $item ){									//  iterate found constants
-				if( !ADT_Constant::has( $iem ) )													//  constant is undefined
+				if( !ADT_Constant::has( $item ) )													//  constant is undefined
 					throw new RangeException( 'Unknown global constant: '.$item );					//  quit with exception
-				$intVal	|= ADT_Constant::get( $iem );												//  otherwise apply constant
+				$intVal	|= ADT_Constant::get( $item );												//  otherwise apply constant
 			}
 			$value	= $intVal;																		//  set config value by constants
 		}

@@ -70,6 +70,9 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment{
 	/**	@var	string											$host		Detected HTTP host */
 	public $host;
 
+	/**	@var	int												$port		Detected HTTP port */
+	public $port;
+
 	/**	@var	string											$path		Detected HTTP path */
 	public $path;
 
@@ -125,13 +128,12 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment{
 		}
 		catch( Exception $e ){
 			if( getEnv( 'HTTP_HOST' ) )
-				die( UI_HTML_Exception_Page::render( $e ) );
+				print( UI_HTML_Exception_Page::render( $e ) );
 			else{
-				remark( $e->getMessage() );
-				remark( $e->getTraceAsString() );
-				remark();
-				exit;
+				print( $e->getMessage().PHP_EOL );
+				print( $e->getTraceAsString().PHP_EOL.PHP_EOL );
 			}
+			exit;
 		}
 	}
 

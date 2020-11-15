@@ -72,6 +72,12 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 	/**	@var	object													$database		Database Connection Object */
 	protected $database;
 
+	/**	@var	CMF_Hydrogen_Environment_Resource_Language				$language		Language support object */
+	protected $language;
+
+	/**	@var	CMF_Hydrogen_Environment_Resource_Log					$log			Log support object */
+	protected $log;
+
 	/**	@var	array													$defaultPaths	Map of default paths to extend base configuration */
 	public static $defaultPaths				= array(
 		'config'	=> 'config/',
@@ -645,10 +651,11 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 	 *	@param		string		$path		Path to set in config instance
 	 *	@return		self
 	 */
-	public function setPath( $key, $path, $override = TRUE, $strict = TRUE ){
+	public function setPath( $key, $path, $override = TRUE, $strict = TRUE ): self
+	{
 		if( $this->hasPath( $key ) && !$override && $strict )
 			throw new RuntimeException( 'Path "'.$key.'" is already set' );
-		$this->config->set( 'path.'.$key, $value );
+		$this->config->set( 'path.'.$key, $path );
 		return $this;
 	}
 }

@@ -39,6 +39,9 @@
  */
 class CMF_Hydrogen_Dispatcher_General
 {
+	protected $env;
+	protected $request;
+
 	public $defaultController			= 'index';
 
 	public $defaultAction				= 'index';
@@ -71,9 +74,7 @@ class CMF_Hydrogen_Dispatcher_General
 		}
 	}
 
-	protected function checkClassActionArguments( $className, $instance ){
-		$action		= $this->request->get( '__action' );
-		$arguments	= $this->request->get( '__arguments' );
+	protected function checkClassActionArguments( $className, $instance, $action, $arguments ){
 		$numberArgsAtLeast	= 0;
 		$numberArgsTotal	= 0;
 		$methodReflection	= new ReflectionMethod( $instance, $action );
@@ -137,7 +138,7 @@ class CMF_Hydrogen_Dispatcher_General
 			$this->env->clock->profiler->tick( 'Dispatcher_General::dispatch: factorized controller' );
 			$this->checkClassAction( $className, $instance, $action );
 			if( $this->checkClassActionArguments )
-				$this->checkClassActionArguments( $className, $instance, $action );
+				$this->checkClassActionArguments( $className, $instance, $action, $arguments );
 			$this->env->clock->profiler->tick( 'Dispatcher_General::dispatch: check@'.$controller.'/'.$action );
 			Alg_Object_MethodFactory::callObjectMethod( $instance, $action, $arguments );			// call action method in controller class with arguments
 			$this->noteLastCall( $instance );

@@ -35,6 +35,8 @@
  *	@copyright		2012-2020 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
+ *	@deprecated		use modules Info_Pages + UI_Navigation instead
+ *	@todo			remove in version 0.9
  */
 class CMF_Hydrogen_View_Helper_Navigation_SingleAutoTabs extends CMF_Hydrogen_View_Helper_Navigation_SingleList{
 
@@ -46,7 +48,10 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAutoTabs extends CMF_Hydrogen_Vi
 	protected $container	= FALSE;
 
 	public function __construct(CMF_Hydrogen_Environment $env ){
-		trigger_error( 'Class '.__CLASS__.' is deprecated, please use modules Info_Pages + UI_Navigation instead', E_USER_DEPRECATED );
+		CMF_Hydrogen_Deprecation::getInstance()
+			->setErrorVersion( '0.8.5' )
+			->ExceptionVersion( '0.9' )
+			->message( 'Use modules Info_Pages + UI_Navigation instead' );
 		$this->env	= $env;
 	}
 

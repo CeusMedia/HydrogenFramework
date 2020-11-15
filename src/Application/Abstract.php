@@ -70,8 +70,10 @@ abstract class CMF_Hydrogen_Application_Abstract{
 	protected function checkNeededModules(){
 		$modulesGot	= array_keys( $this->env->getModules()->getAll() );								//  get installed modules
 		$missing	= array_diff( self::$modulesNeeded, $modulesGot );								//  find missing modules
-		if( $missing )																				//  there are missing modules
-			die( $this->reportMissingModules( $missing ) );											//  quit execution with report
+		if( $missing ){																				//  there are missing modules
+			$this->reportMissingModules( $missing );												//  report missing modules to screen
+			exit;																					//  quit execution
+		}
 	}
 
 	/**

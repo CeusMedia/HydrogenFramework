@@ -167,7 +167,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Editor
 			$link->addAttribute( 'access', trim( $access ) );										//  set access attribute
 		if( strlen( trim( $rank ) ) )																//  rank attribute is given
 			$link->addAttribute( 'rank', trim( $rank ) );											//  set rank attribute
-		if( strlen( trim( $data->get( 'language' ) ) ) )											//  language attribute is given
+		if( strlen( trim( $language ) ) )															//  language attribute is given
 			$link->addAttribute( 'lang', $language, 'xml', $this->nsXml );							//  set language attribute
 		$this->saveModuleXml( $moduleId, $xml );													//  save modified module XML
 	}
@@ -332,6 +332,6 @@ class CMF_Hydrogen_Environment_Resource_Module_Editor
 		if( !file_exists( $moduleFile ) )
 			throw new RuntimeException( 'Module "'.$moduleId.'" is not installed' );
 		$xml	= XML_DOM_Formater::format( $xml->asXML(), TRUE );
-		return File_Writer::save( $moduleFile, $xml );
+		return FS_File_Writer::save( $moduleFile, $xml );
 	}
 }

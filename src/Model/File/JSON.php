@@ -10,7 +10,7 @@ class CMF_Hydrogen_Model_File_JSON extends CMF_Hydrogen_Model_File_Abstract{
 	}
 
 	public function delete( $fileName ){
-		return \FS_File_Writer::remove( $this->path.$fileName );
+		return \FS_File_Writer::delete( $this->path.$fileName );
 	}
 
 	public function exists( $fileName ){
