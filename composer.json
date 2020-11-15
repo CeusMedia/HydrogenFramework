@@ -21,7 +21,8 @@
   },
   "require-dev": {
     "ceus-media/doc-creator": "*",
-    "phpunit/phpunit": "*"
+    "phpunit/phpunit": "*",
+    "phpstan/phpstan": "0.12.x-dev"
   },
   "autoload": {
     "classmap": ["src/"]
