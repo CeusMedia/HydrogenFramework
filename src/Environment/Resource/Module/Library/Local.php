@@ -53,7 +53,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local extends CMF_Hydroge
 		$this->env			= $env;
 		$config				= $this->env->getConfig();
 		$envClass			= get_class( $this->env );
-		$this->path			= $envClass::$configPath.'modules/';
+		$this->path			= $env->path.$envClass::$configPath.'modules/';
 		$this->cacheFile	= $this->path.'../modules.cache.serial';
 		if( $config->get( 'path.module.config' ) )
 			$this->path	= $config->get( 'path.module.config' );
