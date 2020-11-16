@@ -1,0 +1,47 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Instantiated class View_ErrorException not found\\.$#"
+			count: 1
+			path: src/Application/Web/Site.php
+
+		-
+			message: "#^Function remark not found\\.$#"
+			count: 1
+			path: src/Environment/Remote/Messenger.php
+
+		-
+			message: "#^Instantiated class Model_Role not found\\.$#"
+			count: 1
+			path: src/Environment/Resource/Acl/Abstract.php
+
+		-
+			message: "#^Call to static method minifyController\\(\\) on an unknown class Model_Role_Right\\.$#"
+			count: 1
+			path: src/Environment/Resource/Acl/Database.php
+
+		-
+			message: "#^Instantiated class Model_Role_Right not found\\.$#"
+			count: 3
+			path: src/Environment/Resource/Acl/Database.php
+
+		-
+			message: "#^Instantiated class Model_Role not found\\.$#"
+			count: 1
+			path: src/Environment/Resource/Acl/Database.php
+
+		-
+			message: "#^Instantiated class Database_PDO_DataSourceName not found\\.$#"
+			count: 1
+			path: src/Environment/Resource/Database/PDO.php
+
+		-
+			message: "#^Parameter \\$mail of method CMF_Hydrogen_Hook\\:\\:sendMail\\(\\) has invalid typehint type Mail_Abstract\\.$#"
+			count: 1
+			path: src/Hook.php
+
+		-
+			message: "#^Instantiated class CeusMedia\\\\Database\\\\PDO\\\\Table\\\\Writer not found\\.$#"
+			count: 1
+			path: src/Model.php
+

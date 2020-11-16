@@ -40,7 +40,8 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAclList extends CMF_Hydrogen_Vie
 {
 	protected $needsEnv			= TRUE;
 
-	public function getFilteredLinkMap( $linkMap ){
+	public function getFilteredLinkMap( array $linkMap ): array
+	{
 		$roleId		= $this->env->session->get( 'roleId' );
 		if( !$roleId )
 			return $linkMap;
@@ -61,14 +62,13 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAclList extends CMF_Hydrogen_Vie
 		return $map;
 	}
 
-	public function render( $current = NULL, $niceUrls = FALSE )
+	public function render( string $current = NULL, bool $niceUrls = FALSE ): string
 	{
 		$path		= empty( $_REQUEST['path'] ) ? $current : $_REQUEST['path'];
 		$linkMap	= $this->getFilteredLinkMap( $this->linkMap );
 		$active		= $this->getCurrentKey( $linkMap, $path );
 		$list		= array();
-		foreach( $linkMap as $key => $label )
-		{
+		foreach( $linkMap as $key => $label ){
 			$key		= str_replace( '_', '/', $key );
 			$class		= $active == $key ? 'active' : NULL;
 			$url		= $key == "index" ? "./" : './'.$key;

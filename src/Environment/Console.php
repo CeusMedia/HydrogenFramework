@@ -17,8 +17,8 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment{
-
+class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment
+{
 	/**	@var	CLI_ArgumentParser								$request	Console Request Object */
 	protected $request;
 
@@ -31,14 +31,30 @@ class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment{
 	/** @var	ADT_List_Dictionary								$session	Session Storage Object */
 	protected $session;
 
-	protected $pathConfig	= "";
+	protected $pathConfig	= '';
+
+	/**	@var	string											$host		Detected HTTP host */
+	public $host;
+
+	/**	@var	int												$port		Detected HTTP port */
+	public $port;
+
+	/**	@var	string											$scheme		Detected  */
+	public $scheme;
+
+	/**	@var	string											$path		Detected HTTP path */
+	public $path;
+
+	/**	@var	string											$url		Detected application base URL */
+	public $url;
 
 	/**
 	 *	Constructor, sets up Resource Environment.
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function __construct( $options = array(), $isFinal = TRUE ){
+	public function __construct( array $options = array(), bool $isFinal = TRUE )
+	{
 //		ob_start();
 		try{
 			parent::__construct( $options, FALSE );													//  construct parent but dont call __onInit
@@ -64,26 +80,30 @@ class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment{
 		}
 	}
 
-	public function getLanguage(){
+	public function getLanguage(): CMF_Hydrogen_Environment_Resource_Language
+	{
 		return $this->language;
 	}
 
-	public function getMessenger(){
+	public function getMessenger(): CMF_Hydrogen_Environment_Console_Messenger
+	{
 		return $this->messenger;
 	}
 
-	public function getRequest(){
+	public function getRequest()
+	{
 		return $this->request;
 	}
 
-	public function getSession(){
+	public function getSession()
+	{
 		return $this->session;
 	}
 
-
 	//  --  PROTECTED  --  //
 
-	protected function detectSelf(){
+	protected function detectSelf()
+	{
 		$this->url = $this->config->get( 'app.url' );												//  get application URL from config
 		if( !$this->url )																			//  application URL not set
 			$this->url = $this->config->get( 'app.base.url' );										//  get application base URL from config
@@ -100,16 +120,19 @@ class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment{
 //		$this->config	= new ADT_List_Dictionary();
 //	}
 
-	protected function initLanguage(){
+	protected function initLanguage()
+	{
 		$this->language		= new CMF_Hydrogen_Environment_Resource_Language( $this );
 		$this->clock->profiler->tick( 'env: language' );
 	}
 
-	protected function initMessenger(){
+	protected function initMessenger()
+	{
 		$this->messenger	= new CMF_Hydrogen_Environment_Console_Messenger( $this );
 	}
 
-	protected function initRequest(){
+	protected function initRequest()
+	{
 		$this->request	= new CLI_ArgumentParser();
 		$this->request->parseArguments();
 	}
@@ -117,15 +140,9 @@ class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment{
 	/**
 	 * Setup a "session", which is persistent storage for this run only.
 	 */
-	protected function initSession(){
+	protected function initSession()
+	{
 		$this->session	= new ADT_List_Dictionary();
 		return $this;
-	}
-}
-class CMF_Hydrogen_Environment_Console_Messenger extends CMF_Hydrogen_Environment_Resource_Messenger{
-
-	protected function noteMessage( $type, $message ){
-		CLI::out( $message );
-		flush();
 	}
 }

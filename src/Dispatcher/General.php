@@ -40,6 +40,7 @@
 class CMF_Hydrogen_Dispatcher_General
 {
 	protected $env;
+
 	protected $request;
 
 	public $defaultController			= 'index';
@@ -54,62 +55,14 @@ class CMF_Hydrogen_Dispatcher_General
 
 	public static $prefixController		= "Controller_";
 
-	public function __construct(CMF_Hydrogen_Environment $env ) {
+	public function __construct(CMF_Hydrogen_Environment $env )
+	{
 		$this->env		= $env;
 		$this->request	= $env->getRequest();
 	}
 
-	protected function checkClass( $className ){
-		if( !class_exists( $className ) ){															// class is neither loaded nor loadable
-			$message	= 'Invalid Controller "'.$className.'"';
-			throw new RuntimeException( $message, 201 );											// break with internal error
-		}
-	}
-
-	protected function checkClassAction( $className, $instance, $action ){
-		$denied = array( '__construct', '__destruct', 'getView', 'getData' );
-		if( !method_exists( $instance, $action ) || in_array( $action, $denied ) ){					// no action method in controller instance
-			$message	= 'Invalid Action "'.ucfirst( $className ).'::'.$action.'"';
-			throw new RuntimeException( $message, 211 );											// break with internal error
-		}
-	}
-
-	protected function checkClassActionArguments( $className, $instance, $action, $arguments ){
-		$numberArgsAtLeast	= 0;
-		$numberArgsTotal	= 0;
-		$methodReflection	= new ReflectionMethod( $instance, $action );
-		$methodArguments	= $methodReflection->getParameters();
-
-		while( $methodArgument = array_shift( $methodArguments ) ){
-			$numberArgsTotal++;
-			if( !$methodArgument->isOptional() )
-				$numberArgsAtLeast++;
-		}
-		if( count( $arguments ) < $numberArgsAtLeast ){
-			$message	= 'Not enough arguments for action "'.ucfirst( $className ).'::'.$action.'"';
-			throw new RuntimeException( $message, 212 );											// break with internal error
-		}
-		if( count( $arguments ) > $numberArgsTotal ){
-			$message	= 'Too much arguments for action "'.ucfirst( $className ).'::'.$action.'"';
-			throw new RuntimeException( $message, 212 );											// break with internal error
-		}
-
-	}
-
-	protected function checkForLoop(){
-		$controller	= $this->request->get( '__controller' );
-		$action		= $this->request->get( '__action' );
-		if( empty( $this->history[$controller][$action] ) )
-			$this->history[$controller][$action]	= 0;
-		if( $this->history[$controller][$action] > 2 ){
-			throw new RuntimeException( 'Too many redirects' );
-#			$this->messenger->noteFailure( 'Too many redirects.' );
-#			break;
-		}
-		$this->history[$controller][$action]++;
-	}
-
-	public function checkAccess( $controller, $action ){
+	public function checkAccess( string $controller, string $action )
+	{
 		$right1	= $this->env->getAcl()->has( $controller, $action );
 		$right2	= $this->env->getAcl()->has( $controller.'_'.$action );
 //		$right2	= $this->env->getAcl()->has( $controller );
@@ -120,7 +73,8 @@ class CMF_Hydrogen_Dispatcher_General
 		}
 	}
 
-	public function dispatch(){
+	public function dispatch()
+	{
 		$this->env->clock->profiler->tick( 'Dispatcher_General::dispatch' );
 		do{
 			$this->realizeCall();
@@ -150,13 +104,70 @@ class CMF_Hydrogen_Dispatcher_General
 		return $view;
 	}
 
-	static protected function getControllerClassFromPath( $path ){
+	//  --  PROTECTED  --  //
+
+	protected function checkClass( string $className )
+	{
+		if( !class_exists( $className ) ){															// class is neither loaded nor loadable
+			$message	= 'Invalid Controller "'.$className.'"';
+			throw new RuntimeException( $message, 201 );											// break with internal error
+		}
+	}
+
+	protected function checkClassAction( string $className, $instance, string $action )
+	{
+		$denied = array( '__construct', '__destruct', 'getView', 'getData' );
+		if( !method_exists( $instance, $action ) || in_array( $action, $denied ) ){					// no action method in controller instance
+			$message	= 'Invalid Action "'.ucfirst( $className ).'::'.$action.'"';
+			throw new RuntimeException( $message, 211 );											// break with internal error
+		}
+	}
+
+	protected function checkClassActionArguments( string $className, $instance, string $action, array $arguments = array() )
+	{
+		$numberArgsAtLeast	= 0;
+		$numberArgsTotal	= 0;
+		$methodReflection	= new ReflectionMethod( $instance, $action );
+		$methodArguments	= $methodReflection->getParameters();
+
+		while( $methodArgument = array_shift( $methodArguments ) ){
+			$numberArgsTotal++;
+			if( !$methodArgument->isOptional() )
+				$numberArgsAtLeast++;
+		}
+		if( count( $arguments ) < $numberArgsAtLeast ){
+			$message	= 'Not enough arguments for action "'.ucfirst( $className ).'::'.$action.'"';
+			throw new RuntimeException( $message, 212 );											// break with internal error
+		}
+		if( count( $arguments ) > $numberArgsTotal ){
+			$message	= 'Too much arguments for action "'.ucfirst( $className ).'::'.$action.'"';
+			throw new RuntimeException( $message, 212 );											// break with internal error
+		}
+	}
+
+	protected function checkForLoop()
+	{
+		$controller	= $this->request->get( '__controller' );
+		$action		= $this->request->get( '__action' );
+		if( empty( $this->history[$controller][$action] ) )
+			$this->history[$controller][$action]	= 0;
+		if( $this->history[$controller][$action] > 2 ){
+			throw new RuntimeException( 'Too many redirects' );
+#			$this->messenger->noteFailure( 'Too many redirects.' );
+#			break;
+		}
+		$this->history[$controller][$action]++;
+	}
+
+	protected static function getControllerClassFromPath( string $path )
+	{
 		$parts		= str_replace( '/', ' ', $path );												//  slice into parts
 		$name		= str_replace( ' ', '_', ucwords( $parts ) );									//  glue together capitalized
 		return self::$prefixController.$name;														//  return controller class name
 	}
 
-	protected function noteLastCall( CMF_Hydrogen_Controller $instance ){
+	protected function noteLastCall( CMF_Hydrogen_Controller $instance )
+	{
 		$session	= $this->env->getSession();
 		if( !$session )
 			return;
@@ -168,7 +179,8 @@ class CMF_Hydrogen_Dispatcher_General
 		$session->set( 'lastAction', $this->request->get( '__action' ) );
 	}
 
-	protected function realizeCall(){
+	protected function realizeCall()
+	{
 		if( !trim( $this->request->get( '__controller' ) ) )
 			$this->request->set( '__controller', $this->defaultController );
 		if( !trim( $this->request->get( '__action' ) ) )

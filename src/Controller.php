@@ -180,7 +180,7 @@ class CMF_Hydrogen_Controller
 	{
 	}
 
-	protected function addData( string $key, $value, string $topic = NULL )
+	protected function addData( string $key, $value, string $topic = NULL ): self
 	{
 		return $this->view->setData( array( $key => $value ), $topic );
 	}
@@ -335,7 +335,7 @@ class CMF_Hydrogen_Controller
 	 *	@param		array		$parameters		Map of additional parameters to set in request
 	 *	@return		void
 	 */
-	protected function redirect( string $controller = 'index', string $action = "index", array $arguments = array(), array$parameters = array() )
+	protected function redirect( string $controller = 'index', string $action = "index", array $arguments = array(), array $parameters = array() )
 	{
 		CMF_Hydrogen_Deprecation::getInstance()
 			->setErrorVersion( '0.8.6.4' )
@@ -391,7 +391,7 @@ class CMF_Hydrogen_Controller
 	 *
 	 *	@access		protected
 	 *	@param		string		$uri				URI to request
-	 *	@param		string		$withinModule		Flag: user path inside current controller
+	 *	@param		boolean		$withinModule		Flag: user path inside current controller
 	 *	@param		integer		$status				HTTP status code to send, default: NULL -> 200
 	 *	@param		boolean		$allowForeignHost	Flag: allow redirection outside application base URL, default: no
 	 *	@param		integer		$modeFrom			How to handle FROM parameter from request or for new request, not handled atm
@@ -401,7 +401,7 @@ class CMF_Hydrogen_Controller
 	 *	@todo		kriss: implement handling of FROM request parameter, see controller constants
 	 *	@todo		kriss: concept and implement anti-loop {@see http://dev.(ceusmedia.de)/cmKB/?MTI}
 	 */
-	protected function restart( $uri, $withinModule = FALSE, $status = NULL, $allowForeignHost = FALSE, $modeFrom = 0 )
+	protected function restart( string $uri, bool $withinModule = FALSE, ?int $status = NULL, bool $allowForeignHost = FALSE, int $modeFrom = 0 )
 	{
 		$mode	= 'ext';
 		if( !preg_match( "/^http/", $uri ) ){														//  URI is not starting with HTTP scheme
@@ -470,7 +470,7 @@ class CMF_Hydrogen_Controller
 	 *	@throws		RuntimeException			in force mode if view class for controller is not existing
 	 *	@throws		RuntimeException			if view class is not inheriting Hydrogen view class
 	 */
-	protected function setupView( $force = TRUE ): self
+	protected function setupView( bool $force = TRUE ): self
 	{
 		$name		= str_replace( ' ', '_', ucwords( str_replace( '/', ' ', $this->controller ) ) );
 		$class		= self::$prefixView.$name;

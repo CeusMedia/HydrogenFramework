@@ -5,8 +5,8 @@
 /**
  *	General (and therefore abstract) AJAX controller.
  */
-abstract class CMF_Hydrogen_Controller_Ajax{
-
+abstract class CMF_Hydrogen_Controller_Ajax
+{
 	protected $env;
 	protected $request;
 	protected $response;
@@ -18,7 +18,8 @@ abstract class CMF_Hydrogen_Controller_Ajax{
 	 *	@param		CMF_Hydrogen_Environment		$env		Environment object
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment $env ){
+	public function __construct( CMF_Hydrogen_Environment $env )
+	{
 		$this->env	= $env;
 		try{
 			$this->request		= $this->env->getRequest();
@@ -40,6 +41,8 @@ abstract class CMF_Hydrogen_Controller_Ajax{
 		}
 	}
 
+	//  --  PROTECTED  --  //
+
 	/**
 	 *	Use this method to extend construction in you inherited AJAX controller.
 	 *	Please remember to declare any new members as protected!
@@ -47,10 +50,12 @@ abstract class CMF_Hydrogen_Controller_Ajax{
 	 *	@access		protected
 	 *	@return		void
 	 */
-	protected function __onInit(){
+	protected function __onInit()
+	{
 	}
 
-	protected function respondData( $data ){
+	protected function respondData( $data )
+	{
 		$response	= array(
 			'status'	=> 'data',
 			'data'		=> $data,
@@ -58,7 +63,8 @@ abstract class CMF_Hydrogen_Controller_Ajax{
 		$this->respond( json_encode( $response ) );
 	}
 
-	protected function respondError( $code, $message = NULL, $httpCode = 412 ){
+	protected function respondError( $code, string $message = NULL, int $httpCode = 412 )
+	{
 		$response	= array(
 			'status'	=> 'error',
 			'code'		=> $code,
@@ -67,7 +73,8 @@ abstract class CMF_Hydrogen_Controller_Ajax{
 		$this->respond( json_encode( $response ), $httpCode );
 	}
 
-	protected function respondException( $exception, $httpCode = 500 ){
+	protected function respondException( Throwable $exception, int $httpCode = 500 )
+	{
 		$response	= array(
 			'status'	=> 'exception',
 			'code'		=> $exception->getCode(),
@@ -78,7 +85,8 @@ abstract class CMF_Hydrogen_Controller_Ajax{
 		$this->respond( json_encode( $response ), $httpCode );
 	}
 
-	protected function respond( $string, $status = NULL, $mimeType = NULL ){
+	protected function respond( string $string, $status = NULL, string $mimeType = NULL )
+	{
 		$this->response->setBody( $string );
 		if( $status )
 			$this->response->setStatus( $status );

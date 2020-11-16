@@ -48,8 +48,8 @@
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			code documentation
  */
-class CMF_Hydrogen_Environment_Resource_Captain {
-
+class CMF_Hydrogen_Environment_Resource_Captain
+{
 	const LEVEL_UNKNOWN		= 0;
 	const LEVEL_TOP			= 1;
 	const LEVEL_START		= 1;
@@ -81,7 +81,8 @@ class CMF_Hydrogen_Environment_Resource_Captain {
 	 *	@param		CMF_Hydrogen_Environment			$env			Environment object
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment $env ){
+	public function __construct( CMF_Hydrogen_Environment $env )
+	{
 		$this->env	= $env;
 	}
 
@@ -98,7 +99,8 @@ class CMF_Hydrogen_Environment_Resource_Captain {
 	 *	@throws		RuntimeException			if method call is throwing an exception
 	 *	@todo 		rename $data to $payload
 	 */
-	public function callHook( $resource, $event, $context, $payload = array() ){
+	public function callHook( string $resource, string $event, $context, $payload = array() )
+	{
 		if( !$this->env->hasModules() )
 			return NULL;
 		if( array_key_exists( $resource."::".$event, $this->disabledHooks ) )
@@ -191,7 +193,8 @@ class CMF_Hydrogen_Environment_Resource_Captain {
 	 *	@param		string		$event			Name of hook event (e.G. onBuild or onRenderContent)
 	 *	@return 	boolean
 	 */
-	public function enableHook( $resource, $event ){
+	public function enableHook( string $resource, string $event ): bool
+	{
 		$key	= $resource."::".$event;
 		if( !array_key_exists( $key, $this->disabledHooks ) )
 			return FALSE;
@@ -206,7 +209,8 @@ class CMF_Hydrogen_Environment_Resource_Captain {
 	 *	@param		string		$event			Name of hook event (e.G. onBuild or onRenderContent)
 	 *	@return 	boolean
 	 */
-	public function disableHook( $resource, $event ){
+	public function disableHook( string $resource, string $event ): bool
+	{
 		$key	= $resource."::".$event;
 		if( array_key_exists( $key, $this->disabledHooks ) )
 			return FALSE;
@@ -233,7 +237,8 @@ class CMF_Hydrogen_Environment_Resource_Captain {
 	 *	@throws		InvalidArgumentException		if level is not if type NULL, boolean, integer or string
 	 *	@throws		RangeException					if given string is not within {top,head,start,mid,center,normal,default,end,tail,bottom}
 	 */
-	static public function interpretLoadLevel( $level ){
+	static public function interpretLoadLevel( $level ): int
+	{
 		if( is_null( $level ) || !strlen( trim( $level ) ) )
 			return 4;
 		if( is_int( $level ) )
@@ -260,8 +265,9 @@ class CMF_Hydrogen_Environment_Resource_Captain {
 	 *	@param		boolean		$log		Flag: Activate logging of hook calls (disabled by default)
 	 *	@return		self
 	 */
-	public function setLogCalls( $log = TRUE ){
-		$this->logCalls	= (bool) $log;
+	public function setLogCalls( bool $log = TRUE ): self
+	{
+		$this->logCalls	= $log;
 		return $this;
 	}
 }

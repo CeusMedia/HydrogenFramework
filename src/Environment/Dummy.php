@@ -34,12 +34,13 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Environment_Dummy extends CMF_Hydrogen_Environment {
-
+class CMF_Hydrogen_Environment_Dummy extends CMF_Hydrogen_Environment
+{
 	public $hasDatabase		= FALSE;
 
-	public function __construct( $options ){
-		$this->options	= $options;
+	public function __construct( array $options = array() )
+	{
+		$this->options		= $options;
 		$this->path			= isset( $options['pathApp'] ) ? $options['pathApp'] : getCwd().'/';
 		$this->initClock();
 		$this->config		= new ADT_List_Dictionary();											//  create empty configuration object

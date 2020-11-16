@@ -116,6 +116,8 @@ abstract class CMF_Hydrogen_Environment_Resource_Module_Library_Abstract impleme
 		return TRUE;																				//  otherwise
 	}
 
+	//  --  PROTECTED  --  //
+
 	protected function sanitizeId( string $moduleId ): string
 	{
 		return str_replace( ':', '_', $moduleId );

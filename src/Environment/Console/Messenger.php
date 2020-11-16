@@ -1,8 +1,8 @@
 <?php
 /**
- *	Interface for view helpers.
+ *	Fake messenger for console enviroment.
  *
- *	Copyright (c) 20010-2020 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2012-2020 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -18,40 +18,27 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *	@category		Library
- *	@package		CeusMedia.HydrogenFramework.View
+ *	@package		CeusMedia.HydrogenFramework.Environment.Remote
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2010-2020 Christian Würker
+ *	@copyright		2012-2020 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
 /**
- *	Interface for view helpers.
- *
+*	Fake messenger for console enviroment.
  *	@category		Library
- *	@package		CeusMedia.HydrogenFramework.View
+ *	@package		CeusMedia.HydrogenFramework.Environment.Remote
+ *	@extends		CMF_Hydrogen_Environment
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2010-2020 Christian Würker
+ *	@copyright		2012-2020 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-interface CMF_Hydrogen_View_Helper
+class CMF_Hydrogen_Environment_Console_Messenger extends CMF_Hydrogen_Environment_Resource_Messenger
 {
-	public function hasEnv();
-
-	public function needsEnv();
-
-	public function setEnv( CMF_Hydrogen_Environment $env );
-
-//	@todo 	kriss: see if this pattern (having render method) is realizable for all existing helpers
-//	public function render();
-//	public function __toString();
-
-//	@todo 	whats with __construct( $env ) for all helpers?
-//	public function __construct( CMF_Hydrogen_Environment $env )
-//	{
-//		$this->env	= $env;
-//	}
-
-//	@todo 	mind the idea of a "helper pool", like the logic pool
-
+	protected function noteMessage( int $type, string $message )
+	{
+		CLI::out( $message );
+		flush();
+	}
 }

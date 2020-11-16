@@ -16,9 +16,10 @@
 	returns the differences in HTML. The tags used are <ins> and <del>,
 	which can easily be styled with CSS.
 */
-class CMF_Hydrogen_View_Helper_Diff{
-
-	static public function diff( $old, $new ){
+class CMF_Hydrogen_View_Helper_Diff
+{
+	static public function diff( array $old, array $new ): array
+	{
 		$maxlen	= 0;
 		$oldMax	= 0;
 		$newMax	= 0;
@@ -44,7 +45,8 @@ class CMF_Hydrogen_View_Helper_Diff{
 		);
 	}
 
-	static public function htmlDiff( $old, $new ){
+	static public function htmlDiff( string $old, string $new ): string
+	{
 		$ret	= '';
 		$diff	= self::diff( explode( ' ', $old ), explode(' ', $new ) );
 		foreach( $diff as $k ){

@@ -33,8 +33,8 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame{
-
+class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
+{
 	/**	@var	CMF_Hydrogen_Environment				$env				Environment object */
 	public $env;
 
@@ -56,10 +56,11 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame{
 	/**	@var	stdClass								$css				CSS containers (primer, theme) */
 	public $css;
 
-	/**	@var		CMM_TEA_Factory						$tea				Instance of TEA (Template Engine Abstraction) Factory (from cmModules) OR empty if TEA is not available */
+	/**	@var	CMM_TEA_Factory							$tea				Instance of TEA (Template Engine Abstraction) Factory (from cmModules) OR empty if TEA is not available */
 	public $tea					= NULL;
 
-	public function __construct( CMF_Hydrogen_Environment $env ){
+	public function __construct( CMF_Hydrogen_Environment $env )
+	{
 		$this->env	= $env;
 		$language	= 'en';
 		if( $this->env->has( 'language' ) )
@@ -97,7 +98,8 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame{
 	 *	@param		string		$class			Class to be set on body tag
 	 *	@return		self						Instance for chainability
 	 */
-	public function addBodyClass( $class ){
+	public function addBodyClass( string $class ): self
+	{
 		if( strlen( trim( $class ) ) ){
 			$classFixed	= trim( htmlentities( $class, ENT_QUOTES, 'UTF-8' ) );
 			if( !in_array( $classFixed, $this->bodyClasses ) )
@@ -114,7 +116,8 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame{
 	 *	@param		array		$attributes		Map of style tag attributes
 	 *	@return		self						Instance for chainability
 	 */
-	public function addCommonStyle( $fileName, $level = 5, $attributes = array() ){
+	public function addCommonStyle( string $fileName, $level = 5, array $attributes = array() ): self
+	{
 		$this->css->common->addUrl( $fileName, $level, $attributes );
 		return $this;
 	}
@@ -127,7 +130,8 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame{
 	 *	@param		array		$attributes		Map of style tag attributes
 	 *	@return		self						Instance for chainability
 	 */
-	public function addPrimerStyle( $fileName, $level = 5, $attributes = array() ){
+	public function addPrimerStyle( string $fileName, $level = 5, array $attributes = array() ): self
+	{
 		$this->css->primer->addUrl( $fileName, $level, $attributes );
 		return $this;
 	}
@@ -140,7 +144,8 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame{
 	 *	@param		array		$attributes		Map of style tag attributes
 	 *	@return		self						Instance for chainability
 	 */
-	public function addThemeStyle( $fileName, $level = 5, $attributes = array() ){
+	public function addThemeStyle( string $fileName, $level = 5, array $attributes = array() ): self
+	{
 		$this->css->theme->addUrl( $fileName, $level, $attributes );
 		return $this;
 	}
@@ -148,7 +153,8 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame{
 	/**
 	 *	@todo		kriss: apply JS levels after CMF_Hydrogen_View_Helper_JavaScript is supporting it
 	 */
-	public function applyModules(){
+	public function applyModules()
+	{
 		$config		= $this->env->getConfig()->getAll( 'module.', TRUE );							//  dictionary of (user modified) module settings
 		$modules	= $this->env->getModules();														//  get module handler resource
 		if( !$modules )																				//  module handler resource is not existing
@@ -242,7 +248,11 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame{
 		$this->addHead( $script );
 	}
 
-	public function build( $bodyAttributes = array(), $htmlAttributes = array() ){
+	/**
+	 *	@todo		set type hint after CeusMedia::Common updated
+	 */
+	public function build( $bodyAttributes = array(), $htmlAttributes = array() )
+	{
 		$controller			= $this->env->getRequest()->get( '__controller' );
 		$action				= $this->env->getRequest()->get( '__action' );
 		$controllerKey		= str_replace( '/', '-', $controller );
@@ -300,7 +310,8 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame{
 	 *	@param		boolean		$primer			Flag: return path to primer instead of theme
 	 *	@return		string						Path to theme or primer
 	 */
-	public function getThemePath( $primer = FALSE ){
+	public function getThemePath( bool $primer = FALSE ): string
+	{
 		return $primer ? $this->pathPrimer : $this->pathTheme;
 	}
 
@@ -312,7 +323,8 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame{
 	 *	@return		self						Instance for chainability
 	 *	@throws		RuntimeException			if script file is not existint
 	 */
-	public function loadLocalScript( $filePath, $level = 5 ){
+	public function loadLocalScript( string $filePath, $level = 5 ): self
+	{
 		$path	= $this->env->getConfig()->get( 'path.scripts' );
 		if( !file_exists( $path.$filePath ) )
 			throw new RuntimeException( 'Local script "'.$filePath.'" not found in folder "'.$path.'"' );
@@ -327,22 +339,24 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame{
 	 *	@param		integer		$level			Run level (load order), default: 5 (mid), less: earlier, more: later
 	 *	@return		self						Instance for chainability
 	 */
-	public function runScript( $script, $level = 5 ){
+	public function runScript( string $script, $level = 5 ): self
+	{
 		$this->js->addScriptOnReady( $script, $level );
 		return $this;
 	}
 
 	/**
 	 *	Deprecated.
-	 *	@param type $packJavaScripts
-	 *	@param type $packStyleSheets
+	 *	@param		boolean		$packJavaScripts		Flag: pack collected script files
+	 *	@param		boolean		$packStyleSheets		Flag: pack collected style files
 	 *	@return		self						Instance for chainability
 	 *	@deprecated		will be removed in favour of module UI_Compressor
 	 *	@todo			step 1: enable messenger note and let apps adjust
 	 *	@todo			step 2: remove method
 	 *	@todo			step 3: remove compression in JS and CSS helpers
 	 */
-	public function setPackaging( $packJavaScripts = FALSE, $packStyleSheets = FALSE ){
+	public function setPackaging( bool $packJavaScripts = FALSE, bool $packStyleSheets = FALSE ): self
+	{
 //		$this->env->getMessenger()->noteNotice( '<b>Deprecation: </b>Calling Page::setPackaging is deprecated. Please use module UI:Compressor instead.' );
 #		$this->js->setCompression( $packJavaScripts );
 #		$this->css->primer->setCompression( $packStyleSheets );

@@ -35,15 +35,16 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-abstract class CMF_Hydrogen_View_Helper_Abstract implements CMF_Hydrogen_View_Helper{
-
+abstract class CMF_Hydrogen_View_Helper_Abstract implements CMF_Hydrogen_View_Helper
+{
 	/**	@var		CMF_Hydrogen_Environment			$env			Environment Object */
 	protected		$env								= NULL;
 
 	/**	@var		boolean								$needsEnv		Flag: needs Environment to be set */
 	protected		$needsEnv							= TRUE;
 
-	protected function getWords( $section, $topic ){
+	protected function getWords( string $section, string $topic ): array
+	{
 		$words	= $this->env->getLanguage()->getWords( $topic );
 		if( $section && array_key_exists( $section, $words ) )
 			return $words[$section];
@@ -68,8 +69,10 @@ abstract class CMF_Hydrogen_View_Helper_Abstract implements CMF_Hydrogen_View_He
 	 *	Indicates whether this helper has an environment set.
 	 *	@access		public
 	 *	@return		boolean
+	 *	@todo 		kriss: remove after helper interface is updated
 	 */
-	public function hasEnv(){
+	public function hasEnv(): bool
+	{
 		return $this->env instanceof CMF_Hydrogen_Environment;
 	}
 
@@ -77,8 +80,10 @@ abstract class CMF_Hydrogen_View_Helper_Abstract implements CMF_Hydrogen_View_He
 	 *	Indicates whether this helper needs to have an environment to be set.
 	 *	@access		public
 	 *	@return		boolean
+	 *	@todo 		kriss: remove after helper interface is updated
 	 */
-	public function needsEnv(){
+	public function needsEnv()
+	{
 		return $this->needsEnv;
 	}
 
@@ -92,8 +97,10 @@ abstract class CMF_Hydrogen_View_Helper_Abstract implements CMF_Hydrogen_View_He
 	 *	@access		public
 	 *	@param		CMF_Hydrogen_Environment	$env			Environment Object
 	 *	@return		void
+	 *	@todo 		kriss: remove after helper interface is updated
 	 */
-	public function setEnv( CMF_Hydrogen_Environment $env ){
+	public function setEnv( CMF_Hydrogen_Environment $env )
+	{
 		if( $this->needsEnv ){
 			$this->env	= $env;
 			$this->__onSetEnv();

@@ -40,5 +40,6 @@
  *	@todo			to be removed in 0.9
  *	@todo			migrate all modules beforehand
  */
-abstract class CMF_Hydrogen_Environment_Abstract extends CMF_Hydrogen_Environment{
+abstract class CMF_Hydrogen_Environment_Abstract extends CMF_Hydrogen_Environment
+{
 }

@@ -36,11 +36,12 @@
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			Code Documentation
  */
-abstract class CMF_Hydrogen_Application_Web_Abstract extends CMF_Hydrogen_Application_Abstract{
-
+abstract class CMF_Hydrogen_Application_Web_Abstract extends CMF_Hydrogen_Application_Abstract
+{
 	protected $components			= array();
 
-	protected function logOnComplete(){
+	protected function logOnComplete()
+	{
 		$captain	= $this->env->getCaptain();
 		$data		= (object) array(
 			'response'	=> $this->env->getResponse(),
@@ -58,7 +59,8 @@ abstract class CMF_Hydrogen_Application_Web_Abstract extends CMF_Hydrogen_Applic
 	 *	@param		array		$modules		List of module IDs
 	 *	@return		void
 	 */
-	protected function reportMissingModules( $modules ){
+	protected function reportMissingModules( array $modules )
+	{
 		$config	= $this->env->getConfig();
 		if( !$config->get( 'app.setup.url' ) )
 			print( 'Module(s) missing: <ul><li>'.join( '</li><li>', $modules ).'</li></ul>' );
@@ -78,21 +80,24 @@ abstract class CMF_Hydrogen_Application_Web_Abstract extends CMF_Hydrogen_Applic
 	/**
 	 *	Sets collected View Components for Master View.
 	 *	@access		protected
-	 *	@return		void
+	 *	@return		self
 	 */
-	protected function setViewComponents( $components = array() ){
+	protected function setViewComponents( array $components = array() ): self
+	{
 		foreach( $components as $key => $component ){
 			if( !array_key_exists( $key, $this->components ) )
 				$this->components[$key]	= $component;
 		}
+		return $this;
 	}
 
 	/**
 	 *	Collates View Components and puts out Master View.
 	 *	@access		protected
+	 *	@param		string		$templateFile		Master template file, default: master.php
 	 *	@return		string
 	 */
-	protected function view( $templateFile = "master.php" ): string
+	protected function view( string $templateFile = "master.php" ): string
 	{
 		$masterTemplate	= (string) $this->env->getCaptain()->callHook( 'App', 'getMasterTemplate', $this );
 		switch( $masterTemplate ){

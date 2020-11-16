@@ -38,8 +38,8 @@
  *	@deprecated		use modules Info_Pages + UI_Navigation instead
  *	@todo			remove in version 0.9
  */
-class CMF_Hydrogen_View_Helper_Navigation_SingleAutoTabs extends CMF_Hydrogen_View_Helper_Navigation_SingleList{
-
+class CMF_Hydrogen_View_Helper_Navigation_SingleAutoTabs extends CMF_Hydrogen_View_Helper_Navigation_SingleList
+{
 	public $classContainer	= "";
 	public $classWidget		= "ui-tabs ui-widget ui-corner-all";
 	public $classHelper		= "ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-all";
@@ -47,7 +47,8 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAutoTabs extends CMF_Hydrogen_Vi
 	public $classTabActive	= "ui-tabs-selected ui-state-active";
 	protected $container	= FALSE;
 
-	public function __construct(CMF_Hydrogen_Environment $env ){
+	public function __construct( CMF_Hydrogen_Environment $env )
+	{
 		CMF_Hydrogen_Deprecation::getInstance()
 			->setErrorVersion( '0.8.5' )
 			->ExceptionVersion( '0.9' )
@@ -55,7 +56,8 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAutoTabs extends CMF_Hydrogen_Vi
 		$this->env	= $env;
 	}
 
-	public function render( $current = NULL, $niceUrls = FALSE ){
+	public function render( string $current = NULL, bool $niceUrls = FALSE ): string
+	{
 		$request	= $this->env->getRequest();
 		$userId		= $this->env->getSession()->get( 'userId' );
 		$language	= $this->env->getLanguage()->getLanguage();
@@ -96,11 +98,14 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAutoTabs extends CMF_Hydrogen_Vi
 		return UI_HTML_Tag::create( 'div', $widget, array( 'class' => $this->classContainer ) );
 	}
 
-	public function setContainer( $boolean ){
-		$this->container	= (boolean) $boolean;
+	public function setContainer( bool $boolean ): self
+	{
+		$this->container	= $boolean;
+		return $this;
 	}
 
-	protected function getUserModuleLinks( $userId, $language, $useAcl = TRUE ){
+	protected function getUserModuleLinks( $userId, string $language, bool $useAcl = TRUE ): array
+	{
 		$acl		= $this->env->getAcl();
 		$linkMap	= array();
 		foreach( $this->env->getModules()->getAll() as $module ){

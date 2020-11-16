@@ -37,8 +37,8 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Environment implements ArrayAccess{
-
+class CMF_Hydrogen_Environment implements ArrayAccess
+{
 	const MODE_UNKNOWN	= 0;
 	const MODE_DEV		= 1;
 	const MODE_TEST		= 2;
@@ -48,10 +48,7 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 	/** @var	CMF_Hydrogen_Environment_Resource_Acl_Abstract			$acl			Implementation of access control list */
 	protected $acl;
 
-	/**	@var	CMF_Hydrogen_Application								$application	Instance of Application */
-	protected $application;
-
-	/**	@var	CMM_SEA_Adapter_Interface								$cache			Instance of cache adapter */
+	/**	@var	object													$cache			Instance of cache adapter */
 	protected $cache;
 
 	/**	@var	CMF_Hydrogen_Environment_Resource_Captain				$captain		Instance of captain */
@@ -109,6 +106,7 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 	public $uri;
 
 	public static $timezone					= NULL;
+
 	/** @var	string													$version		Framework version */
 	public $version;
 
@@ -121,7 +119,8 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 	 *	@return		void
 	 *	@todo		possible error: call to onInit is to soon of another environment if existing
 	 */
-	public function __construct( $options = array(), $isFinal = TRUE ){
+	public function __construct( array $options = array(), bool $isFinal = TRUE )
+	{
 		$frameworkConfig	= parse_ini_file( dirname( __DIR__ ).'/hydrogen.ini' );
 		$this->version		= $frameworkConfig['version'];
 
@@ -135,7 +134,7 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 		$this->uri			= getCwd().'/';															//  detect application base URI
 
 		date_default_timezone_set( @date_default_timezone_get() );									//  avoid having no timezone set
-		if( !empty( static::$timezone ) )																//  a timezone has be set externally before
+		if( !empty( static::$timezone ) )															//  a timezone has be set externally before
 			date_default_timezone_set( static::$timezone );											//  set this timezone
 
 		$this->initClock();																			//  setup clock
@@ -153,20 +152,8 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 		$this->__onInit();																			//  default callback for construction end
 	}
 
-	/**
-	 *	Magic function called at the end of construction.
-	 *	ATTENTION: In case of overriding, you MUST bubble down using parent::__onInit();
-	 *	Otherwise you will lose the trigger for hook Env::init.
-	 *
-	 *	@access		protected
-	 *	@return		void
-	 */
-	protected function __onInit(){
-		if( $this->hasModules() )																	//  module support and modules available
-			$this->modules->callHook( 'Env', 'init', $this );										//  call related module event hooks
-	}
-
-	public function __get( $key ){
+	public function __get( string $key )
+	{
 		return $this->get( $key );
 	}
 
@@ -177,7 +164,8 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 	 *	@param		boolean		$keepAppAlive			Flag: do not end execution right now if turned on
 	 *	@return		void
 	 */
-	public function close( $additionalResources = array(), $keepAppAlive = FALSE ){
+	public function close( array $additionalResources = array(), bool $keepAppAlive = FALSE )
+	{
 		$resources	= array(																		//  list of resource handler member names, namely of ...
 			'config',																				//  ... base application configuration handler
 			'clock',																				//  ... internal clock handler
@@ -195,12 +183,204 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 				unset( $this->$resource );															//  unbind resource
 			}
 		}
-		unset( $this->application );																//  unbind relation to application instance object
 		if( !$keepAppAlive )																		//  application is not meant to live without this environment
 			exit( 0 );																				//  so end of environment is end of application
 	}
 
-	protected function detectMode(){
+	public function get( string $key, bool $strict = TRUE )
+	{
+		if( isset( $this->$key ) && !is_null( $this->$key ) )
+			return $this->$key;
+		if( $strict ){
+			$message	= 'No environment resource found for key "%1$s"';
+			throw new RuntimeException( sprintf( $message, $key ) );
+		}
+		return NULL;
+	}
+
+	/**
+	 *	Initialize remote access control list.
+	 *	@access		public
+	 *	@return		CMF_Hydrogen_Environment_Resource_Acl_Abstract	Instance of access control list object
+	 */
+	public function getAcl(): CMF_Hydrogen_Environment_Resource_Acl_Abstract
+	{
+		return $this->acl;
+	}
+
+	public function getBaseUrl( string $keyConfig = 'app.base.url' ): string
+	{
+		if( $this->config && $this->config->get( $keyConfig ) )
+			return $this->config->get( $keyConfig );
+		$host	= getEnv( 'HTTP_HOST' );
+		if( $host ){
+			$path	= dirname( getEnv( 'SCRIPT_NAME' ) ).'/';
+			$scheme	= getEnv( 'HTTPS' ) ? 'https' : 'http';
+			return $scheme.'://'.$host.$path;
+		}
+		return '';
+	}
+
+	public function getCache()
+	{
+		return $this->cache;
+	}
+
+	public function getCaptain(): CMF_Hydrogen_Environment_Resource_Captain
+	{
+		return $this->captain;
+	}
+
+	public function getClock(): Alg_Time_Clock
+	{
+		return $this->clock;
+	}
+
+	/**
+	 *	Returns Configuration Object.
+	 *	@access		public
+	 *	@return		ADT_List_Dictionary
+	 */
+	public function getConfig(): ADT_List_Dictionary
+	{
+		return $this->config;
+	}
+
+	public function getDatabase()
+	{
+		return $this->database;
+	}
+
+	public function getDisclosure()
+	{
+		return $this->disclosure;
+	}
+
+	/**
+	 *	Returns Language Object.
+	 *	@access		public
+	 *	@return		CMF_Hydrogen_Environment_Resource_Language
+	 */
+	public function getLanguage(): CMF_Hydrogen_Environment_Resource_Language
+	{
+		return $this->language;
+	}
+
+	public function getLog(){
+		return $this->log;
+	}
+
+	/**
+	 *	Returns Logic Pool Object.
+	 *	@access		public
+	 *	@return		CMF_Hydrogen_Environment_Resource_LogicPool
+	 */
+	public function getLogic(): CMF_Hydrogen_Environment_Resource_LogicPool
+	{
+		return $this->logic;
+	}
+
+	/**
+	 *	Returns handler for local module library.
+	 *	@access		public
+	 *	@return		CMF_Hydrogen_Environment_Resource_Module_Library_Local
+	 */
+	public function getModules(): CMF_Hydrogen_Environment_Resource_Module_Library_Local
+	{
+		return $this->modules;
+	}
+
+	/**
+	 *	Return configured path by path key.
+	 *	@access		public
+	 *	@param		string		$key		...
+	 *	@param		boolean		$strict		Flag: ... (default: yes)
+	 *	@return		string|NULL
+	 *	@throws		RangeException			if path is not configured using strict mode
+	 */
+	public function getPath( string $key, bool $strict = TRUE )
+	{
+		if( $strict && !$this->hasPath( $key ) )
+			throw new RangeException( 'Path "'.$key.'" is not configured' );
+		return $this->config->get( 'path.'.$key );
+	}
+
+	/**
+	 *	Returns PHP configuration and version management.
+	 *	@access		public
+	 *	@return		CMF_Hydrogen_Environment_Resource_Php
+	 */
+	public function getPhp(): CMF_Hydrogen_Environment_Resource_Php
+	{
+		return $this->php;
+	}
+
+	/**
+	 *	Indicates wheter a resource is an available object by its access method key.
+	 *	@access		public
+	 *	@param		string		$key		Resource access method key, ie. session, language, request
+	 *	@return		boolean
+	 */
+	public function has( string $key ): bool
+	{
+		$method	= 'get'.ucFirst( $key );
+		if( is_callable( array( $this, $method ) ) )
+			if( is_object( call_user_func( array( $this, $method ) ) ) )
+				return TRUE;
+		if( isset( $this->$key ) && !is_null( isset( $this->$key ) ) )
+			return TRUE;
+		return FALSE;
+	}
+
+	/**
+	 *	@todo this is totally outdated - refactor if possible
+	 */
+	public function hasAcl()
+	{
+		return $this->getConfig()->get( 'module.roles' );
+	}
+
+	public function hasModule( string $moduleId ): bool
+	{
+		if( !$this->hasModules() )
+			return FALSE;
+		return $this->getModules()->has( $moduleId );
+	}
+
+	public function hasModules(): bool
+	{
+		return $this->modules !== NULL;
+	}
+
+	/**
+	 *	Indicated whether a path is configured path key.
+	 *	@access		public
+	 *	@param		string		$key		...
+	 *	@return		boolean
+	 */
+	public function hasPath( string $key ): bool
+	{
+		return $this->config->has( 'path.'.$key );
+	}
+
+	//  --  PROTECTED  --  //
+
+	/**
+	 *	Magic function called at the end of construction.
+	 *	ATTENTION: In case of overriding, you MUST bubble down using parent::__onInit();
+	 *	Otherwise you will lose the trigger for hook Env::init.
+	 *
+	 *	@access		protected
+	 *	@return		void
+	 */
+	protected function __onInit()
+	{
+		if( $this->hasModules() )																	//  module support and modules available
+			$this->modules->callHook( 'Env', 'init', $this );										//  call related module event hooks
+	}
+
+	protected function detectMode()
+	{
 		$modes	= preg_split( '/[_.:;>#@\/-]/', strtolower( $this->config->get( 'app.mode' ) ) );
 		foreach( $modes as $mode ){
 			switch( $mode ){
@@ -222,164 +402,6 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 					break;
 			}
 		}
-	}
-
-	public function get( $key, $strict = TRUE ){
-		if( isset( $this->$key ) && !is_null( $this->$key ) )
-			return $this->$key;
-		if( $strict ){
-			$message	= 'No environment resource found for key "%1$s"';
-			throw new RuntimeException( sprintf( $message, $key ) );
-		}
-		return NULL;
-	}
-
-	public function getApp(){
-		return $this->application;
-	}
-
-	/**
-	 *	Initialize remote access control list.
-	 *	@access		public
-	 *	@return		CMF_Hydrogen_Environment_Resource_Acl_Abstract	Instance of access control list object
-	 */
-	public function getAcl(){
-		return $this->acl;
-	}
-
-	public function getBaseUrl( $keyConfig = 'app.base.url' ){
-		if( $this->config && $this->config->get( $keyConfig ) )
-			return $this->config->get( $keyConfig );
-		$host	= getEnv( 'HTTP_HOST' );
-		if( $host ){
-			$path	= dirname( getEnv( 'SCRIPT_NAME' ) ).'/';
-			$scheme	= getEnv( 'HTTPS' ) ? 'https' : 'http';
-			return $scheme.'://'.$host.$path;
-		}
-		return NULL;
-	}
-
-	public function getCache(){
-		return $this->cache;
-	}
-
-	public function getCaptain(){
-		return $this->captain;
-	}
-
-	public function getClock(){
-		return $this->clock;
-	}
-
-	/**
-	 *	Returns Configuration Object.
-	 *	@access		public
-	 *	@return		File_Configuration_Reader
-	 */
-	public function getConfig(){
-		return $this->config;
-	}
-
-	public function getDatabase(){
-		return $this->database;
-	}
-
-	public function getDisclosure(){
-		return $this->disclosure;
-	}
-
-	/**
-	 *	Returns Language Object.
-	 *	@access		public
-	 *	@return		CMF_Hydrogen_Environment_Resource_Language
-	 */
-	public function getLanguage(){
-		return $this->language;
-	}
-
-	public function getLog(){
-		return $this->log;
-	}
-
-	/**
-	 *	Returns Logic Pool Object.
-	 *	@access		public
-	 *	@return		CMF_Hydrogen_Environment_Resource_LogicPool
-	 */
-	public function getLogic(){
-		return $this->logic;
-	}
-
-	/**
-	 *	Returns handler for local module library.
-	 *	@access		public
-	 *	@return		CMF_Hydrogen_Environment_Resource_Module_Library_Local
-	 */
-	public function getModules(){
-		return $this->modules;
-	}
-
-	/**
-	 *	Return configured path by path key.
-	 *	@access		public
-	 *	@param		string		$key		...
-	 *	@param		boolean		$strict		Flag: ... (default: yes)
-	 *	@return		string|NULL
-	 *	@throws		RangeException			if path is not configured using strict mode
-	 */
-	public function getPath( $key, $strict = TRUE ){
-		if( $strict && !$this->hasPath( $key ) )
-			throw new RangeException( 'Path "'.$key.'" is not configured' );
-		return $this->config->get( 'path.'.$key );
-	}
-
-	/**
-	 *	Returns PHP configuration and version management.
-	 *	@access		public
-	 *	@return		CMF_Hydrogen_Environment_Resource_Php
-	 */
-	public function getPhp(){
-		return $this->php;
-	}
-
-	/**
-	 *	Indicates wheter a resource is an available object by its access method key.
-	 *	@access		public
-	 *	@param		string		$key		Resource access method key, ie. session, language, request
-	 *	@return		boolean
-	 */
-	public function has( $key ){
-		$method	= 'get'.ucFirst( $key );
-		if( is_callable( array( $this, $method ) ) )
-			if( is_object( call_user_func( array( $this, $method ) ) ) )
-				return TRUE;
-		if( isset( $this->$key ) && !is_null( isset( $this->$key ) ) )
-			return TRUE;
-		return FALSE;
-	}
-
-	public function hasAcl(){
-		return $this->getConfig()->get( 'module.roles' );
-	}
-
-	public function hasModule( $moduleId ){
-		if( !$this->hasModules() )
-			return FALSE;
-		return $this->getModules()->has( $moduleId );
-	}
-
-	public function hasModules(){
-		return $this->modules !== NULL;
-	}
-
-	/**
-	 *	Indicated whether a path is configured path key.
-	 *	@access		public
-	 *	@param		string		$key		...
-	 *	@return		boolean
-	 */
-	public function hasPath( $key ){
-		return $this->config->has( 'path.'.$key );
 	}
 
 	/**
@@ -450,14 +472,16 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 		$this->clock->profiler->tick( 'env: initAcl', 'Finished setup of access control list.' );
 	}
 
-	protected function initCache(){
+	protected function initCache()
+	{
 		$this->cache	= new CMF_Hydrogen_Environment_Resource_CacheDummy();
 		if( $this->modules )																		//  module support and modules available
 			$this->modules->callHook( 'Env', 'initCache', $this );									//  call related module event hooks
 		$this->clock->profiler->tick( 'env: initCache', 'Finished setup of cache' );
 	}
 
-	protected function initCaptain(){
+	protected function initCaptain()
+	{
 		$this->captain	= new CMF_Hydrogen_Environment_Resource_Captain( $this );
 		$this->clock->profiler->tick( 'env: initCaptain', 'Finished setup of event handler.' );
 	}
@@ -532,7 +556,8 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 	 *	@todo  		extract to resource module: question is where to store the resource? in env again?
 	 *	@todo  		to be deprecated in 0.9: please use module Resource_Disclosure instead
 	 */
-	protected function initLog(){
+	protected function initLog()
+	{
 		$this->log	= new CMF_Hydrogen_Environment_Resource_Log( $this );
 	}
 
@@ -542,7 +567,8 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 		$this->clock->profiler->tick( 'env: language' );
 	}
 
-	protected function initLogic(){
+	protected function initLogic()
+	{
 		$this->logic		= new CMF_Hydrogen_Environment_Resource_LogicPool( $this );
 		$this->clock->profiler->tick( 'env: logic', 'Finished setup of logic pool.' );
 	}
@@ -552,7 +578,8 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 	 *	@return		void
 	 *	@todo		remove support for base_config::module.acl.public
 	 */
-	protected function initModules(){
+	protected function initModules()
+	{
 		$this->modules	= new CMF_Hydrogen_Environment_Resource_Module_Library_Local( $this );
 		$this->modules->stripFeatures( array(
 			'sql',
@@ -605,11 +632,13 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 		$this->clock->profiler->tick( 'env: initModules', 'Finished setup of modules.' );
 	}
 
-	protected function initPhp(){
-		$this->php		= new CMF_Hydrogen_Environment_Resource_Php( $this );
+	protected function initPhp()
+	{
+		$this->php	= new CMF_Hydrogen_Environment_Resource_Php( $this );
 	}
 
-	public function offsetExists( $key ){
+	public function offsetExists( $key )
+	{
 //		return property_exists( $this, $key );														//  PHP 5.3
 		return isset( $this->$key );																//  PHP 5.2
 	}
@@ -626,11 +655,14 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 		return $this->remove( $key );
 	}
 
-	public function remove( $key ){
+	public function remove( string $key ): self
+	{
 		$this->$key	= NULL;
+		return $this;
 	}
 
-	public function set( $key, $object ){
+	public function set( string $key, $object ): self
+	{
 		if( !is_object( $object ) ){
 			$message	= 'Given resource "%1$s" is not an object';
 			throw new InvalidArgumentException( sprintf( $message, $key ) );
@@ -640,6 +672,7 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 			throw new InvalidArgumentException( sprintf( $message, $key ) );
 		}
 		$this->$key	= $object;
+		return $this;
 	}
 
 	/**
@@ -649,9 +682,11 @@ class CMF_Hydrogen_Environment implements ArrayAccess{
 	 *	@access		public
 	 *	@param		string		$key		Path key to set in config instance
 	 *	@param		string		$path		Path to set in config instance
+	 *	@param		boolean		$override	Flag: override path if already existing and strict mode off, default: yes
+	 *	@param		boolean		$strict		Flag: throw exception if already existing, default: yes
 	 *	@return		self
 	 */
-	public function setPath( $key, $path, $override = TRUE, $strict = TRUE ): self
+	public function setPath( string $key, string $path, bool $override = TRUE, $strict = TRUE ): self
 	{
 		if( $this->hasPath( $key ) && !$override && $strict )
 			throw new RuntimeException( 'Path "'.$key.'" is already set' );

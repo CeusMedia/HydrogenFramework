@@ -54,8 +54,7 @@ class CMF_Hydrogen_Environment_Router_Single extends CMF_Hydrogen_Environment_Ro
 		$request->set( '__controller',	array_shift( $parts ) );
 		$request->set( '__action',		array_shift( $parts ) );
 		$arguments	= array();
-		while( count( $parts ) )
-		{
+		while( count( $parts ) ){
 			$part = trim( array_shift( $parts ) );
 			if( strlen( $part ) )
 				$arguments[]	= $part;

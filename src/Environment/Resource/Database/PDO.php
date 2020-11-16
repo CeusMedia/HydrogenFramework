@@ -37,9 +37,15 @@ class CMF_Hydrogen_Environment_Resource_Database_PDO extends DB_PDO_Connection
 {
 	protected $env;
 
-	public function __construct(CMF_Hydrogen_Environment $env ){
+	public function __construct( CMF_Hydrogen_Environment $env )
+	{
 		$this->env	= $env;
 		$this->setUp();
+	}
+
+	public function __destruct()
+	{
+		$this->tearDown();
 	}
 
 	/**
@@ -47,7 +53,8 @@ class CMF_Hydrogen_Environment_Resource_Database_PDO extends DB_PDO_Connection
 	 *	@access		public
 	 *	@return		string
 	 */
-	public function getPrefix(){
+	public function getPrefix(): string
+	{
 		if( $this->env->getModules()->has( 'Resource_Database' ) )									//  module for database support is installed
 			return $this->env->getConfig()->get( 'module.resource_database.access.prefix' );		//  extract prefix from module configuration
 		return $this->env->getConfig()->get( 'database.prefix' );									//  extract prefix from main configuration
@@ -68,18 +75,20 @@ class CMF_Hydrogen_Environment_Resource_Database_PDO extends DB_PDO_Connection
 	 *	@todo		implement lazy mode
 	 *	@todo		0.7: clean deprecated code
 	 */
-	protected function setUp(){
+	protected function setUp()
+	{
 		$config			= $this->env->getConfig();
 		if( $this->env->getModules()->has( 'Resource_Database' ) ){									//  module for database support is installed
-			extract( $config->getAll( 'module.resource_database.access.' ) );						//  extract connection access configuration
+			$dba			= $config->getAll( 'module.resource_database.access.' );				//  get connection access configuration
 			$logStatements	= $config->get( 'module.resource_database.log.statements' );			//
 			$logErrors		= $config->get( 'module.resource_database.log.errors' );				//
 			$options		= $config->getAll( 'module.resource_database.option.' );				//  get connection options
 		}
 		else{																						//  @deprecated	use database module instead
-			$dba	= array( 'driver', 'host', 'port', 'name', 'username', 'password', 'prefix' );	//  list of access configuration pair keys
-			foreach( $dba as $key )																	//  iterate keys
-				$$key	= $config->get( 'database.'.$key );											//  realize access configuration setting
+			$dba		= array();
+			$dbaKeys	= array( 'driver', 'host', 'port', 'name', 'username', 'password', 'prefix' );	//  list of access configuration pair keys
+			foreach( $dbaKeys as $key )																	//  iterate keys
+				$dba[$key]	= $config->get( 'database.'.$key );											//  realize access configuration setting
 	#		$logfile		= $config->get( 'database.log' );										//  @deprecated
 	#		$lazy			= $config->get( 'database.lazy' );										//  @todo		implement
 	#		$charset		= $config->get( 'database.charset' );									//  @todo		implement, for lazy mode too
@@ -88,18 +97,18 @@ class CMF_Hydrogen_Environment_Resource_Database_PDO extends DB_PDO_Connection
 			$options		= $config->getAll( 'database.option.' );
 		}
 
-		if( empty( $driver ) )
+		if( !( isset( $dba['driver'] ) && strlen( $dba['driver'] ) > 0 ) )
 			throw new RuntimeException( 'Database driver must be set in config:database.driver' );
 
-		$dsn		= new Database_PDO_DataSourceName( $driver, $name );
-		if( !empty( $host ) )
-			$dsn->setHost( $host );
-		if( !empty( $port ) )
-			$dsn->setPort( $port );
-		if( !empty( $username ) )
-			$dsn->setUsername( $username );
-		if( !empty( $password ) )
-			$dsn->setPassword( $password );
+		$dsn		= new Database_PDO_DataSourceName( $dba['driver'], $dba['name'] );
+		if( isset( $dba['host'] ) && strlen( $dba['host'] ) > 0 )
+			$dsn->setHost( $dba['host'] );
+		if( isset( $dba['port'] ) && strlen( $dba['port'] ) > 0 )
+			$dsn->setPort( $dba['port'] );
+		if( isset( $dba['username'] ) && strlen( $dba['username'] ) > 0 )
+			$dsn->setUsername( $dba['username'] );
+		if( isset( $dba['password'] ) && strlen( $dba['password'] ) > 0 )
+			$dsn->setPassword( $dba['password'] );
 
 		$defaultOptions	= array(
 			'ATTR_PERSISTENT'				=> TRUE,
@@ -121,7 +130,7 @@ class CMF_Hydrogen_Environment_Resource_Database_PDO extends DB_PDO_Connection
 			$driverOptions[constant( "PDO::".$key )]	= $value;									//  note option
 		}
 
-		parent::__construct( $dsn, $username, $password, $driverOptions );							//  connect to database
+		parent::__construct( $dsn, $dba['username'], $dba['password'], $driverOptions );							//  connect to database
 
 		if( $logStatements )
 			$this->setStatementLogFile( $config->get( 'path.logs' ).$logStatements );
@@ -131,5 +140,7 @@ class CMF_Hydrogen_Environment_Resource_Database_PDO extends DB_PDO_Connection
 #			$this->exec( "SET NAMES '".$charset."';" );												//  set character set
 	}
 
-	public function tearDown(){}
+	protected function tearDown()
+	{
+	}
 }

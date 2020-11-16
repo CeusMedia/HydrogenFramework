@@ -1,6 +1,7 @@
 <?php
 /**
  *	Helper to collect and combine JavaScripts.
+ *	This is a singleton.
  *
  *	Copyright (c) 2010-2020 Christian Würker (ceusmedia.de)
  *
@@ -33,8 +34,8 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_View_Helper_JavaScript{
-
+class CMF_Hydrogen_View_Helper_JavaScript
+{
 	protected static $instance;
 
 	protected $env;
@@ -60,35 +61,19 @@ class CMF_Hydrogen_View_Helper_JavaScript{
 	public $indent					= "\t\t";
 
 	/**
-	 *	Constructor is disabled from public context.
-	 *	Use static call 'getInstance()' instead of 'new'.
-	 *	@access		protected
-	 *	@param		CMF_Hydrogen_Environment	$env		Environment object
-	 *	@return		void
-	 */
-	protected function __construct( CMF_Hydrogen_Environment $env ){
-		$this->env	= $env;
-	}
-
-	/**
-	 *	Cloning this object is not allowed.
-	 *	@access		private
-	 *	@return		void
-	 */
-	private function __clone(){}
-
-	/**
 	 *	Adds a module JavaScript by path name within configured local JavaScript folder.
 	 *	Uses addUrl with configured  local JavaScript folder.
 	 *	@access		public
 	 *	@param		string		$filePath	Path of file within JavaScript folder
 	 *	@param		integer		$level		Optional: Load level (1-9 or {top(1),mid(5),end(9)}, default: 5)
-	 *	@return		void
+	 *	@param		string		$key		Optional: script key in case of later removal
+	 *	@return		self
 	 */
-	public function addModuleFile( $filePath, $level = CMF_Hydrogen_Environment_Resource_Captain::LEVEL_MID, $key = NULL ){
+	public function addModuleFile( string $filePath, $level = CMF_Hydrogen_Environment_Resource_Captain::LEVEL_MID, string $key = NULL ): self
+	{
 		$path	= $this->env->getConfig()->get( 'path.scripts' );
 		$level	= CMF_Hydrogen_Environment_Resource_Captain::interpretLoadLevel( $level );
-		$this->addUrl( $path.$filePath, $level );
+		return $this->addUrl( $path.$filePath, $level, $key );
 	}
 
 	/**
@@ -97,11 +82,13 @@ class CMF_Hydrogen_View_Helper_JavaScript{
 	 *	@access		public
 	 *	@param		string		$script		JavaScript block
 	 *	@param		integer		$level		Optional: Load level (1-9 or {top(1),mid(5),end(9)}, default: 5)
-	 *	@return		void
+	 *	@param		string		$key		Optional: script key in case of later removal
+	 *	@return		self
 	 *	@deprecated	use addModuleFile instead
 	 *	@todo		remove in v0.8.8
 	 */
-	public function addModuleScript( $script, $level = CMF_Hydrogen_Environment_Resource_Captain::LEVEL_MID, $key = NULL ){
+	public function addModuleScript( $script, $level = CMF_Hydrogen_Environment_Resource_Captain::LEVEL_MID, string $key = NULL ): self
+	{
 		CMF_Hydrogen_Deprecation::getInstance()
 			->setErrorVersion( '0.8.6.3' )
 			->setExceptionVersion( '0.8.7' )
@@ -109,7 +96,7 @@ class CMF_Hydrogen_View_Helper_JavaScript{
 
 		$path	= $this->env->getConfig()->get( 'path.scripts' );
 		$level	= CMF_Hydrogen_Environment_Resource_Captain::interpretLoadLevel( $level );
-		$this->addUrl( $path.$script, $level );
+		return $this->addUrl( $path.$script, $level, $key );
 	}
 
 	/**
@@ -121,7 +108,7 @@ class CMF_Hydrogen_View_Helper_JavaScript{
 	 *	@return		self
 	 *	@todo		remove support for level "ready", see below
 	 */
-	public function addScript( $script, $level = CMF_Hydrogen_Environment_Resource_Captain::LEVEL_MID, $key = NULL ): self
+	public function addScript( string $script, $level = CMF_Hydrogen_Environment_Resource_Captain::LEVEL_MID, string $key = NULL ): self
 	{
 		/* @todo		remove after all ->addScript( '...', 'ready' ) are replaced by ->addScriptOnReady( '...' ) */
 		if( $level === "ready" )
@@ -144,8 +131,10 @@ class CMF_Hydrogen_View_Helper_JavaScript{
 	 *	@param		integer		$level		Optional: Load level (1-9 or {top(1),mid(=5),end(9)}, default: 5)
 	 *	@param		string		$key		Optional: script key in case of later removal
 	 *	@return		self
+	 *	@todo		implement support of a script key (3rd argument)
 	 */
-	public function addScriptOnReady( $script, $level = CMF_Hydrogen_Environment_Resource_Captain::LEVEL_MID, $key = NULL ){
+	public function addScriptOnReady( string $script, $level = CMF_Hydrogen_Environment_Resource_Captain::LEVEL_MID, string $key = NULL ): self
+	{
 		$level	= CMF_Hydrogen_Environment_Resource_Captain::interpretLoadLevel( $level );		//  sanitize level supporting old string values
 		if( !array_key_exists( $level, $this->scriptsOnReady ) )								//  level is not yet defined in scripts list
 			$this->scriptsOnReady[$level]	= array();											//  create empty scripts list for level
@@ -163,8 +152,9 @@ class CMF_Hydrogen_View_Helper_JavaScript{
 	 *	@param		integer		$level		Optional: Load level (1-9 or {top(1),mid(=5),end(9)}, default: 5)
 	 *	@param		string		$key		Optional: script key in case of later removal
 	 *	@return		self
+	 *	@todo		implement support of a script key (3rd argument)
 	 */
-	public function addUrl( $url, $level = CMF_Hydrogen_Environment_Resource_Captain::LEVEL_MID, $key = NULL ): self
+	public function addUrl( string $url, $level = CMF_Hydrogen_Environment_Resource_Captain::LEVEL_MID, string $key = NULL ): self
 	{
 		$level	= CMF_Hydrogen_Environment_Resource_Captain::interpretLoadLevel( $level );		//  sanitize level supporting old string values
 		if( !array_key_exists( $level, $this->urls ) )											//  level is not yet defined in scripts list
@@ -197,7 +187,147 @@ class CMF_Hydrogen_View_Helper_JavaScript{
 		return $this;
 	}
 
-	protected function compress( $script ){
+	/**
+	 *	Returns a single instance of this Singleton class.
+	 *	@static
+	 *	@access		public
+	 *	@return		self						Single instance of this Singleton class
+	 */
+	public static function getInstance( $env ): self
+	{
+		if( !self::$instance )
+			self::$instance	= new self( $env );
+		return self::$instance;
+	}
+
+	/**
+	 *	Returns hash calculated by added URLs and revision, if set.
+	 *	@access		public
+	 *	@return		string
+	 */
+	public function getPackageHash(): string
+	{
+		$copy	= $this->getPlainUrlList();
+		sort( $copy );
+		$key	= implode( '_', $copy );
+		return md5( $this->revision.$key );
+	}
+
+	/**
+	 *	Returns a list of collected JavaScripts URLs.
+	 *	@access		public
+	 *	@return		array
+	 *	@deprecated	use getPlainUrlList instead
+	 *	@todo		remove in v0.8.7
+	 */
+	public function getUrlList(): array
+	{
+		CMF_Hydrogen_Deprecation::getInstance()
+			->setErrorVersion( '0.8.6.3' )
+			->setExceptionVersion( '0.8.7' )
+			->message( 'Please use getPlainUrlList or getStructuredUrlList instead' );
+		return $this->getPlainUrlList();
+	}
+
+	/**
+	 *	Returns a flat list of collected JavaScripts URLs ordered by run level.
+	 *	@access		public
+	 *	@return		array		List of registered script URLS ordered by run level and script key
+	 */
+	public function getPlainUrlList(): array
+	{
+		$list	= array();
+		foreach( $this->urls as $level => $levelUrls )
+			foreach( $levelUrls as $key => $keyedUrls )
+				foreach( $keyedUrls as $url )
+					$list[]	= $url;
+		return $list;
+	}
+
+	/**
+	 *	Returns a list of collected JavaScripts URLs structured by run level and script key.
+	 *	@access		public
+	 *	@return		array		List of registered script URLS structured by run level and script key
+	 */
+	public function getStructuredUrlList(): array
+	{
+		return $this->urls;
+	}
+
+	/**
+	 *	Renders an HTML script tag with all collected JavaScript URLs and blocks.
+	 *	@access		public
+	 *	@param		bool		$indentEndTag	Flag: indent end tag by 2 tabs, default: no
+	 *	@param		bool		$forceFresh		Flag: force fresh creation instead of using cache, default: no
+	 *	@return		string
+	 */
+	public function render( bool $indentEndTag = FALSE, bool $forceFresh = FALSE ): string
+	{
+		$links			= $this->renderUrls( $this->useCompression, TRUE, $forceFresh );
+		$scripts		= $this->renderScripts( $this->useCompression, TRUE );
+		$scriptsOnReady	= $this->renderScriptsOnReady( $this->useCompression, TRUE );
+		return $links.PHP_EOL.$scriptsOnReady.PHP_EOL.$scripts;
+	}
+
+	/**
+	 *	Sets revision for versioning cache.
+	 *	@access		public
+	 *	@param		mixed		$revision	Revision number or version string
+	 *	@return		self
+	 */
+	public function setRevision( string $revision ): self
+	{
+		$this->revision	= $revision;
+		return $this;
+	}
+
+	public function setCompression( bool $compression ): self
+	{
+		$this->useCompression	= $compression;
+		return $this;
+	}
+
+	public function setPrefix( string $prefix ): self
+	{
+		$this->prefix	= $prefix;
+		return $this;
+	}
+
+	public function setSuffix( string $suffix ): self
+	{
+		$this->suffix	= $suffix;
+		return $this;
+	}
+
+	/**
+	 *	Set path to file cache.
+	 *	@access		public
+	 *	@param		string		$path		Path to file cache
+	 *	@return		self
+	 */
+	public function setCachePath( string $path ): self
+	{
+		$this->pathCache = $path;
+		return $this;
+	}
+
+
+	//  --  PROTECTED  --  //
+
+	/**
+	 *	Constructor is disabled from public context.
+	 *	Use static call 'getInstance()' instead of 'new'.
+	 *	@access		protected
+	 *	@param		CMF_Hydrogen_Environment	$env		Environment object
+	 *	@return		void
+	 */
+	protected function __construct( CMF_Hydrogen_Environment $env )
+	{
+		$this->env	= $env;
+	}
+
+	protected function compress( string $script ): string
+	{
 //		$script	= preg_replace( "@^\s*//.+\n?@", "", $script );
 //		$script	= preg_replace( "@/\*.+\*/\n?@sU", "", $script );
 		if( class_exists( 'JSMin' ) ){
@@ -213,35 +343,12 @@ class CMF_Hydrogen_View_Helper_JavaScript{
 	}
 
 	/**
-	 *	Returns a single instance of this Singleton class.
-	 *	@static
-	 *	@access		public
-	 *	@return		self						Single instance of this Singleton class
-	 */
-	public static function getInstance( $env ){
-		if( !self::$instance )
-			self::$instance	= new self( $env );
-		return self::$instance;
-	}
-
-	/**
-	 *	Returns hash calculated by added URLs and revision, if set.
-	 *	@access		public
-	 *	@return		string
-	 */
-	public function getPackageHash() {
-		$copy	= $this->getPlainUrlList();
-		sort( $copy );
-		$key	= implode( '_', $copy );
-		return md5( $this->revision.$key );
-	}
-
-	/**
 	 *	Returns name of combined file in file cache.
 	 *	@access		protected
 	 *	@return		string
 	 */
-	protected function getPackageCacheFileName(){
+	protected function getPackageCacheFileName(): string
+	{
 		$hash	= $this->getPackageHash();
 		return $this->pathCache.$this->prefix.$hash.$this->suffix.'.js';
 	}
@@ -252,7 +359,8 @@ class CMF_Hydrogen_View_Helper_JavaScript{
 	 *	@param		bool		$forceFresh		Flag: force fresh creation instead of using cache
 	 *	@return		string
 	 */
-	protected function getPackageFileName( $forceFresh = FALSE ){
+	protected function getPackageFileName( bool $forceFresh = FALSE ): string
+	{
 		$fileJs	= $this->getPackageCacheFileName();
 		if( !file_exists( $fileJs ) || $forceFresh ) {
 			$contents	= array();
@@ -277,66 +385,13 @@ class CMF_Hydrogen_View_Helper_JavaScript{
 	}
 
 	/**
-	 *	Returns a list of collected JavaScripts URLs.
-	 *	@access		public
-	 *	@return		array
-	 *	@deprecated	use getPlainUrlList instead
-	 *	@todo		remove in v0.8.7
-	 */
-	public function getUrlList(){
-		CMF_Hydrogen_Deprecation::getInstance()
-			->setErrorVersion( '0.8.6.3' )
-			->setExceptionVersion( '0.8.7' )
-			->message( 'Please use getPlainUrlList or getStructuredUrlList instead' );
-		return $this->getPlainUrlList();
-	}
-
-	/**
-	 *	Returns a flat list of collected JavaScripts URLs ordered by run level.
-	 *	@access		public
-	 *	@return		array		List of registered script URLS ordered by run level and script key
-	 */
-	public function getPlainUrlList(){
-		$list	= array();
-		foreach( $this->urls as $level => $levelUrls )
-			foreach( $levelUrls as $key => $keyedUrls )
-				foreach( $keyedUrls as $url )
-					$list[]	= $url;
-		return $list;
-	}
-
-	/**
-	 *	Returns a list of collected JavaScripts URLs structured by run level and script key.
-	 *	@access		public
-	 *	@return		array		List of registered script URLS structured by run level and script key
-	 */
-	public function getStructuredUrlList(){
-		return $this->urls;
-	}
-
-	/**
-	 *	Renders an HTML script tag with all collected JavaScript URLs and blocks.
-	 *	@access		public
-	 *	@param		bool		$indentEndTag	Flag: indent end tag by 2 tabs
-	 *	@param		bool		$forceFresh		Flag: force fresh creation instead of using cache
-	 *	@return		string
-	 */
-	public function render( $indentEndTag = FALSE, $forceFresh = FALSE ): string
-	{
-		$links			= $this->renderUrls( $this->useCompression, TRUE, $forceFresh );
-		$scripts		= $this->renderScripts( $this->useCompression, TRUE );
-		$scriptsOnReady	= $this->renderScriptsOnReady( $this->useCompression, TRUE );
-		return $links.PHP_EOL.$scriptsOnReady.PHP_EOL.$scripts;
-	}
-
-	/**
 	 *	Renders block of collected JavaScript code with directive to run if Browser finished loading (using jQuery event document.ready).
 	 *	@access		protected
-	 *	@param		boolean		$compress		Flag: compress code
-	 *	@param		boolean		$wrapInTag		Flag: wrap code in HTML script tag
+	 *	@param		boolean		$compress		Flag: compress code, default: no
+	 *	@param		boolean		$wrapInTag		Flag: wrap code in HTML script tag, default: no
 	 *	@return		string		Combinded JavaScript code to run if Browser is ready
 	 */
-	protected function renderScripts( $compress = FALSE, $wrapInTag = FALSE ): string
+	protected function renderScripts( bool $compress = FALSE, bool $wrapInTag = FALSE ): string
 	{
 		$list	= array();
 		ksort( $this->scripts );
@@ -357,10 +412,11 @@ class CMF_Hydrogen_View_Helper_JavaScript{
 	/**
 	 *	Renders block of collected JavaScript code with directive to run if Browser finished loading (using jQuery event document.ready).
 	 *	@access		protected
-	 *	@param		boolean		$wrapInTag		Flag: wrap code in HTML script tag
+	 *	@param		boolean		$compress		Flag: compress code, default: no
+	 *	@param		boolean		$wrapInTag		Flag: wrap code in HTML script tag, default: no
 	 *	@return		string		Combined JavaScript code to run if Browser is ready
 	 */
-	protected function renderScriptsOnReady( $compress = FALSE, $wrapInTag = FALSE ): string
+	protected function renderScriptsOnReady( bool $compress = FALSE, bool $wrapInTag = FALSE ): string
 	{
 		$list	= array();
 		ksort( $this->scriptsOnReady );
@@ -388,7 +444,7 @@ class CMF_Hydrogen_View_Helper_JavaScript{
 		return UI_HTML_Tag::create( 'script', $content, array( 'type' => 'text/javascript' ) );
 	}
 
-	protected function renderUrls( $compress, $wrapInTag = FALSE, $forceFresh = FALSE ): string
+	protected function renderUrls( bool $compress = FALSE, bool $wrapInTag = FALSE, bool $forceFresh = FALSE ): string
 	{
 		if( !count( $this->getPlainUrlList() ) )
 			return '';
@@ -420,45 +476,14 @@ class CMF_Hydrogen_View_Helper_JavaScript{
 		return $links;
 	}
 
-	/**
-	 *	Sets revision for versioning cache.
-	 *	@access		public
-	 *	@param		mixed		$revision	Revision number or version string
-	 *	@return		self
-	 */
-	public function setRevision( $revision ): self
-	{
-		$this->revision	= $revision;
-		return $this;
-	}
-
-	public function setCompression( $compression ): self
-	{
-		$this->useCompression	= (bool) $compression;
-		return $this;
-	}
-
-	public function setPrefix( $prefix ): self
-	{
-		$this->prefix	= $prefix;
-		return $this;
-	}
-
-	public function setSuffix( $suffix ): self
-	{
-		$this->suffix	= $suffix;
-		return $this;
-	}
+	//  --  PRIVATE  --  //
 
 	/**
-	 *	Set path to file cache.
-	 *	@access		public
-	 *	@param		string		$path		Path to file cache
-	 *	@return		self
+	 *	Cloning this object is not allowed.
+	 *	@access		private
+	 *	@return		void
 	 */
-	public function setCachePath( $path ): self
+	private function __clone()
 	{
-		$this->pathCache = $path;
-		return $this;
 	}
 }

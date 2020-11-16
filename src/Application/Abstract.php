@@ -35,8 +35,8 @@
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			Code Documentation
  */
-abstract class CMF_Hydrogen_Application_Abstract{
-
+abstract class CMF_Hydrogen_Application_Abstract
+{
 	/**	@var		string								$classEnvironment		Class Name of Application Environment to build */
 	public static $classEnvironment						= 'CMF_Hydrogen_Environment_Web';
 
@@ -51,7 +51,8 @@ abstract class CMF_Hydrogen_Application_Abstract{
 	 *	@param		CMF_Hydrogen_Environment			$env					Framework Environment
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment $env = NULL ){
+	public function __construct( CMF_Hydrogen_Environment $env = NULL )
+	{
 		if( !$env )
 			$env		= Alg_Object_Factory::createObject( self::$classEnvironment );
 		else if( is_string( $env ) )
@@ -61,13 +62,18 @@ abstract class CMF_Hydrogen_Application_Abstract{
 			$this->checkNeededModules();															//  check for missing modules
 	}
 
+	abstract public function run();
+
+	//  --  PROTECTED  --  //
+
 	/**
 	 *	Finds missing modules if needed modules are defined.
 	 *	Having such, the application will quit with a report.
 	 *	@access		protected
 	 *	@return		void
 	 */
-	protected function checkNeededModules(){
+	protected function checkNeededModules()
+	{
 		$modulesGot	= array_keys( $this->env->getModules()->getAll() );								//  get installed modules
 		$missing	= array_diff( self::$modulesNeeded, $modulesGot );								//  find missing modules
 		if( $missing ){																				//  there are missing modules
@@ -83,9 +89,8 @@ abstract class CMF_Hydrogen_Application_Abstract{
 	 *	@param		array		$modules		List of module IDs
 	 *	@return		void
 	 */
-	protected function reportMissingModules( $modules ){
+	protected function reportMissingModules( array $modules )
+	{
 		print( 'Missing modules: '.join( ', ', $modules ) );
 	}
-
-	abstract public function run();
 }

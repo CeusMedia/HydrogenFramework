@@ -22,8 +22,8 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Common
  */
-class CMF_Hydrogen_Deprecation extends Deprecation{
-
+class CMF_Hydrogen_Deprecation extends Deprecation
+{
 	/**
 	 *	Contructor, needs to be called statically by getInstance.
 	 *	Will detect library version.
@@ -32,7 +32,8 @@ class CMF_Hydrogen_Deprecation extends Deprecation{
 	 *	@access		protected
 	 *	@return		void
 	 */
-	protected function __construct(){
+	protected function __construct()
+	{
 		$iniFilePath		= dirname( __DIR__ ).'/hydrogen.ini';
 		$iniFileData		= parse_ini_file( $iniFilePath, TRUE );
 		$this->version		= $iniFileData['project']['version'];
@@ -46,8 +47,9 @@ class CMF_Hydrogen_Deprecation extends Deprecation{
 	 *	@access		public
 	 *	@return		Deprecation
 	 */
-	static public function getInstance(){
-		return new static();
+	static public function getInstance()
+	{
+		return new self();
 	}
 
 	/**
@@ -56,11 +58,13 @@ class CMF_Hydrogen_Deprecation extends Deprecation{
 	 *	Will throw a deprecation error if set error version reached detected library version using PHP 5.3+.
 	 *	Will throw a deprecation notice if set error version reached detected library version using PHP lower 5.3.
 	 *	@access		public
-	 *	@param		string		$version	Library version to start showing deprecation error or notice
+	 *	@param		string		$message	Message to show
 	 *	@return		void
 	 *	@throws		Exception				if set exception version reached detected library version
+	 *	@todo		set type hint after CeusMedia::Common updated
 	 */
-	public function message( $message ){
+	public function message( $message )
+	{
 		$trace	= debug_backtrace();
 		$caller = next( $trace );
 		if( isset( $caller['file'] ) && isset( $caller['line'] ) )
@@ -73,7 +77,11 @@ class CMF_Hydrogen_Deprecation extends Deprecation{
 		}
 	}
 
-	static public function notify( $message ){
+	/**
+	 *	@todo		set type hint after CeusMedia::Common updated
+	 */
+	public static function notify( $message )
+	{
 		$message .= ', triggered';
 		if( version_compare( phpversion(), "5.3.0" ) >= 0 )
 			trigger_error( $message, E_USER_DEPRECATED );
@@ -86,9 +94,11 @@ class CMF_Hydrogen_Deprecation extends Deprecation{
 	 *	Returns deprecation object for chainability.
 	 *	@access		public
 	 *	@param		string		$version	Library version to start showing deprecation error or notice
-	 *	@return		Deprecation
+	 *	@return		self
+	 *	@todo		set type hint after CeusMedia::Common updated
 	 */
-	public function setErrorVersion( $version ){
+	public function setErrorVersion( $version ): self
+	{
 		$this->errorVersion		= $version;
 		return $this;
 	}
@@ -98,9 +108,11 @@ class CMF_Hydrogen_Deprecation extends Deprecation{
 	 *	Returns deprecation object for chainability.
 	 *	@access		public
 	 *	@param		string		$version	Library version to start throwing deprecation exception
-	 *	@return		Deprecation
+	 *	@return		self
+	 *	@todo		set type hint after CeusMedia::Common updated
 	 */
-	public function setExceptionVersion( $version ){
+	public function setExceptionVersion( $version ): self
+	{
 		$this->exceptionVersion		= $version;
 		return $this;
 	}
@@ -111,9 +123,10 @@ class CMF_Hydrogen_Deprecation extends Deprecation{
 	 *	On handling deprecations within modules, you can use this method to set the module version.
 	 *	@access		public
 	 *	@param		string		$version		Version of component to compare with
-	 *	@return		Deprecation
+	 *	@return		self
 	 */
-	public function setVersion( $version ){
+	public function setVersion( string $version ): self
+	{
 		$this->version	= $version;
 		return $this;
 	}

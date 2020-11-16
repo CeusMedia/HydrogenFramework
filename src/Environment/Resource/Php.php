@@ -33,19 +33,21 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Environment_Resource_Php{
-
+class CMF_Hydrogen_Environment_Resource_Php
+{
 	public $version;
 
 	protected $env;
 
-	public function __construct( CMF_Hydrogen_Environment $env ){
+	public function __construct( CMF_Hydrogen_Environment $env )
+	{
 		$this->env		= $env;
 		$this->version	= new CMF_Hydrogen_Environment_Resource_Php_Version();
 		$this->applyConfig();																		//  apply PHP configuration from config file
 	}
 
-	public function applyConfig(){
+	public function applyConfig()
+	{
 		$settings	= $this->env->getConfig()->getAll( 'php.', TRUE );								//  get PHP configuration from config file
 		foreach( $settings as $key => $value ){														//  iterate set PHP configuration pairs
 			try{																					//  try since there could by unknown constants
@@ -57,7 +59,8 @@ class CMF_Hydrogen_Environment_Resource_Php{
 		}
 	}
 
-	public function applyConfigPair( $key, $value ){
+	public function applyConfigPair( $key, $value )
+	{
 		if( ini_get( $key ) === FALSE )
 			throw new RangeException( 'Unknown PHP configuration key: '.$key );
 		if( preg_match( '/^([A-Z_]+(\s*,\s*))+$/', $value ) ){										//  value is list of constants
@@ -72,7 +75,8 @@ class CMF_Hydrogen_Environment_Resource_Php{
 		ini_set( $key, $value );																	//  apply to PHP configuration
 	}
 
-	public function getCurrentVersion(){
+	public function getCurrentVersion(): string
+	{
 		return $this->version->get();
 	}
 }

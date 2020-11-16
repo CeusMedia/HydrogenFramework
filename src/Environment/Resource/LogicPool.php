@@ -17,10 +17,11 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Environment_Resource_LogicPool {
-
+class CMF_Hydrogen_Environment_Resource_LogicPool
+{
 	/**	@var			CMF_Hydrogen_Environment	$env		Environment object */
 	protected $env;
+
 	/**	@var			array						$pool		Map of logic class names or instances */
 	protected $pool		= array();
 
@@ -30,7 +31,8 @@ class CMF_Hydrogen_Environment_Resource_LogicPool {
 	 *	@param		CMF_Hydrogen_Environment		$env		Environment object
 	 *	@return		void
 	 */
-	public function  __construct( CMF_Hydrogen_Environment $env ) {
+	public function  __construct( CMF_Hydrogen_Environment $env )
+	{
 		$this->env		= $env;
 	}
 
@@ -40,7 +42,8 @@ class CMF_Hydrogen_Environment_Resource_LogicPool {
 	 *	@param		string			$key			Key of logic object
 	 *	@return		object
 	 */
-	public function __get( $key ){
+	public function __get( string $key )
+	{
 		return $this->get( $key );
 	}
 
@@ -50,7 +53,8 @@ class CMF_Hydrogen_Environment_Resource_LogicPool {
 	 *	@param		string			$key			Key of logic object
 	 *	@return		boolean
 	 */
-	public function __isset( $key ){
+	public function __isset( string $key ): bool
+	{
 		return $this->has( $key );
 	}
 
@@ -61,7 +65,8 @@ class CMF_Hydrogen_Environment_Resource_LogicPool {
 	 *	@param		object			$logicObject	Logic object to store in pool
 	 *	@return		void
 	 */
-	public function __set( $key, $logicObject ){
+	public function __set( string $key, $logicObject )
+	{
 		$this->set( $key, $logicObject );
 	}
 
@@ -71,7 +76,8 @@ class CMF_Hydrogen_Environment_Resource_LogicPool {
 	 *	@param		string			$key			Key of logic object
 	 *	@return		void
 	 */
-	public function __unset( $key ){
+	public function __unset( string $key ): bool
+	{
 		$this->remove( $key );
 	}
 
@@ -81,31 +87,12 @@ class CMF_Hydrogen_Environment_Resource_LogicPool {
 	 *	@access		public
 	 *	@param		string			$key				Key of logic object in pool
 	 *	@param		string|object	$logicClassOrObject	Name of logic class to add
-	 *	@return		void
+	 *	@return		self
 	 */
-	public function add( $key, $logicClassOrObject ){
+	public function add( string $key, $logicClassOrObject ): self
+	{
 		$this->set( $key, $logicClassOrObject, FALSE );
-	}
-
-	/**
-	 *	Creates instance of logic class.
-	 *	@access		protected
-	 *	@param		string			$className			Name of class to create instance for
-	 *	@return		object
-	 *	@throws		InvalidArgumentException			if class is not a subclass of CMF_Hydrogen_Logic
-	 */
-	protected function createInstance( $className ){
-		if( is_subclass_of( $className, 'CMF_Hydrogen_Logic' ) )
-			return Alg_Object_Factory::createObject( $className, array( $this->env ) );
-
-		// @todo activate this line after deprecation of old logic classes
-//		throw new InvalidArgumentException( 'Given class "'.$className.'" is not a valid logic class' );
-		$arguments	= array( $this->env );
-		if( is_subclass_of( $className, 'CMF_Hydrogen_Logic_Singleton' ) )
-			return call_user_func_array( array( $className, 'getInstance' ), $arguments );
-		if( is_subclass_of( $className, 'CMF_Hydrogen_Logic_Multiple' ) )
-			return Alg_Object_Factory::createObject( $className, $arguments );
-		return Alg_Object_Factory::createObject( $className, $arguments );
+		return $this;
 	}
 
 	/**
@@ -116,7 +103,8 @@ class CMF_Hydrogen_Environment_Resource_LogicPool {
 	 *	@throws		RuntimeException				if no class or object has been added for given key
 	 *	@throws		DomainException					if class for given key is not existing
 	 */
-	public function get( $key ){
+	public function get( string $key )
+	{
 		if( !$this->has( $key ) ){
 			$className		= $this->getClassNameFromKey( $key );
 			class_exists( $className ) ? $this->add( $key, $className ) : NULL;
@@ -133,23 +121,6 @@ class CMF_Hydrogen_Environment_Resource_LogicPool {
 	}
 
 	/**
-	 *	Returns class name of registered logic pool key.
-	 *	Logic pool key can be either a shortened class name (without prefix Logic_)
-	 *	or a camelcased shortened class name.
-	 *	For example, logic pool key for class Logic_Catalog_Bookstore can be
-	 *	Catalog_Bookstore or catalogBookstore.
-	 *	@access		public
-	 *	@param		string			$key			Key of logic object
-	 *	@return		string
-	 */
-	public function getClassNameFromKey( $key ){
-		if( preg_match( '/^[A-Z]/', $key ) )
-			return 'Logic_'.$key;
-		$classNameWords	= ucwords( Alg_Text_CamelCase::decode( $key ) );
-		return str_replace( ' ', '_', 'Logic '.$classNameWords );
-	}
-
-	/**
 	 *	Returns logic pool key for a logic class name.
 	 *	@access		public
 	 *	@param		string			$className		Name of class to create instance for
@@ -157,8 +128,9 @@ class CMF_Hydrogen_Environment_Resource_LogicPool {
 	 *	@throws		InvalidArgumentException		if given class name os empty
 	 *	@throws		InvalidArgumentException		if given class name is not starting with Logic_
 	 */
-	public function getKeyFromClassName( $className ){
-		if( !strlen( trim( $className ) ) )
+	public function getKeyFromClassName( string $className ): string
+	{
+		if( strlen( trim( $className ) ) === 0 )
 			throw new InvalidArgumentException( 'Class name cannot be empty' );
 		$parts	= explode( ' ', str_replace( '_', ' ', $className ) );
 		$prefix	= array_shift( $parts );
@@ -173,7 +145,8 @@ class CMF_Hydrogen_Environment_Resource_LogicPool {
 	 *	@param		string			$key			Key of logic object
 	 *	@return		boolean
 	 */
-	public function has( $key ){
+	public function has( string $key ): bool
+	{
 		return array_key_exists( $key, $this->pool );
 	}
 
@@ -182,7 +155,8 @@ class CMF_Hydrogen_Environment_Resource_LogicPool {
 	 *	@access		public
 	 *	@return		array			List of keys of stored logic classes or objects
 	 */
-	public function index(){
+	public function index(): array
+	{
 		return array_keys( $this->pool );
 	}
 
@@ -193,7 +167,8 @@ class CMF_Hydrogen_Environment_Resource_LogicPool {
 	 *	@param		string			$key			Key of logic object in pool
 	 *	@return		boolean|NULL
 	 */
-	public function isInstantiated( $key ){
+	public function isInstantiated( string $key ): bool
+	{
 		if( !$this->has( $key ) )
 			return NULL;
 		return is_object( $this->pool[$key] );
@@ -206,7 +181,8 @@ class CMF_Hydrogen_Environment_Resource_LogicPool {
 	 *	@return		void
 	 *	@throws		RuntimeException				if no logic is stored for pool key
 	 */
-	public function remove( $key ){
+	public function remove( string $key )
+	{
 		if( !$this->has( $key ) )
 			throw new RuntimeException( 'No logic "'.$key.'" available' );
 		unset( $this->pool[$key] );
@@ -222,11 +198,54 @@ class CMF_Hydrogen_Environment_Resource_LogicPool {
 	 *	@throws		RuntimeException					if key is already existing in pool and overriding disabled
 	 *	@throws		InvalidArgumentException			if logic component is neither an instance nor a string
 	 */
-	public function set( $key, $logicClassOrObject, $override = TRUE ){
+	public function set( string $key, $logicClassOrObject, bool $override = TRUE )
+	{
 		if( $this->has( $key ) && !$override )
 			throw new RuntimeException( 'Logic "'.$key.'" is already in logic pool' );
 		if( !is_string( $logicClassOrObject ) && !is_object( $logicClassOrObject ) )
 			throw new InvalidArgumentException( 'Given logic must be either a logic class or a logic object ('.gettype( $logicClassOrObject ).' given)' );
 		$this->pool[$key]	= $logicClassOrObject;
+	}
+
+	//  --  PROTECTED  --  //
+
+	/**
+	 *	Creates instance of logic class.
+	 *	@access		protected
+	 *	@param		string			$className			Name of class to create instance for
+	 *	@return		object
+	 *	@throws		InvalidArgumentException			if class is not a subclass of CMF_Hydrogen_Logic
+	 */
+	protected function createInstance( string $className )
+	{
+		if( is_subclass_of( $className, 'CMF_Hydrogen_Logic' ) )
+			return Alg_Object_Factory::createObject( $className, array( $this->env ) );
+
+		// @todo activate this line after deprecation of old logic classes
+//		throw new InvalidArgumentException( 'Given class "'.$className.'" is not a valid logic class' );
+		$arguments	= array( $this->env );
+		if( is_subclass_of( $className, 'CMF_Hydrogen_Logic_Singleton' ) )
+			return call_user_func_array( array( $className, 'getInstance' ), $arguments );
+		if( is_subclass_of( $className, 'CMF_Hydrogen_Logic_Multiple' ) )
+			return Alg_Object_Factory::createObject( $className, $arguments );
+		return Alg_Object_Factory::createObject( $className, $arguments );
+	}
+
+	/**
+	 *	Returns class name of registered logic pool key.
+	 *	Logic pool key can be either a shortened class name (without prefix Logic_)
+	 *	or a camelcased shortened class name.
+	 *	For example, logic pool key for class Logic_Catalog_Bookstore can be
+	 *	Catalog_Bookstore or catalogBookstore.
+	 *	@access		protected
+	 *	@param		string			$key			Key of logic object
+	 *	@return		string
+	 */
+	protected function getClassNameFromKey( string $key ): string
+	{
+		if( preg_match( '/^[A-Z]/', $key ) )
+			return 'Logic_'.$key;
+		$classNameWords	= ucwords( Alg_Text_CamelCase::decode( $key ) );
+		return str_replace( ' ', '_', 'Logic '.$classNameWords );
 	}
 }

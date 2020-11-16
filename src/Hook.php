@@ -1,11 +1,15 @@
 <?php
-class CMF_Hydrogen_Hook{
-
-	static public function callHook( CMF_Hydrogen_Environment $env, $resource, $event, $context, $module, $data ){
+class CMF_Hydrogen_Hook
+{
+	public static function callHook( CMF_Hydrogen_Environment $env, string $resource, string $event, $context, $module, $data )
+	{
 		return $env->getCaptain()->callHook( $resource, $event, $context, $data );
 	}
 
-	static protected function getModuleConfig( CMF_Hydrogen_Environment $env, $module ){
+	//  --  PROTECTED  --  //
+
+	protected static function getModuleConfig( CMF_Hydrogen_Environment $env, $module )
+	{
 		return $env->getConfig()->get( 'module.'.strtolower( $module ).'.', TRUE );
 	}
 
@@ -24,7 +28,8 @@ class CMF_Hydrogen_Hook{
 	 *	@return		boolean		Always returns TRUE to indicate that dispatching hook is done
 	 *	@todo		remove first 2 lines after Env::redirect has been deprecated
 	 */
-	static protected function redirect( CMF_Hydrogen_Environment $env, $controller = 'index', $action = "index", $arguments = array(), $parameters = array() ){
+	protected static function redirect( CMF_Hydrogen_Environment $env, string $controller = 'index', string $action = "index", array $arguments = array(), array $parameters = array() )
+	{
 //		$env->redirect( $controller, $action, $arguments, $parameters );
 //		return TRUE;
 
@@ -35,7 +40,6 @@ class CMF_Hydrogen_Hook{
 		foreach( $parameters as $key => $value )
 			if( !empty( $key ) )
 				$request->set( $key, $value );
-
 	}
 
 	/**
@@ -55,7 +59,8 @@ class CMF_Hydrogen_Hook{
 	 *	@return		void
 	 *	@todo		kriss: check for better HTTP status
 	 */
-	static protected function relocate( $uri, $status = NULL ){
+	protected static function relocate( string $uri, int $status = NULL )
+	{
 		static::restart( $uri, $status, TRUE );
 	}
 
@@ -81,11 +86,13 @@ class CMF_Hydrogen_Hook{
 	 *	@param		integer		$modeFrom			How to handle FROM parameter from request or for new request, not handled atm
 	 *	@return		void
 	 */
-	static protected function restart( CMF_Hydrogen_Environment $env, $uri, $status = NULL, $allowForeignHost = FALSE, $modeFrom = 0 ){
+	protected static function restart( CMF_Hydrogen_Environment $env, string $uri, int $status = NULL, bool $allowForeignHost = FALSE, int $modeFrom = 0 )
+	{
 		$env->restart( $uri, $status, $allowForeignHost, $modeFrom );
 	}
 
-	static protected function sendMail( CMF_Hydrogen_Environment $env, Mail_Abstract $mail, $receivers = array() ){
+	static protected function sendMail( CMF_Hydrogen_Environment $env, Mail_Abstract $mail, array $receivers = array() )
+	{
 		$language	= $env->getLanguage()->getLanguage();										// @todo apply user language
 		foreach( $receivers as $receiver ){
 			if( is_string( $receiver ) )

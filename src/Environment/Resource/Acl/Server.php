@@ -43,7 +43,7 @@ class CMF_Hydrogen_Environment_Resource_Acl_Server extends CMF_Hydrogen_Environm
 	 *	@param		integer		$roleId			Role ID
 	 *	@return		array
 	 */
-	protected function getRights( $roleId )
+	protected function getRights( $roleId ): array
 	{
 		if( $this->hasFullAccess( $roleId ) )
 			return array();
@@ -70,22 +70,9 @@ class CMF_Hydrogen_Environment_Resource_Acl_Server extends CMF_Hydrogen_Environm
 	 *	@param		integer		$roleId			Specified role, otherwise current role
 	 *	@return		array						List of actions or matrix of controllers and actions
 	 */
-	public function index( $controller = NULL, $roleId = NULL ){
-		throw new Exception( 'Not implemented yet' );
-	}
-
-	/**
-	 *	Returns Role.
-	 *	@access		protected
-	 *	@param		integer		$roleId			Role ID
-	 *	@return		array
-	 */
-	protected function getRole( $roleId )
+	public function index( string $controller = NULL, $roleId = NULL ): array
 	{
-		if( !$this->roles )
-			foreach( $this->env->getServer()->getData( 'role', 'index' ) as $role )
-				$this->roles[$role->roleId]	= $role;
-		return $this->roles[$roleId];
+		throw new Exception( 'Not implemented yet' );
 	}
 
 	/**
@@ -96,7 +83,7 @@ class CMF_Hydrogen_Environment_Resource_Acl_Server extends CMF_Hydrogen_Environm
 	 *	@param		string		$action			Name of Action
 	 *	@return		integer
 	 */
-	public function setRight( $roleId, $controller, $action )
+	public function setRight( $roleId, string $controller, string $action )
 	{
 		if( $this->hasFullAccess( $roleId ) )
 			return -1;
@@ -104,5 +91,21 @@ class CMF_Hydrogen_Environment_Resource_Acl_Server extends CMF_Hydrogen_Environm
 			return -2;
 		$data	= array( 'controller' => $controller, 'action' => $action );
 		return $this->env->getServer()->postData( 'role', 'setRight', array( $roleId ), $data );
+	}
+
+	//  --  PROTECTED  --  //
+
+	/**
+	 *	Returns Role.
+	 *	@access		protected
+	 *	@param		integer		$roleId			Role ID
+	 *	@return		array|object
+	 */
+	protected function getRole( $roleId )
+	{
+		if( !$this->roles )
+			foreach( $this->env->getServer()->getData( 'role', 'index' ) as $role )
+				$this->roles[$role->roleId]	= $role;
+		return $this->roles[$roleId];
 	}
 }

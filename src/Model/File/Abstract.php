@@ -1,19 +1,23 @@
 <?php
-abstract class CMF_Hydrogen_Model_File_Abstract{
-
+abstract class CMF_Hydrogen_Model_File_Abstract
+{
 	protected $path;
 
-	public function __construct( $path ){
+	/**
+	 *	@todo		enable env to be first argument, after thinking twice
+	 */
+	public function __construct( /*CMF_Hydrogen_Environment $env,*/ string $path )
+	{
 		$this->path	= $path;
 	}
 
-	abstract public function create( $fileName, $content );
+	abstract public function create( string $fileName, $content );
 
-	abstract public function delete( $fileName );
+	abstract public function delete( string $fileName );
 
-	abstract public function exists( $fileName );
+	abstract public function exists( string $fileName );
 
-	abstract public function read( $fileName );
+	abstract public function read( string $fileName );
 
-	abstract public function update( $fileName, $content );
+	abstract public function update( string $fileName, $content );
 }

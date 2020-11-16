@@ -37,8 +37,8 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment{
-
+class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment
+{
 	public static $classRouter			= 'CMF_Hydrogen_Environment_Router_Single';
 
 	public static $configKeyBaseHref	= 'app.base.url';
@@ -52,7 +52,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment{
 	/**	@var	CMF_Hydrogen_Environment_Router_Abstract		$router		Router Object */
 	protected $router;
 
-	/**	@var	Net_HTTP_Session								$session	Session Object */
+	/**	@var	Net_HTTP_PartitionSession						$session	Session Object */
 	protected $session;
 
 	/**	@var	Net_HTTP_Cookie									$cookie		Cookie Object */
@@ -108,7 +108,8 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment{
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function __construct( $options = array() ){
+	public function __construct( $options = array() )
+	{
 		ob_start();
 		try{
 			parent::__construct( $options, FALSE );
@@ -144,7 +145,8 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment{
 	 *	@param		boolean		$keepAppAlive			Flag: do not end execution right now if turned on
 	 *	@return		void
 	 */
-	public function close( $additionalResources = array(), $keepAppAlive = FALSE ){
+	public function close( array $additionalResources = array(), bool $keepAppAlive = FALSE )
+	{
 		$resources	= array(
 			'session',																				//  HTTP session handler
 			'request',																				//  HTTP request handler
@@ -154,6 +156,194 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment{
 		);
 		parent::close( $resources );																//  close environment and application execution
 	}
+
+	/**
+	 *	Returns Cookie Object.
+	 *	@access		public
+	 *	@return		Net_HTTP_Cookie
+	 *	@throws		RuntimeException		if cookie support has not been initialized
+	 */
+	public function getCookie(): Net_HTTP_Cookie
+	{
+		if( !is_object( $this->cookie ) )
+			throw new RuntimeException( 'Cookie resource not initialized within environment' );
+		return $this->cookie;
+	}
+
+	/**
+	 *	Returns Messenger Object.
+	 *	@access		public
+	 *	@return		CMF_Hydrogen_Environment_Resource_Messenger
+	 */
+	public function getMessenger(): CMF_Hydrogen_Environment_Resource_Messenger
+	{
+		return $this->messenger;
+	}
+
+	/**
+	 *	Get resource to communicate with chat server.
+	 *	@access		public
+	 *	@return		CMF_Hydrogen_Environment_Resource_Page
+	 */
+	public function getPage(): CMF_Hydrogen_Environment_Resource_Page
+	{
+		return $this->page;
+	}
+
+	/**
+	 *	Returns Router Object.
+	 *	@access		public
+	 *	@return		CMF_Hydrogen_Environment_Router_Abstract
+	 */
+	public function getRouter(): CMF_Hydrogen_Environment_Router_Abstract
+	{
+		return $this->router;
+	}
+
+	/**
+	 *	Returns Request Object.
+	 *	@access		public
+	 *	@return		Net_HTTP_Request
+	 */
+	public function getRequest(): Net_HTTP_Request
+	{
+		return $this->request;
+	}
+
+	/**
+	 *	Returns HTTP Response Object.
+	 *	@access		public
+	 *	@return		Net_HTTP_Response
+	 */
+	public function getResponse(): Net_HTTP_Response
+	{
+		return $this->response;
+	}
+
+	/**
+	 *	Returns Session Object.
+	 *	@access		public
+	 *	@return		Net_HTTP_PartitionSession
+	 */
+	public function getSession(): Net_HTTP_PartitionSession
+	{
+		return $this->session;
+	}
+
+	/**
+	 *	Redirects by setting different Controller and Action.
+	 *	Attention: This will *NOT* effect the URL in browser nor need cURL requests to allow forwarding.
+	 *	Attention: This is not recommended, please use restart in favour.
+	 *	@access		public
+	 *	@param		string		$controller		Controller to be called, default: index
+	 *	@param		string		$action			Action to be called, default: index
+	 *	@param		array		$arguments		List of arguments to add to URL
+	 *	@param		array		$parameters		Map of additional parameters to set in request
+	 *	@return		void
+	 *	@deprecated	redirecting only works in hooks within dispatching, use restart in controllers
+	 *	@todo		remove in 0.9 and handle todo in Hook::redirect
+	 */
+	public function redirect( string $controller = 'index', string $action = "index", array $arguments = array(), array $parameters = array() )
+	{
+		CMF_Hydrogen_Deprecation::getInstance()
+			->setErrorVersion( '0.8.6.4' )
+			->setExceptionVersion( '0.8.9' )
+			->message( 'Redirecting is usable for hooks within dispatching, only. Please use restart instead!' );
+
+		$request	= $this->getRequest();
+		$request->set( '__controller', $controller );
+		$request->set( '__action', $action );
+		$request->set( '__arguments', $arguments );
+		foreach( $parameters as $key => $value )
+			if( !empty( $key ) )
+				$request->set( $key, $value );
+	}
+
+	/**
+	 *	Redirects to given URI, allowing URIs external to current application.
+	 *	Attention: This *WILL* effect the URL displayed in browser / need request clients (eG. cURL) to allow forwarding.
+	 *
+	 *	Alias for restart with parameters $allowForeignHost set to TRUE.
+	 *	Similar to: $this->restart( 'http://foreign.tld/', NULL, TRUE );
+	 *
+	 *	HTTP status will be 200 or second parameter.
+	 *
+	 *	@access		public
+	 *	@param		string		$uri				URI to request, may be external
+	 *	@param		integer		$status				HTTP status code to send, default: NULL -> 200
+	 *	@return		void
+	 *	@todo		kriss: check for better HTTP status
+	 */
+	public function relocate( string $uri, int $status = NULL )
+	{
+		$this->restart( $uri, $status, TRUE );
+	}
+
+	/**
+	 *	Redirects by requesting a URI.
+	 *	Attention: This *WILL* effect the URL displayed in browser / need request clients (eG. cURL) to allow forwarding.
+	 *
+	 *	By default, redirect URIs are are request path within the current application, eg. "./[CONTROLLER]/[ACTION]"
+	 *	ATTENTION: For browser compatibility local paths should start with "./"
+	 *
+	 *	If seconds parameter is set to TRUE, redirects to a path inside the current controller.
+	 *	Therefore the given URI needs to be a path inside the current controller.
+	 *	This would look like this: $this->restart( '[ACTION]', TRUE );
+	 *	Of course you can append actions arguments and parameters.
+	 *
+	 *	If third parameter is set to a valid HTTP status code, the code and its HTTP status text will be set for response.
+	 *
+	 *	If forth parameter is set to TRUE, redirects to URIs outside the current domain are allowed.
+	 *	This would look like this: $this->restart( 'http://foreign.tld/', FALSE, NULL, TRUE );
+	 *	There is a shorter alias: $this->relocate( 'http://foreign.tld/' );
+	 *
+	 *	@access		public
+	 *	@param		string		$uri				URI to request
+	 *	@param		integer		$status				HTTP status code to send, default: NULL -> 200
+	 *	@param		boolean		$allowForeignHost	Flag: allow redirection outside application base URL, default: no
+	 *	@param		integer		$modeFrom			How to handle FROM parameter from request or for new request, not handled atm
+	 *	@return		void
+	 *	@link		https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#3xx_Redirection HTTP status codes
+	 *	@todo		kriss: implement automatic lookout for "from" request parameter
+	 *	@todo		kriss: implement handling of FROM request parameter, see controller constants
+	 *	@todo		kriss: concept and implement anti-loop {@see http://dev.(ceusmedia.de)/cmKB/?MTI}
+	 */
+	public function restart( string $uri, ?int $status = NULL, bool $allowForeignHost = FALSE, int $modeFrom = 0 ){
+		$base	= "";
+		if( !preg_match( "/^http/", $uri ) ){														//  URI is not starting with HTTP scheme
+			$base	= $this->getBaseUrl();															//  get application base URI
+		}
+		if( !$allowForeignHost ){																	//  redirect to foreign domain not allowed
+			$scheme		= getEnv( 'HTTPS' ) ? 'https' : 'http';
+			$hostFrom	= parse_url( $scheme.'://'.getEnv( 'HTTP_HOST' ), PHP_URL_HOST );			//  current host domain
+			$hostTo		= parse_url( $base.$uri, PHP_URL_HOST );									//  requested host domain
+			if( $hostFrom !== $hostTo ){															//  both are not matching
+				$message	= 'Redirection to foreign host is not allowed.';						//  error message
+				if( $this->has( 'messenger' ) ){													//  messenger is available
+					$this->getMessenger()->noteFailure( $message );									//  note message
+					$this->modules->callHook( 'App', 'onException', $this );						//  call module hooks for end of env construction
+					$this->restart( NULL, NULL, TRUE );												//  redirect to start
+				}
+				print( $message );																	//  otherwise print message
+				exit;																				//  and exit
+			}
+		}
+	#	$this->database->close();																	//  close database connection
+	#	$this->session->close();																	//  close session
+		if( $status )																				//  a HTTP status code is to be set
+			Net_HTTP_Status::sendHeader( (int) $status );											//  send HTTP status code header
+		header( "Location: ".$base.$uri );															//  send HTTP redirect header
+
+		$link	= UI_HTML_Tag::create( 'a', $base.$uri, array( 'href' => $base.$uri ) );
+		$text	= UI_HTML_Tag::create( 'small', 'Redirecting to '.$link.' ...' );
+		$page	= new UI_HTML_PageFrame();
+		$page->addMetaTag( 'http-equiv', 'refresh', '0; '.$base.$uri );
+		$page->addBody( $text );
+		print( $page->build() );
+		exit;																						//  and exit application
+	}
+
+	//  --  PROTECTED  --  //
 
 	/**
 	 *	Detects basic environmental web and local information.
@@ -166,7 +356,8 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment{
 	 *	@throws		CMF_Hydrogen_Environment_Exception	if strict mode and no document root path has been provided by web server
 	 *	@throws		CMF_Hydrogen_Environment_Exception	if strict mode and no script file path has been provided by web server
 	 */
-	protected function detectSelf( $strict = TRUE ){
+	protected function detectSelf( bool $strict = TRUE )
+	{
 		if( $strict ){
 			if( !getEnv( 'HTTP_HOST' ) ){															//  application has been executed outside a valid web server environment or no HTTP host has been provided by web server
 				throw new CMF_Hydrogen_Environment_Exception(
@@ -194,71 +385,6 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment{
 		$this->path		= preg_replace( "@^/$@", "", dirname( getEnv( 'SCRIPT_NAME' ) ) )."/";		//  note requested working path
 		$this->url		= $this->scheme.'://'.$hostWithPort.$this->path;							//  note calculated base application URI
 		$this->uri		= $this->root.$this->path;													//  note calculated absolute base application path
-	}
-
-	/**
-	 *	Returns Cookie Object.
-	 *	@access		public
-	 *	@return		Net_HTTP_Cookie
-	 */
-	public function getCookie(){
-		if( !is_object( $this->cookie ) )
-			throw new RuntimeException( 'Cookie resource not initialized within environment' );
-		return $this->cookie;
-	}
-
-	/**
-	 *	Returns Messenger Object.
-	 *	@access		public
-	 *	@return		CMF_Hydrogen_Environment_Resource_Messenger
-	 */
-	public function getMessenger(){
-		return $this->messenger;
-	}
-
-	/**
-	 *	Get resource to communicate with chat server.
-	 *	@access		public
-	 *	@return		CMF_Hydrogen_Environment_Resource_Page
-	 */
-	public function getPage(){
-		return $this->page;
-	}
-
-	/**
-	 *	Returns Router Object.
-	 *	@access		public
-	 *	@return		CMF_Hydrogen_Router_Abstract
-	 */
-	public function getRouter(){
-		return $this->router;
-	}
-
-	/**
-	 *	Returns Request Object.
-	 *	@access		public
-	 *	@return		Net_HTTP_Request_Receiver
-	 */
-	public function getRequest(){
-		return $this->request;
-	}
-
-	/**
-	 *	Returns HTTP Response Object.
-	 *	@access		public
-	 *	@return		Net_HTTP_Request_Response
-	 */
-	public function getResponse(){
-		return $this->response;
-	}
-
-	/**
-	 *	Returns Session Object.
-	 *	@access		public
-	 *	@return		Net_HTTP_Session
-	 */
-	public function getSession(){
-		return $this->session;
 	}
 
 	/**
@@ -332,7 +458,8 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment{
 	 *	@param		boolean		$packStyleSheets	Flag: compress Stylesheet, default: TRUE
 	 *	@return		void
 	 */
-	protected function initPage( $pageJavaScripts = TRUE, $packStyleSheets = TRUE ){
+	protected function initPage( bool $pageJavaScripts = TRUE, bool $packStyleSheets = TRUE )
+	{
 		$this->page	= new CMF_Hydrogen_Environment_Resource_Page( $this );
 		$this->page->setPackaging( $pageJavaScripts, $packStyleSheets );
 		$this->page->setBaseHref( $this->getBaseUrl( self::$configKeyBaseHref ) );
@@ -350,7 +477,8 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment{
 	 *	@access		protected
 	 *	@return		Net_HTTP_Request
 	 */
-	protected function initRequest(){
+	protected function initRequest()
+	{
 		$this->request		= new Net_HTTP_Request();
 		$this->request->fromEnv( FALSE/*$this->has( 'session' )*/ );
 		$this->clock->profiler->tick( 'env: request' );
@@ -361,18 +489,21 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment{
 	 *	@access		protected
 	 *	@return		Net_HTTP_Response
 	 */
-	protected function initResponse(){
+	protected function initResponse()
+	{
 		$this->response	= new Net_HTTP_Response();
 		$this->clock->profiler->tick( 'env: response' );
 	}
 
-	protected function initRouter( $routerClass = NULL ){
+	protected function initRouter( string $routerClass = NULL )
+	{
 		$classRouter	= $routerClass ? $routerClass : self::$classRouter;
 		$this->router	= Alg_Object_Factory::createObject( $classRouter, array( $this ) );
 		$this->clock->profiler->tick( 'env: router' );
 	}
 
-	protected function initSession( $keyPartitionName = NULL, $keySessionName = NULL ){
+	protected function initSession( string $keyPartitionName = NULL, string $keySessionName = NULL )
+	{
 		$partitionName	= md5( getCwd() );
 		$sessionName	= 'sid';
 		if( $keyPartitionName && $this->config->get( $keyPartitionName ) )
@@ -413,118 +544,8 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment{
 			$this->modules->callHook( 'Session', 'init', $this->session );
 	}
 
-	protected function registerResourceToClose( $resourceKey ){
+	protected function registerResourceToClose( string $resourceKey )
+	{
 		$this->resourcesToClose[]	= $resourceKey;
-	}
-
-	/**
-	 *	Redirects by setting different Controller and Action.
-	 *	Attention: This will *NOT* effect the URL in browser nor need cURL requests to allow forwarding.
-	 *	Attention: This is not recommended, please use restart in favour.
-	 *	@access		public
-	 *	@param		string		$controller		Controller to be called, default: index
-	 *	@param		string		$action			Action to be called, default: index
-	 *	@param		array		$arguments		List of arguments to add to URL
-	 *	@param		array		$parameters		Map of additional parameters to set in request
-	 *	@return		void
-	 *	@deprecated	redirecting only works in hooks within dispatching, use restart in controllers
-	 *	@todo		remove in 0.9 and handle todo in Hook::redirect
-	 */
-	public function redirect( $controller = 'index', $action = "index", $arguments = array(), $parameters = array() ){
-		CMF_Hydrogen_Deprecation::getInstance()
-			->setErrorVersion( '0.8.6.4' )
-			->setExceptionVersion( '0.8.9' )
-			->message( 'Redirecting is usable for hooks within dispatching, only. Please use restart instead!' );
-
-		$request	= $this->getRequest();
-		$request->set( '__controller', $controller );
-		$request->set( '__action', $action );
-		$request->set( '__arguments', $arguments );
-		foreach( $parameters as $key => $value )
-			if( !empty( $key ) )
-				$request->set( $key, $value );
-	}
-
-	/**
-	 *	Redirects to given URI, allowing URIs external to current application.
-	 *	Attention: This *WILL* effect the URL displayed in browser / need request clients (eG. cURL) to allow forwarding.
-	 *
-	 *	Alias for restart with parameters $allowForeignHost set to TRUE.
-	 *	Similar to: $this->restart( 'http://foreign.tld/', NULL, TRUE );
-	 *
-	 *	HTTP status will be 200 or second parameter.
-	 *
-	 *	@access		public
-	 *	@param		string		$uri				URI to request, may be external
-	 *	@param		integer		$status				HTTP status code to send, default: NULL -> 200
-	 *	@return		void
-	 *	@todo		kriss: check for better HTTP status
-	 */
-	public function relocate( $uri, $status = NULL ){
-		$this->restart( $uri, $status, TRUE );
-	}
-
-	/**
-	 *	Redirects by requesting a URI.
-	 *	Attention: This *WILL* effect the URL displayed in browser / need request clients (eG. cURL) to allow forwarding.
-	 *
-	 *	By default, redirect URIs are are request path within the current application, eg. "./[CONTROLLER]/[ACTION]"
-	 *	ATTENTION: For browser compatibility local paths should start with "./"
-	 *
-	 *	If seconds parameter is set to TRUE, redirects to a path inside the current controller.
-	 *	Therefore the given URI needs to be a path inside the current controller.
-	 *	This would look like this: $this->restart( '[ACTION]', TRUE );
-	 *	Of course you can append actions arguments and parameters.
-	 *
-	 *	If third parameter is set to a valid HTTP status code, the code and its HTTP status text will be set for response.
-	 *
-	 *	If forth parameter is set to TRUE, redirects to URIs outside the current domain are allowed.
-	 *	This would look like this: $this->restart( 'http://foreign.tld/', FALSE, NULL, TRUE );
-	 *	There is a shorter alias: $this->relocate( 'http://foreign.tld/' );
-	 *
-	 *	@access		public
-	 *	@param		string		$uri				URI to request
-	 *	@param		integer		$status				HTTP status code to send, default: NULL -> 200
-	 *	@param		boolean		$allowForeignHost	Flag: allow redirection outside application base URL, default: no
-	 *	@param		integer		$modeFrom			How to handle FROM parameter from request or for new request, not handled atm
-	 *	@return		void
-	 *	@link		https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#3xx_Redirection HTTP status codes
-	 *	@todo		kriss: implement automatic lookout for "from" request parameter
-	 *	@todo		kriss: implement handling of FROM request parameter, see controller constants
-	 *	@todo		kriss: concept and implement anti-loop {@see http://dev.(ceusmedia.de)/cmKB/?MTI}
-	 */
-	public function restart( $uri, $status = NULL, $allowForeignHost = FALSE, $modeFrom = 0 ){
-		$base	= "";
-		if( !preg_match( "/^http/", $uri ) ){														//  URI is not starting with HTTP scheme
-			$base	= $this->getBaseUrl();															//  get application base URI
-		}
-		if( !$allowForeignHost ){																	//  redirect to foreign domain not allowed
-			$scheme		= getEnv( 'HTTPS' ) ? 'https' : 'http';
-			$hostFrom	= parse_url( $scheme.'://'.getEnv( 'HTTP_HOST' ), PHP_URL_HOST );			//  current host domain
-			$hostTo		= parse_url( $base.$uri, PHP_URL_HOST );									//  requested host domain
-			if( $hostFrom !== $hostTo ){															//  both are not matching
-				$message	= 'Redirection to foreign host is not allowed.';						//  error message
-				if( $this->has( 'messenger' ) ){													//  messenger is available
-					$this->getMessenger()->noteFailure( $message );									//  note message
-					$this->modules->callHook( 'App', 'onException', $this );						//  call module hooks for end of env construction
-					$this->restart( NULL, NULL, TRUE );												//  redirect to start
-				}
-				print( $message );																	//  otherwise print message
-				exit;																				//  and exit
-			}
-		}
-	#	$this->database->close();																		//  close database connection
-	#	$this->session->close();																	//  close session
-		if( $status )																				//  a HTTP status code is to be set
-			Net_HTTP_Status::sendHeader( (int) $status );											//  send HTTP status code header
-		header( "Location: ".$base.$uri );															//  send HTTP redirect header
-
-		$link	= UI_HTML_Tag::create( 'a', $base.$uri, array( 'href' => $base.$uri ) );
-		$text	= UI_HTML_Tag::create( 'small', 'Redirecting to '.$link.' ...' );
-		$page	= new UI_HTML_PageFrame();
-		$page->addMetaTag( 'http-equiv', 'refresh', '0; '.$base.$uri );
-		$page->addBody( $text );
-		print( $page->build() );
-		exit;																						//  and exit application
 	}
 }

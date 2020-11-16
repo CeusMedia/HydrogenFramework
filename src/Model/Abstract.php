@@ -1,29 +1,32 @@
 <?php
-abstract class CMF_Hydrogen_Model_Abstract{
-
+abstract class CMF_Hydrogen_Model_Abstract
+{
 	protected $env;
+
 	protected $idKey;
+
 	protected $className;
 
-	public function __construct( CMF_Hydrogen_Environment $env ){
+	public function __construct( CMF_Hydrogen_Environment $env )
+	{
 		$this->env	= $env;
 		$this->__onInit();
 		$this->className	= get_class( $this );
 	}
 
-	protected function __onInit(){
-		if( !$this->idKey )
-			throw new Exception( sprintf( 'No ID key set for model %s', $this->className ) );
-	}
-
 	/*  --  ABSTRACT CRUDIC METHODS  --  */
 
-	abstract public function count( $conditions = array() );
+	abstract public function count( array $conditions = array() ): int;
+
 	abstract public function create( $data );
-	abstract public function delete( $id );
-	abstract public function index( $conditions = array(), $orders = array(), $limits = array() );
-	abstract public function read( $id );
-	abstract public function update( $id, $data );
+
+	abstract public function delete( string $id );
+
+	abstract public function index( array $conditions = array(), array $orders = array(), array $limits = array() ): array;
+
+	abstract public function read( string $id );
+
+	abstract public function update( string $id, $data );
 
 
 	/*  --  ALIAS METHODS FOR COMFORT  --  */
@@ -41,27 +44,32 @@ abstract class CMF_Hydrogen_Model_Abstract{
 		$this->create( /*$id, */$data );
 	}
 
-	public function edit( $id, $data ){
+	public function edit( string $id, $data ){
 		$this->update( $id, $data );
 	}
 
-	public function get( $id ){
+	public function get( string $id )
+	{
 		return $this->read( $id );
 	}
 
-	public function getAll( $conditions = array(), $orders = array(), $limits = array() ){
+	public function getAll( array $conditions = array(), array $orders = array(), array $limits = array() ): array
+	{
 		return $this->index( $conditions, $orders, $limits );
 	}
 
-	public function getAllByIndex( $indexKey, $indexValue, $orders = array(), $limits = array() ){
+	public function getAllByIndex( string $indexKey, $indexValue, array $orders = array(), array $limits = array() ): array
+	{
 		return $this->index( array( $indexKey => $indexValue ), $orders, $limits );
 	}
 
-	public function getAllByIndices( $indices, $orders = array(), $limits = array() ){
+	public function getAllByIndices( array $indices, array $orders = array(), array $limits = array() ): array
+	{
 		return $this->index( $indices, $orders, $limits );
 	}
 
-	public function has( $id ){
+	public function has( string $id ): bool
+	{
 		try{
 			@$this->get( $id );
 			return TRUE;
@@ -70,11 +78,13 @@ abstract class CMF_Hydrogen_Model_Abstract{
 		return FALSE;
 	}
 
-	public function remove( $id ){
+	public function remove( string $id )
+	{
 		return $this->delete( $id );
 	}
 
-	public function removeByIndex( $indexKey, $indexValue ){
+	public function removeByIndex( string $indexKey, $indexValue ): int
+	{
 		$items	= $this->index( array( $indexKey => $indexValue ) );
 		foreach( $items as $item ){
 			$item	= (array) $item;
@@ -87,7 +97,8 @@ abstract class CMF_Hydrogen_Model_Abstract{
 		return count( $items );
 	}
 
-	public function removeByIndices( $indices ){
+	public function removeByIndices( array $indices ): int
+	{
 		$items	= $this->index( $indices );
 		foreach( $items as $item ){
 			$item	= (array) $item;
@@ -98,5 +109,13 @@ abstract class CMF_Hydrogen_Model_Abstract{
 			$this->delete( $item[$this->idKey] );
 		}
 		return count( $items );
+	}
+
+	//  --  PROTECTED  --  //
+
+	protected function __onInit()
+	{
+		if( !$this->idKey )
+			throw new Exception( sprintf( 'No ID key set for model %s', $this->className ) );
 	}
 }

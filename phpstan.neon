@@ -1,6 +1,6 @@
 includes:
 #	- vendor/phpstan/phpstan-strict-rules/rules.neon
-#	- phpstan-baseline.neon
+	- phpstan-baseline.neon
 
 parameters:
 	level: 1

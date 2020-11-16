@@ -34,24 +34,15 @@
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			Code Documentation
  */
-class CMF_Hydrogen_Application_Console extends CMF_Hydrogen_Application_Abstract{
-	public function __construct( CMF_Hydrogen_Environment $env = NULL ){
+class CMF_Hydrogen_Application_Console extends CMF_Hydrogen_Application_Abstract
+{
+	public function __construct( CMF_Hydrogen_Environment $env = NULL )
+	{
 		if( self::$classEnvironment === 'CMF_Hydrogen_Environment_Web' )
 			self::$classEnvironment	= 'CMF_Hydrogen_Environment_Console';
 		parent::__construct( $env );
 //		$this->env->set( 'request', new Console_Command_ArgumentParser() );
 	}
-
-	/**
-	 *	Executes called command.
-	 *	@access		protected
-	 *	@todo		implement
-	 *	@throws		RuntimeException	since not implemented yet
-	 */
-	protected function dispatch( $default = NULL ){
-		throw new RuntimeException( 'Dispatching is disabled for console applications' );
-	}
-
 
 	/**
 	 *	General main application method.
@@ -60,7 +51,8 @@ class CMF_Hydrogen_Application_Console extends CMF_Hydrogen_Application_Abstract
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function run(){
+	public function run()
+	{
 		throw new RuntimeException( 'Not implemented' );
 /*		error_reporting( E_ALL );
 		try{
@@ -72,5 +64,18 @@ class CMF_Hydrogen_Application_Console extends CMF_Hydrogen_Application_Abstract
 		catch( Exception $e ){
 			die( "Error: ".$e->getMessage()."\n" );
 		}*/
+	}
+
+	//  --  PROTECTED  --  //
+
+	/**
+	 *	Executes called command.
+	 *	@access		protected
+	 *	@todo		implement
+	 *	@throws		RuntimeException	since not implemented yet
+	 */
+	protected function dispatch( $default = NULL )
+	{
+		throw new RuntimeException( 'Dispatching is disabled for console applications' );
 	}
 }

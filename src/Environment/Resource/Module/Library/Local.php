@@ -65,7 +65,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local extends CMF_Hydroge
 	/**
 	 *	@todo		check if this is needed anymore and remove otherwise
 	 */
-	public function callHook( $resource, $event, $context, $arguments = array() )
+	public function callHook( string $resource, string $event, $context, $arguments = array() )
 	{
 		$captain	= $this->env->getCaptain();
 		$countHooks	= $captain->callHook( $resource, $event, $context, $arguments );
@@ -168,8 +168,9 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local extends CMF_Hydroge
 	 *	@access		public
 	 *	@param		array		$features		List of module definition features to remove
 	 */
-	public function stripFeatures( array $features ){
-		if( !count( $features ) )
+	public function stripFeatures( array $features )
+	{
+		if( count( $features ) === 0 )
 			return;
 		foreach( $this->modules as $moduleId => $module ){
 			foreach( $features as $feature ){

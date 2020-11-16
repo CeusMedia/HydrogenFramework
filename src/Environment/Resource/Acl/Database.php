@@ -37,54 +37,8 @@
  */
 class CMF_Hydrogen_Environment_Resource_Acl_Database extends CMF_Hydrogen_Environment_Resource_Acl_Abstract
 {
-	/**
-	 *	Returns all rights of a role.
-	 *	@access		protected
-	 *	@param		integer		$roleId			Role ID
-	 *	@return		array
-	 */
-	protected function getRights( $roleId )
+	public function index( string $controller = NULL, $roleId = NULL ): array
 	{
-		if( $this->hasFullAccess( $roleId ) )
-			return array();
-		if( $this->hasNoAccess( $roleId ) )
-			return array();
-		if( !isset( $this->rights[$roleId] ) )
-		{
-			$model	= new Model_Role_Right( $this->env );
-			$this->rights[$roleId]	= array();
-			foreach( $model->getAllByIndex( 'roleId', $roleId ) as $right ){
-				$controller = strtolower( str_replace( '/', '_', $right->controller ) );
-				if( !isset( $this->rights[$roleId][$controller] ) )
-					$this->rights[$roleId][$controller]	= array();
-				$this->rights[$roleId][$controller][]	= $right->action;
-			}
-		}
-		return $this->rights[$roleId];
-	}
-
-	/**
-	 *	Returns Role.
-	 *	@access		protected
-	 *	@param		integer		$roleId			Role ID
-	 *	@return		array
-	 */
-	protected function getRole( $roleId )
-	{
-		if( !$roleId )
-			return array();
-		if( !$this->roles )
-		{
-			$model	= new Model_Role( $this->env );
-			foreach( $model->getAll() as $role )
-				$this->roles[$role->roleId]	= $role;
-		}
-		if( !isset( $this->roles[$roleId] ) )
-			throw new OutOfRangeException( 'Role with ID '.$roleId.' is not existing' );
-		return $this->roles[$roleId];
-	}
-
-	public function index( $controller = NULL, $roleId = NULL ){
 		if( $roleId === NULL ){
 			if( !$this->env->has( 'session' ) )
 				return array();
@@ -111,40 +65,6 @@ class CMF_Hydrogen_Environment_Resource_Acl_Database extends CMF_Hydrogen_Enviro
 		}
 	}
 
-/*	protected function listActions( $controller ){
-		$model	= new Model_Role_Right( $this->env );
-		$list	= array();
-		foreach( $model->getAllByIndex( 'controller', $controller ) as $action )
-			if( !in_array( $action, $list ) )
-				$list[]	= $action;
-		return $list;
-	}*/
-
-	protected function listControllers(){
-		$model	= new Model_Role_Right( $this->env );
-		$list	= array();
-		foreach( $model->getAll( array(), array( 'controller' => 'ASC' ) ) as $controller )
-			if( !in_array( $controller, $list ) )
-				$list[]	= $controller;
-		return $list;
-	}
-
-	/**
-	 *	Scan controller classes for actions using disclosure.
-	 *	@access		protected
-	 *	@return		void
-	 */
-	protected function scanControllerActions(){
-		$disclosure	= new CMF_Hydrogen_Environment_Resource_Disclosure();
-		$classes	= $disclosure->reflect( 'classes/Controller/' );
-		foreach( $classes as $className => $classData ){
-			$className	= strtolower( str_replace( '/', '_', $className ) );
-			$this->controllerActions[$className]	= array();
-			foreach( $classData->methods as $methodName => $methodData )
-				$this->controllerActions[$className][]	= $methodName;
-		}
-	}
-
 	/**
 	 *	Allowes access to a controller action for a role.
 	 *	@access		public
@@ -152,8 +72,9 @@ class CMF_Hydrogen_Environment_Resource_Acl_Database extends CMF_Hydrogen_Enviro
 	 *	@param		string		$controller		Name of Controller
 	 *	@param		string		$action			Name of Action
 	 *	@return		integer
+	 *	@todo 		refactor return type to string
 	 */
-	public function setRight( $roleId, $controller, $action )
+	public function setRight( $roleId, string $controller, string $action )
 	{
 		if( $this->hasFullAccess( $roleId ) )
 			return -1;
@@ -167,5 +88,88 @@ class CMF_Hydrogen_Environment_Resource_Acl_Database extends CMF_Hydrogen_Enviro
 		);
 		$model	= new Model_Role_Right( $this->env );
 		return $model->add( $data );
+	}
+
+	//  --  PROTECTED  --  //
+
+	/**
+	 *	Returns all rights of a role.
+	 *	@access		protected
+	 *	@param		integer		$roleId			Role ID
+	 *	@return		array
+	 */
+	protected function getRights( $roleId ): array
+	{
+		if( $this->hasFullAccess( $roleId ) )
+			return array();
+		if( $this->hasNoAccess( $roleId ) )
+			return array();
+		if( !isset( $this->rights[$roleId] ) ){
+			$model	= new Model_Role_Right( $this->env );
+			$this->rights[$roleId]	= array();
+			foreach( $model->getAllByIndex( 'roleId', $roleId ) as $right ){
+				$controller = strtolower( str_replace( '/', '_', $right->controller ) );
+				if( !isset( $this->rights[$roleId][$controller] ) )
+					$this->rights[$roleId][$controller]	= array();
+				$this->rights[$roleId][$controller][]	= $right->action;
+			}
+		}
+		return $this->rights[$roleId];
+	}
+
+	/**
+	 *	Returns Role.
+	 *	@access		protected
+	 *	@param		integer		$roleId			Role ID
+	 *	@return		array|object
+	 */
+	protected function getRole( $roleId )
+	{
+		if( !$roleId )
+			return array();
+		if( !$this->roles ){
+			$model	= new Model_Role( $this->env );
+			foreach( $model->getAll() as $role )
+				$this->roles[$role->roleId]	= $role;
+		}
+		if( !isset( $this->roles[$roleId] ) )
+			throw new OutOfRangeException( 'Role with ID '.$roleId.' is not existing' );
+		return $this->roles[$roleId];
+	}
+
+/*	protected function listActions( $controller ){
+		$model	= new Model_Role_Right( $this->env );
+		$list	= array();
+		foreach( $model->getAllByIndex( 'controller', $controller ) as $action )
+			if( !in_array( $action, $list ) )
+				$list[]	= $action;
+		return $list;
+	}*/
+
+	protected function listControllers(): array
+	{
+		$model	= new Model_Role_Right( $this->env );
+		$list	= array();
+		foreach( $model->getAll( array(), array( 'controller' => 'ASC' ) ) as $controller )
+			if( !in_array( $controller, $list ) )
+				$list[]	= $controller;
+		return $list;
+	}
+
+	/**
+	 *	Scan controller classes for actions using disclosure.
+	 *	@access		protected
+	 *	@return		void
+	 */
+	protected function scanControllerActions()
+	{
+		$disclosure	= new CMF_Hydrogen_Environment_Resource_Disclosure();
+		$classes	= $disclosure->reflect( 'classes/Controller/' );
+		foreach( $classes as $className => $classData ){
+			$className	= strtolower( str_replace( '/', '_', $className ) );
+			$this->controllerActions[$className]	= array();
+			foreach( $classData->methods as $methodName => $methodData )
+				$this->controllerActions[$className][]	= $methodName;
+		}
 	}
 }

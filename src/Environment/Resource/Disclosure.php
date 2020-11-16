@@ -16,9 +16,11 @@
  *	@copyright		2012-2020 Ceus Media
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
+ *	@deprecated		use module Resource_Disclosure instead
+ *	@todo			remove in version 0.9
  */
-class CMF_Hydrogen_Environment_Resource_Disclosure{
-
+class CMF_Hydrogen_Environment_Resource_Disclosure
+{
 	protected $options	= array(
 		'classPrefix'		=> 'Controller_',
 		'readMethods'		=> TRUE,
@@ -34,11 +36,17 @@ class CMF_Hydrogen_Environment_Resource_Disclosure{
 		'methodFilter'		=> ReflectionMethod::IS_PUBLIC
 	);
 
-	public function __construct( $options = array() ){
+	public function __construct( $options = array() )
+	{
+		CMF_Hydrogen_Deprecation::getInstance()
+			->setErrorVersion( '0.8.5' )
+			->ExceptionVersion( '0.9' )
+			->message( 'Use module Resource_Disclosure instead' );
 		$this->options	= array_merge( $this->options, $options );
 	}
 
-	public function reflect( $path, $options = array() ){
+	public function reflect( string $path, array $options = array() ): array
+	{
 		$options	= array_merge( $this->options, $options );
 
 		$classes	= array();

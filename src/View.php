@@ -35,8 +35,8 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_View{
-
+class CMF_Hydrogen_View
+{
 	/**	@var		array						$data			Collected Data for View */
 	protected $data			= array();
 
@@ -102,30 +102,23 @@ class CMF_Hydrogen_View{
 		$this->__onInit();
 	}
 
-	/**
-	 *	Empty method which is called after construction and can be customised.
-	 *	@access		protected
-	 *	@return		void
-	 */
-	protected function __onInit(){}
-
-	public function addData( $key, $value, $topic = NULL )
+	public function addData( string $key, $value, $topic = NULL ): self
 	{
 		return $this->setData( array( $key => $value ), $topic );
 	}
 
-	public function addHelper( $name, $object, $parameters = array() )
+	public function addHelper( string $name, $object, array $parameters = array() ): self
 	{
-		if( is_object( $object ) )
-		{
+		if( is_object( $object ) ){
 			$object->setEnv( $this->env );
 			$this->helpers->set( $name, $object );
 		}
 		else
-			$this->registerHelper($name, $object, $parameters);
+			$this->registerHelper( $name, $object, $parameters );
+		return $this;
 	}
 
-	public function getContentUri( $fileKey, $path = NULL )
+	public function getContentUri( string $fileKey, string $path = NULL ): string
 	{
 		$path		= preg_replace( '/^(.+)(\/)*$/U', '\\1/', $path );
 		$pathLocale	= $this->env->getLanguage()->getLanguagePath();
@@ -144,7 +137,7 @@ class CMF_Hydrogen_View{
 		throw new InvalidArgumentException( 'No view data by key "'.htmlentities( $key, ENT_QUOTES, 'UTF-8' ).'"' );
 	}
 
-	public function getHelper( $name, $strict = TRUE )
+	public function getHelper( string $name, bool $strict = TRUE )
 	{
 		if( isset( $this->helpers[$name] ) )
 			return $this->helpers[$name];
@@ -153,79 +146,46 @@ class CMF_Hydrogen_View{
 		throw new InvalidArgumentException( 'No view helper set by name "'.htmlentities( $name, ENT_QUOTES, 'UTF-8' ).'"' );
 	}
 
-	public function getHelpers(){
+	public function getHelpers(): array
+	{
 		return $this->helpers;
 	}
 
-	protected function getTemplateUri( $controller, $action )
-	{
-		$fileKey	= $controller.'/'.$action.'.php';
-		return $this->getTemplateUriFromFile( $fileKey );
-	}
-
-	/**
-	 *	Returns File Name of Template.
-	 *	Uses config::path.templates and defaults to 'templates/'.
-	 *	@access		protected
-	 *	@param		string		$controller		Name of Controller
-	 *	@param		string		$action			Name of Action
-	 *	@return		string
-	 */
-	protected function getTemplateUriFromFile( $fileKey )
-	{
-		return $this->pathTemplates.$fileKey;
-	}
-
-	/**
-	 *	Loads View Class of called Controller.
-	 *	@access		protected
-	 *	@param		string		$section	Section in locale file
-	 *	@param		string		$topic		Locale file key, eg. test/my, default: current controller
-	 *	@return		void
-	 */
-	protected function getWords( $section = NULL, $topic = NULL ){
-		if( empty( $topic ) /*&& $this->env->getLanguage()->hasWords( $this->controller ) */)
-			$topic = $this->controller;
-		if( empty( $section ) )
-			return $this->env->getLanguage()->getWords( $topic );
-		return (object) $this->env->getLanguage()->getSection( $topic, $section );
-	}
-
-	public function hasContent( $controller, $action, $path = NULL, $extension = '.html' )
+	public function hasContent( string $controller, string $action, ?string $path = NULL, string $extension = '.html' ): bool
 	{
 		$fileKey	= $controller.'/'.$action.$extension;
 		return $this->hasContentFile( $fileKey, $path );
 	}
 
-	public function hasContentFile( $fileKey, $path = NULL )
+	public function hasContentFile( string $fileKey, ?string $path = NULL ): bool
 	{
 		$uri	= $this->getContentUri( $fileKey, $path );
 		return file_exists( $uri );
 	}
 
-	public function hasData( $key )
+	public function hasData( string $key ): bool
 	{
 		return isset( $this->data[$key] );
 	}
 
-	public function hasHelper( $name )
+	public function hasHelper( string $name ): bool
 	{
 		return isset( $this->helpers[$name] );
 	}
 
-	public function hasTemplate( $controller, $action )
+	public function hasTemplate( string $controller, string $action ): bool
 	{
 		$uri		= $this->getTemplateUri( $controller, $action );
 		return file_exists( $uri );
 	}
 
-	public function hasTemplateFile( $fileKey )
+	public function hasTemplateFile( string $fileKey ): bool
 	{
 		$uri	= $this->getTemplateUriFromFile( $fileKey );
 		return file_exists( $uri );
 	}
 
-	public function loadContent( $controller, $action, $data = array() )
+	public function loadContent( string $controller, string $action, array $data = array() ): string
 	{
 		$fileKey	= 'html/'.$controller.'/'.$action.'.html';
 		return $this->loadContentFile( $fileKey, $data );
@@ -234,7 +194,7 @@ class CMF_Hydrogen_View{
 	/**
 	 *	@todo	remove use of UI_Template
 	 */
-	public function loadContentFile( $fileKey, $data = array(), $path = NULL )
+	public function loadContentFile( string $fileKey, array $data = array(), ?string $path = NULL ): string
 	{
 		if( !is_array( $data ) )																	//  no data given
 			$data	= array();																		//  ensure empty array
@@ -260,8 +220,9 @@ class CMF_Hydrogen_View{
 	 *	@param		string		$path		Path to files within locales, like "html/controller/action/"
 	 *	@param		array		$keys		List of file keys (without .html extension)
 	 *	@return		array		Map of collected file contents
-     */
-	public function loadContentFiles( $path, $keys, $data = array() ){
+	 */
+	public function loadContentFiles( string $path, array $keys, array $data = array() ): array
+	{
 		$list	= array();
 		$path	= preg_replace( "/\/+$/", "", $path ).'/';											//  correct path
 		$keys	= is_string( $keys ) ? array( $keys ) : $keys;										//  convert single key to list
@@ -285,7 +246,7 @@ class CMF_Hydrogen_View{
 	 *	@param		boolean		$renderContent		Flag: inject content blocks of modules
 	 *	@return		string
 	 */
-	public function loadTemplate( $controller, $action, $data = array(), $renderContent = TRUE )
+	public function loadTemplate( string $controller, string $action, array $data = array(), bool $renderContent = TRUE ): string
 	{
 		$fileKey	= $controller.'/'.$action.'.php';
 		$uri		= $this->getTemplateUri( $controller, $action );
@@ -294,7 +255,7 @@ class CMF_Hydrogen_View{
 		return $this->loadTemplateFile( $fileKey, $data, $renderContent );
 	}
 
-	public function loadTemplateFile( $fileName, $data = array(), $renderContent = TRUE )
+	public function loadTemplateFile( string $fileName, array $data = array(), bool $renderContent = TRUE ): string
 	{
 		$filePath	= $this->getTemplateUriFromFile( $fileName );
 		if( !file_exists( $filePath ) )
@@ -323,8 +284,9 @@ class CMF_Hydrogen_View{
 	 *	@param		array		$keys		List of file keys (without .html extension)
 	 *	@param		string		$path		Path to files within locales, like "html/controller/action/"
 	 *	@return		array		Prefixed map of collected file contents mapped by prefixed IDs
-     */
-	public function populateTexts( $keys, $path, $data = array(), $prefix = "text" ){
+	 */
+	public function populateTexts( array $keys, string $path, array $data = array(), string $prefix = "text" ): array
+	{
 		if( is_string( $keys ) )																	//  list if keys is comma separated
 			$keys	= preg_split( '/\s*,\s*/', trim( trim( $keys, ',' ) ) );						//  split string into array
 		$list	= array();																			//  prepare empty list
@@ -338,6 +300,49 @@ class CMF_Hydrogen_View{
 		return $list;																				//  return map of collected files
 	}
 
+	//  --  PROTECTED  --  //
+
+	/**
+	 *	Empty method which is called after construction and can be customised.
+	 *	@access		protected
+	 *	@return		void
+	 */
+	protected function __onInit(){}
+
+	protected function getTemplateUri( string $controller, string $action ): string
+	{
+		$fileKey	= $controller.'/'.$action.'.php';
+		return $this->getTemplateUriFromFile( $fileKey );
+	}
+
+	/**
+	 *	Returns File Name of Template.
+	 *	Uses config::path.templates and defaults to 'templates/'.
+	 *	@access		protected
+	 *	@param		string		$fileKey		File key, like: controller/action.php
+	 *	@return		string
+	 */
+	protected function getTemplateUriFromFile( string $fileKey ): string
+	{
+		return $this->pathTemplates.$fileKey;
+	}
+
+	/**
+	 *	Loads View Class of called Controller.
+	 *	@access		protected
+	 *	@param		string		$section	Section in locale file
+	 *	@param		string		$topic		Locale file key, eg. test/my, default: current controller
+	 *	@return		void
+	 */
+	protected function getWords( $section = NULL, $topic = NULL )
+	{
+		if( empty( $topic ) /*&& $this->env->getLanguage()->hasWords( $this->controller ) */)
+			$topic = $this->controller;
+		if( empty( $section ) )
+			return $this->env->getLanguage()->getWords( $topic );
+		return (object) $this->env->getLanguage()->getSection( $topic, $section );
+	}
+
 	/**
 	 *	...
 	 *	Check if template file is existing MUST be done beforehand.
@@ -345,7 +350,8 @@ class CMF_Hydrogen_View{
 	 *	@param		array		$data			Additional template data, appened to assigned view data
 	 *	@return		string		Template content with applied data
 	 */
-	protected function realizeTemplate( $filePath, $data ){
+	protected function realizeTemplate( string $filePath, array $data = array() ): string
+	{
 		$___content	= '';
 		$___templateUri	= $filePath;
 		ob_start();
@@ -392,7 +398,7 @@ class CMF_Hydrogen_View{
 	 *	@param		array		$data			Additional template data, appened to assigned view data
 	 *	@return		string		Template content with applied data
 	 */
-	protected function realizeTemplateWithTEA( $filePath, $data = array() )
+	protected function realizeTemplateWithTEA( string $filePath, array $data = array() ): string
 	{
 		$data['view']		= $this;															//
 		$data['env']		= $this->env;														//
@@ -406,13 +412,15 @@ class CMF_Hydrogen_View{
 		return $template->render();																//  render content with template engine
 	}
 
-	protected function registerHelper( $name, $class, $parameters = array() )
+	protected function registerHelper( string $name, string $class, array $parameters = array() ): self
 	{
 		$object	= Alg_Object_Factory::createObject( $class, $parameters );
 		$this->addHelper( $name, $object );
+		return $this;
 	}
 
-	public function renderContent( $content, $dataType = "HTML" ){
+	public function renderContent( string $content, string $dataType = "HTML" ): string
+	{
 		$data	= (object) array(
 			'content'	=> $content,
 			'type'		=> $dataType
@@ -437,7 +445,7 @@ class CMF_Hydrogen_View{
 	 *	@param		string		$topic			Optional: Topic Name of Data
 	 *	@return		self
 	 */
-	public function setData( $data, $topic = NULL ): self
+	public function setData( array $data, $topic = NULL ): self
 	{
 		if( $topic )
 		{
@@ -482,7 +490,7 @@ class CMF_Hydrogen_View{
 	 *	@param		mixed		$mode			Concat mode: 0 - set | 1 - append, -1 - prepend
 	 *	@return		self
 	 */
-	protected function setPageTitle( $section = 'index', $key = 'title', $data = array(), $mode = 1 ): self
+	protected function setPageTitle( string $section = 'index', string $key = 'title', array $data = array(), int $mode = 1 ): self
 	{
 		$data	= $this->getData();
 		if( isset( $data['words'][$section][$key] ) )

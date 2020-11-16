@@ -66,7 +66,8 @@ class CMF_Hydrogen_Model
 	 *	@param		integer							$id				ID to focus on
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment $env, $id = NULL ){
+	public function __construct( CMF_Hydrogen_Environment $env, $id = NULL )
+	{
 		$this->setEnv( $env );
 		$this->table	= new \CeusMedia\Database\PDO\Table\Writer(
 			$this->env->getDatabase(),
@@ -89,14 +90,430 @@ class CMF_Hydrogen_Model
 	 *	Returns Data of single Line by ID.
 	 *	@access		public
 	 *	@param		array			$data			Data to add to Table
-	 *	@param		boolean			$stripTags		Flag: strip HTML Tags from values
+	 *	@param		boolean			$stripTags		Flag: strip HTML Tags from values, default: yes
 	 *	@return		integer
 	 */
-	public function add( $data, $stripTags = TRUE ){
+	public function add( array $data, bool $stripTags = TRUE )
+	{
 		$id	= $this->table->insert( $data, $stripTags );
 		$this->cache->set( $this->cacheKey.$id, $this->get( $id ) );
 		return $id;
 	}
+
+	/**
+	 *	Returns number of entries at all or for given conditions.
+	 *	@access		public
+	 *	@param		array			$conditions		Map of conditions
+	 *	@return		integer			Number of entries
+	 */
+	public function count( array $conditions = array() ): int
+	{
+		return $this->table->count( $conditions );
+	}
+
+	/**
+	 *	Returns number of entries within an index.
+	 *	@access		public
+	 *	@param		string			$key			Index Key
+	 *	@param		string			$value			Value of Index
+	 *	@return		integer			Number of entries within this index
+	 */
+	public function countByIndex( string $key, $value )
+	{
+		$conditions	= array( $key => $value );
+		return $this->table->count( $conditions );
+	}
+
+	/**
+	 *	Returns number of entries selected by map of indices.
+	 *	@access		public
+	 *	@param		array			$indices		Map of index conditions
+	 *	@return		integer			Number of entries within this index
+	 */
+	public function countByIndices( array $indices ): int
+	{
+		return $this->count( $indices );
+	}
+
+	/**
+	 *	Returns number of entries of a large table by map of conditions.
+	 *	Attention: The returned number may be inaccurat, but this is much faster.
+	 *	@access		public
+	 *	@param		array			$conditions		Map of conditions
+	 *	@return		integer			Number of entries
+	 */
+	public function countFast( array $conditions ): int
+	{
+		return $this->table->countFast( $conditions );
+	}
+
+	/**
+	 *	Modifies data of single row by ID.
+	 *	@access		public
+	 *	@param		integer			$id				ID to focus on
+	 *	@param		array			$data			Data to edit
+	 *	@param		boolean			$stripTags		Flag: strip HTML Tags from values, default: yes
+	 *	@return		integer			Number of changed rows
+	 */
+	public function edit( $id, $data, bool $stripTags = TRUE )
+	{
+		$this->table->focusPrimary( $id );
+		$result	= 0;
+		if( count( $this->table->get( FALSE ) ) )
+			$result	= $this->table->update( $data, $stripTags );
+		$this->table->defocus();
+		$this->cache->remove( $this->cacheKey.$id );
+		return $result;
+	}
+
+	/**
+	 *	Modifies data of several rows by indices.
+	 *	@access		public
+	 *	@param		array			$indices		Map of Index Keys and Values
+	 *	@param		array			$data			Data to edit
+	 *	@param		boolean			$stripTags		Flag: strip HTML Tags from values, default: yes
+	 *	@return		integer			Number of changed rows
+	 */
+	public function editByIndices( array $indices, $data, bool $stripTags = TRUE )
+	{
+		$indices	= $this->checkIndices( $indices, TRUE, TRUE );
+		return $this->table->updateByConditions( $data, $indices, $stripTags );
+	}
+
+	/**
+	 *	Returns Data of single Line by ID.
+	 *	@access		public
+	 *	@param		integer			$id				ID to focus on
+	 *	@param		string			$field			Single Field to return
+	 *	@return		mixed
+	 */
+	public function get( $id, $field = '' )
+	{
+		$field	= $this->checkField( $field, FALSE, TRUE );
+		$data	= $this->cache->get( $this->cacheKey.$id );
+		if( !$data ){
+			$this->table->focusPrimary( $id );
+			$data	= $this->table->get( TRUE );
+			$this->table->defocus();
+			$this->cache->set( $this->cacheKey.$id, $data );
+		}
+		if( strlen( trim( $field ) ) )
+			return $this->getFieldsFromResult( $data, array( $field ) );
+		return $data;
+	}
+
+	/**
+	 *	Returns Data of all Lines.
+	 *	@access		public
+	 *	@param		array			$conditions		Map of Conditions to include in SQL Query
+	 *	@param		array			$orders			Map of Orders to include in SQL Query
+	 *	@param		array			$limits			Map of Limits to include in SQL Query
+	 *	@param		array			$fields			Map of Columns to include in SQL Query
+	 *	@param		array			$groupings		List of columns to group by
+	 *	@param		array			$havings		List of conditions to apply after grouping
+	 *	@param		boolean			$strict			Flag: throw exception if result is empty and fields are selected (default: FALSE)
+	 *	@return		array
+	 */
+	public function getAll( array $conditions = array(), array $orders = array(), array $limits = array(), array $fields = array(), array $groupings = array(), array $havings = array(), bool $strict = FALSE ): array
+	{
+		$data	= $this->table->find( $fields, $conditions, $orders, $limits, $groupings, $havings );
+		if( $fields )
+			foreach( $data as $nr => $set )
+				$data[$nr]	= $this->getFieldsFromResult( $set, $fields, $strict );
+		return $data;
+	}
+
+	/**
+	 *	Returns Data of all Lines selected by Index.
+	 *	@access		public
+	 *	@param		string			$key			Key of Index
+	 *	@param		string			$value			Value of Index
+	 *	@param		array			$orders			Map of Orders to include in SQL Query
+	 *	@param		array			$limits			List of Limits to include in SQL Query
+	 *	@param		boolean			$fields			List of fields or one field to return from result
+	 *	@param		boolean			$strict			Flag: throw exception if result is empty and fields are selected (default: FALSE)
+	 *	@return		array
+	 */
+	public function getAllByIndex( string $key, $value, array $orders = array(), array $limits = array(), array $fields = array(), bool $strict = FALSE ): array
+	{
+		$this->table->focusIndex( $key, $value );
+		$data	= $this->table->get( FALSE, $orders, $limits );
+		$this->table->defocus();
+		if( $fields )
+			foreach( $data as $nr => $set )
+				$data[$nr]	= $this->getFieldsFromResult( $set, $fields, $strict );
+		return $data;
+	}
+
+	/**
+	 *	Returns Data of all Lines selected by Indices.
+	 *	@access		public
+	 *	@param		array			$indices		Map of Index Keys and Values
+	 *	@param		array			$conditions		Map of Conditions to include in SQL Query
+	 *	@param		array			$orders			Map of Orders to include in SQL Query
+	 *	@param		array			$limits			List of Limits to include in SQL Query
+	 *	@param		boolean			$fields			List of fields or one field to return from result
+	 *	@param		boolean			$strict			Flag: throw exception if result is empty and fields are selected (default: FALSE)
+	 *	@return		array
+	 */
+	public function getAllByIndices( array $indices = array(), array $orders = array(), array $limits = array(), array $fields = array(), bool $strict = FALSE )
+	{
+		$indices	= $this->checkIndices( $indices, TRUE, TRUE );
+		foreach( $indices as $key => $value )
+			$this->table->focusIndex( $key, $value );
+		$data	= $this->table->get( FALSE, $orders, $limits );
+		$this->table->defocus();
+		if( $fields )
+			foreach( $data as $nr => $set )
+				$data[$nr]	= $this->getFieldsFromResult( $set, $fields, $strict );
+		return $data;
+	}
+
+	/**
+	 *	Returns data of first entry selected by index.
+	 *	@access		public
+	 *	@param		string			$key			Key of Index
+	 *	@param		string			$value			Value of Index
+	 *	@param		array			$orders			Map of Orders to include in SQL Query
+	 *	@param		string			$fields			List of fields or one field to return from result
+	 *	@param		boolean			$strict			Flag: throw exception if result is empty (default: FALSE)
+	 *	@return		mixed			Structure depending on fetch type, string if field selected, NULL if field selected and no entries
+	 *	@todo		change argument order: move fields to end
+	 *	@throws		InvalidArgumentException			If given fields list is neither a list nor a string
+	 */
+	public function getByIndex( string $key, $value, array $orders = array(), array $fields = array(), bool $strict = FALSE )
+	{
+		if( is_string( $fields ) )
+			$fields	= strlen( trim( $fields ) ) ? array( trim( $fields ) ) : array();
+		if( !is_array( $fields ) )
+			throw new \InvalidArgumentException( 'Fields must be of array or string' );
+		foreach( $fields as $field )
+			$this->checkField( $field, FALSE, TRUE );
+		$this->table->focusIndex( $key, $value );
+		$data	= $this->table->get( TRUE, $orders );
+		$this->table->defocus();
+		return $this->getFieldsFromResult( $data, $fields, $strict );
+	}
+
+	/**
+	 *	Returns data of single line selected by indices.
+	 *	@access		public
+	 *	@param		array			$indices		Map of Index Keys and Values
+	 *	@param		array			$orders			Map of Orders to include in SQL Query
+	 *	@param		string			$fields			List of fields or one field to return from result
+	 *	@param		boolean			$strict			Flag: throw exception if result is empty (default: FALSE)
+	 *	@return		mixed			Structure depending on fetch type, string if field selected, NULL if field selected and no entries
+	 *	@throws		InvalidArgumentException			If given fields list is neither a list nor a string
+	 *	@todo  		change default value of argument 'strict' to TRUE
+	 */
+	public function getByIndices( array $indices, array $orders = array(), array $fields = array(), bool $strict = FALSE )
+	{
+		if( is_string( $fields ) )
+			$fields	= strlen( trim( $fields ) ) ? array( trim( $fields ) ) : array();
+		if( !is_array( $fields ) )
+			throw new \InvalidArgumentException( 'Fields must be of array or string' );
+		foreach( $fields as $field )
+			$field	= $this->checkField( $field, FALSE, TRUE );
+		$this->checkIndices( $indices, TRUE, TRUE );
+		foreach( $indices as $key => $value )
+			$this->table->focusIndex( $key, $value );
+		$result	= $this->table->get( TRUE, $orders );
+		$this->table->defocus();
+		return $this->getFieldsFromResult( $result, $fields, $strict );
+	}
+
+	/**
+	 *	Returns list of table columns.
+	 *	@access		public
+	 *	@return		array
+	 */
+	public function getColumns(): array
+	{
+		return $this->table->getColumns();
+	}
+
+	/**
+	 *	Returns list of distinct column values.
+	 *	@access		public
+	 *	@param		string			$column			Column to get distinct values for
+	 *	@param		array			$conditions		Map of Conditions to include in SQL Query
+	 *	@param		array			$orders			Map of Orders to include in SQL Query
+	 *	@param		array			$limits			List of Limits to include in SQL Query
+	 *	@return		array			List of distinct column values
+	 */
+	public function getDistinct( string $column, array $conditions, array $orders = array(), array $limits = array() ): array
+	{
+		return $this->table->getDistinctColumnValues( $column, $conditions, $orders, $limits );
+	}
+
+	/**
+	 *	Returns list of table index columns.
+	 *	@access		public
+	 *	@return		array
+	 */
+	public function getIndices(): array
+	{
+		return $this->table->getIndices();
+	}
+
+	public function getLastQuery()
+	{
+		return $this->table->getLastQuery();
+	}
+
+	/**
+	 *	Returns table name with or without index.
+	 *	@access		public
+	 *	@param		boolean			$prefixed		Flag: return table name with prefix
+	 *	@return		string			Table name with or without prefix
+	 */
+	public function getName( bool $prefixed = TRUE ): string
+	{
+		if( $prefixed )
+			return $this->prefix.$this->name;
+		return $this->name;
+	}
+
+	/**
+	 *	Returns primary key columns name of table.
+	 *	@access		public
+	 *	@return		string			Primary key column name
+	 */
+	public function getPrimaryKey(): string
+	{
+		return $this->table->getPrimaryKey();
+	}
+
+	/**
+	 *	Indicates whether a table row is existing by ID.
+	 *	@param		integer			$id				ID to focus on
+	 *	@return		boolean
+	 */
+	public function has( $id ): bool
+	{
+		if( $this->cache->has( $this->cacheKey.$id ) )
+			return TRUE;
+		return (bool) $this->get( $id );
+	}
+
+	/**
+	 *	Indicates whether a table row is existing by index.
+	 *	@access		public
+	 *	@param		string			$key			Key of Index
+	 *	@param		string			$value			Value of Index
+	 *	@return		boolean
+	 */
+	public function hasByIndex( string $key, $value ): bool
+	{
+		return (bool) $this->getByIndex( $key, $value );
+	}
+
+	/**
+	 *	Indicates whether a Table Row is existing by a Map of Indices.
+	 *	@access		public
+	 *	@param		array			$indices		Map of Index Keys and Values
+	 *	@return		boolean
+	 */
+	public function hasByIndices( array $indices ): bool
+	{
+		return (bool) $this->getByIndices( $indices );
+	}
+
+	/**
+	 *	Returns Data of single Line by ID.
+	 *	@access		public
+	 *	@param		integer			$id				ID to focus on
+	 *	@return		boolean
+	 */
+	public function remove( $id ): bool
+	{
+		$this->table->focusPrimary( $id );
+		$result	= FALSE;
+		if( count( $this->table->get( FALSE ) ) ){
+			$this->table->delete();
+			$result	= TRUE;
+		}
+		$this->table->defocus();
+		$this->cache->remove( $this->cacheKey.$id );
+		return $result;
+	}
+
+	/**
+	 *	Removes entries selected by index.
+	 *	@access		public
+	 *	@param		string			$key			Key of Index
+	 *	@param		string			$value			Value of Index
+	 *	@return		boolean
+	 */
+	public function removeByIndex( string $key, $value ): bool
+	{
+		$this->table->focusIndex( $key, $value );
+		$number	= 0;
+		$rows	= $this->table->get( FALSE );
+		if( count( $rows ) ){
+			$number = $this->table->delete();
+			foreach( $rows as $row ){
+				switch( $this->fetchMode ){
+					case \PDO::FETCH_CLASS:
+					case \PDO::FETCH_OBJ:
+						$id	= $row->{$this->primaryKey};
+						break;
+					default:
+						$id	= $row[$this->primaryKey];
+				}
+				$this->cache->remove( $this->cacheKey.$id );
+			}
+			$result	= TRUE;
+		}
+		$this->table->defocus();
+		return $number;
+	}
+
+	/**
+	 *	Removes entries selected by index.
+	 *	@access		public
+	 *	@param		array			$indices		Map of Index Keys and Values
+	 *	@return		integer			Number of removed entries
+	 */
+	public function removeByIndices( array $indices ): int
+	{
+		$indices	= $this->checkIndices( $indices, TRUE, TRUE );
+		foreach( $indices as $key => $value )
+			$this->table->focusIndex( $key, $value );
+
+		$number	= 0;
+		$rows	= $this->table->get( FALSE );
+		if( count( $rows ) ){
+			$number	= $this->table->delete();
+			foreach( $rows as $row ){
+				switch( $this->fetchMode ){
+					case \PDO::FETCH_CLASS:
+					case \PDO::FETCH_OBJ:
+						$id	= $row->{$this->primaryKey};
+						break;
+					default:
+						$id	= $row[$this->primaryKey];
+				}
+				$this->cache->remove( $this->cacheKey.$id );
+			}
+		}
+		$this->table->defocus();
+		return $number;
+	}
+
+	/**
+	 *	Removes all data and resets incremental counter.
+	 *	Note: This method does not return the number of removed rows.
+	 *	@access		public
+	 *	@return		void
+	 *	@see		http://dev.mysql.com/doc/refman/4.1/en/truncate.html
+	 */
+	public function truncate()
+	{
+		$this->table->truncate();
+	}
+
+	//  --  PROTECTED  --  //
 
 	/**
 	 *	Indicates whether a requested field is a table column.
@@ -112,7 +529,8 @@ class CMF_Hydrogen_Model
 	 *	@throws		InvalidArgumentException		in strict mode if field is empty but mandatory
 	 *	@throws		InvalidArgumentException		in strict mode if field is not a table column
 	 */
-	protected function checkField( $field, $mandatory = FALSE, $strict = TRUE ){
+	protected function checkField( string $field, bool $mandatory = FALSE, bool $strict = TRUE )
+	{
 		if( !is_string( $field ) ){
 			if( !$strict )
 				return FALSE;
@@ -142,259 +560,21 @@ class CMF_Hydrogen_Model
 	 *	In strict mode exceptions will be thrown if map is not an array or empty but mandatory.
 	 *	FYI: The next logical check - if index keys are valid columns and noted indices - is done by used table reader class.
 	 *	@access		protected
-	 *	@param		string			$indices		Map of Index Keys and Values
+	 *	@param		array 			$indices		Map of Index Keys and Values
 	 *	@param		string			$mandatory		Force atleast one pair, otherwise return FALSE or throw exception in strict mode
 	 *	@param		boolean			$strict			Strict mode (default): throw exception instead of returning FALSE
 	 *	@return		array|boolean	Map if valid, FALSE otherwise or exceptions in strict mode
-	 *	@throws		InvalidArgumentException		in strict mode if field is not a string
 	 *	@throws		InvalidArgumentException		in strict mode if field is empty but mandatory
+	 *	@todo		refactor return type
 	 */
-	protected function checkIndices( $indices, $mandatory = FALSE, $strict = TRUE ){
-		if( !is_array( $indices ) ){
+	protected function checkIndices( array $indices, bool $mandatory = FALSE, bool $strict = TRUE )
+	{
+		if( count( $indices ) === 0 && $mandatory ){
 			if( !$strict )
 				return FALSE;
-			throw new InvalidArgumentException( 'Index map must be an array' );
-		}
-		if( !$indices ){
-			if( $mandatory ){
-				if( !$strict )
-					return FALSE;
-				throw new InvalidArgumentException( 'Index map must have atleast one pair' );
-			}
+			throw new InvalidArgumentException( 'Index map must have atleast one pair' );
 		}
 		return $indices;
-	}
-
-	/**
-	 *	Returns number of entries at all or for given conditions.
-	 *	@access		public
-	 *	@param		array			$conditions		Map of conditions
-	 *	@return		integer			Number of entries
-	 */
-	public function count( $conditions = array() ){
-		return $this->table->count( $conditions );
-	}
-
-	/**
-	 *	Returns number of entries within an index.
-	 *	@access		public
-	 *	@param		string			$key			Index Key
-	 *	@param		string			$value			Value of Index
-	 *	@return		integer			Number of entries within this index
-	 */
-	public function countByIndex( $key, $value ){
-		$conditions	= array( $key => $value );
-		return $this->table->count( $conditions );
-	}
-
-	/**
-	 *	Returns number of entries selected by map of indices.
-	 *	@access		public
-	 *	@param		array			$indices		Map of index conditions
-	 *	@return		integer			Number of entries within this index
-	 */
-	public function countByIndices( $indices ){
-		return $this->count( $indices );
-	}
-
-	/**
-	 *	Returns number of entries of a large table by map of conditions.
-	 *	Attention: The returned number may be inaccurat, but this is much faster.
-	 *	@access		public
-	 *	@param		array			$conditions		Map of conditions
-	 *	@return		integer			Number of entries
-	 */
-	public function countFast( $conditions ){
-		return $this->table->countFast( $conditions );
-	}
-
-	/**
-	 *	Modifies data of single row by ID.
-	 *	@access		public
-	 *	@param		integer			$id				ID to focus on
-	 *	@param		array			$data			Data to edit
-	 *	@param		boolean			$stripTags		Flag: strip HTML Tags from values
-	 *	@return		integer			Number of changed rows
-	 */
-	public function edit( $id, $data, $stripTags = TRUE ){
-		$this->table->focusPrimary( $id );
-		$result	= 0;
-		if( count( $this->table->get( FALSE ) ) )
-			$result	= $this->table->update( $data, $stripTags );
-		$this->table->defocus();
-		$this->cache->remove( $this->cacheKey.$id );
-		return $result;
-	}
-
-	/**
-	 *	Modifies data of several rows by indices.
-	 *	@access		public
-	 *	@param		array			$indices		Map of Index Keys and Values
-	 *	@param		array			$data			Data to edit
-	 *	@param		boolean			$stripTags		Flag: strip HTML Tags from values
-	 *	@return		integer			Number of changed rows
-	 */
-	public function editByIndices( $indices, $data, $stripTags = TRUE ){
-		$indices	= $this->checkIndices( $indices, TRUE, TRUE );
-		return $this->table->updateByConditions( $data, $indices, $stripTags );
-	}
-
-	/**
-	 *	Returns Data of single Line by ID.
-	 *	@access		public
-	 *	@param		integer			$id				ID to focus on
-	 *	@param		string			$field			Single Field to return
-	 *	@return		mixed
-	 */
-	public function get( $id, $field = '' ){
-		$field	= $this->checkField( $field, FALSE, TRUE );
-		$data	= $this->cache->get( $this->cacheKey.$id );
-		if( !$data ){
-			$this->table->focusPrimary( $id );
-			$data	= $this->table->get( TRUE );
-			$this->table->defocus();
-			$this->cache->set( $this->cacheKey.$id, $data );
-		}
-		if( strlen( trim( $field ) ) )
-			return $this->getFieldsFromResult( $data, array( $field ) );
-		return $data;
-	}
-
-	/**
-	 *	Returns Data of all Lines.
-	 *	@access		public
-	 *	@param		array			$conditions		Map of Conditions to include in SQL Query
-	 *	@param		array			$orders			Map of Orders to include in SQL Query
-	 *	@param		array			$limits			Map of Limits to include in SQL Query
-	 *	@param		array			$fields			Map of Columns to include in SQL Query
-	 *	@param		array			$groupings		List of columns to group by
-	 *	@param		array			$havings		List of conditions to apply after grouping
-	 *	@param		boolean			$strict			Flag: throw exception if result is empty and fields are selected (default: FALSE)
-	 *	@return		array
-	 */
-	public function getAll( $conditions = array(), $orders = array(), $limits = array(), $fields = array(), $groupings = array(), $havings = array(), $strict = FALSE ){
-		$data	= $this->table->find( $fields, $conditions, $orders, $limits, $groupings, $havings );
-		if( $fields )
-			foreach( $data as $nr => $set )
-				$data[$nr]	= $this->getFieldsFromResult( $set, $fields, $strict );
-		return $data;
-	}
-
-	/**
-	 *	Returns Data of all Lines selected by Index.
-	 *	@access		public
-	 *	@param		string			$key			Key of Index
-	 *	@param		string			$value			Value of Index
-	 *	@param		array			$orders			Map of Orders to include in SQL Query
-	 *	@param		array			$limits			List of Limits to include in SQL Query
-	 *	@param		boolean			$fields			List of fields or one field to return from result
-	 *	@param		boolean			$strict			Flag: throw exception if result is empty and fields are selected (default: FALSE)
-	 *	@return		array
-	 */
-	public function getAllByIndex( $key, $value, $orders = array(), $limits = array(), $fields = array(), $strict = FALSE ){
-		$this->table->focusIndex( $key, $value );
-		$data	= $this->table->get( FALSE, $orders, $limits );
-		$this->table->defocus();
-		if( $fields )
-			foreach( $data as $nr => $set )
-				$data[$nr]	= $this->getFieldsFromResult( $set, $fields, $strict );
-		return $data;
-	}
-
-	/**
-	 *	Returns Data of all Lines selected by Indices.
-	 *	@access		public
-	 *	@param		array			$indices		Map of Index Keys and Values
-	 *	@param		array			$conditions		Map of Conditions to include in SQL Query
-	 *	@param		array			$orders			Map of Orders to include in SQL Query
-	 *	@param		array			$limits			List of Limits to include in SQL Query
-	 *	@param		boolean			$fields			List of fields or one field to return from result
-	 *	@param		boolean			$strict			Flag: throw exception if result is empty and fields are selected (default: FALSE)
-	 *	@return		array
-	 */
-	public function getAllByIndices( $indices = array(), $orders = array(), $limits = array(), $fields = array(), $strict = FALSE ){
-		$indices	= $this->checkIndices( $indices, TRUE, TRUE );
-		foreach( $indices as $key => $value )
-			$this->table->focusIndex( $key, $value );
-		$data	= $this->table->get( FALSE, $orders, $limits );
-		$this->table->defocus();
-		if( $fields )
-			foreach( $data as $nr => $set )
-				$data[$nr]	= $this->getFieldsFromResult( $set, $fields, $strict );
-		return $data;
-	}
-
-	/**
-	 *	Returns data of first entry selected by index.
-	 *	@access		public
-	 *	@param		string			$key			Key of Index
-	 *	@param		string			$value			Value of Index
-	 *	@param		array			$orders			Map of Orders to include in SQL Query
-	 *	@param		string			$fields			List of fields or one field to return from result
-	 *	@param		boolean			$strict			Flag: throw exception if result is empty (default: FALSE)
-	 *	@return		mixed			Structure depending on fetch type, string if field selected, NULL if field selected and no entries
-	 *	@todo		change argument order: move fields to end
-	 *	@throws		InvalidArgumentException			If given fields list is neither a list nor a string
-	 */
-	public function getByIndex( $key, $value, $orders = array(), $fields = array(), $strict = FALSE ){
-		if( is_string( $fields ) )
-			$fields	= strlen( trim( $fields ) ) ? array( trim( $fields ) ) : array();
-		if( !is_array( $fields ) )
-			throw new \InvalidArgumentException( 'Fields must be of array or string' );
-		foreach( $fields as $field )
-			$this->checkField( $field, FALSE, TRUE );
-		$this->table->focusIndex( $key, $value );
-		$data	= $this->table->get( TRUE, $orders );
-		$this->table->defocus();
-		return $this->getFieldsFromResult( $data, $fields, $strict );
-	}
-
-	/**
-	 *	Returns data of single line selected by indices.
-	 *	@access		public
-	 *	@param		array			$indices		Map of Index Keys and Values
-	 *	@param		array			$orders			Map of Orders to include in SQL Query
-	 *	@param		string			$fields			List of fields or one field to return from result
-	 *	@param		boolean			$strict			Flag: throw exception if result is empty (default: FALSE)
-	 *	@return		mixed			Structure depending on fetch type, string if field selected, NULL if field selected and no entries
-	 *	@throws		InvalidArgumentException			If given fields list is neither a list nor a string
-	 *	@todo  		change default value of argument 'strict' to TRUE
-	 */
-	public function getByIndices( $indices, $orders = array(), $fields = array(), $strict = FALSE ){
-		if( is_string( $fields ) )
-			$fields	= strlen( trim( $fields ) ) ? array( trim( $fields ) ) : array();
-		if( !is_array( $fields ) )
-			throw new \InvalidArgumentException( 'Fields must be of array or string' );
-		foreach( $fields as $field )
-			$field	= $this->checkField( $field, FALSE, TRUE );
-		$this->checkIndices( $indices, TRUE, TRUE );
-		foreach( $indices as $key => $value )
-			$this->table->focusIndex( $key, $value );
-		$result	= $this->table->get( TRUE, $orders );
-		$this->table->defocus();
-		return $this->getFieldsFromResult( $result, $fields, $strict );
-	}
-
-	/**
-	 *	Returns list of table columns.
-	 *	@access		public
-	 *	@return		array
-	 */
-	public function getColumns(){
-		return $this->table->getColumns();
-	}
-
-	/**
-	 *	Returns list of distinct column values.
-	 *	@access		public
-	 *	@param		string			$column			Column to get distinct values for
-	 *	@param		array			$conditions		Map of Conditions to include in SQL Query
-	 *	@param		array			$orders			Map of Orders to include in SQL Query
-	 *	@param		array			$limits			List of Limits to include in SQL Query
-	 *	@return		List of distinct column values
-	 */
-	public function getDistinct( $column, $conditions, $orders = array(), $limits = array() ){
-		return $this->table->getDistinctColumnValues( $column, $conditions, $orders, $limits );
 	}
 
 	/**
@@ -406,7 +586,8 @@ class CMF_Hydrogen_Model
 	 *	@return		string|array|object			Structure depending on result and field list length
 	 *	@throws		InvalidArgumentException			If given fields list is neither a list nor a string
 	 */
-	protected function getFieldsFromResult( $result, $fields = array(), $strict = TRUE ){
+	protected function getFieldsFromResult( $result, array $fields = array(), bool $strict = TRUE )
+	{
 		if( is_string( $fields ) )
 			$fields	= strlen( trim( $fields ) ) ? array( trim( $fields ) ) : array();
 		if( !is_array( $fields ) )
@@ -459,173 +640,18 @@ class CMF_Hydrogen_Model
 	}
 
 	/**
-	 *	Returns list of table index columns.
-	 *	@access		public
-	 *	@return		array
-	 */
-	public function getIndices(){
-		return $this->table->getIndices();
-	}
-
-	public function getLastQuery(){
-		return $this->table->getLastQuery();
-	}
-
-	/**
-	 *	Returns table name with or without index.
-	 *	@access		public
-	 *	@param		boolean			$prefixed		Flag: return table name with prefix
-	 *	@return		string			Table name with or without prefix
-	 */
-	public function getName( $prefixed = TRUE ){
-		if( $prefixed )
-			return $this->prefix.$this->name;
-		return $this->name;
-	}
-
-	/**
-	 *	Returns primary key columns name of table.
-	 *	@access		public
-	 *	@return		string			Primary key column name
-	 */
-	public function getPrimaryKey(){
-		return $this->table->getPrimaryKey();
-	}
-
-	/**
-	 *	Indicates whether a table row is existing by ID.
-	 *	@param		integer			$id				ID to focus on
-	 *	@return		boolean
-	 */
-	public function has( $id ){
-		if( $this->cache->has( $this->cacheKey.$id ) )
-			return TRUE;
-		return (bool) $this->get( $id );
-	}
-
-	/**
-	 *	Indicates whether a table row is existing by index.
-	 *	@access		public
-	 *	@param		string			$key			Key of Index
-	 *	@param		string			$value			Value of Index
-	 *	@return		boolean
-	 */
-	public function hasByIndex( $key, $value ){
-		return (bool) $this->getByIndex( $key, $value );
-	}
-
-	/**
-	 *	Indicates whether a Table Row is existing by a Map of Indices.
-	 *	@access		public
-	 *	@param		array			$indices		Map of Index Keys and Values
-	 *	@return		boolean
-	 */
-	public function hasByIndices( $indices ){
-		return (bool) $this->getByIndices( $indices );
-	}
-
-	/**
-	 *	Returns Data of single Line by ID.
-	 *	@access		public
-	 *	@param		integer			$id				ID to focus on
-	 *	@return		boolean
-	 */
-	public function remove( $id ){
-		$this->table->focusPrimary( $id );
-		$result	= FALSE;
-		if( count( $this->table->get( FALSE ) ) ){
-			$this->table->delete();
-			$result	= TRUE;
-		}
-		$this->table->defocus();
-		$this->cache->remove( $this->cacheKey.$id );
-		return $result;
-	}
-
-	/**
-	 *	Removes entries selected by index.
-	 *	@access		public
-	 *	@param		string			$key			Key of Index
-	 *	@param		string			$value			Value of Index
-	 *	@return		boolean
-	 */
-	public function removeByIndex( $key, $value ){
-		$this->table->focusIndex( $key, $value );
-		$number	= 0;
-		$rows	= $this->table->get( FALSE );
-		if( count( $rows ) ){
-			$number = $this->table->delete();
-			foreach( $rows as $row ){
-				switch( $this->fetchMode ){
-					case \PDO::FETCH_CLASS:
-					case \PDO::FETCH_OBJ:
-						$id	= $row->{$this->primaryKey};
-						break;
-					default:
-						$id	= $row[$this->primaryKey];
-				}
-				$this->cache->remove( $this->cacheKey.$id );
-			}
-			$result	= TRUE;
-		}
-		$this->table->defocus();
-		return $number;
-	}
-
-	/**
-	 *	Removes entries selected by index.
-	 *	@access		public
-	 *	@param		array			$indices		Map of Index Keys and Values
-	 *	@return		integer			Number of removed entries
-	 */
-	public function removeByIndices( $indices ){
-		$indices	= $this->checkIndices( $indices, TRUE, TRUE );
-		foreach( $indices as $key => $value )
-			$this->table->focusIndex( $key, $value );
-
-		$number	= 0;
-		$rows	= $this->table->get( FALSE );
-		if( count( $rows ) ){
-			$number	= $this->table->delete();
-			foreach( $rows as $row ){
-				switch( $this->fetchMode ){
-					case \PDO::FETCH_CLASS:
-					case \PDO::FETCH_OBJ:
-						$id	= $row->{$this->primaryKey};
-						break;
-					default:
-						$id	= $row[$this->primaryKey];
-				}
-				$this->cache->remove( $this->cacheKey.$id );
-			}
-		}
-		$this->table->defocus();
-		return $number;
-	}
-
-	/**
 	 *	Sets Environment of Controller by copying Framework Member Variables.
 	 *	@access		protected
 	 *	@param		CMF_Hydrogen_Environment	$env			Application Environment Object
-	 *	@return		void
+	 *	@return		self
 	 *	@throws		RuntimeException			if no database resource is available in given environment
 	 */
-	protected function setEnv( CMF_Hydrogen_Environment $env )
+	protected function setEnv( CMF_Hydrogen_Environment $env ): self
 	{
 		$this->env		= $env;
 		if( !$env->getDatabase() )
 			throw new RuntimeException( 'Database resource needed for '.get_class( $this ) );
 		$this->prefix	= $env->getDatabase()->getPrefix();
-	}
-
-	/**
-	 *	Removes all data and resets incremental counter.
-	 *	Note: This method does not return the number of removed rows.
-	 *	@access		public
-	 *	@return		void
-	 *	@see		http://dev.mysql.com/doc/refman/4.1/en/truncate.html
-	 */
-	public function truncate(){
-		$this->table->truncate();
+		return $this;
 	}
 }

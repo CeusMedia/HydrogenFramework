@@ -19,19 +19,25 @@
  */
 class CMF_Hydrogen_Environment_Resource_Logic
 {
+	const OS_UNKNOWN			= 0;
 	const OS_LINUX				= 1;
 	const OS_WINDOWS			= 2;
+
+	/**	@var	CMF_Hydrogen_Environment			$env	Environment object */
+	protected $env;
+
 	protected $config;
-	protected $os				= 0;
+
+	protected $os				= self::OS_UNKNOWN;
+
 	protected $timePrefixes		= array(
 		'u'		=> 1,
 		'm'		=> 1000,
 		''		=> 1000000
 	);
+
 	public $fileNameLogDev		= 'logs/dev.log';
 
-	/**	@var	CMF_Hydrogen_Environment			$env	Environment object */
-	protected $env;
 
 	/**
 	 *	Constructor.
@@ -39,7 +45,8 @@ class CMF_Hydrogen_Environment_Resource_Logic
 	 *	@param		CMF_Hydrogen_Environment		$env	Environment
 	 *	@return		void
 	 */
-	public function  __construct( CMF_Hydrogen_Environment $env ) {
+	public function  __construct( CMF_Hydrogen_Environment $env )
+	{
 		$this->env		= $env;
 		$this->config	= $env->getConfig();
 		$this->os		= self::OS_LINUX;															//  set OS to Linux by default
@@ -49,18 +56,25 @@ class CMF_Hydrogen_Environment_Resource_Logic
 		Alg_Object_MethodFactory::callObjectMethod( $this, '__onInit', $arguments, TRUE, TRUE );	//  invoke possibly extended init method
 	}
 
+	//  --  PROTECTED  --  //
+
 	protected function __onInit(){}
 
-	public function getArrayFromRequestKey( $key ){
+	protected function getArrayFromRequestKey( string $key ): array
+	{
 		$request	= $this->env->getRequest();														//  shortcut request object
 		$array		= array();
 		if( is_array( $request->get( $key ) ) )
-				foreach( $request->get( $key ) as $key => $value )
-					$array[$key]	= $value;
+			foreach( $request->get( $key ) as $key => $value )
+				$array[$key]	= $value;
 		return $array;
 	}
 
-	public function getConfiguredMicroTimeFor( $configKey ) {
+	/**
+	 *	Better implementation of getConfiguredSleepTimeFor.
+	 */
+	protected function getConfiguredMicroTimeFor( string $configKey ): int
+	{
 		$parts	= explode( '.', $configKey );
 		$last	= array_pop( $parts );
 		$path	= implode( '.', $parts );
@@ -70,20 +84,27 @@ class CMF_Hydrogen_Environment_Resource_Logic
 		throw new InvalidArgumentException( 'No valid key set' );
 	}
 
-	public function getConfiguredSleepTimeFor( $configKey ) {
+	/**
+	 *	Older implementation of getConfiguredSleepTimeFor.
+	 */
+	protected function getConfiguredSleepTimeFor( string $configKey ): int
+	{
 		if( $this->config->has( $configKey.'.usleep' ) )
 			return $this->config->get( $configKey.'.usleep' ) * 1;
 		if( $this->config->has( $configKey.'.msleep' ) )
 			return $this->config->get( $configKey.'.msleep' ) * 1000;
 		if( $this->config->has( $configKey.'.sleep' ) )
 			return $this->config->get( $configKey.'.sleep' ) * 1000000;
+		throw new InvalidArgumentException( 'No valid key set' );
 	}
 
-	public function logDev( $message ) {
+	protected function logDev( string $message )
+	{
 		error_log( $message."\n", 3, $this->fileNameLogDev );
 	}
 
-	public function microsleep( $microseconds ) {
+	protected function microsleep( int $microseconds )
+	{
 		$microseconds	= abs( $microseconds );
 		$clock			= $this->env->getClock();
 		switch( $this->os ) {

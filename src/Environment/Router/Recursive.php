@@ -52,21 +52,17 @@ class CMF_Hydrogen_Environment_Router_Recursive extends CMF_Hydrogen_Environment
 		$left	= $parts;
 		$right	= array();
 		if( strlen( trim( $path ) ) ){
-			while( count( $left ) )
-			{
+			while( count( $left ) ){
 				$class	= array();
 				foreach( $left as $part )
 					$class[]	= ucfirst( $part );
 				$className	= 'Controller_'.implode( '_', $class );
-				if( class_exists( $className ) )
-				{
+				if( class_exists( $className ) ){
 	//				remark( 'Controller Class: '.$className );
 					$controller	= implode( '/', $left );
 					$request->set( '__controller', $controller );
-					if( count( $right ) )
-					{
-						if( method_exists( $className, $right[0] ) )
-						{
+					if( count( $right ) ){
+						if( method_exists( $className, $right[0] ) ){
 	//						remark( 'Controller Method: '.$right[0] );
 							$request->set( '__action', array_shift( $right ) );
 						}

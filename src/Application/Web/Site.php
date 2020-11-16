@@ -34,8 +34,8 @@
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			Code Documentation
  */
-class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abstract{
-
+class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abstract
+{
 	public static $checkClassActionArguments	= TRUE;
 
 	/**	@var		string						$content				Collected Content to respond */
@@ -43,6 +43,30 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 
 	protected $_dev;
 
+	/**
+	 *	General main application method.
+	 *	You can copy and modify this method in your application to handle exceptions your way.
+	 *	NOTE: You need to execute $this->respond( $this->main() ) in order to start dispatching, controlling and rendering.
+	 *	@access		public
+	 *	@return		void
+	 */
+	public function run()
+	{
+		$displayErrors	= $this->env->getConfig( 'system.display.errors' );							//  get error mode from config
+		$displayErrors	= is_null( $displayErrors ) ? TRUE : (bool) $displayErrors;					//  if not set: enable error display by default
+		error_reporting( $displayErrors ? E_ALL : 0 );												//  set error reporting
+		try{
+			$this->respond( $this->main() );														//	send rendered result of dispatched controller action
+			$this->logOnComplete();																	//  handle logging after responding
+			$this->env->close();																	//  teardown environment and quit application execution
+		}
+		catch( Exception $e ){
+			UI_HTML_Exception_Page::display( $e );
+		}
+	}
+
+	//  --  PROTECTED  --  //
+	
 	/**
 	 *	Executes called Controller and stores generated View.
 	 *	@access		protected
@@ -52,7 +76,8 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 	 *	@throws		Exception	if a exception is caught and neither error view not messenger is available
 	 *	@todo		handle exception by hook call "App@onDispatchException", see below
 	 */
-	protected function control( $defaultController = NULL, $defaultAction = NULL ){
+	protected function control( $defaultController = NULL, $defaultAction = NULL )
+	{
 		$request	= $this->env->getRequest();
 		$captain	= $this->env->getCaptain();
 		$captain->callHook( 'App', 'onControl', $this, array() );
@@ -120,7 +145,8 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 	 *	@return		string
 	 *	@todo		use UI_OutputBuffer
 	 */
-	protected function main(){
+	protected function main(): string
+	{
 		ob_start();
 		$request	= $this->env->getRequest();
 		$content	= $this->control();																//  dispatch and run request
@@ -155,10 +181,12 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 	 *	Simple implementation of content response. Can be overridden for special moves.
 	 *	@access		public
 	 *	@param		string		$body		Response content body
+	 *	@param		array		$headers	List of additional headers to be set on response
 	 *	@return		object		Map of final response and number of sent bytes (members: bytesSent, compression, response)
 	 *	@todo		use UI_OutputBuffer
 	 */
-	protected function respond( $body, $headers = array() ){
+	protected function respond( string $body, array $headers = array() )
+	{
 		$response	= $this->env->getResponse();
 		$body		= ob_get_clean().$body;
 		if( $body )
@@ -180,26 +208,5 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 			'compression'	=> $compression,
 			'response'		=> $response,
 		);
-	}
-
-	/**
-	 *	General main application method.
-	 *	You can copy and modify this method in your application to handle exceptions your way.
-	 *	NOTE: You need to execute $this->respond( $this->main() ) in order to start dispatching, controlling and rendering.
-	 *	@access		public
-	 *	@return		void
-	 */
-	public function run(){
-		$displayErrors	= $this->env->getConfig( 'system.display.errors' );							//  get error mode from config
-		$displayErrors	= is_null( $displayErrors ) ? TRUE : (bool) $displayErrors;					//  if not set: enable error display by default
-		error_reporting( $displayErrors ? E_ALL : 0 );												//  set error reporting
-		try{
-			$this->respond( $this->main() );														//	send rendered result of dispatched controller action
-			$this->logOnComplete();																	//  handle logging after responding
-			$this->env->close();																	//  teardown environment and quit application execution
-		}
-		catch( Exception $e ){
-			UI_HTML_Exception_Page::display( $e );
-		}
 	}
 }

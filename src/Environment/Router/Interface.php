@@ -35,13 +35,11 @@
  */
 interface CMF_Hydrogen_Environment_Router_Interface
 {
-	public function __construct(CMF_Hydrogen_Environment $env );
+	public function __construct( CMF_Hydrogen_Environment $env );
 
-	public function getAbsoluteUri( $controller = NULL, $action = NULL, $arguments = NULL, $parameters = NULL, $fragmentId = NULL );
+	public function getAbsoluteUri( string $controller = NULL, string $action = NULL, array $arguments = array(), array $parameters = array(), string $fragmentId = NULL ): string;
 
-	public function getRelativeUri( $controller = NULL, $action = NULL, $arguments = NULL, $parameters = NULL, $fragmentId = NULL );
+	public function getRelativeUri( string $controller = NULL, string $action = NULL, array $arguments = array(), array $parameters = array(), string $fragmentId = NULL ): string;
 
 	public function parseFromRequest();
-
-	public function realizeInResponse();
 }

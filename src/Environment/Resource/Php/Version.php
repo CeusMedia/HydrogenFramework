@@ -1,39 +1,49 @@
 <?php
-class CMF_Hydrogen_Environment_Resource_Php_Version{
-
+class CMF_Hydrogen_Environment_Resource_Php_Version
+{
 	protected $version;
 
-	public function __construct(){
+	public function __construct()
+	{
 		$this->version	= phpversion();
 	}
 
-	public function equalsTo( $version ){
+	public function equalsTo( string $version ): bool
+	{
 		return $this->compare( $version, '==' );
 	}
 
-	public function get(){
+	public function get(): string
+	{
 		return $this->version;
 	}
 
-	public function has( $version ){
+	public function has( string $version ): bool
+	{
 		return $this->isAtLeast( $version );
 	}
 
-	public function isAtLeast( $version ){
+	public function isAtLeast( string $version ): bool
+	{
 		return $this->compare( $version, '>=' );
 	}
 
-	public function isAtMost( $version ){
+	public function isAtMost( string $version ): bool
+	{
 		return $this->compare( $version, '<=' );
 	}
 
-	public function isGreaterThan( $version ){
+	public function isGreaterThan( string $version ): bool
+	{
 		return $this->compare( $version, '>' );
 	}
 
-	public function isLowerThan( $version ){
+	public function isLowerThan( string $version ): bool
+	{
 		return $this->compare( $version, '<' );
 	}
+
+	//  --  PROTECTED  --  //
 
 	/**
 	 *	...
@@ -42,7 +52,8 @@ class CMF_Hydrogen_Environment_Resource_Php_Version{
 	 *	@param		string			$comparator		Comparison operator (<,>,<=,>=)
 	 *	@return		boolean
 	 */
-	protected function compare( $version, $comparator ){
+	protected function compare( string $version, string $comparator ): bool
+	{
 		return version_compare( $this->version, $version, $comparator );
 	}
 }

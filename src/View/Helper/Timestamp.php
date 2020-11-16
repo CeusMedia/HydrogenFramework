@@ -35,33 +35,31 @@
  *	@copyright		2010-2020 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
+ *	@todo 			enable environment after interface and abstract support $env on construction
  */
-class CMF_Hydrogen_View_Helper_Timestamp extends CMF_Hydrogen_View_Helper_Abstract{
-
+class CMF_Hydrogen_View_Helper_Timestamp extends CMF_Hydrogen_View_Helper_Abstract
+{
 	protected $timestamp			= NULL;
+
 	protected $stringEmpty			= "";
+
 	public static $formatDatetime	= 'Y-m-d H:i:s';
+
 	public static $formatDate		= 'Y-m-d';
+
 	public static $formatTime		= 'H:i:s';
 
-	public function __construct( $timestamp, $stringEmpty = "---" ){
+	/**
+	 *	@todo 		enable environment after interface and abstract support $env on construction
+	 */
+	public function __construct( /*CMF_Hydrogen_Environment $env,*/ $timestamp, string $stringEmpty = "---" )
+	{
 		$this->timestamp	= $timestamp;
 		$this->stringEmpty	= $stringEmpty;
 	}
 
-	public function toDatetime( $format = NULL, $html = FALSE ){
-		if( !$this->timestamp )
-			return $this->stringEmpty;
-		$format	= $format ? $format : self::$formatDatetime;
-		$date	= date( $format, $this->timestamp );
-		if( $html ){
-			$attr	= array( 'class' => 'datetime' );
-			$date	= UI_HTML_Tag::create( 'span', $date, $attr );
-		}
-		return $date;
-	}
-
-	public function toDate( $format = NULL, $html = FALSE ){
+	public function toDate( string $format = NULL, bool $html = FALSE ): string
+	{
 		if( !$this->timestamp )
 			return '-';
 		$format	= $format ? $format : self::$formatDate;
@@ -73,19 +71,21 @@ class CMF_Hydrogen_View_Helper_Timestamp extends CMF_Hydrogen_View_Helper_Abstra
 		return $date;
 	}
 
-	public function toTime( $format = NULL, $html = FALSE ){
+	public function toDatetime( string $format = NULL, bool $html = FALSE ): string
+	{
 		if( !$this->timestamp )
-			return '-';
-		$format	= $format ? $format : self::$formatTime;
-		$time	= date( $format, $this->timestamp );
+			return $this->stringEmpty;
+		$format	= $format ? $format : self::$formatDatetime;
+		$date	= date( $format, $this->timestamp );
 		if( $html ){
-			$attr	= array( 'class' => 'time' );
-			$time	= UI_HTML_Tag::create( 'span', $time, $attr );
+			$attr	= array( 'class' => 'datetime' );
+			$date	= UI_HTML_Tag::create( 'span', $date, $attr );
 		}
-		return $time;
+		return $date;
 	}
 
-	public function toPhrase( $env, $html = FALSE, $languageTopic = 'main', $languageSection = 'phrases-time' ){
+	public function toPhrase( CMF_Hydrogen_Environment $env, bool $html = FALSE, string $languageTopic = 'main', string $languageSection = 'phrases-time' ): string
+	{
 		if( !$this->timestamp )
 			return '-';
 
@@ -104,7 +104,21 @@ class CMF_Hydrogen_View_Helper_Timestamp extends CMF_Hydrogen_View_Helper_Abstra
 		return $phrase;
 	}
 
-	static public function statePhrase( $timestamp, $env, $html = FALSE, $languageTopic = 'main', $languageSection = 'phrases-time' ){
+	public function toTime( string $format = NULL, bool $html = FALSE ): string
+	{
+		if( !$this->timestamp )
+			return '-';
+		$format	= $format ? $format : self::$formatTime;
+		$time	= date( $format, $this->timestamp );
+		if( $html ){
+			$attr	= array( 'class' => 'time' );
+			$time	= UI_HTML_Tag::create( 'span', $time, $attr );
+		}
+		return $time;
+	}
+
+	public static function statePhrase( $timestamp, CMF_Hydrogen_Environment $env, bool $html = FALSE, string $languageTopic = 'main', string $languageSection = 'phrases-time' ): string
+	{
 		$instance	= new CMF_Hydrogen_View_Helper_Timestamp( $timestamp );
 		return $instance->toPhrase( $env, $html, $languageTopic, $languageSection );
 	}

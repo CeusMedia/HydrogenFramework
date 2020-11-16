@@ -33,8 +33,8 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_View_Helper_StyleSheet{
-
+class CMF_Hydrogen_View_Helper_StyleSheet
+{
 	protected $pathBase				= "";
 	protected $pathCache			= "";
 	protected $prefix				= "";
@@ -46,7 +46,8 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 	protected $useCompression		= FALSE;
 	public $indent					= "\t\t";
 
-	public function __construct( $basePath = NULL ){
+	public function __construct( $basePath = NULL )
+	{
 		if( $basePath !== NULL )
 			$this->setBasePath( $basePath );
 		for( $i=0; $i<=9; $i++ ){
@@ -60,11 +61,13 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 	 *	@access		public
 	 *	@param		string		$style		StyleSheet block
 	 *	@param		integer		$level		Optional: Load level (1-9 or {top(1),mid(=5),end(9)}, default: 5)
-	 *	@return		void
+	 *	@return		self
 	 */
-	public function addStyle( $style, $level = CMF_Hydrogen_Environment_Resource_Captain::LEVEL_MID ){
+	public function addStyle( string $style, $level = CMF_Hydrogen_Environment_Resource_Captain::LEVEL_MID ): self
+	{
 		$level	= CMF_Hydrogen_Environment_Resource_Captain::interpretLoadLevel( $level );		//  sanitize level supporting old string values
 		$this->styles[$level][]		= $style;
+		return $this;
 	}
 
 	/**
@@ -73,11 +76,13 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 	 *	@param		string		$url		StyleSheet URL
 	 *	@param		integer		$level		Optional: Load level (1-9 or {top(1),mid(=5),end(9)}, default: 5)
 	 *	@param		array		$attributes	Optional: Additional style tag attributes
-	 *	@return		void
+	 *	@return		self
 	 */
-	public function addUrl( $url, $level = CMF_Hydrogen_Environment_Resource_Captain::LEVEL_MID, $attributes = array() ){
+	public function addUrl( string $url, $level = CMF_Hydrogen_Environment_Resource_Captain::LEVEL_MID, array $attributes = array() ): self
+	{
 		$level	= CMF_Hydrogen_Environment_Resource_Captain::interpretLoadLevel( $level );		//  sanitize level supporting old string values
 		$this->urls[$level][]		= array( $url, $attributes );
+		return $this;
 	}
 
 	/**
@@ -85,7 +90,8 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function clearCache(){
+	public function clearCache()
+	{
 		$prefix = preg_replace( "/^([a-z0-9]+)/", "\\1", $this->prefix );
 		$index	= new FS_File_RegexFilter( $this->pathCache, '/^'.$prefix.'\w+\.css$/' );
 		foreach( $index as $file ){
@@ -98,7 +104,8 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 	 *	@access		public
 	 *	@return		string
 	 */
-	public function getPackageHash(){
+	public function getPackageHash(): string
+	{
 		$copy	= $this->getUrlList();
 		sort( $copy );
 		$key	= implode( '_', $copy );
@@ -110,7 +117,8 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 	 *	@access		protected
 	 *	@return		string
 	 */
-	protected function getPackageCacheFileName(){
+	protected function getPackageCacheFileName(): string
+	{
 		$hash	= $this->getPackageHash();
 		return $this->pathCache.$this->prefix.$hash.$this->suffix.'.css';
 	}
@@ -121,7 +129,8 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 	 *	@param		bool		$forceFresh		Flag: force fresh creation instead of using cache
 	 *	@return		string
 	 */
-	protected function getPackageFileName( $forceFresh = FALSE ){
+	protected function getPackageFileName( bool $forceFresh = FALSE ): string
+	{
 		$fileCss	= $this->getPackageCacheFileName();												//  calculate CSS package file name for collected CSS files
 		if( file_exists( $fileCss ) && !$forceFresh )												//  CSS package file has been built before and is not to be rebuild
 			return $fileCss;																		//  return CSS package file name
@@ -162,7 +171,8 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 	 *	@access		public
 	 *	@return		array
 	 */
-	public function getStyleList(){
+	public function getStyleList(): array
+	{
 		$list	= array();
 		foreach( $this->styles as $level => $map ){
 			foreach( $map as $style ){
@@ -177,7 +187,8 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 	 *	@access		public
 	 *	@return		array
 	 */
-	public function getUrlList(){
+	public function getUrlList(): array
+	{
 		$list	= array();
 		foreach( $this->urls as $level => $map ){
 			foreach( $map as $url ){
@@ -196,7 +207,8 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 	 *	@param		bool		$forceFresh		Flag: force fresh creation instead of using cache
 	 *	@return		string
 	 */
-	public function render( $indentEndTag = FALSE, $forceFresh = FALSE ){
+	public function render( bool $indentEndTag = FALSE, bool $forceFresh = FALSE ): string
+	{
 		$links		= '';
 		$styles		= '';
 		$urls		= $this->getUrlList();
@@ -239,39 +251,51 @@ class CMF_Hydrogen_View_Helper_StyleSheet{
 		return $links;
 	}
 
-	public function setBasePath( $path ){
+	public function setBasePath( string $path ): self
+	{
 		$this->pathBase	= $path;
+		return $this;
 	}
 
 	/**
 	 *	Set path to file cache.
 	 *	@access		public
 	 *	@param		string		$path		Path to file cache
-	 *	@return		void
+	 *	@return		self
 	 */
-	public function setCachePath( $path ){
+	public function setCachePath( string $path ): self
+	{
 		$this->pathCache = $path;
+		return $this;
 	}
 
-	public function setCompression( $compression ){
-		$this->useCompression	= (bool) $compression;
+	public function setCompression( bool $compression ): self
+	{
+		$this->useCompression	= $compression;
+		return $this;
 	}
 
-	public function setPrefix( $prefix ){
+	public function setPrefix( string $prefix ): self
+	{
 		$this->prefix	= $prefix;
+		return $this;
 	}
 
-	public function setSuffix( $suffix ){
+	public function setSuffix( string $suffix ): self
+	{
 		$this->suffix	= $suffix;
+		return $this;
 	}
 
 	/**
 	 *	Sets revision for versioning cache.
 	 *	@access		public
 	 *	@param		mixed		$revision	Revision number or version string
-	 *	@return		void
+	 *	@return		self
 	 */
-	public function setRevision( $revision ){
+	public function setRevision( string $revision ):self
+	{
 		$this->revision	= $revision;
+		return $this;
 	}
 }

@@ -17,14 +17,15 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Environment_Resource_CacheDummy{
-
+class CMF_Hydrogen_Environment_Resource_CacheDummy
+{
 	/**
 	 *	Simulate to flush cache.
 	 *	@access		public
 	 *	@return		boolean		Always true
 	 */
-	public function flush(){
+	public function flush(): bool
+	{
 		return TRUE;
 	}
 
@@ -34,7 +35,8 @@ class CMF_Hydrogen_Environment_Resource_CacheDummy{
 	 *	@param		string		$key			Cache key
 	 *	@return		NULL		Always null
 	 */
-	public function get( $key ){
+	public function get( string $key )
+	{
 		return NULL;
 	}
 
@@ -43,7 +45,8 @@ class CMF_Hydrogen_Environment_Resource_CacheDummy{
 	 *	@access		public
 	 *	@return		boolean		Always false.
 	 */
-	public function has( $key ){
+	public function has( string $key ): bool
+	{
 		return FALSE;
 	}
 
@@ -54,7 +57,8 @@ class CMF_Hydrogen_Environment_Resource_CacheDummy{
 	 *	@param		mixed		$value			Value to store
 	 *	@return		boolean		Always true
 	 */
-	public function set( $key, $value ){
+	public function set( string $key, $value ): bool
+	{
 		return TRUE;
 	}
 
@@ -63,7 +67,8 @@ class CMF_Hydrogen_Environment_Resource_CacheDummy{
 	 *	@access		public
 	 *	@return		boolean		Always true.
 	 */
-	public function remove( $key ){
+	public function remove( string $key ): bool
+	{
 		return TRUE;
 	}
 
@@ -73,6 +78,7 @@ class CMF_Hydrogen_Environment_Resource_CacheDummy{
 	 *	@param		string		$content		Context within cache storage
 	 *	@return		void
 	 */
-	public function setContext( $content ){
+	public function setContext( string $content )
+	{
 	}
 }

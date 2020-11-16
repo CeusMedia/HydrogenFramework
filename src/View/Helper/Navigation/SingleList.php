@@ -47,7 +47,7 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_H
 	protected $linksToSkip		= array();
 	public static $pathRequestKey		= "__path";
 
-	public function __construct( $linkMap, $innerClass = NULL, $innerId = NULL )
+	public function __construct( array $linkMap, string $innerClass = NULL, string $innerId = NULL )
 	{
 		CMF_Hydrogen_Deprecation::getInstance()
 			->setErrorVersion( '0.8.5' )
@@ -60,10 +60,6 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_H
 			$this->innerId		= $innerId;
 	}
 
-	public function skipLink( $path ){
-		$this->linksToSkip[]	= $path;
-	}
-
 	/**
 	 *	...
 	 *	@access		public
@@ -72,7 +68,8 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_H
 	 *	@todo		correct implementation: rank by depth, not length, see todo below
 	 *	@return		string
 	 */
-	static public function getCurrentKey( $linkMap, $current = NULL ){
+	public static function getCurrentKey( array $linkMap, string $current = NULL ): string
+	{
 		$path		= $current;
 		if( isset( $_REQUEST[self::$pathRequestKey] ) && $current === NULL )
 			$path	= utf8_decode( $_REQUEST[self::$pathRequestKey] );
@@ -95,7 +92,7 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_H
 		return $selected;												//  return longest link path
 	}
 
-	public function render( $current = NULL, $niceUrls = FALSE )
+	public function render( string $current = NULL, bool $niceUrls = FALSE ): string
 	{
 		$path	= empty( $_REQUEST[self::$pathRequestKey] ) ? $current : $_REQUEST[self::$pathRequestKey];
 		$active	= $this->getCurrentKey( $this->linkMap, $current );
@@ -121,13 +118,21 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_H
 		return UI_HTML_Tag::create( 'div', $list, $attr );
 	}
 
-	public function setInnerClass( $class )
+	public function setInnerClass( string $class ): self
 	{
 		$this->innerClass	= $class;
+		return $this;
 	}
 
-	public function setInnerId( $id )
+	public function setInnerId( string $id ): self
 	{
 		$this->innerId	= $id;
+		return $this;
+	}
+
+	public function skipLink( string $path ): self
+	{
+		$this->linksToSkip[]	= $path;
+		return $this;
 	}
 }

@@ -36,8 +36,8 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Environment_Resource_Messenger{
-
+class CMF_Hydrogen_Environment_Resource_Messenger
+{
 	/**	@var		CMF_Hydrogen_Environment	$env			Application Environment Object */
 	protected $env;
 
@@ -62,7 +62,8 @@ class CMF_Hydrogen_Environment_Resource_Messenger{
 	 *	@param		CMF_Hydrogen_Environment		$env			Instance of any Session Handler
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment $env, $enabled = TRUE  ){
+	public function __construct( CMF_Hydrogen_Environment $env, bool $enabled = TRUE )
+	{
 		$this->env		= $env;
 		$this->enabled	= $enabled;
 	}
@@ -71,33 +72,16 @@ class CMF_Hydrogen_Environment_Resource_Messenger{
 	 *	Adds a Heading Text to Message Block.
 	 *	@access		public
 	 *	@param		string		$heading			Text of Heading
-	 *	@return		void
+	 *	@return		self
 	 */
-	public function addHeading( $heading ){
+	public function addHeading( string $heading ): self
+	{
 		$headings	= $this->env->getSession()->get( $this->keyHeadings );
 		if( !is_array( $headings ) )
 			$headings	= array();
 		$headings[]	= $heading;
 		$this->env->getSession()->set( $this->keyHeadings, $headings );
-	}
-
-	/**
-	 *	Inserts arguments into a Message.
-	 *	@access		protected
-	 *	@param		string		$arguments			List with message and parameters to apply using sprintf
-	 *	@return		string		Resulting message or original message if insufficient parameters
-	 */
-	protected function applyParametersToMessage( $arguments ){
-		if( count( $arguments ) > 1 ){
-			foreach( $arguments as $nr => $argument )
-				if( $nr )
-					$arguments[$nr]	= htmlentities( $argument, ENT_QUOTES, 'UTF-8' );
-			$function	= new ReflectionFunction( 'sprintf' );
-			$message	= $function->invokeArgs( $arguments );
-		}
-		else
-			$message	= array_shift( $arguments );
-		return $message;
+		return $this;
 	}
 
 	/**
@@ -105,7 +89,8 @@ class CMF_Hydrogen_Environment_Resource_Messenger{
 	 *	@access		public
 	 *	@return		string
 	 */
-	public function buildHeadings(){
+	public function buildHeadings(): string
+	{
 		$headings	= $this->env->getSession()->get( $this->keyHeadings );
 		$heading		= implode( " / ", $headings );
 		return $heading;
@@ -119,7 +104,8 @@ class CMF_Hydrogen_Environment_Resource_Messenger{
 	 *	@param		bool		$linkResources	Flag: try to link resources in message
 	 *	@return		string
 	 */
-	public function buildMessages( $timeFormat = NULL, $clear = TRUE, $linkResources = FALSE ){
+	public function buildMessages( string $timeFormat = NULL, bool $clear = TRUE, bool $linkResources = FALSE ): string
+	{
 		$messages	= (array) $this->env->getSession()->get( $this->keyMessages );
 		$list		= '';
 		$ids		= array();
@@ -168,16 +154,20 @@ class CMF_Hydrogen_Environment_Resource_Messenger{
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function clear(){
+	public function clear()
+	{
 		$this->env->getSession()->set( $this->keyHeadings, array() );
 		$this->env->getSession()->set( $this->keyMessages, array() );
 	}
 
-	public function enable( $yesOrNo ){
-		$this->enabled	= (boolean) $yesOrNo;
+	public function enable( bool $yesOrNo ): self
+	{
+		$this->enabled	= $yesOrNo;
+		return $this;
 	}
 
-	public function getMessages(){
+	public function getMessages(): array
+	{
 		return (array) $this->env->getSession()->get( $this->keyMessages );
 	}
 
@@ -186,7 +176,8 @@ class CMF_Hydrogen_Environment_Resource_Messenger{
 	 *	@access		public
 	 *	@return		integer		Number of noted errors or failures
 	 */
-	public function gotError(){
+	public function gotError(): int
+	{
 		$count		= 0;
 		$messages	= (array) $this->env->getSession()->get( $this->keyMessages );
 		foreach( $messages as $message )
@@ -199,10 +190,11 @@ class CMF_Hydrogen_Environment_Resource_Messenger{
 	 *	Saves a Error Message on the Message Stack.
 	 *	@access		public
 	 *	@param		string		$message			Message to display
-	 *	@param		string		[$arg1]*			Arguments to be set into Message
+	 *	@param		string		[$argX]*			Arguments to be set into Message
 	 *	@return		void
 	 */
-	public function noteError( $message, $arg1 = NULL ){
+	public function noteError( string $message, $arg1 = NULL, $arg2 = NULL )
+	{
 		$message	= $this->applyParametersToMessage( func_get_args() );
 		$this->noteMessage( 1, $message);
 	}
@@ -211,10 +203,11 @@ class CMF_Hydrogen_Environment_Resource_Messenger{
 	 *	Saves a Failure Message on the Message Stack.
 	 *	@access		public
 	 *	@param		string		$message			Message to display
-	 *	@param		string		[$arg1]*			Arguments to be set into Message
+	 *	@param		string		[$argX]*			Arguments to be set into Message
 	 *	@return		void
 	 */
-	public function noteFailure( $message, $arg1 = NULL ){
+	public function noteFailure( string $message, $arg1 = NULL, $arg2 = NULL )
+	{
 		$message	= $this->applyParametersToMessage( func_get_args() );
 		$this->noteMessage( 0, $message);
 	}
@@ -223,11 +216,11 @@ class CMF_Hydrogen_Environment_Resource_Messenger{
 	 *	Saves a Notice Message on the Message Stack.
 	 *	@access		public
 	 *	@param		string		$message			Message to display
-	 *	@param		string		$arg1				Argument to be set into Message
-	 *	@param		string		$arg2				Argument to be set into Message
+	 *	@param		string		[$argX]*			Arguments to be set into Message
 	 *	@return		void
 	 */
-	public function noteNotice( $message, $arg1 = NULL, $arg2 = NULL ){
+	public function noteNotice( string $message, $arg1 = NULL, $arg2 = NULL )
+	{
 		$message	= $this->applyParametersToMessage( func_get_args() );
 		$this->noteMessage( 2, $message);
 	}
@@ -236,13 +229,35 @@ class CMF_Hydrogen_Environment_Resource_Messenger{
 	 *	Saves a Success Message on the Message Stack.
 	 *	@access		public
 	 *	@param		string		$message			Message to display
-	 *	@param		string		$arg1				Argument to be set into Message
-	 *	@param		string		$arg2				Argument to be set into Message
+	 *	@param		string		[$argX]*			Arguments to be set into Message
 	 *	@return		void
 	 */
-	public function noteSuccess( $message, $arg1 = NULL, $arg2 = NULL ){
+	public function noteSuccess( string $message, $arg1 = NULL, $arg2 = NULL )
+	{
 		$message	= $this->applyParametersToMessage( func_get_args() );
-		$this->noteMessage( 3, $message);
+		$this->noteMessage( 3, $message );
+	}
+
+	//  --  PROTECTED  --  //
+
+	/**
+	 *	Inserts arguments into a Message.
+	 *	@access		protected
+	 *	@param		array		$arguments			List with message and parameters to apply using sprintf
+	 *	@return		string		Resulting message or original message if insufficient parameters
+	 */
+	protected function applyParametersToMessage( array $arguments ): string
+	{
+		if( count( $arguments ) > 1 ){
+			foreach( $arguments as $nr => $argument )
+				if( $nr )
+					$arguments[$nr]	= htmlentities( $argument, ENT_QUOTES, 'UTF-8' );
+			$function	= new ReflectionFunction( 'sprintf' );
+			$message	= $function->invokeArgs( $arguments );
+		}
+		else
+			$message	= array_shift( $arguments );
+		return $message;
 	}
 
 	/**
@@ -252,7 +267,8 @@ class CMF_Hydrogen_Environment_Resource_Messenger{
 	 *	@param		string		$message			Message to display
 	 *	@return		void
 	 */
-	protected function noteMessage( $type, $message){
+	protected function noteMessage( int $type, string $message )
+	{
 		if( $this->enabled ){
 			if( is_array( $message ) || is_object( $message ) || is_resource( $message ) )
 				throw new InvalidArgumentException( 'Message must be a string or numeric' );

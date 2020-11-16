@@ -40,9 +40,6 @@ abstract class CMF_Hydrogen_Environment_Router_Abstract implements CMF_Hydrogen_
 
 	/**	@var	CMF_Hydrogen_Environment			$env		Environment object */
 	protected $env;
-#	public $configKeyBaseHref	= 'app.base.url';
-#	public $configKeyBaseHref	= 'app.base.href';
-	public $configKeyBaseHref	= 'application.base';
 
 	public function __construct( CMF_Hydrogen_Environment $env )
 	{
@@ -50,7 +47,20 @@ abstract class CMF_Hydrogen_Environment_Router_Abstract implements CMF_Hydrogen_
 		$this->parseFromRequest();
 	}
 
-	public function getRelativeUri( $controller = NULL, $action = NULL, $arguments = NULL, $parameters = NULL, $fragmentId = NULL )
+	public function getAbsoluteUri( string $controller = NULL, string $action = NULL, array $arguments = array(), $parameters = array(), string $fragmentId = NULL ): string
+	{
+		$uri	= $this->getRelativeUri( $controller, $action, $arguments, $parameters, $fragmentId );
+		if( strlen( $uri ) ){
+			if( $uri == '.' )
+				$uri	= '';
+			if( substr( $uri, 0, 2 ) == './' )
+				$uri	= substr( $uri, 2 );
+		}
+		$uri	= $this->env->url.$uri;
+		return $uri;
+	}
+
+	public function getRelativeUri( string $controller = NULL, string $action = NULL, array $arguments = array(), array $parameters = array(), string $fragmentId = NULL ): string
 	{
 		$data	= array(
 			'controller'	=> $this->env->request->get( '__controller' ),
@@ -59,8 +69,7 @@ abstract class CMF_Hydrogen_Environment_Router_Abstract implements CMF_Hydrogen_
 			'parameters'	=> array(),
 		);
 		$uri	= '.';
-		if( !is_null( $controller ) )
-		{
+		if( !is_null( $controller ) ){
 			$uri	.= '/'.$controller;
 			if( !is_null( $action ) )
 				$uri	.= '/'.$action;
@@ -75,25 +84,4 @@ abstract class CMF_Hydrogen_Environment_Router_Abstract implements CMF_Hydrogen_
 			$uri	.= '#'.$fragmentId;
 		return $uri;
 	}
-
-	public function getAbsoluteUri( $controller = NULL, $action = NULL, $arguments = NULL, $parameters = NULL, $fragmentId = NULL )
-	{
-		$uri	= $this->getRelativeUri( $controller, $action, $arguments, $parameters, $fragmentId );
-		if( strlen( $uri ) )
-		{
-			if( $uri == '.' )
-				$uri	= '';
-			if( substr( $uri, 0, 2 ) == './' )
-				$uri	= substr( $uri, 2 );
-		}
-		$uri	= $this->env->config->get( $this->optionKeyBaseHref ).$uri;
-		return $uri;
-	}
-
-	public function realizeInResponse(){
-		if( !$this->env->response )
-			throw new RuntimeException( 'Route filtering needs a registered response resource' );
-		$body	= $this->env->response->getBody();
-		xmp( $body );
-		die;
-	}}
+}

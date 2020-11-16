@@ -137,12 +137,12 @@ class CMF_Hydrogen_Environment_Resource_Language
 	 *	Returns array of language sections within a language topic.
 	 *	@access		public
 	 *	@param		string		$topic			Topic of Language
-	 *	@param		bool		$strict			Flag: throw exception if language topic is not loaded
-	 *	@param		bool		$force			Flag: note Failure if not loaded
+	 *	@param		bool		$strict			Flag: throw exceptions on error, default: yes
+	 *	@param		bool		$force			Flag: show error messages on error and strict mode is off, default: yes
 	 *	@return		array
 	 *	@throws		RuntimeException if language topic is not loaded/existing and strict is on
 	 */
-	public function getWords( $topic, $strict = TRUE, $force = TRUE ): array
+	public function getWords( string $topic, bool $strict = TRUE, bool $force = TRUE ): array
 	{
 		if( !strlen( trim( $topic ) ) )
 			throw new InvalidArgumentException( "getWords: Topic cannot be empty" );
@@ -160,7 +160,7 @@ class CMF_Hydrogen_Environment_Resource_Language
 		return array();
 	}
 
-	public function hasWords( $topic ): bool
+	public function hasWords( string $topic ): bool
 	{
 		return isset( $this->data[$topic] );
 	}
@@ -170,12 +170,13 @@ class CMF_Hydrogen_Environment_Resource_Language
 	 *	@access		public
 	 *	@param		string		$topic			Topic of Language
 	 *	@param		string		$section		Section of Language
-	 *	@param		bool		$strict			Flag: throw exception if language topic is not loaded
-	 *	@param		bool		$force			Flag: note Failure if not loaded
+	 *	@param		bool		$strict			Flag: throw exceptions on error, default: yes
+	 *	@param		bool		$force			Flag: show error messages on error and strict mode is off, default: yes
 	 *	@return		array
 	 *	@throws		RuntimeException if language section is not existing and strict is on
 	 */
-	public function getSection( $topic, $section, $strict = TRUE, $force = TRUE ){
+	public function getSection( string $topic, string $section, bool $strict = TRUE, bool $force = TRUE ): array
+	{
 		$sections	= $this->getWords( $topic, $strict, $force );
 		if( isset( $sections[$section] ) )
 			return $sections[$section];
@@ -193,7 +194,7 @@ class CMF_Hydrogen_Environment_Resource_Language
 	 *	@param		string		$topic			Topic of Language
 	 *	@return		string
 	 */
-	protected function getFilenameOfLanguage( $topic ): string
+	protected function getFilenameOfLanguage( string $topic ): string
 	{
 		$ext	= strlen( trim( static::$fileExtension ) ) ? '.'.trim( static::$fileExtension ) : '';
 		return $this->filePath.$this->language.'/'.$topic.$ext;
@@ -203,11 +204,14 @@ class CMF_Hydrogen_Environment_Resource_Language
 	 *	Loads Language File by Topic.
 	 *	@access		public
 	 *	@param		string		$topic			Topic of Language
-	 *	@param		bool		$strict			Flag: throw Exception if language file is not existing
+	 *	@param		bool		$strict			Flag: throw Exception if language file is not existing, default: no
+	 *	@param		bool		$force			Flag: show error if language file is not existing and strict mode is off, default: no
 	 *	@return		array		Map of loaded words
 	 *	@throws		RuntimeException if language file is not existing (and strict is on)
+	 *	@todo		improve error handling
 	 */
-	public function load( $topic, $strict = FALSE, $force = FALSE ){
+	public function load( string $topic, bool $strict = FALSE, bool $force = FALSE )
+	{
 		if( !strlen( trim( $topic ) ) )
 			throw new InvalidArgumentException( "Topic cannot be empty" );
 		$this->env->clock->profiler->tick( 'Resource_Language::load('.$topic.')' );
@@ -237,7 +241,7 @@ class CMF_Hydrogen_Environment_Resource_Language
 		}
 		else{
 			$message	= 'Invalid language file "'.$topic.'" ('.$fileName.')';
-			if(  $strict )
+			if( $strict )
 				throw new RuntimeException( $message, 221 );
 			if( $force )
 				$this->env->getMessenger()->noteFailure( $message );
@@ -251,9 +255,9 @@ class CMF_Hydrogen_Environment_Resource_Language
 	 *	@access		public
 	 *	@param		string		$language		Language to select
 	 *	@return		self
-	 *	@throws		DomainException				if language is not supporte
+	 *	@throws		DomainException				if language is not supported
 	 */
-	public function setLanguage( $language ): self
+	public function setLanguage( string $language ): self
 	{
 		$language	= strtolower( $language );
 		if( !in_array( $language, $this->languages ) )

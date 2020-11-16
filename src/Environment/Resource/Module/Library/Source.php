@@ -71,8 +71,9 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source extends CMF_Hydrog
 	 */
 	public function scan( bool $useCache = FALSE, bool $forceReload = FALSE )
 	{
+		$cache			= $this->env->getCache();
+		$cacheKeySource	= NULL;
 		if( $useCache ){
-			$cache			= $this->env->getCache();
 			$cacheKeySource	= 'Sources/'.$this->source->id;
 			if( $forceReload )
 				$cache->remove( $cacheKeySource );

@@ -36,8 +36,8 @@
  *	@todo			is a web environment needed instead? try to avoid this - maybe a console messenger needs to be implemented therefore
  *	@todo			finish path resolution (path is set twice at the moment)
  */
-class CMF_Hydrogen_Environment_Remote extends CMF_Hydrogen_Environment{
-
+class CMF_Hydrogen_Environment_Remote extends CMF_Hydrogen_Environment
+{
 	/**	@var	boolean		$hasDatabase		Flag: indicates availability of a database connection */
 	public $hasDatabase		= FALSE;
 
@@ -50,7 +50,8 @@ class CMF_Hydrogen_Environment_Remote extends CMF_Hydrogen_Environment{
 	 *	@param		array		$options		Map of environment options
 	 *	@return		void
 	 */
-	public function __construct( $options ){
+	public function __construct( array $options = array() )
+	{
 //		self::$defaultPaths	= CMF_Hydrogen_Environment::$defaultPaths;
 		$this->options	= $options;
 		$this->path		= isset( $options['pathApp'] ) ? $options['pathApp'] : getCwd().'/';
@@ -80,15 +81,18 @@ class CMF_Hydrogen_Environment_Remote extends CMF_Hydrogen_Environment{
 	 *	@param		boolean		$keepAppAlive			Not used in remote environment
 	 *	@return		void
 	 */
-	public function close( $additionalResources = array(), $keepAppAlive = FALSE){
+	public function close( array $additionalResources = array(), bool $keepAppAlive = FALSE )
+	{
 		parent::close( array(), FALSE );															//  unbind bound resources but keep application alive
 	}
 
-	public function getMessenger(){
+	public function getMessenger(): CMF_Hydrogen_Environment_Remote_Messenger
+	{
 		return $this->messenger;
 	}
 
-	public function initMessenger(){
+	public function initMessenger()
+	{
 		$this->messenger	= new CMF_Hydrogen_Environment_Remote_Messenger( $this );
 	}
 }

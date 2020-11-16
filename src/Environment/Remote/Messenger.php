@@ -36,7 +36,7 @@
  */
 class CMF_Hydrogen_Environment_Remote_Messenger extends CMF_Hydrogen_Environment_Resource_Messenger
 {
-	protected function noteMessage( $type, $message )
+	protected function noteMessage( int $type, string $message )
 	{
 		remark( $message );
 		flush();

@@ -21,8 +21,8 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Logic{
-
+class CMF_Hydrogen_Logic
+{
 	/**	@var	CMF_Hydrogen_Environment								$env			Application Environment Object */
 	protected $env;
 
@@ -41,7 +41,8 @@ class CMF_Hydrogen_Logic{
 	 *	@param		CMF_Hydrogen_Environment		$env		Environment instance
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment $env ){
+	public function __construct( CMF_Hydrogen_Environment $env )
+	{
 		$key	= $env->getLogic()->getKeyFromClassName( get_class( $this ) );
 //		if( $env->logic->has( $key ) && $env->logic->isInstantiated( $key ) )
 //			return $env->logic->get( $key );
@@ -54,7 +55,19 @@ class CMF_Hydrogen_Logic{
 		$this->__onInit();
 	}
 
-	protected function __clone(){
+	public static function getInstance( CMF_Hydrogen_Environment $env ){
+		$className	= get_called_class();
+		$logicPool	= $env->getLogic();
+		$key		= $logicPool->getKeyFromClassName( $className );
+		if( !$logicPool->has( $key ) )
+			$logicPool->add( $key, $className );
+		return $logicPool->get( $key );
+	}
+
+	//  --  PROTECTED  --  //
+
+	protected function __clone()
+	{
 	}
 
 	/**
@@ -65,16 +78,14 @@ class CMF_Hydrogen_Logic{
 	 *	@access		protected
 	 *	@return		void
 	 */
-	protected function __onInit(){
+	protected function __onInit()
+	{
 	}
 
-	static public function getInstance( CMF_Hydrogen_Environment $env ){
-		$className	= get_called_class();
-		$logicPool	= $env->getLogic();
-		$key		= $logicPool->getKeyFromClassName( $className );
-		if( !$logicPool->has( $key ) )
-			$logicPool->add( $key, $className );
-		return $logicPool->get( $key );
+	protected function callHook( string $resource, string $event, $context = NULL, $payload = NULL )
+	{
+		$context	= $context ? $context : $this;
+		return $this->captain->callHook( $resource, $event, $context, $payload );
 	}
 
 	/**
@@ -87,17 +98,12 @@ class CMF_Hydrogen_Logic{
 	 *	@todo		change \@return to CMF_Hydrogen_Model after CMF model refactoring
 	 *	@see		duplicate code with CMF_Hydrogen_Controller::getModel
 	 */
-	protected function getModel( $key ){
+	protected function getModel( string $key )
+	{
 		$classNameWords	= ucwords( \Alg_Text_CamelCase::decode( $key ) );
 		$className		= str_replace( ' ', '_', 'Model '.$classNameWords );
 		if( !class_exists( $className ) )
 			throw new \RuntimeException( 'Model class "'.$className.'" not found' );
 		return \Alg_Object_Factory::createObject( $className, array( $this->env ) );
-	}
-
-	protected function callHook( string $resource, string $event, $context = NULL, $payload = NULL )
-	{
-		$context	= $context ? $context : $this;
-		return $this->captain->callHook( $resource, $event, $context, $payload );
 	}
 }

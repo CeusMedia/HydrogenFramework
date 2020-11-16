@@ -17,19 +17,22 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Environment_Resource_Log {
-
-	/**	@var	CMF_Hydrogen_Environment		$env		Environment instance */
+class CMF_Hydrogen_Environment_Resource_Log
+{
+	/**	@var	CMF_Hydrogen_Environment	$env		Environment instance */
 	protected $env;
 
+	/**	@var	string						$path		Path to log files */
 	protected $path;
 
 	/**
 	 *	...
 	 *	@access		public
 	 *	@return		void
+	 *	@todo 		add path fallback using Null-Coalesce
 	 */
-	public function __construct( CMF_Hydrogen_Environment $env ){
+	public function __construct( CMF_Hydrogen_Environment $env )
+	{
 		$this->env	= $env;
 		$this->path	= $env->getConfig()->get( 'path.logs' );
 	}
@@ -43,7 +46,8 @@ class CMF_Hydrogen_Environment_Resource_Log {
 	 *	@return		void
 	 *	@trigger	Env::log			Calls hook for handling by installed modules
 	 */
-	public function log( $type, $message, $context = NULL/*, $file = NULL, $line = NULL*/ ){
+	public function log( $type, string $message, $context = NULL/*, $file = NULL, $line = NULL*/ ): bool
+	{
 		$data	= array(
 			'type'		=> $type,
 			'message'	=> $message,
@@ -70,7 +74,8 @@ class CMF_Hydrogen_Environment_Resource_Log {
 	 *	@return		boolean				TRUE if handled by called module hooks
 	 *	@trigger	Env::logException	Calls hook for handling by installed modules
 	 */
-	public function logException( $exception, $context = NULL ){
+	public function logException( Throwable $exception, $context = NULL ): bool
+	{
 		$data	= array( 'exception' => $exception );
 		if( $this->env->getCaptain()->callHook( 'Env', 'logException', $context, $data ) )
 			return TRUE;

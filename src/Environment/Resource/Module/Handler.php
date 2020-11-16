@@ -35,15 +35,16 @@
  *	@deprecated		since CMF_Hydrogen_Environment_Resource_Module_Library_Local is used within app instances
  *	@todo			to be removed in 0.8.7
  */
-class CMF_Hydrogen_Environment_Resource_Module_Handler{
-
+class CMF_Hydrogen_Environment_Resource_Module_Handler
+{
 	protected $env;
 	protected $path;
 	protected $modulesInstalled		= array();
 	protected $modulesAvailable		= array();
 	protected $sources				= array();
 
-	public function __construct( CMF_Hydrogen_Environment $env ){
+	public function __construct( CMF_Hydrogen_Environment $env )
+	{
 		CMF_Hydrogen_Deprecation::getInstance()
 			->setErrorVersion( '0.8.6.5' )
 			->setExceptionVersion( '0.8.7' )
@@ -67,11 +68,13 @@ class CMF_Hydrogen_Environment_Resource_Module_Handler{
 		$this->modulesInstalled	= new CMF_Hydrogen_Environment_Resource_Module_Library_Local( $env );
 	}
 
-	public function clearCache(){
+	public function clearCache()
+	{
 		$this->modulesInstalled->clearCache();
 	}
 
-	public function get( $moduleId, $installed = FALSE ){
+	public function get( string $moduleId, bool $installed = FALSE )
+	{
 		if( $installed ){
 			if( $this->isInstalled( $moduleId ) )
 				return $this->modulesInstalled[$moduleId];
@@ -82,27 +85,36 @@ class CMF_Hydrogen_Environment_Resource_Module_Handler{
 		throw new RuntimeException( 'Module "'.$moduleId.'" is not available' );
 	}
 
-	public function getInstalled(){
+	public function getInstalled(): array
+	{
 		return $this->modulesInstalled;
 	}
-	public function has( $moduleId, $installed = FALSE ){
+
+	public function has( string $moduleId, bool $installed = FALSE ): bool
+	{
 		$source	= $installed ? $this->modulesInstalled : $this->modulesAvailable;
 		return array_key_exists( $moduleId, $source );
 	}
 
-	public function isActive( $moduleId ){
+	public function isActive( string $moduleId ): bool
+	{
 		return array_key_exists( $moduleId, $this->modulesAvailable );
 	}
 
-	public function isAvailable( $moduleId ){
+	public function isAvailable( string $moduleId ): bool
+	{
 		return array_key_exists( $moduleId, $this->modulesAvailable );
 	}
 
-	public function isInstalled( $moduleId ){
+	public function isInstalled( string $moduleId ): bool
+	{
 		return array_key_exists( $moduleId, $this->modulesInstalled );
 	}
 
-	protected function readModuleXml( $moduleId, $sourceId = NULL ){
+	//  --  PROTECTED  --  //
+
+	protected function readModuleXml( string $moduleId, string $sourceId = NULL )
+	{
 		$fileName	= $this->path.$moduleId.'.xml';
 		if( $sourceId ){
 			if( empty( $this->sources[$sourceId] ) )

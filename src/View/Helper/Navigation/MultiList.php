@@ -52,7 +52,7 @@ class CMF_Hydrogen_View_Helper_Navigation_MultiList extends CMF_Hydrogen_View_He
 		$this->words	= $words;
 	}
 
-	public function render( $current = NULL )
+	public function render( string $current = NULL ): string
 	{
 		$active		= FALSE;
 		$navi		= $this->buildNavigationLinkList( 'links', $current, $active );
@@ -64,7 +64,7 @@ class CMF_Hydrogen_View_Helper_Navigation_MultiList extends CMF_Hydrogen_View_He
 		return $container;
 	}
 
-	protected function buildNavigationLinkList( $linkSectionKey, $current, &$parentActive, $level = 0 )
+	protected function buildNavigationLinkList( string $linkSectionKey, string $current, &$parentActive, int $level = 0 ): string
 	{
 		if( !isset( $this->words[$linkSectionKey] ) )
 			return '';

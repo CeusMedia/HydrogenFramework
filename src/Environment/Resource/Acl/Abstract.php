@@ -34,8 +34,8 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract{
-
+abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
+{
 	protected $env;
 
 	public $roleAccessNone	= 0;
@@ -56,30 +56,9 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract{
 	 *	@param		CMF_Hydrogen_Environment	$env	Environment Object
 	 *	@return		void
 	 */
-	public function __construct(CMF_Hydrogen_Environment $env )
+	public function __construct( CMF_Hydrogen_Environment $env )
 	{
 		$this->env	= $env;
-	}
-
-	abstract protected function getRights( $roleId );
-
-	/**
-	 *	Returns Role.
-	 *	@access		protected
-	 *	@param		integer		$roleId			Role ID
-	 *	@return		array
-	 */
-	protected function getRole( $roleId )
-	{
-		if( !$roleId )
-			return array();
-		if( !$this->roles )
-		{
-			$model	= new Model_Role( $this->env );
-			foreach( $model->getAll() as $role )
-				$this->roles[$role->roleId]	= $role;
-		}
-		return $this->roles[$roleId];
 	}
 
 	/**
@@ -91,7 +70,8 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract{
 	 *	@param		string		$action			Name of action
 	 *	@return		integer		Right state: -1: no access at all | 0: no access | 1: access | 2: access at all
 	 */
-	public function has( $controller = 'index', $action = 'index' ){
+	public function has( string $controller = 'index', string $action = 'index' ): bool
+	{
 		if( !$this->env->has( 'session' ) )
 			return 0;
 		$roleId	= $this->env->getSession()->get( 'roleId' );
@@ -108,7 +88,7 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract{
 	 *	@param		integer		$roleId			Specified role, otherwise current role
 	 *	@return		array						List of actions or matrix of controllers and actions
 	 */
-	abstract public function index( $controller = NULL, $roleId = NULL );
+	abstract public function index( string $controller = NULL, $roleId = NULL );
 
 	/**
 	 *	Indicates wheter a role is system operator and has access to all controller actions.
@@ -116,7 +96,7 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract{
 	 *	@param		integer		$roleId			Role ID
 	 *	@return		boolean
 	 */
-	public function hasFullAccess( $roleId )
+	public function hasFullAccess( $roleId ): bool
 	{
 		if( !$roleId )
 			return FALSE;
@@ -132,7 +112,7 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract{
 	 *	@param		integer		$roleId			Role ID
 	 *	@return		boolean
 	 */
-	public function hasNoAccess( $roleId )
+	public function hasNoAccess( $roleId ): bool
 	{
 		if( !$roleId )
 			return FALSE;
@@ -160,7 +140,7 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract{
 	 *	 4: public access if outside
 	 *	 5: public access if inside
 	 */
-	public function hasRight( $roleId, $controller = 'index', $action = 'index' )
+	public function hasRight( $roleId, string $controller = 'index', string $action = 'index' ): int
 	{
 		$controller	= strtolower( str_replace( '/', '_', $controller ) );
 		$linkPath	= $controller && $action ? $controller.'_'.$action : '';
@@ -193,8 +173,10 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract{
 	 *	@param		array		$links			Map of links, eg. auth_login
 	 *	@param		string		$mode			Mode: set (default) or append
 	 *	@return		void
+	 *	@todo		refactor return type to "self" and implement getPublicLinks()
 	 */
-	public function setPublicLinks( $links, $mode = 'set' ){
+	public function setPublicLinks( array $links, string $mode = 'set' )
+	{
 		if( is_array( $links ) && count( $links ) ){
 			if( $mode === 'append' )
 				foreach( $links as $link )
@@ -211,8 +193,10 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract{
 	 *	@param		array		$links			Map of links, eg. auth_login
 	 *	@param		string		$mode			Mode: set (default) or append
 	 *	@return		void
+	 *	@todo		refactor return type to "self" and implement getPublicInsideLinks()
 	 */
-	public function setPublicInsideLinks( $links, $mode = 'set' ){
+	public function setPublicInsideLinks( array $links, string $mode = 'set' )
+	{
 		if( is_array( $links ) && count( $links ) ){
 			if( $mode === 'append' )
 				foreach( $links as $link )
@@ -229,8 +213,10 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract{
 	 *	@param		array		$links			Map of links, eg. auth_login
 	 *	@param		string		$mode			Mode: set (default) or append
 	 *	@return		void
+	 *	@todo		refactor return type to "self" and implement getPublicOutsideLinks()
 	 */
-	public function setPublicOutsideLinks( $links, $mode = 'set' ){
+	public function setPublicOutsideLinks( array $links, string $mode = 'set' )
+	{
 		if( is_array( $links ) && count( $links ) ){
 			if( $mode === 'append' )
 				foreach( $links as $link )
@@ -250,5 +236,27 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract{
 	 *	@param		string		$action			Name of Action
 	 *	@return		integer
 	 */
-	abstract public function setRight( $roleId, $controller, $action );
+	abstract public function setRight( $roleId, string $controller, string $action );
+
+	//  --  PROTECTED  --  //
+
+	abstract protected function getRights( $roleId );
+
+	/**
+	 *	Returns Role.
+	 *	@access		protected
+	 *	@param		integer		$roleId			Role ID
+	 *	@return		array|object
+	 */
+	protected function getRole( $roleId )
+	{
+		if( !$roleId )
+			return array();
+		if( !$this->roles ){
+			$model	= new Model_Role( $this->env );
+			foreach( $model->getAll() as $role )
+				$this->roles[$role->roleId]	= $role;
+		}
+		return $this->roles[$roleId];
+	}
 }
