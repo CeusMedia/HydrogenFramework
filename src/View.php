@@ -267,6 +267,7 @@ class CMF_Hydrogen_View
 		if( isset( $data['this' ] ) )
 			unset( $data['this'] );
 		$data		= array_merge( $this->data, $data );											//
+		$content	= '';
 
 		/*  --  LOAD TEMPLATE AND APPLY DATA  --  */
 		if( $this->env->getPage()->tea )
@@ -362,6 +363,7 @@ class CMF_Hydrogen_View
 		$request	= $___request	= $this->env->getRequest();									//
 		$session	= $___session	= $this->env->getSession();									//
 		$helpers	= $___helpers	= $this->helpers;											//
+
 		try{
 			$content	= include( $___templateUri );											//  render template by include
 			if( $content === FALSE )
@@ -383,12 +385,10 @@ class CMF_Hydrogen_View
 				$content	= $buffer;															//  use buffer as content
 			else if( $this->env->getMessenger() )												//  otherwise use messenger
 				$this->env->getMessenger()->noteFailure( nl2br( $buffer ) );					//  note as failure
-			else{																				//  otherwise
-				if( !$this->env->getLog()->log( 'error', $buffer, $this ) )
-					throw new RuntimeException( $buffer );											//  throw exception
-			}
+			else if( !$this->env->getLog()->log( 'error', $buffer, $this ) )					//  logging failed
+				throw new RuntimeException( $buffer );											//  throw exception
 		}
-		return $content;
+		return (string) $content;
 	}
 
 	/**

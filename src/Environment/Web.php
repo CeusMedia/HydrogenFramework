@@ -308,7 +308,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment
 	 *	@todo		kriss: implement handling of FROM request parameter, see controller constants
 	 *	@todo		kriss: concept and implement anti-loop {@see http://dev.(ceusmedia.de)/cmKB/?MTI}
 	 */
-	public function restart( string $uri, ?int $status = NULL, bool $allowForeignHost = FALSE, int $modeFrom = 0 ){
+	public function restart( ?string $uri = '', ?int $status = NULL, bool $allowForeignHost = FALSE, int $modeFrom = 0 ){
 		$base	= "";
 		if( !preg_match( "/^http/", $uri ) ){														//  URI is not starting with HTTP scheme
 			$base	= $this->getBaseUrl();															//  get application base URI

@@ -182,7 +182,8 @@ class CMF_Hydrogen_Controller
 
 	protected function addData( string $key, $value, string $topic = NULL ): self
 	{
-		return $this->view->setData( array( $key => $value ), $topic );
+		$this->view->setData( array( $key => $value ), $topic );
+		return $this;
 	}
 
 	protected function callHook( string $resource, string $event, $context = NULL, $data = array() )
@@ -401,7 +402,7 @@ class CMF_Hydrogen_Controller
 	 *	@todo		kriss: implement handling of FROM request parameter, see controller constants
 	 *	@todo		kriss: concept and implement anti-loop {@see http://dev.(ceusmedia.de)/cmKB/?MTI}
 	 */
-	protected function restart( string $uri, bool $withinModule = FALSE, ?int $status = NULL, bool $allowForeignHost = FALSE, int $modeFrom = 0 )
+	protected function restart( ?string $uri = NULL, bool $withinModule = FALSE, ?int $status = NULL, bool $allowForeignHost = FALSE, int $modeFrom = 0 )
 	{
 		$mode	= 'ext';
 		if( !preg_match( "/^http/", $uri ) ){														//  URI is not starting with HTTP scheme
