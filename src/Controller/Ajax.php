@@ -60,7 +60,9 @@ abstract class CMF_Hydrogen_Controller_Ajax
 			'status'	=> 'data',
 			'data'		=> $data,
 		);
-		$this->respond( json_encode( $response ) );
+		if( ob_get_level() && strlen( trim( $dev = ob_get_clean() ) ) )
+			$response['dev']	= $dev;
+		$this->respond( json_encode( $response ), 'text/json', NULL );
 	}
 
 	protected function respondError( $code, string $message = NULL, int $httpCode = 412 )
@@ -70,7 +72,9 @@ abstract class CMF_Hydrogen_Controller_Ajax
 			'code'		=> $code,
 			'message'	=> $message,
 		);
-		$this->respond( json_encode( $response ), $httpCode );
+		if( ob_get_level() && strlen( trim( $dev = ob_get_clean() ) ) )
+			$response['dev']	= $dev;
+		$this->respond( json_encode( $response ), 'text/json', $httpCode );
 	}
 
 	protected function respondException( Throwable $exception, int $httpCode = 500 )
@@ -82,16 +86,20 @@ abstract class CMF_Hydrogen_Controller_Ajax
 			'file'		=> $exception->getFile(),
 			'line'		=> $exception->getLine(),
 		);
-		$this->respond( json_encode( $response ), $httpCode );
+		if( ob_get_level() && strlen( trim( $dev = ob_get_clean() ) ) )
+			$response['dev']	= $dev;
+		$this->respond( json_encode( $response ), 'text/json', $httpCode );
 	}
 
 	protected function respond( string $string, $status = NULL, string $mimeType = NULL )
 	{
+		$mimeType	= $mimeType ? $mimeType : 'text/json';
+		$this->response->addHeaderPair( 'Content-Type', $mimeType );
 		$this->response->setBody( $string );
 		if( $status )
 			$this->response->setStatus( $status );
-		$mimeType	= $mimeType ? $mimeType : 'text/json';
-		$this->response->addHeaderPair( 'Content-Type', $mimeType );
-		Net_HTTP_Response_Sender::sendResponse( $this->response, 'gzip', TRUE, TRUE );
+		if( ob_get_level() && strlen( trim( $dev = ob_get_clean() ) ) )
+			$this->response->addHeaderPair( 'X-Ajax-Dev', base64_encode( $dev ) );
+		Net_HTTP_Response_Sender::sendResponse( $this->response, 'gzip', FALSE, TRUE );
 	}
 }
