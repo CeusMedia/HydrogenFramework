@@ -12,6 +12,12 @@ abstract class CMF_Hydrogen_Controller_Ajax
 	protected $response;
 	protected $session;
 
+	protected $defaultResponseMimeType	= 'text/json';
+	protected $compressionMethod		= 'gzip';
+	protected $exitAfterwards			= TRUE;
+	protected $sendLengthHeader			= FALSE;
+
+
 	/**
 	 *	Constructor.
 	 *	@access		public
@@ -54,7 +60,17 @@ abstract class CMF_Hydrogen_Controller_Ajax
 	{
 	}
 
-	protected function respondData( $data )
+	/**
+	 *	Sends response data.
+	 *	Exits afterwards, if enabled (default: yes).
+	 *	@access		public
+	 *	@param		mixed		$data			Data to be responded, will be stringified/serialized
+	 *	@param		integer		$statusCode		HTTP status code of response
+	 *	@param		string		$mimeType		MIME type to send (default: defaultMimeType)
+	 *	@return		integer		Number of sent bytes, if exitAfterwards is disabled (default: no)
+	 *	@todo		support other serializations, too
+	 */
+	protected function respondData( $data, int $statusCode = 200, string $mimeType = NULL ): int
 	{
 		$response	= array(
 			'status'	=> 'data',
@@ -62,10 +78,20 @@ abstract class CMF_Hydrogen_Controller_Ajax
 		);
 		if( ob_get_level() && strlen( trim( $dev = ob_get_clean() ) ) )
 			$response['dev']	= $dev;
-		$this->respond( json_encode( $response ), 'text/json', NULL );
+		return $this->respond( json_encode( $response ), $statusCode, $mimeType );
 	}
 
-	protected function respondError( $code, string $message = NULL, int $httpCode = 412 )
+	/**
+	 *	Sends error message.
+	 *	Exits afterwards, if enabled (default: yes).
+	 *	@access		protected
+	 *	@param		string|int	$code			Error code to send
+	 *	@param		string		$message		Error message to send
+	 *	@param		integer		$statusCode		HTTP status code of response
+	 *	@param		string		$mimeType		MIME type to send (default: defaultMimeType)
+	 *	@return		integer		Number of sent bytes, if exitAfterwards is disabled (default: no)
+	 */
+	protected function respondError( $code, string $message = NULL, int $statusCode = 412, string $mimeType = NULL ): int
 	{
 		$response	= array(
 			'status'	=> 'error',
@@ -74,10 +100,19 @@ abstract class CMF_Hydrogen_Controller_Ajax
 		);
 		if( ob_get_level() && strlen( trim( $dev = ob_get_clean() ) ) )
 			$response['dev']	= $dev;
-		$this->respond( json_encode( $response ), 'text/json', $httpCode );
+		return $this->respond( json_encode( $response ), $statusCode, $mimeType );
 	}
 
-	protected function respondException( Throwable $exception, int $httpCode = 500 )
+	/**
+	 *	Sends caught exception.
+	 *	Exits afterwards, if enabled (default: yes).
+	 *	@access		protected
+	 *	@param		Throwable	$exception		Caught exception
+	 *	@param		integer		$statusCode		HTTP status code of response
+	 *	@param		string		$mimeType		MIME type to send (default: defaultMimeType)
+	 *	@return		integer		Number of sent bytes, if exitAfterwards is disabled (default: no)
+	 */
+	protected function respondException( Throwable $exception, int $statusCode = 500, strimg $mimeType = NULL ): int
 	{
 		$response	= array(
 			'status'	=> 'exception',
@@ -88,18 +123,32 @@ abstract class CMF_Hydrogen_Controller_Ajax
 		);
 		if( ob_get_level() && strlen( trim( $dev = ob_get_clean() ) ) )
 			$response['dev']	= $dev;
-		$this->respond( json_encode( $response ), 'text/json', $httpCode );
+		return $this->respond( json_encode( $response ), $statusCode, $mimeType );
 	}
 
-	protected function respond( string $string, $status = NULL, string $mimeType = NULL )
+	/**
+	 *	Sends prepared response string.
+	 *	Exits afterwards, if enabled (default: yes).
+	 *	@access		protected
+	 *	@param		string		$content		Stringified/serialized content to send
+	 *	@param		integer		$statusCode		HTTP status code of response
+	 *	@param		string		$mimeType		MIME type to send (default: defaultMimeType)
+	 *	@return		integer		Number of sent bytes, if exitAfterwards is disabled (default: no)
+	 */
+	protected function respond( string $content, int $statusCode = NULL, string $mimeType = NULL ): int
 	{
-		$mimeType	= $mimeType ? $mimeType : 'text/json';
+		$mimeType	= $mimeType ? $mimeType : $this->defaultResponseMimeType;
+		$statusCode	= $statusCode ? $statusCode : 200;
+
 		$this->response->addHeaderPair( 'Content-Type', $mimeType );
-		$this->response->setBody( $string );
-		if( $status )
-			$this->response->setStatus( $status );
+		$this->response->setBody( $content );
+		$this->response->setStatus( $statusCode );
+
 		if( ob_get_level() && strlen( trim( $dev = ob_get_clean() ) ) )
 			$this->response->addHeaderPair( 'X-Ajax-Dev', base64_encode( $dev ) );
-		Net_HTTP_Response_Sender::sendResponse( $this->response, 'gzip', FALSE, TRUE );
+
+		$sender	= new Net_HTTP_Response_Sender( $this->response );
+        $sender->setCompression( $this->compressionMethod );
+        return $sender->send( $this->sendLengthHeader, $this->exitAfterwards );
 	}
 }

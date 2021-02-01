@@ -39,7 +39,7 @@ class CMF_Hydrogen_Environment_Resource_Disclosure
 	public function __construct( $options = array() )
 	{
 		CMF_Hydrogen_Deprecation::getInstance()
-			->setErrorVersion( '0.8.5' )
+			->setErrorVersion( '0.8.8' )
 			->setExceptionVersion( '0.9' )
 			->message( 'Use module Resource_Disclosure instead' );
 		$this->options	= array_merge( $this->options, $options );
