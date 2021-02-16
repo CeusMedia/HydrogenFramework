@@ -2,7 +2,7 @@
 /**
  *	Generic Action Dispatcher Class of Framework Hydrogen
  *
- *	Copyright (c) 2007-2020 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2007-2021 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Dispatcher
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2020 Christian Würker
+ *	@copyright		2007-2021 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -32,7 +32,7 @@
  *	@uses			ReflectionMethod
  *	@uses			Alg_Object_Factory
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2020 Christian Würker
+ *	@copyright		2007-2021 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			Code Documentation
@@ -55,12 +55,19 @@ class CMF_Hydrogen_Dispatcher_General
 
 	public static $prefixController		= "Controller_";
 
-	public function __construct(CMF_Hydrogen_Environment $env )
+	public function __construct( CMF_Hydrogen_Environment $env )
 	{
 		$this->env		= $env;
 		$this->request	= $env->getRequest();
 	}
 
+	/**
+	 *	Checks ACL rights to controller action, given by URL.
+	 *	@access		public
+	 *	@param		string		$controller		Controller, part of request URL
+	 *	@param		string		$action			Controller action, part of request URL
+	 *	@throws		RuntimeException			if not rights set
+	 */
 	public function checkAccess( string $controller, string $action )
 	{
 		$right1	= $this->env->getAcl()->has( $controller, $action );
@@ -73,7 +80,13 @@ class CMF_Hydrogen_Dispatcher_General
 		}
 	}
 
-	public function dispatch()
+	/**
+	 *	Tries to create controller instance and call controller action, given by request URL.
+	 *	Returns rendering result of view action.
+	 *	@access		public
+	 *	@return		string
+	 */
+	public function dispatch(): string
 	{
 		$this->env->clock->profiler->tick( 'Dispatcher_General::dispatch' );
 		do{
@@ -159,7 +172,7 @@ class CMF_Hydrogen_Dispatcher_General
 		$this->history[$controller][$action]++;
 	}
 
-	protected static function getControllerClassFromPath( string $path )
+	protected static function getControllerClassFromPath( string $path ): string
 	{
 		$parts		= str_replace( '/', ' ', $path );												//  slice into parts
 		$name		= str_replace( ' ', '_', ucwords( $parts ) );									//  glue together capitalized

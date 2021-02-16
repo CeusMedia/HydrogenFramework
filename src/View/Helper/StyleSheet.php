@@ -2,7 +2,7 @@
 /**
  *	Helper to collect and combine StyleSheets.
  *
- *	Copyright (c) 2010-2020 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2010-2021 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.View.Helper
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2010-2020 Christian Würker
+ *	@copyright		2010-2021 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -29,7 +29,7 @@
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.View.Helper
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2010-2020 Christian Würker
+ *	@copyright		2010-2021 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -81,7 +81,7 @@ class CMF_Hydrogen_View_Helper_StyleSheet
 	public function addUrl( string $url, $level = CMF_Hydrogen_Environment_Resource_Captain::LEVEL_MID, array $attributes = array() ): self
 	{
 		$level	= CMF_Hydrogen_Environment_Resource_Captain::interpretLoadLevel( $level );		//  sanitize level supporting old string values
-		$this->urls[$level][]		= array( $url, $attributes );
+		$this->urls[$level][]		= (object) array( 'url' => $url, 'attributes' => $attributes );
 		return $this;
 	}
 
@@ -106,64 +106,12 @@ class CMF_Hydrogen_View_Helper_StyleSheet
 	 */
 	public function getPackageHash(): string
 	{
-		$copy	= $this->getUrlList();
+		$copy	= array();
+		foreach( $this->getUrlList() as $url )
+			$copy[]	= $url->url;
 		sort( $copy );
 		$key	= implode( '_', $copy );
 		return md5( $this->revision.$key );
-	}
-
-	/**
-	 *	Returns name of combined file in file cache.
-	 *	@access		protected
-	 *	@return		string
-	 */
-	protected function getPackageCacheFileName(): string
-	{
-		$hash	= $this->getPackageHash();
-		return $this->pathCache.$this->prefix.$hash.$this->suffix.'.css';
-	}
-
-	/**
-	 *	Returns name of combined StyleSheet file.
-	 *	@access		protected
-	 *	@param		bool		$forceFresh		Flag: force fresh creation instead of using cache
-	 *	@return		string
-	 */
-	protected function getPackageFileName( bool $forceFresh = FALSE ): string
-	{
-		$fileCss	= $this->getPackageCacheFileName();												//  calculate CSS package file name for collected CSS files
-		if( file_exists( $fileCss ) && !$forceFresh )												//  CSS package file has been built before and is not to be rebuild
-			return $fileCss;																		//  return CSS package file name
-		$combiner	= new FS_File_CSS_Combiner();													//  load CSS combiner for nested CSS files
-		$compressor	= new FS_File_CSS_Compressor();													//  load CSS compressor
-		$relocator	= new FS_File_CSS_Relocator();													//  load CSS relocator
-		$pathRoot	= getEnv( 'DOCUMENT_ROOT' );													//  get server document root path for CSS relocator
-		$pathSelf	= str_replace( $pathRoot, '', dirname( getEnv( 'SCRIPT_FILENAME' ) ) );			//  get path relative to document root for symbolic link map
-
-		$symlinks	= array();																		//  prepare map of symbolic links for CSS relocator
-		foreach( FS_Folder_Lister::getFolderList( 'themes' ) as $item )								//  iterate theme folders
-			if( is_link( ( $path = $item->getPathname() ) ) )										//  if theme folder is a link
-				$symlinks['/'.$pathSelf.'/themes/'.$item->getFilename()] = realpath( $path );		//  not symbolic link
-
-		$contents	= array();																		//  prepare empty package content list
-		if( $this->revision )																		//  a revision is set
-			$contents[]	= "/* @revision ".$this->revision." */\n";									//  add revision header to content list
-
-		foreach( $this->getUrlList() as $url ){														//  iterate collected URLs
-			if( preg_match( "/^http/", $url[0] ) ){													//  CSS resource is global (using HTTP)
-				$contents[]	= Net_Reader::readUrl( $url[0] );											//  read global CSS content and append to content list
-				continue;																			//  skip to next without relocation etc.
-			}
-			$pathFile	= dirname( $url[0] ).'/';														//  get path to CSS file within app
-			$content	= FS_File_Reader::load( $url[0] );												//  read local CSS content
-			$content	= $combiner->combineString( $pathFile, $content, TRUE );					//  insert imported CSS files within CSS content
-			if( preg_match( "/\/[a-z]+/", $content ) )												//  CSS content contains path notations
-				$content	= $relocator->rewrite( $content, $pathFile, $pathRoot, $symlinks );		//  relocate resources paths in CSS content
-			$contents[]	= $content;																	//  add CSS content after import and relocation
-		}
-		$content	= $compressor->compress( implode( "\n\n", $contents ) );						//  compress collected CSS contents
-		FS_File_Writer::save( $fileCss, $content );													//  save CSS package file
-		return $fileCss;																			//  return CSS package file name
 	}
 
 	/**
@@ -191,9 +139,10 @@ class CMF_Hydrogen_View_Helper_StyleSheet
 	{
 		$list	= array();
 		foreach( $this->urls as $level => $map ){
+
 			foreach( $map as $url ){
-				if( !preg_match( "@^[a-z]+://@", $url[0] ) )
-					$url[0]	= $this->pathBase.$url[0];
+				if( !preg_match( "@^[a-z]+://@", $url->url ) )
+					$url->url	= $this->pathBase.$url->url;
 				$list[]	= $url;
 			}
 		}
@@ -229,13 +178,13 @@ class CMF_Hydrogen_View_Helper_StyleSheet
 				$list	= array();
 				foreach( $urls as $url ){
 					if( $this->revision )
-						$url[0]	.= '?r'.$this->revision;
+						$url->url	.= '?r'.$this->revision;
 					$attributes	= array_merge( array(
 						'rel'		=> 'stylesheet',
 						'type'		=> 'text/css',
 						'media'		=> 'all',
-						'href'		=> $url[0]
-					), array( $url[1] ) );
+						'href'		=> $url->url
+					), array( $url->attributes ) );
 					$list[]	= UI_HTML_Tag::create( 'link', NULL, $attributes );
 				}
 				$links	= implode( "\n".$this->indent, $list  );
@@ -297,5 +246,61 @@ class CMF_Hydrogen_View_Helper_StyleSheet
 	{
 		$this->revision	= $revision;
 		return $this;
+	}
+
+	//  --  PROTECTED --  //
+
+	/**
+	 *	Returns name of combined file in file cache.
+	 *	@access		protected
+	 *	@return		string
+	 */
+	protected function getPackageCacheFileName(): string
+	{
+		$hash	= $this->getPackageHash();
+		return $this->pathCache.$this->prefix.$hash.$this->suffix.'.css';
+	}
+
+	/**
+	 *	Returns name of combined StyleSheet file.
+	 *	@access		protected
+	 *	@param		bool		$forceFresh		Flag: force fresh creation instead of using cache
+	 *	@return		string
+	 */
+	protected function getPackageFileName( bool $forceFresh = FALSE ): string
+	{
+		$fileCss	= $this->getPackageCacheFileName();												//  calculate CSS package file name for collected CSS files
+		if( file_exists( $fileCss ) && !$forceFresh )												//  CSS package file has been built before and is not to be rebuild
+			return $fileCss;																		//  return CSS package file name
+		$combiner	= new FS_File_CSS_Combiner();													//  load CSS combiner for nested CSS files
+		$compressor	= new FS_File_CSS_Compressor();													//  load CSS compressor
+		$relocator	= new FS_File_CSS_Relocator();													//  load CSS relocator
+		$pathRoot	= getEnv( 'DOCUMENT_ROOT' );													//  get server document root path for CSS relocator
+		$pathSelf	= str_replace( $pathRoot, '', dirname( getEnv( 'SCRIPT_FILENAME' ) ) );			//  get path relative to document root for symbolic link map
+
+		$symlinks	= array();																		//  prepare map of symbolic links for CSS relocator
+		foreach( FS_Folder_Lister::getFolderList( 'themes' ) as $item )								//  iterate theme folders
+			if( is_link( ( $path = $item->getPathname() ) ) )										//  if theme folder is a link
+				$symlinks['/'.$pathSelf.'/themes/'.$item->getFilename()] = realpath( $path );		//  not symbolic link
+
+		$contents	= array();																		//  prepare empty package content list
+		if( $this->revision )																		//  a revision is set
+			$contents[]	= "/* @revision ".$this->revision." */\n";									//  add revision header to content list
+
+		foreach( $this->getUrlList() as $url ){														//  iterate collected URLs
+			if( preg_match( "/^http/", $url->url ) ){												//  CSS resource is global (using HTTP)
+				$contents[]	= Net_Reader::readUrl( $url->url );										//  read global CSS content and append to content list
+				continue;																			//  skip to next without relocation etc.
+			}
+			$pathFile	= dirname( $url->url ).'/';													//  get path to CSS file within app
+			$content	= FS_File_Reader::load( $url->url );										//  read local CSS content
+			$content	= $combiner->combineString( $pathFile, $content, TRUE );					//  insert imported CSS files within CSS content
+			if( preg_match( "/\/[a-z]+/", $content ) )												//  CSS content contains path notations
+				$content	= $relocator->rewrite( $content, $pathFile, $pathRoot, $symlinks );		//  relocate resources paths in CSS content
+			$contents[]	= $content;																	//  add CSS content after import and relocation
+		}
+		$content	= $compressor->compress( implode( "\n\n", $contents ) );						//  compress collected CSS contents
+		FS_File_Writer::save( $fileCss, $content );													//  save CSS package file
+		return $fileCss;																			//  return CSS package file name
 	}
 }

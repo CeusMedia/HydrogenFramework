@@ -2,7 +2,7 @@
 /**
  *	Setup for Resource Environment for Hydrogen Applications.
  *
- *	Copyright (c) 2007-2020 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2007-2021 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2020 Christian Würker
+ *	@copyright		2007-2021 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -33,7 +33,7 @@
  *	@uses			Net_HTTP_Request_Response
  *	@uses			Net_HTTP_Session
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2020 Christian Würker
+ *	@copyright		2007-2021 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -308,7 +308,8 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment
 	 *	@todo		kriss: implement handling of FROM request parameter, see controller constants
 	 *	@todo		kriss: concept and implement anti-loop {@see http://dev.(ceusmedia.de)/cmKB/?MTI}
 	 */
-	public function restart( ?string $uri = '', ?int $status = NULL, bool $allowForeignHost = FALSE, int $modeFrom = 0 ){
+	public function restart( ?string $uri = '', ?int $status = NULL, bool $allowForeignHost = FALSE, int $modeFrom = 0 )
+	{
 		$base	= "";
 		if( !preg_match( "/^http/", $uri ) ){														//  URI is not starting with HTTP scheme
 			$base	= $this->getBaseUrl();															//  get application base URI
@@ -421,10 +422,11 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment
 	/**
 	 *	Initialize cookie resource instance.
 	 *	@access		protected
-	 *	@return		CMF_Hydrogen_Environment_Resource_Messenger
+	 *	@return		void
 	 *	@throws		RuntimeException			if cookie resource has not been initialized before
 	 */
-	protected function initCookie(){
+	protected function initCookie()
+	{
 		if( !$this->url )
 			throw new RuntimeException( 'URL not detected yet, run detectSelf beforehand' );
 		$this->cookie	= new Net_HTTP_Cookie(
@@ -444,7 +446,8 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment
 		$this->definition->setChannel( "html" );
 	}
 */
-	protected function initMessenger( $enabled = "auto" ){
+	protected function initMessenger( $enabled = "auto" )
+	{
 		if( $enabled === "auto" )																	//  auto detect mode
 			$enabled	= preg_match( "/html/", getEnv( 'HTTP_ACCEPT' ) );							//  enabled if HTML is requested
 		$this->messenger	= new CMF_Hydrogen_Environment_Resource_Messenger( $this, $enabled );
@@ -487,7 +490,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment
 	/**
 	 *	Initialize HTTP respone resource instance.
 	 *	@access		protected
-	 *	@return		Net_HTTP_Response
+	 *	@return		void
 	 */
 	protected function initResponse()
 	{
