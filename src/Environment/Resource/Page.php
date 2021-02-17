@@ -69,6 +69,10 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 		parent::__construct( 'XHTML_10_STRICT', $language );
 		$this->js		= CMF_Hydrogen_View_Helper_JavaScript::getInstance( $env );
 
+		$pathStylesLib	= '';
+		if( $env->config->get( 'path.styles.lib' ) )
+			$pathStylesLib	= rtrim( $env->config->get( 'path.styles.lib' ), '/' ).'/';
+
 		$pathThemes		= rtrim( $env->config->get( 'path.themes' ), '/' ).'/';
 		$this->pathPrimer	= $pathThemes;
 		if( $env->config->get( 'layout.primer' ) )
@@ -79,6 +83,7 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 		$this->css->primer	= new CMF_Hydrogen_View_Helper_StyleSheet( $this->pathPrimer.'css/' );
 		$this->css->common	= new CMF_Hydrogen_View_Helper_StyleSheet( $this->pathCommon.'css/' );
 		$this->css->theme	= new CMF_Hydrogen_View_Helper_StyleSheet( $this->pathTheme.'css/' );
+		$this->css->lib		= new CMF_Hydrogen_View_Helper_StyleSheet();
 		if( $env->config->get( 'app.revision' ) ){
 			$this->css->primer->setRevision( $env->config->get( 'app.revision' ) );
 			$this->css->theme->setRevision( $env->config->get( 'app.revision' ) );
@@ -185,7 +190,7 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 					else if( $source == 'lib' ){													//  style file is in styles library, which is enabled by configured path
 						if( !strlen( trim( $pathStylesLib ) ) )
 							throw new RuntimeException( 'Path to style library "path.styles.lib" is not configured' );
-						$this->css->primer->addUrl( $pathStylesLib.$style->file, $level );			//  load style file from styles library
+						$this->css->lib->addUrl( $pathStylesLib.$style->file, $level );							//  load style file from styles library
 					}
 					else if( $source == 'scripts-lib' && $pathScriptsLib ){							//  style file is in scripts library, which is enabled by configured path
 						if( !strlen( trim( $pathScriptsLib ) ) )
@@ -284,11 +289,19 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 			$this->css->primer->clearCache();
 			$this->css->common->clearCache();
 			$this->css->theme->clearCache();
+			$this->css->lib->clearCache();
 		}
 
-		$this->addHead( $this->css->primer->render( $this->packStyleSheets ) );
-		$this->addHead( $this->css->common->render( $this->packStyleSheets ) );
-		$this->addHead( $this->css->theme->render( $this->packStyleSheets ) );
+		$headStyleBlocks	= [
+			'primer'	=> $this->css->primer->render( $this->packStyleSheets ),
+			'common'	=> $this->css->common->render( $this->packStyleSheets ),
+			'theme'		=> $this->css->theme->render( $this->packStyleSheets ),
+			'lib'		=> $this->css->lib->render( $this->packStyleSheets ),
+		];
+		foreach( $headStyleBlocks as $blockKey => $blocksContent )
+			if( strlen( trim( $blocksContent ) ) !== 0 )
+				$this->addHead( $blocksContent );
+
 		$this->addBody( $this->js->render() );
 
 		/*  --  BODY CLASSES  --  */

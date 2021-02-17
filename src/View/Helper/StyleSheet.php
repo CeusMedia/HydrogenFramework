@@ -44,7 +44,7 @@ class CMF_Hydrogen_View_Helper_StyleSheet
 	protected $styles				= array();
 	protected $urls					= array();
 	protected $useCompression		= FALSE;
-	public $indent					= "\t\t";
+	public $indent					= "    ";
 
 	public function __construct( $basePath = NULL )
 	{
@@ -158,46 +158,40 @@ class CMF_Hydrogen_View_Helper_StyleSheet
 	 */
 	public function render( bool $indentEndTag = FALSE, bool $forceFresh = FALSE ): string
 	{
-		$links		= '';
-		$styles		= '';
 		$urls		= $this->getUrlList();
 		$styles		= $this->getStyleList();
 
+		$linkAttributes	= [
+			'type'		=> 'text/css',
+			'rel'		=> 'stylesheet',
+			'media'		=> 'all',
+		];
+
+		$items		= array();
 		if( $urls ){
 			if( $this->useCompression ){
-				$fileCss	= $this->getPackageFileName( $forceFresh );
-				$attributes	= array(
-					'type'		=> 'text/css',
-					'rel'		=> 'stylesheet',
-					'media'		=> 'all',
-					'href'		=> $fileCss
-				);
-				$links	= UI_HTML_Tag::create( 'link', NULL, $attributes );
+				$attributes	= array_merge( $linkAttributes, [
+					'href'		=> $this->getPackageFileName( $forceFresh )
+				] );
+				$items[]	= UI_HTML_Tag::create( 'link', NULL, $linkAttributes );
 			}
 			else{
-				$list	= array();
 				foreach( $urls as $url ){
 					if( $this->revision )
 						$url->url	.= '?r'.$this->revision;
-					$attributes	= array_merge( array(
-						'rel'		=> 'stylesheet',
-						'type'		=> 'text/css',
-						'media'		=> 'all',
+					$attributes	= array_merge( $linkAttributes, $url->attributes, [
 						'href'		=> $url->url
-					), array( $url->attributes ) );
-					$list[]	= UI_HTML_Tag::create( 'link', NULL, $attributes );
+					] );
+					$items[]	= UI_HTML_Tag::create( 'link', NULL, $attributes );
 				}
-				$links	= implode( "\n".$this->indent, $list  );
 			}
 		}
 		if( $styles ){
-			array_unshift( $styles, '' );
-			array_push( $styles, $indentEndTag ? "\t\t" : '' );
-			$content	= implode( "\n", $styles );
+			$content	= PHP_EOL.implode( PHP_EOL, $styles ).PHP_EOL.$this->indent;
 			$attributes	= array( 'type' => 'text/css' );
-			$links	.= "\n".$this->indent.UI_HTML_Tag::create( 'style', $content."\n".$this->indent, $attributes );
+			$items[]	= UI_HTML_Tag::create( 'style', $content, $attributes );
 		}
-		return $links;
+		return implode( PHP_EOL.$this->indent, $items );
 	}
 
 	public function setBasePath( string $path ): self
@@ -286,7 +280,7 @@ class CMF_Hydrogen_View_Helper_StyleSheet
 		$contents	= array();																		//  prepare empty package content list
 		if( $this->revision )																		//  a revision is set
 			$contents[]	= "/* @revision ".$this->revision." */\n";									//  add revision header to content list
-
+print_m( $this->getUrlList() );die;
 		foreach( $this->getUrlList() as $url ){														//  iterate collected URLs
 			if( preg_match( "/^http/", $url->url ) ){												//  CSS resource is global (using HTTP)
 				$contents[]	= Net_Reader::readUrl( $url->url );										//  read global CSS content and append to content list
