@@ -112,7 +112,7 @@ abstract class CMF_Hydrogen_Controller_Ajax
 	 *	@param		string		$mimeType		MIME type to send (default: defaultMimeType)
 	 *	@return		integer		Number of sent bytes, if exitAfterwards is disabled (default: no)
 	 */
-	protected function respondException( Throwable $exception, int $statusCode = 500, strimg $mimeType = NULL ): int
+	protected function respondException( Throwable $exception, int $statusCode = 500, string $mimeType = NULL ): int
 	{
 		$response	= array(
 			'status'	=> 'exception',
