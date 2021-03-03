@@ -139,28 +139,27 @@ class CMF_Hydrogen_Environment_Resource_Captain
 		}
 		foreach( $hooks as $level => $levelHooks ){
 			foreach( $levelHooks as $hook ){
+				if( 0 === strlen( $hook->function ) )
+					continue;
 				$module		= $hook->module;
 				$resource	= $hook->resource;
 				$event		= $hook->event;
 				$function	= $hook->function;
-				if( !trim( $function ) )
-					continue;
 				try{
-					if( preg_match( $regexMethod, $function ) ){
-						$function	= preg_split( "/::/", $function );
-						if( !class_exists( $function[0] ) )
-							throw new RuntimeException( 'Hook handling class '.$function[0].' is not existing' );
-						if( !method_exists( $function[0], $function[1] ) )
-							throw new RuntimeException( 'Method '.$function[0].'::'.$function[1].' is not existing' );
-					}
-					else{
-						$function	= '$data = $payload;'.PHP_EOL.$function;
-						$function	= create_function( '$env, $context, $module, $payload = array()', $function );
-					}
+					$callback	= preg_split( "/::/", $function );
+					if( !preg_match( $regexMethod, $function ) )
+						throw new RuntimeException( 'Format of hook function is invalid or outdated' );
+					if( !class_exists( $callback[0] ) )
+						throw new RuntimeException( 'Hook handling class '.$callback[0].' is not existing' );
+					if( !method_exists( $callback[0], $callback[1] ) )
+						throw new RuntimeException( 'Hook handling function '.$function.' is not existing' );
+					if( !is_callable( $callback[0], $callback[1] ) )
+						throw new RuntimeException( 'Hook handling function '.$function.' is not callable' );
+
 					$count++;
 					ob_start();
 					$args	= array( $this->env, &$context, $module, $payload );
-					$result	= call_user_func_array( $function, $args );
+					$result	= call_user_func_array( $callback, $args );
 					$this->env->clock->profiler->tick( '<!--Resource_Module_Library_Local::call-->Hook: '.$event.'@'.$resource.': '.$module->id );
 					$stdout	= ob_get_clean();
 					if( strlen( trim( $stdout ) ) )
