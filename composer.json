@@ -17,7 +17,8 @@
   },
   "require": {
     "php": ">=7.2",
-    "ceus-media/common": "^0.8 | dev-master"
+    "ceus-media/common": "^0.8 | dev-master",
+    "ceus-media/database": "* | dev-master"
   },
   "require-dev": {
     "ceus-media/doc-creator": "*",
