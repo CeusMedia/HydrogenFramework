@@ -19,11 +19,36 @@
  */
 class CMF_Hydrogen_Environment_Resource_Log
 {
-	/**	@var	CMF_Hydrogen_Environment	$env		Environment instance */
+	const STRATEGY_APP_DEFAULT		= 'app-default';
+	const STRATEGY_APP_TYPED		= 'app-typed';
+	const STRATEGY_MODULE_HOOKS		= 'module-hooks';
+	const STRATEGY_CUSTOM_HOOKS		= 'custom-hooks';
+	const STRATEGY_CUSTOM_CALLBACK	= 'custom-callback';
+
+	const STRATEGIES				= [
+		self::STRATEGY_APP_DEFAULT,
+		self::STRATEGY_APP_TYPED,
+		self::STRATEGY_MODULE_HOOKS,
+		self::STRATEGY_CUSTOM_HOOKS,
+		self::STRATEGY_CUSTOM_CALLBACK,
+	];
+
+	/**	@var	CMF_Hydrogen_Environment	$env				Environment instance */
 	protected $env;
 
-	/**	@var	string						$path		Path to log files */
+	/**	@var	array						$lastStrategies		List of log strategies that end handling on positive result */
+	protected $lastStrategies	= [
+		self::STRATEGY_APP_DEFAULT,
+	];
+
+	/**	@var	string						$path				Path to log files */
 	protected $path;
+
+	/**	@var	array						$lastStrategies		List of log strategies to use */
+	protected $strategies		= [
+		self::STRATEGY_MODULE_HOOKS,
+		self::STRATEGY_APP_DEFAULT,
+	];
 
 	/**
 	 *	...
@@ -46,24 +71,41 @@ class CMF_Hydrogen_Environment_Resource_Log
 	 *	@return		void
 	 *	@trigger	Env::log			Calls hook for handling by installed modules
 	 */
-	public function log( $type, string $message, $context = NULL/*, $file = NULL, $line = NULL*/ ): bool
+	public function log( $type, string $message, $context = NULL ): bool
 	{
-		$data	= array(
-			'type'		=> $type,
-			'message'	=> $message,
-//			'file'		=> $file,
-//			'line'		=> $line,
-		);
-		if( $this->env->getCaptain()->callHook( 'Env', 'log', $context, $data ) )
-			return TRUE;
-		if( !is_string( $message ) && !is_numeric( $message ) )
-			$message	= json_encode( $message );
-		$entry	= array( microtime( TRUE ), '['.$type.']', $message );
-		error_log( join( ' ', $entry )."\n", 3, $this->path.'app.log' );
-
-//		$entry	= array( microtime( TRUE ), $message );
-//		error_log( join( ' ', $entry )."\n", 3, $this->path.'app.'.$type.'.log' );
-		return FALSE;
+		$isHandled		= FALSE;
+		$data			= [
+			'type'			=> $type,
+			'message'		=> $message,
+			'context'		=> $context,
+			'env'			=> $this->env,
+			'datetime'		=> date( DateTime::RFC3339_EXTENDED ),
+			'microtime'		=> microtime( TRUE ),
+		];
+		foreach( $this->strategies as $strategy ){
+			switch( $strategy ){
+				case 'module-hooks':
+					$captain	= $this->env->getCaptain();
+					$isHandled	= $captain->callHook( 'Env', 'log', $context, $data );
+					break;
+				case 'custom-hooks':
+					$captain	= $this->env->getCaptain();
+					$isHandled	= $captain->callHook( 'Env:Custom', 'log', $context, $data );
+					break;
+				case 'custom-callback':
+					$isHandled	= $this->handleLogWithCustomCallback( $data );
+					break;
+				case 'app-typed':
+					$isHandled	= $this->handleLogWithAppTyped( $data );
+					break;
+				case 'app-default':
+					$isHandled	= $this->handleLogWithAppDefault( $data );
+					break;
+			}
+			if( $isHandled && in_array( $strategy, $this->lastStrategies ) )
+				break;
+		}
+		return $isHandled;
 	}
 
 	/**
@@ -76,14 +118,165 @@ class CMF_Hydrogen_Environment_Resource_Log
 	 */
 	public function logException( Throwable $exception, $context = NULL ): bool
 	{
-		$data	= array( 'exception' => $exception );
-		if( $this->env->getCaptain()->callHook( 'Env', 'logException', $context, $data ) )
-			return TRUE;
+		$isHandled		= FALSE;
+		$data			= [
+			'exception'		=> $exception,
+			'context'		=> $context,
+			'env'			=> $this->env,
+			'datetime'		=> date( DateTime::RFC3339_EXTENDED ),
+			'microtime'		=> microtime( TRUE ),
+		];
+		foreach( $this->strategies as $strategy ){
+			switch( $strategy ){
+				case 'module-hooks':
+					$captain	= $this->env->getCaptain();
+					$isHandled	= $captain->callHook( 'Env', 'logException', $context, $data );
+					break;
+				case 'custom-hooks':
+					$captain	= $this->env->getCaptain();
+					$isHandled	= $captain->callHook( 'Env:Custom', 'logException', $context, $data );
+					break;
+				case 'custom-callback':
+					$isHandled	= $this->handleExceptionWithCustomCallback( $data );
+					break;
+				case 'app-typed':
+					$isHandled	= $this->handleExceptionWithAppTyped( $data );
+					break;
+				case 'app-default':
+					$isHandled	= $this->handleExceptionWithAppDefault( $data );
+					break;
+			}
+			if( $isHandled && in_array( $strategy, $this->lastStrategies ) )
+				break;
+		}
+		return $isHandled;
+	}
 
-		$entry	= array( microtime( TRUE ), '[exception]', $exception->getMessage() );
-		error_log( join( ' ', $entry )."\n", 3, $this->path.'app.log' );
+	/**
+	 *	Sets callback for custom logging using strategy STRATEGY_CUSTOM_CALLBACK.
+	 *	@access		public
+	 *	@param		array		$callback		Callback, like [class, method] or [object, method]
+	 *	@return		self
+	 */
+	public function setCustomerLogCallback( $callback ): self
+	{
+		$this->customLogCallback	= $callback;
+		return $this;
+	}
 
-//		error_log( time().': '.$exception->getMessage()."\n", 3, $this->path.'exception.log' );
+	/**
+	 *	Sets callback for custom exception logging using strategy STRATEGY_CUSTOM_CALLBACK.
+	 *	@access		public
+	 *	@param		array		$callback		Callback, like [class, method] or [object, method]
+	 *	@return		self
+	 */
+	public function setCustomerExceptionCallback( $callback ): self
+	{
+		$this->customExceptionCallback	= $callback;
+		return $this;
+	}
+
+	/**
+	 *	Sets list of strategies that end handling on positive result.
+	 *	Default is: [STRATEGY_APP_DEFAULT]
+	 *	@access		public
+	 *	@param		array		$strategies		List of log strategies that end handling on positive result
+	 *	@return		self
+	 */
+	public function setLastStrategies( array $strategies ): self
+	{
+		$this->lastStrategies	= $strategies;
+		return $this;
+	}
+
+	/**
+	 *	Sets which log strategies should be used on what order.
+	 *	Default is: [STRATEGY_MODULE_HOOKS, STRATEGY_APP_DEFAULT]
+	 *	Possible others: STRATEGY_APP_TYPED, STRATEGY_CUSTOM_HOOKS (not implemented)
+	 *	@access		public
+	 *	@param		array		$strategies		List of log strategies to use
+	 *	@return		self
+	 */
+	public function setStrategies( array $strategies ): self
+	{
+		$this->strategies	= $strategies;
+		return $this;
+	}
+
+	//  --  PROTECTED  --  //
+
+	protected function handleExceptionWithAppDefault( array $data ): bool
+	{
+		$entry	= vsprintf( '%s THROW %s %s'.PHP_EOL.'%s'.PHP_EOL, [
+			$data['datetime'],
+			get_class( $data['exception'] ),
+			$data['exception']->getMessage(),
+			$data['exception']->getTraceAsString(),
+		] );
+		return error_log( $entry, 3, $this->path.'app.log' );
+	}
+
+	protected function handleExceptionWithAppTyped( array $data ): bool
+	{
+		$entry	= join( PHP_EOL, [
+			'Datetime:   '.$data['datetime'],
+			'Microtime:  '.$data['microtime'],
+			'Type:       '.get_class( $data['exception'] ),
+			'Message:    '.$data['exception']->getMessage(),
+			'Trace:',
+			$data['exception']->getTraceAsString(),
+		] ).PHP_EOL.PHP_EOL;
+		return error_log( $entry, 3, $this->path.'app.exception.log' );
+	}
+
+	protected function handleExceptionWithCustomCallback( array $data ): bool
+	{
+		if( $this->customExceptionCallback ){
+			$callable	= $this->customExceptionCallback;
+			if( is_object( $callable[0] ) && is_callable( $callable, TRUE ) ){
+				$className	= get_class( $callable[0] );
+				$reflection	= new ReflectionMethod( $className, $callable[1] );
+				return $reflection->invokeArgs( $callable[0], [$data] );
+			}
+			if( class_exists( $callable[0] ) && is_callable( $callable, TRUE ) )
+				return (bool) call_user_func_array( $callable, [$data] );
+		}
+		return FALSE;
+	}
+
+	protected function handleLogWithAppDefault( array $data ): bool
+	{
+		$message	= $data['message'];
+		$type		= strtoupper( $data['type'] );
+		if( !is_string( $message ) && !is_numeric( $message ) )
+			$message	= json_encode( $message );
+		$entry		= $data['datetime'].' '.$type.' '.$message.PHP_EOL;
+		return error_log( $entry, 3, $this->path.'app.log' );
+	}
+
+	protected function handleLogWithAppTyped( array $data ): bool
+	{
+		$message	= $data['message'];
+		$type		= strtolower( $data['type'] );
+		if( !is_string( $message ) && !is_numeric( $message ) )
+			$message	= json_encode( $message );
+		$entry		= $data['datetime'].' '.$message.PHP_EOL;
+		$logFile	= $this->path.'app.'.$type.'.log';
+		return error_log( $entry, 3, $logFile );
+	}
+
+	protected function handleLogWithCustomCallback( array $data ): bool
+	{
+		if( $this->customLogCallback ){
+			$callable	= $this->customLogCallback;
+			if( is_object( $callable[0] ) && is_callable( $callable, TRUE ) ){
+				$className	= get_class( $callable[0] );
+				$reflection	= new ReflectionMethod( $className, $callable[1] );
+				return $reflection->invokeArgs( $callable[0], [$data] );
+			}
+			if( class_exists( $callable[0] ) && is_callable( $callable, TRUE ) )
+				return (bool) call_user_func_array( $callable, [$data] );
+		}
 		return FALSE;
 	}
 }
