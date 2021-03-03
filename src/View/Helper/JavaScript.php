@@ -272,7 +272,7 @@ class CMF_Hydrogen_View_Helper_JavaScript
 	/**
 	 *	Sets revision for versioning cache.
 	 *	@access		public
-	 *	@param		mixed		$revision	Revision number or version string
+	 *	@param		string		$revision	Revision number or version string
 	 *	@return		self
 	 */
 	public function setRevision( string $revision ): self

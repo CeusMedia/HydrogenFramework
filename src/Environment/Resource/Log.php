@@ -50,6 +50,10 @@ class CMF_Hydrogen_Environment_Resource_Log
 		self::STRATEGY_APP_DEFAULT,
 	];
 
+	protected $customExceptionCallback;
+
+	protected $customLogCallback;
+
 	/**
 	 *	...
 	 *	@access		public

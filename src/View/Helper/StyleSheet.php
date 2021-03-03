@@ -280,7 +280,7 @@ class CMF_Hydrogen_View_Helper_StyleSheet
 		$contents	= array();																		//  prepare empty package content list
 		if( $this->revision )																		//  a revision is set
 			$contents[]	= "/* @revision ".$this->revision." */\n";									//  add revision header to content list
-print_m( $this->getUrlList() );die;
+
 		foreach( $this->getUrlList() as $url ){														//  iterate collected URLs
 			if( preg_match( "/^http/", $url->url ) ){												//  CSS resource is global (using HTTP)
 				$contents[]	= Net_Reader::readUrl( $url->url );										//  read global CSS content and append to content list

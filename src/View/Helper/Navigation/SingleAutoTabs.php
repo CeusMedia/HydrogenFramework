@@ -51,7 +51,7 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAutoTabs extends CMF_Hydrogen_Vi
 	{
 		CMF_Hydrogen_Deprecation::getInstance()
 			->setErrorVersion( '0.8.5' )
-			->ExceptionVersion( '0.9' )
+			->setExceptionVersion( '0.9' )
 			->message( 'Use modules Info_Pages + UI_Navigation instead' );
 		$this->env	= $env;
 	}

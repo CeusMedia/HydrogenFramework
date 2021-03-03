@@ -14,7 +14,7 @@
  *	Example:
  *		CMF_Hydrogen_Deprecation::getInstance()
  *			->setErrorVersion( '0.9' )
- *			->ExceptionVersion( '0.9' )
+ *			->setExceptionVersion( '0.9' )
  *			->message( 'Use method ... instead' );
  *
  *	@category		Library
