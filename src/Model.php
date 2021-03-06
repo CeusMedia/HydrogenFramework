@@ -24,11 +24,13 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+
+use CeusMedia\Database\PDO\Table\Writer as DatabaseTableWriter;
+
 /**
  *	Generic Model Class of Framework Hydrogen.
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework
- *	@uses			Database_PDO_TableWriter
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2007-2021 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -46,7 +48,7 @@ class CMF_Hydrogen_Model
  	protected $indices								= array();
 	/**	@var		string							$primaryKey		Primary Key of Database Table */
 	protected $primaryKey							= "";
-	/**	@var		Database_PDO_TableWriter		$table			Database Table Writer Object for reading from and writing to Database Table */
+	/**	@var		DatabaseTableWriter				$table			Database Table Writer Object for reading from and writing to Database Table */
 	protected $table;
 	/**	@var		string							$prefix			Database Table Prefix */
  	protected $prefix;
@@ -69,7 +71,7 @@ class CMF_Hydrogen_Model
 	public function __construct( CMF_Hydrogen_Environment $env, $id = NULL )
 	{
 		$this->setEnv( $env );
-		$this->table	= new \CeusMedia\Database\PDO\Table\Writer(
+		$this->table	= new DatabaseTableWriter(
 			$this->env->getDatabase(),
 			$this->prefix.$this->name,
 			$this->columns,
@@ -230,7 +232,7 @@ class CMF_Hydrogen_Model
 	 *	@param		string			$value			Value of Index
 	 *	@param		array			$orders			Map of Orders to include in SQL Query
 	 *	@param		array			$limits			List of Limits to include in SQL Query
-	 *	@param		boolean			$fields			List of fields or one field to return from result
+	 *	@param		array			$fields			List of fields or one field to return from result
 	 *	@param		boolean			$strict			Flag: throw exception if result is empty and fields are selected (default: FALSE)
 	 *	@return		array
 	 */
@@ -252,7 +254,7 @@ class CMF_Hydrogen_Model
 	 *	@param		array			$conditions		Map of Conditions to include in SQL Query
 	 *	@param		array			$orders			Map of Orders to include in SQL Query
 	 *	@param		array			$limits			List of Limits to include in SQL Query
-	 *	@param		boolean			$fields			List of fields or one field to return from result
+	 *	@param		array			$fields			List of fields or one field to return from result
 	 *	@param		boolean			$strict			Flag: throw exception if result is empty and fields are selected (default: FALSE)
 	 *	@return		array
 	 */
@@ -275,7 +277,7 @@ class CMF_Hydrogen_Model
 	 *	@param		string			$key			Key of Index
 	 *	@param		string			$value			Value of Index
 	 *	@param		array			$orders			Map of Orders to include in SQL Query
-	 *	@param		string			$fields			List of fields or one field to return from result
+	 *	@param		array			$fields			List of fields or one field to return from result
 	 *	@param		boolean			$strict			Flag: throw exception if result is empty (default: FALSE)
 	 *	@return		mixed			Structure depending on fetch type, string if field selected, NULL if field selected and no entries
 	 *	@todo		change argument order: move fields to end
@@ -522,7 +524,7 @@ class CMF_Hydrogen_Model
 	 *	In strict mode exceptions will be thrown if field is not a string, empty but mandatory or not a table column.
 	 *	@access		protected
 	 *	@param		string			$field			Table Column to check for existence
-	 *	@param		string			$mandatory		Force a value, otherwise return NULL or throw exception in strict mode
+	 *	@param		boolean			$mandatory		Force a value, otherwise return NULL or throw exception in strict mode
 	 *	@param		boolean			$strict			Strict mode (default): throw exception instead of returning FALSE or NULL
 	 *	@return		string|NULL		Trimmed Field name if found, NULL otherwise or exception in strict mode
 	 *	@throws		InvalidArgumentException		in strict mode if field is not a string and strict mode is on
@@ -561,7 +563,7 @@ class CMF_Hydrogen_Model
 	 *	FYI: The next logical check - if index keys are valid columns and noted indices - is done by used table reader class.
 	 *	@access		protected
 	 *	@param		array 			$indices		Map of Index Keys and Values
-	 *	@param		string			$mandatory		Force atleast one pair, otherwise return FALSE or throw exception in strict mode
+	 *	@param		boolean			$mandatory		Force atleast one pair, otherwise return FALSE or throw exception in strict mode
 	 *	@param		boolean			$strict			Strict mode (default): throw exception instead of returning FALSE
 	 *	@return		array|boolean	Map if valid, FALSE otherwise or exceptions in strict mode
 	 *	@throws		InvalidArgumentException		in strict mode if field is empty but mandatory
@@ -581,7 +583,7 @@ class CMF_Hydrogen_Model
 	 *	Returns any fields or one field from a query result.
 	 *	@access		protected
 	 *	@param		mixed			$result			Query result as array or object
-	 *	@param		array|string	$fields			List of fields or one field
+	 *	@param		array			$fields			List of fields or one field
 	 *	@param		boolean			$strict			Flag: throw exception if result is empty
 	 *	@return		string|array|object			Structure depending on result and field list length
 	 *	@throws		InvalidArgumentException			If given fields list is neither a list nor a string

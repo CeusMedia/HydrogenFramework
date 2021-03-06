@@ -28,7 +28,6 @@
  *	Setup for Resource Environment for Hydrogen Applications.
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment
- *	@extends		CMF_Hydrogen_Environment
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2012-2021 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3

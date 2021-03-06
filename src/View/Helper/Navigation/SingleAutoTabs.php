@@ -29,7 +29,6 @@
  *
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.View.Helper.Navigation
- *	@extends		CMF_Hydrogen_View_Helper_Navigation_SingleList
  *	@uses			UI_HTML_Tag
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2012-2021 Christian Würker
@@ -47,7 +46,7 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAutoTabs extends CMF_Hydrogen_Vi
 	public $classTabActive	= "ui-tabs-selected ui-state-active";
 	protected $container	= FALSE;
 
-	public function __construct( CMF_Hydrogen_Environment $env )
+	public function __construct( CMF_Hydrogen_Environment_Web $env )
 	{
 		CMF_Hydrogen_Deprecation::getInstance()
 			->setErrorVersion( '0.8.5' )

@@ -24,6 +24,10 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+
+use CeusMedia\Database\PDO\Connection;
+use CeusMedia\Database\PDO\DataSourceName;
+
 /**
  *	Database resource using PDO extension of CeusMedia:Common.
  *	@category		Library
@@ -33,7 +37,7 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Environment_Resource_Database_PDO extends CeusMedia\Database\PDO\Connection
+class CMF_Hydrogen_Environment_Resource_Database_PDO extends Connection
 {
 	protected $env;
 
@@ -100,7 +104,7 @@ class CMF_Hydrogen_Environment_Resource_Database_PDO extends CeusMedia\Database\
 		if( !( isset( $dba['driver'] ) && strlen( $dba['driver'] ) > 0 ) )
 			throw new RuntimeException( 'Database driver must be set in config:database.driver' );
 
-		$dsn		= new Database_PDO_DataSourceName( $dba['driver'], $dba['name'] );
+		$dsn		= new DataSourceName( $dba['driver'], $dba['name'] );
 		if( isset( $dba['host'] ) && strlen( $dba['host'] ) > 0 )
 			$dsn->setHost( $dba['host'] );
 		if( isset( $dba['port'] ) && strlen( $dba['port'] ) > 0 )

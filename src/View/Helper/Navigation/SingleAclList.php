@@ -29,7 +29,6 @@
  *
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.View.Helper.Navigation
- *	@extends		CMF_Hydrogen_View_Helper_Abstract
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2010-2021 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3

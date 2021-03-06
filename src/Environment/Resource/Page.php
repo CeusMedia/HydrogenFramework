@@ -69,28 +69,29 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 		parent::__construct( 'XHTML_10_STRICT', $language );
 		$this->js		= CMF_Hydrogen_View_Helper_JavaScript::getInstance( $env );
 
+		$config			= $env->getConfig();
 		$pathStylesLib	= '';
-		if( $env->config->get( 'path.styles.lib' ) )
-			$pathStylesLib	= rtrim( $env->config->get( 'path.styles.lib' ), '/' ).'/';
+		if( $config->get( 'path.styles.lib' ) )
+			$pathStylesLib	= rtrim( $config->get( 'path.styles.lib' ), '/' ).'/';
 
-		$pathThemes		= rtrim( $env->config->get( 'path.themes' ), '/' ).'/';
+		$pathThemes		= rtrim( $config->get( 'path.themes' ), '/' ).'/';
 		$this->pathPrimer	= $pathThemes;
-		if( $env->config->get( 'layout.primer' ) )
-			$this->pathPrimer	= $pathThemes.$env->config->get( 'layout.primer' ).'/';
+		if( $config->get( 'layout.primer' ) )
+			$this->pathPrimer	= $pathThemes.$config->get( 'layout.primer' ).'/';
 		$this->pathCommon	= $pathThemes.'common/';
-		$this->pathTheme	= $pathThemes.$env->config->get( 'layout.theme' ).'/';
+		$this->pathTheme	= $pathThemes.$config->get( 'layout.theme' ).'/';
 		$this->css			= new stdClass;
 		$this->css->primer	= new CMF_Hydrogen_View_Helper_StyleSheet( $this->pathPrimer.'css/' );
 		$this->css->common	= new CMF_Hydrogen_View_Helper_StyleSheet( $this->pathCommon.'css/' );
 		$this->css->theme	= new CMF_Hydrogen_View_Helper_StyleSheet( $this->pathTheme.'css/' );
 		$this->css->lib		= new CMF_Hydrogen_View_Helper_StyleSheet();
-		if( $env->config->get( 'app.revision' ) ){
-			$this->css->primer->setRevision( $env->config->get( 'app.revision' ) );
-			$this->css->theme->setRevision( $env->config->get( 'app.revision' ) );
-			$this->js->setRevision( $env->config->get( 'app.revision' ) );
+		if( $config->get( 'app.revision' ) ){
+			$this->css->primer->setRevision( $config->get( 'app.revision' ) );
+			$this->css->theme->setRevision( $config->get( 'app.revision' ) );
+			$this->js->setRevision( $config->get( 'app.revision' ) );
 		}
 
-		if( strlen( $title	= $env->config->get( 'app.name' ) ) )
+		if( strlen( $title	= $config->get( 'app.name' ) ) )
 			$this->setTitle( $title );
 		if( ( $modules = $this->env->getModules() ) )												//  get module handler resource if existing
 			$modules->callHook( 'Page', 'init', $this );											//  call related module event hooks
@@ -165,9 +166,9 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 		if( !$modules )																				//  module handler resource is not existing
 			return;
 
-		$pathScripts	= $this->env->config->get( 'path.scripts' );
-		$pathScriptsLib	= $this->env->config->get( 'path.scripts.lib' );
-		$pathStylesLib	= $this->env->config->get( 'path.styles.lib' );
+		$pathScripts	= $this->env->getConfig()->get( 'path.scripts' );
+		$pathScriptsLib	= $this->env->getConfig()->get( 'path.scripts.lib' );
+		$pathStylesLib	= $this->env->getConfig()->get( 'path.styles.lib' );
 		$listConfig		= array();
 		$settings		= array();
 

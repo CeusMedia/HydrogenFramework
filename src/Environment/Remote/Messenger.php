@@ -28,7 +28,6 @@
 *	Fake messenger for remote enviroment.
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Remote
- *	@extends		CMF_Hydrogen_Environment
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2012-2021 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -38,7 +37,7 @@ class CMF_Hydrogen_Environment_Remote_Messenger extends CMF_Hydrogen_Environment
 {
 	protected function noteMessage( int $type, string $message )
 	{
-		remark( $message );
-		flush();
+//		remark( $message );
+//		flush();
 	}
 }

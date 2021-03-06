@@ -28,7 +28,6 @@
  *	Base application class for MVC web application.
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Application.Web
- *	@extends		CMF_Hydrogen_Application_Abstract
  *	@uses			CMF_Hydrogen_View
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2007-2021 Christian Würker

@@ -17,13 +17,13 @@
   },
   "require": {
     "php": ">=7.2",
-    "ceus-media/common": "^0.8 | dev-master",
+    "ceus-media/common": "* | dev-master",
     "ceus-media/database": "* | dev-master"
   },
   "require-dev": {
     "ceus-media/doc-creator": "*",
     "phpunit/phpunit": "*",
-    "phpstan/phpstan": "0.12.x-dev"
+    "phpstan/phpstan": "*"
   },
   "autoload": {
     "classmap": ["src/"]
