@@ -135,7 +135,9 @@ class CMF_Hydrogen_Controller
 		if( $language->hasWords( $this->controller ) )
 			$this->view->setData( $language->getWords( $this->controller ), 'words' );
 		$this->env->clock->profiler->tick( 'Controller::getView: set words' );
-		$result			= \Alg_Object_MethodFactory::callObjectMethod( $this->view, $this->action );
+
+		$factory	= new \Alg_Object_MethodFactory( $this->view, $this->action );
+		$result		= $factory->call();
 		if( is_string( $result ) ){
 			$this->env->clock->profiler->tick( 'Controller::getView: Action called' );
 		}

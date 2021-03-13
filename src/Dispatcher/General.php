@@ -107,7 +107,9 @@ class CMF_Hydrogen_Dispatcher_General
 			if( $this->checkClassActionArguments )
 				$this->checkClassActionArguments( $className, $instance, $action, $arguments );
 			$this->env->clock->profiler->tick( 'Dispatcher_General::dispatch: check@'.$controller.'/'.$action );
-			Alg_Object_MethodFactory::callObjectMethod( $instance, $action, $arguments );			// call action method in controller class with arguments
+
+			$factory	= new \Alg_Object_MethodFactory( $instance );								// create method factory on controller instance
+			$result		= $factory->callMethod( $action, $arguments );								// call action method in controller class with arguments
 			$this->noteLastCall( $instance );
 		}
 		while( $instance->redirect );
