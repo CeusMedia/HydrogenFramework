@@ -100,7 +100,7 @@ class CMF_Hydrogen_Environment_Resource_Runtime
 	protected function markDeprecation()
 	{
 		CMF_Hydrogen_Deprecation::getInstance()
-			->setErrorVersion( '0.8.7.8' )
+			->setErrorVersion( '0.8.7.9' )
 			->setExceptionVersion( '0.9' )
 			->message( 'Use module $[this->]env->getRuntime() instead' );
 	}
@@ -138,7 +138,7 @@ class CMF_Hydrogen_Environment_Resource_Runtime_Profiler
 	protected function markDeprecation()
 	{
 		CMF_Hydrogen_Deprecation::getInstance()
-			->setErrorVersion( '0.8.7.8' )
+			->setErrorVersion( '0.8.7.9' )
 			->setExceptionVersion( '0.9' )
 			->message( 'Use $[this->]env->getClock()->reach() instead' );
 	}

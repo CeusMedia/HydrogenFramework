@@ -179,7 +179,7 @@ class CMF_Hydrogen_Environment_Resource_Acl_Database extends CMF_Hydrogen_Enviro
 	protected function markDeprecation()
 	{
 		CMF_Hydrogen_Deprecation::getInstance()
-			->setErrorVersion( '0.8.7.8' )
+			->setErrorVersion( '0.8.7.9' )
 			->setExceptionVersion( '0.9' )
 			->message( 'Use module Resource_Authentication instead' );
 

@@ -205,7 +205,7 @@ class CMF_Hydrogen_Environment implements ArrayAccess
 			return $this->$key;
 		if( $key === 'clock' ){
 			CMF_Hydrogen_Deprecation::getInstance()
-				->setErrorVersion( '0.8.7.8' )
+				->setErrorVersion( '0.8.7.9' )
 				->setExceptionVersion( '0.9' )
 				->message( 'Use $[this->]env->get( \'runtime\' ) or $[this->]env->runtime instead' );
 			return $this->runtime;
