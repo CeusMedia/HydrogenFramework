@@ -122,7 +122,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Editor
 	 *	@access		public
 	 *	@param		string		$moduleId	Module ID
 	 *	@param		string		$type		File resource type (class,template,locale,script,style,image)
-	 *	@param		string		$data		Map object of data to set
+	 *	@param		string		$resource	Typed file resource
 	 *	@param		string		$source		Source, depending on type
 	 *	@param		string		$load		Load mode, empty or "auto"
 	 *	@return		void

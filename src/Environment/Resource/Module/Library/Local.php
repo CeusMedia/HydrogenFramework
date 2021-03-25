@@ -24,41 +24,49 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+
+use CMF_Hydrogen_Environment as Environment;
+use CMF_Hydrogen_Environment_Resource_Module_Reader as ModuleReader;
+use CMF_Hydrogen_Environment_Resource_Module_Library_Interface as LibraryInterface;
+use CMF_Hydrogen_Environment_Resource_Module_Library_Abstract as AbstractLibrary;
+use FS_File_Reader as FileReader;
+use FS_File_RegexFilter as FileRegexIndex;
+use FS_File_Writer as FileWriter;
+
+
 /**
  *	Handler for local module library.
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module.Library
- *	@extends		CMF_Hydrogen_Environment_Resource_Module_Library_Abstract
- *	@implements		CMF_Hydrogen_Environment_Resource_Module_Library_Interface
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2012-2021 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			Code Documentation
  */
-class CMF_Hydrogen_Environment_Resource_Module_Library_Local extends CMF_Hydrogen_Environment_Resource_Module_Library_Abstract implements CMF_Hydrogen_Environment_Resource_Module_Library_Interface
+class CMF_Hydrogen_Environment_Resource_Module_Library_Local extends AbstractLibrary implements LibraryInterface
 {
 	protected $env;
 	protected $modulePath;
-	protected $modules		= array();
+	protected $modules			= array();
 	protected $cacheFile;
 
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		CMF_Hydrogen_Environment		$env			Environment instance
+	 *	@param		Environment		$env			Environment instance
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment $env )
+	public function __construct( Environment $env )
 	{
 		$this->env			= $env;
 		$config				= $this->env->getConfig();
 		$envClass			= get_class( $this->env );
-		$this->modulePath	= $env->path.$envClass::$configPath.'modules/';
+		$this->modulePath	= $env->path.$envClass::$defaultPaths['config'].'modules/';
 		$this->cacheFile	= $this->modulePath.'../modules.cache.serial';
 		if( $config->get( 'path.module.config' ) )
 			$this->modulePath	= $config->get( 'path.module.config' );
-		$this->env->clock->profiler->tick( 'Hydrogen: Environment_Resource_Module_Library_Local::' );
+		$this->env->getRuntime()->reach( 'Resource_Module_Library_Local::construction' );
 		$this->scan( (bool) $config->get( 'system.cache.modules' ) );
 	}
 
@@ -101,6 +109,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local extends CMF_Hydroge
 					return $module;
 			}
 		}
+		return NULL;
 	}
 
 	/**
@@ -117,8 +126,8 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local extends CMF_Hydroge
 			if( $forceReload )
 				$this->clearCache();
 			if( file_exists( $this->cacheFile ) ){
-				$this->modules	= unserialize( FS_File_Reader::load( $this->cacheFile ) );
-				$this->env->clock->profiler->tick( 'Hydrogen: Environment_Resource_Module_Library_Local::scan (cache)' );
+				$this->modules	= unserialize( FileReader::load( $this->cacheFile ) );
+				$this->env->clock->reach( 'Resource_Module_Library_Local::scan (cache)' );
 				return (object) array(
 					'source' 	=> 'cache',
 					'count'		=> count( $this->modules ),
@@ -131,13 +140,13 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local extends CMF_Hydroge
 				'source' 	=> 'none',
 				'count'		=> 0,
 			);
-		$index	= new FS_File_RegexFilter( $this->modulePath, '/^[a-z0-9_]+\.xml$/i' );
+		$index	= new FileRegexIndex( $this->modulePath, '/^[a-z0-9_]+\.xml$/i' );
 		foreach( $index as $entry ){
 			$moduleId		= preg_replace( '/\.xml$/i', '', $entry->getFilename() );
 			$moduleFile		= $this->modulePath.$moduleId.'.xml';
-			$module			= CMF_Hydrogen_Environment_Resource_Module_Reader::load( $moduleFile, $moduleId );
+			$module			= ModuleReader::load( $moduleFile, $moduleId );
 			$module->source				= 'local';													//  set source to local
-			$module->path				= $this->modulePath;												//  assume app path as module path
+			$module->path				= $this->modulePath;										//  assume app path as module path
 			$module->isInstalled		= TRUE;														//  module is installed
 			$module->versionInstalled	= $module->version;											//  set installed version by found module version
 			if( isset( $module->config['active'] ) )												//  module has main switch in config
@@ -146,16 +155,16 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Local extends CMF_Hydroge
 /*			This snippet from source library is not working in local installation.
 			$icon	= $entry->getPath().'/'.$moduleId;
 			if( file_exists( $icon.'.png' ) )
-				$module->icon	= 'data:image/png;base64,'.base64_encode( FS_File_Reader::load( $icon.'.png' ) );
+				$module->icon	= 'data:image/png;base64,'.base64_encode( FileReader::load( $icon.'.png' ) );
 			else if( file_exists( $icon.'.ico' ) )
-				$module->icon	= 'data:image/x-icon;base64,'.base64_encode( FS_File_Reader::load( $icon.'.ico' ) );*/
+				$module->icon	= 'data:image/x-icon;base64,'.base64_encode( FileReader::load( $icon.'.ico' ) );*/
 
 			$this->modules[$moduleId]	= $module;
 		}
 		ksort( $this->modules );
 		if( $useCache )
-			FS_File_Writer::save( $this->cacheFile, serialize( $this->modules ) );
-		$this->env->clock->profiler->tick( 'Hydrogen: Environment_Resource_Module_Library_Local::scan (files)' );
+			FileWriter::save( $this->cacheFile, serialize( $this->modules ) );
+		$this->env->clock->reach( 'Resource_Module_Library_Local::scan (files)' );
 		return $this->scanResult = (object) array(
 			'source' 	=> 'files',
 			'count'		=> count( $this->modules ),

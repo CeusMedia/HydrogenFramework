@@ -28,7 +28,6 @@
  *	Setup for Resource Environment for Hydrogen Applications.
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment
- *	@extends		CMF_Hydrogen_Environment
  *	@uses			Net_HTTP_Request_Receiver
  *	@uses			Net_HTTP_Request_Response
  *	@uses			Net_HTTP_Session
@@ -125,7 +124,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment
 			$this->initAcl();																		//
 			$this->modules->callHook( 'Env', 'constructEnd', $this );								//  call module hooks for end of env construction
 			$this->__onInit();																		//  default callback for construction end
-			$this->clock->profiler->tick( 'Environment (Web): construction end' );					//  log time of construction
+			$this->runtime->reach( 'Environment (Web): construction end' );					//  log time of construction
 		}
 		catch( Exception $e ){
 			if( getEnv( 'HTTP_HOST' ) )
@@ -386,6 +385,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment
 		$this->path		= preg_replace( "@^/$@", "", dirname( getEnv( 'SCRIPT_NAME' ) ) )."/";		//  note requested working path
 		$this->url		= $this->scheme.'://'.$hostWithPort.$this->path;							//  note calculated base application URI
 		$this->uri		= $this->root.$this->path;													//  note calculated absolute base application path
+		$this->runtime->reach( 'env: self detection' );
 	}
 
 	/**
@@ -397,13 +397,9 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment
 	{
 		parent::initConfiguration();
 
-		/*  -- DEFAULT PATHS  --  */
-		foreach( self::$defaultPaths as $key => $value )											//  iterate default paths
-			if( !$this->config->has( 'path.'.$key ) )												//  path is not set in config
-				$this->config->set( 'path.'.$key, rtrim( trim( $value ), '/' ).'/' );				//  set path in config (in memory)
-
 		/*  -- HOST BASED CONFIG  --  */
-		$configHost	= static::$configPath.getEnv( 'HTTP_HOST' ).'.ini';
+//		$configHost	= self::$defaultPaths['config'].getEnv( 'HTTP_HOST' ).'.ini';
+		$configHost	= $this->config->get( 'path.config' ).getEnv( 'HTTP_HOST' ).'.ini';
 		if( file_exists( $configHost ) ){															//  config file for host is existing
 			foreach( parse_ini_file( $configHost, FALSE ) as $key => $value ){						//  read host config pairs
 				if( preg_match( '/^[0-9.]+$/', $value ) )											//  value is integer or float
@@ -415,8 +411,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment
 				$this->config->set( $key, $value );
 			}
 		}
-
-		$this->clock->profiler->tick( 'env: config', 'Finished setup of web app configuration.' );
+//		$this->runtime->reach( 'env: config', 'Finished setup of web app configuration.' );
 	}
 
 	/**
@@ -451,7 +446,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment
 		if( $enabled === "auto" )																	//  auto detect mode
 			$enabled	= preg_match( "/html/", getEnv( 'HTTP_ACCEPT' ) );							//  enabled if HTML is requested
 		$this->messenger	= new CMF_Hydrogen_Environment_Resource_Messenger( $this, $enabled );
-		$this->clock->profiler->tick( 'env: messenger' );
+		$this->runtime->reach( 'env: messenger' );
 	}
 
 	/**
@@ -468,23 +463,23 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment
 		$this->page->setBaseHref( $this->getBaseUrl( self::$configKeyBaseHref ) );
 		$this->page->applyModules();
 
-		$words		= $this->getLanguage()->getWords( 'main' );
+		$words		= $this->getLanguage()->getWords( 'main', FALSE );
 		if( is_array( $words ) && isset( $words['main']['title'] ) )
 			$this->page->setTitle( $words['main']['title'] );
-		$this->clock->profiler->tick( 'env: page' );
+		$this->runtime->reach( 'env: page' );
 	}
 
 	/**
 	 *	Initialize HTTP request resource instance.
 	 *	Request data will be imported from given web server environment.
 	 *	@access		protected
-	 *	@return		Net_HTTP_Request
+	 *	@return		void
 	 */
 	protected function initRequest()
 	{
 		$this->request		= new Net_HTTP_Request();
 		$this->request->fromEnv( FALSE/*$this->has( 'session' )*/ );
-		$this->clock->profiler->tick( 'env: request' );
+		$this->runtime->reach( 'env: request' );
 	}
 
 	/**
@@ -495,14 +490,14 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment
 	protected function initResponse()
 	{
 		$this->response	= new Net_HTTP_Response();
-		$this->clock->profiler->tick( 'env: response' );
+		$this->runtime->reach( 'env: response' );
 	}
 
 	protected function initRouter( string $routerClass = NULL )
 	{
 		$classRouter	= $routerClass ? $routerClass : self::$classRouter;
 		$this->router	= Alg_Object_Factory::createObject( $classRouter, array( $this ) );
-		$this->clock->profiler->tick( 'env: router' );
+		$this->runtime->reach( 'env: router' );
 	}
 
 	protected function initSession( string $keyPartitionName = NULL, string $keySessionName = NULL )
@@ -518,6 +513,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment
 			$partitionName,
 			$sessionName
 		);
+		$this->runtime->reach( 'env: session: construction' );
 
 		// @todo check if this old workaround public URL paths extended by module is still needed and remove
 		$isInside	= (int) $this->session->get( 'userId' );
@@ -542,9 +538,9 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment
 			$this->config->set( 'module.acl.inside', implode( ',', array_unique( $inside ) ) );		//  save public link list
 			$this->config->set( 'module.acl.outside', implode( ',', array_unique( $outside ) ) );	//  save public link list
 		}
-		$this->clock->profiler->tick( 'env: session' );
 		if( $this->modules )
 			$this->modules->callHook( 'Session', 'init', $this->session );
+		$this->runtime->reach( 'env: session: init done' );
 	}
 
 	protected function registerResourceToClose( string $resourceKey )

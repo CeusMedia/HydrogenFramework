@@ -24,6 +24,8 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+use CMF_Hydrogen_Environment_Web as WebEnv;
+
 /**
  *	Generic Main Class of Framework Hydrogen
  *	@category		Library
@@ -55,7 +57,7 @@ class CMF_Hydrogen_Dispatcher_General
 
 	public static $prefixController		= "Controller_";
 
-	public function __construct( CMF_Hydrogen_Environment $env )
+	public function __construct( WebEnv $env )
 	{
 		$this->env		= $env;
 		$this->request	= $env->getRequest();
@@ -88,7 +90,7 @@ class CMF_Hydrogen_Dispatcher_General
 	 */
 	public function dispatch(): string
 	{
-		$this->env->clock->profiler->tick( 'Dispatcher_General::dispatch' );
+		$this->env->clock->reach( 'Dispatcher_General::dispatch' );
 		do{
 			$this->realizeCall();
 			$this->checkForLoop();
@@ -99,23 +101,23 @@ class CMF_Hydrogen_Dispatcher_General
 
 			$className	= self::getControllerClassFromPath( $controller );							// get controller class name from requested controller path
 			$this->checkClass( $className );
-			$this->env->clock->profiler->tick( 'Dispatcher_General::dispatch: check: controller' );
+			$this->env->clock->reach( 'Dispatcher_General::dispatch: check: controller' );
 			$this->checkAccess( $controller, $action);
 			$instance	= Alg_Object_Factory::createObject( $className, array( $this->env ) );		// build controller instance
-			$this->env->clock->profiler->tick( 'Dispatcher_General::dispatch: factorized controller' );
+			$this->env->clock->reach( 'Dispatcher_General::dispatch: factorized controller' );
 			$this->checkClassAction( $className, $instance, $action );
 			if( $this->checkClassActionArguments )
 				$this->checkClassActionArguments( $className, $instance, $action, $arguments );
-			$this->env->clock->profiler->tick( 'Dispatcher_General::dispatch: check@'.$controller.'/'.$action );
+			$this->env->clock->reach( 'Dispatcher_General::dispatch: check@'.$controller.'/'.$action );
 
 			$factory	= new \Alg_Object_MethodFactory( $instance );								// create method factory on controller instance
 			$result		= $factory->callMethod( $action, $arguments );								// call action method in controller class with arguments
 			$this->noteLastCall( $instance );
 		}
 		while( $instance->redirect );
-		$this->env->clock->profiler->tick( 'Dispatcher_General::dispatch: done' );
+		$this->env->clock->reach( 'Dispatcher_General::dispatch: done' );
 		$view	= $instance->renderView();
-		$this->env->clock->profiler->tick( 'Dispatcher_General::dispatch: view' );
+		$this->env->clock->reach( 'Dispatcher_General::dispatch: view' );
 		return $view;
 	}
 

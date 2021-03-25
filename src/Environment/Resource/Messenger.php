@@ -24,13 +24,13 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+
+use CMF_Hydrogen_Environment as WebEnv;
+
 /**
  *	Message Output Handler of Framework Hydrogen.
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource
- *	@uses			Alg_Time_Converter
- *	@uses			UI_HTML_Tag
- *	@uses			UI_HTML_Elements
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2007-2021 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -38,13 +38,13 @@
  */
 class CMF_Hydrogen_Environment_Resource_Messenger
 {
-	/**	@var		CMF_Hydrogen_Environment	$env			Application Environment Object */
+	/**	@var		WebEnv			$env			Application Environment Object */
 	protected $env;
 
-	/**	@var		boolean						$enabled		Flag: store messages in session */
+	/**	@var		boolean			$enabled		Flag: store messages in session */
 	protected $enabled;
 
-	/**	@var		array						$classes		CSS Classes of Message Types */
+	/**	@var		array			$classes		CSS Classes of Message Types */
 	protected $classes	= array(
 		'0'	=> 'failure',
 		'1'	=> 'error',
@@ -59,10 +59,10 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		CMF_Hydrogen_Environment		$env			Instance of any Session Handler
+	 *	@param		WebEnv			$env			Instance of any Session Handler
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment $env, bool $enabled = TRUE )
+	public function __construct( WebEnv $env, bool $enabled = TRUE )
 	{
 		$this->env		= $env;
 		$this->enabled	= $enabled;
@@ -190,7 +190,8 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 	 *	Saves a Error Message on the Message Stack.
 	 *	@access		public
 	 *	@param		string		$message			Message to display
-	 *	@param		string		[$argX]*			Arguments to be set into Message
+	 *	@param		mixed|NULL	$arg1				Arguments to be set into Message
+	 *	@param		mixed|NULL	$arg2				Arguments to be set into Message
 	 *	@return		void
 	 */
 	public function noteError( string $message, $arg1 = NULL, $arg2 = NULL )
@@ -203,7 +204,8 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 	 *	Saves a Failure Message on the Message Stack.
 	 *	@access		public
 	 *	@param		string		$message			Message to display
-	 *	@param		string		[$argX]*			Arguments to be set into Message
+	 *	@param		mixed|NULL	$arg1				Arguments to be set into Message
+	 *	@param		mixed|NULL	$arg2				Arguments to be set into Message
 	 *	@return		void
 	 */
 	public function noteFailure( string $message, $arg1 = NULL, $arg2 = NULL )
@@ -216,7 +218,8 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 	 *	Saves a Notice Message on the Message Stack.
 	 *	@access		public
 	 *	@param		string		$message			Message to display
-	 *	@param		string		[$argX]*			Arguments to be set into Message
+	 *	@param		mixed|NULL	$arg1				Arguments to be set into Message
+	 *	@param		mixed|NULL	$arg2				Arguments to be set into Message
 	 *	@return		void
 	 */
 	public function noteNotice( string $message, $arg1 = NULL, $arg2 = NULL )
@@ -229,7 +232,8 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 	 *	Saves a Success Message on the Message Stack.
 	 *	@access		public
 	 *	@param		string		$message			Message to display
-	 *	@param		string		[$argX]*			Arguments to be set into Message
+	 *	@param		mixed|NULL	$arg1				Arguments to be set into Message
+	 *	@param		mixed|NULL	$arg2				Arguments to be set into Message
 	 *	@return		void
 	 */
 	public function noteSuccess( string $message, $arg1 = NULL, $arg2 = NULL )

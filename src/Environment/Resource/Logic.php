@@ -106,19 +106,7 @@ class CMF_Hydrogen_Environment_Resource_Logic
 	protected function microsleep( int $microseconds )
 	{
 		$microseconds	= abs( $microseconds );
-		$clock			= $this->env->getClock();
-		switch( $this->os ) {
-			case self::OS_WINDOWS:
-				$seconds	= round( $microseconds / 1000000 );
-				$seconds	= max( 1, abs( $seconds ) );
-				sleep( $seconds );
-				$clock->sleep( $seconds );											//  inform performance clock about sleep time
-				break;
-			case self::OS_LINUX:
-			default:
-				usleep( $microseconds );
-				$clock->usleep( $microseconds );									//  inform performance clock about sleep time
-				break;
-		}
+		usleep( $microseconds );
+		$this->env->getRuntime()->usleep( $microseconds );											//  inform performance clock about sleep time
 	}
 }

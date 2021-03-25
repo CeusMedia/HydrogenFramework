@@ -24,24 +24,27 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+
+use CMF_Hydrogen_Environment as Environment;
+use CMF_Hydrogen_Environment_Resource_Module_Library_Interface as LibraryInterface;
+use CMF_Hydrogen_Environment_Resource_Module_Library_Abstract as AbstractLibrary;
+use CMF_Hydrogen_Environment_Resource_Module_Reader as ModuleReader;
+use FS_File_RecursiveNameFilter as RecursiveFileIndex;
+use FS_File_Reader as FileReader;
+use Net_HTTP_Request_Sender as HttpRequestSender;
+use Net_Reader as HttpReader;
+
 /**
  *	Handler for module source library.
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module.Library
- *	@extends		CMF_Hydrogen_Environment_Resource_Module_Library_Abstract
- *	@implements		CMF_Hydrogen_Environment_Resource_Module_Library_Interface
- *	@uses			CMF_Hydrogen_Environment_Resource_Module_Reader
- *	@uses			FS_File_RecursiveNameFilter
- *	@uses			Net_HTTP_Request_Sender
- *	@uses			Net_Reader
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2012-2021 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			Code Documentation
- *	@todo			Finish by using CMM::SEA
  */
-class CMF_Hydrogen_Environment_Resource_Module_Library_Source extends CMF_Hydrogen_Environment_Resource_Module_Library_Abstract implements CMF_Hydrogen_Environment_Resource_Module_Library_Interface
+class CMF_Hydrogen_Environment_Resource_Module_Library_Source extends AbstractLibrary implements LibraryInterface
 {
 	protected $env;
 	protected $modules		= array();
@@ -50,11 +53,11 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source extends CMF_Hydrog
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		CMF_Hydrogen_Environment	$env			Environment instance
-	 *	@param		object						$source			Data object defining source by: {id: ..., type: [folder|http], path: ...}
+	 *	@param		Environment		$env			Environment instance
+	 *	@param		object			$source			Data object defining source by: {id: ..., type: [folder|http], path: ...}
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment $env, $source )
+	public function __construct( Environment $env, $source )
 	{
 		$this->env		= $env;
 		$this->source	= $source;
@@ -113,8 +116,8 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source extends CMF_Hydrog
 #			throw new RuntimeException( 'Source XML "'.$this->source->path.'source.xml" is not existing' );
 
 		$list	= array();
-		$index	= new FS_File_RecursiveNameFilter( $this->source->path, 'module.xml' );
-		$this->env->clock->profiler->tick( 'Hydrogen: Environment_Resource_Module_Library_Source::scanFolder: init' );
+		$index	= new RecursiveFileIndex( $this->source->path, 'module.xml' );
+		$this->env->clock->reach( 'Hydrogen: Environment_Resource_Module_Library_Source::scanFolder: init' );
 		foreach( $index as $entry ){
 			if( preg_match( "@/templates$@", $entry->getPath() ) )
 				continue;
@@ -125,7 +128,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source extends CMF_Hydrog
 			$cacheKey	= 'Modules/'.$this->source->id.'/'.$id;
 			if( $cache->has( $cacheKey ) ){
 				$list[$id]	= $cache->get( $cacheKey );
-#				$this->env->clock->profiler->tick( 'Hydrogen: Environment_Resource_Module_Library_Source::scanFolder: Module #'.$id.':cache' );
+#				$this->env->clock->reach( 'Hydrogen: Environment_Resource_Module_Library_Source::scanFolder: Module #'.$id.':cache' );
 				continue;
 			}*/
 			$icon	= $entry->getPath().'/icon';
@@ -134,7 +137,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source extends CMF_Hydrog
 				$this->env->messenger->noteFailure( 'Module file "'.$filePath.'" is not readable.' );
 			else{
 				try{
-					$module	= CMF_Hydrogen_Environment_Resource_Module_Reader::load( $filePath, $id );
+					$module	= ModuleReader::load( $filePath, $id );
 					$module->path				= $entry->getPath();
 					$module->source				= $this->source->id;
 					$module->versionAvailable	= $module->version;
@@ -142,9 +145,9 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source extends CMF_Hydrog
 						$module->isActive		= $module->config['active']->value;
 					$module->icon	= NULL;
 					if( file_exists( $icon.'.png' ) )
-						$module->icon	= 'data:image/png;base64,'.base64_encode( FS_File_Reader::load( $icon.'.png' ) );
+						$module->icon	= 'data:image/png;base64,'.base64_encode( FileReader::load( $icon.'.png' ) );
 					else if( file_exists( $icon.'.ico' ) )
-						$module->icon	= 'data:image/x-icon;base64,'.base64_encode( FS_File_Reader::load( $icon.'.ico' ) );
+						$module->icon	= 'data:image/x-icon;base64,'.base64_encode( FileReader::load( $icon.'.ico' ) );
 					$list[$id]	= $module;
 				}
 				catch( Exception $e ){
@@ -153,7 +156,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source extends CMF_Hydrog
 //				if( $cache )
 //					$cache->set( $cacheKey, $module );
 			}
-#			$this->env->clock->profiler->tick( 'Hydrogen: Environment_Resource_Module_Library_Source::scanFolder: Module #'.$id.':file' );
+#			$this->env->clock->reach( 'Hydrogen: Environment_Resource_Module_Library_Source::scanFolder: Module #'.$id.':file' );
 		}
 		ksort( $list );
 		return $list;
@@ -163,7 +166,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source extends CMF_Hydrog
 	{
 		$host		= parse_url( $this->source->path, PHP_URL_HOST );
 		$path		= parse_url( $this->source->path, PHP_URL_PATH );
-		$request	= new Net_HTTP_Request_Sender( $host, $path.'?do=list' );
+		$request	= new HttpRequestSender( $host, $path.'?do=list' );
 
 		$request->addHeaderPair( 'Accept', 'application/json' );
 		$response	= $request->send();
@@ -182,12 +185,12 @@ class CMF_Hydrogen_Environment_Resource_Module_Library_Source extends CMF_Hydrog
 
 			$icon	= $module->path.'/icon';
 			try{
-				$content		= Net_Reader::readUrl( $icon.'.png' );
+				$content		= HttpReader::readUrl( $icon.'.png' );
 				$module->icon	= 'data:image/png;base64,'.base64_encode( $content );
 			}
 			catch( Exception $e ){}
 			try{
-				$content		= Net_Reader::readUrl( $icon.'.ico' );
+				$content		= HttpReader::readUrl( $icon.'.ico' );
 				$module->icon	= 'data:image/png;base64,'.base64_encode( $content );
 			}
 			catch( Exception $e ){}

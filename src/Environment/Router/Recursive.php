@@ -37,7 +37,7 @@ class CMF_Hydrogen_Environment_Router_Recursive extends CMF_Hydrogen_Environment
 {
 	public function parseFromRequest()
 	{
-		if( !$this->env->request )
+		if( !$this->env->has( 'request' ) )
 			throw new RuntimeException( 'Routing needs a registered request resource' );
 
 		$request	= $this->env->getRequest();
@@ -45,7 +45,11 @@ class CMF_Hydrogen_Environment_Router_Recursive extends CMF_Hydrogen_Environment
 		if( FALSE !== getEnv( 'REDIRECT_URL' ) && $request->has( '__path' ) )
 			self::$pathKey	= '__path';
 
-		$path	= $request->getFromSource( self::$pathKey, 'get' );
+		$path	= $request->get( self::$pathKey );
+		if( $this->env instanceof CMF_Hydrogen_Environment_Web )
+			if( $request instanceof Net_HTTP_Request )
+				$path	= $request->getFromSource( self::$pathKey, 'get' );
+
 		$path	= urldecode( $path );
 		$path	= preg_replace( '@^(.*)/?$@U', '\\1', trim( $path ) );
 		$parts	= explode( '/', $path );

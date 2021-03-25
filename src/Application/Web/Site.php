@@ -38,8 +38,8 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 {
 	public static $checkClassActionArguments	= TRUE;
 
-	/**	@var		string						$content				Collected Content to respond */
-	protected $content							= '';
+	/**	@var		string			$content			Collected Content to respond */
+	protected $content				= '';
 
 	protected $_dev;
 
@@ -52,7 +52,7 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 	 */
 	public function run()
 	{
-		$displayErrors	= $this->env->getConfig( 'system.display.errors' );							//  get error mode from config
+		$displayErrors	= $this->env->getConfig()->get( 'system.display.errors' );					//  get error mode from config
 		$displayErrors	= is_null( $displayErrors ) ? TRUE : (bool) $displayErrors;					//  if not set: enable error display by default
 		error_reporting( $displayErrors ? E_ALL : 0 );												//  set error reporting
 		try{
@@ -66,7 +66,7 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 	}
 
 	//  --  PROTECTED  --  //
-	
+
 	/**
 	 *	Executes called Controller and stores generated View.
 	 *	@access		protected
@@ -98,7 +98,7 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 			) );
 			return $output;																			//  return generated output
 		}
-		catch( ErrorException $e ){
+/*		catch( ErrorException $e ){
 			if( getEnv( 'HTTP_HOST' ) ){
 				if( $this->env->getModules()->has( 'ErrorException' ) ){
 					$view	= new View_ErrorException( $this->env );
@@ -111,7 +111,7 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 				print( $e->getTraceAsString().PHP_EOL.PHP_EOL );
 				exit;
 			}
-		}
+		}*/
 		catch( Exception $e ){
 			$captain	= $this->env->getCaptain();
 			$data		= array( 'exception' => $e );

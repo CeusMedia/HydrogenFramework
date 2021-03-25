@@ -58,7 +58,6 @@ class CMF_Hydrogen_Environment_Resource_Language
 	 *	Uses config::path.locales and defaults to 'locales/'.
 	 *	@access		public
 	 *	@param		CMF_Hydrogen_Environment			$env			Application Environment Object
-	 *	@param		string								$language		Language to select
 	 *	@return		void
 	 */
 	public function __construct( CMF_Hydrogen_Environment $env )
@@ -98,9 +97,10 @@ class CMF_Hydrogen_Environment_Resource_Language
 				$language	= $session->get( 'language' );
 		}
 		$this->setLanguage( $language );
-		$words	= $this->getWords( 'main' );
-		if( !empty( $words['main']['title'] ) )
-			$env->title	= $words['main']['title'];
+//		@todo remove: title is not longer existing in environment
+//		$words	= $this->getWords( 'main', FALSE );
+//		if( !empty( $words['main']['title'] ) )
+//			$env->title	= $words['main']['title'];
 	}
 
 	/**
@@ -155,8 +155,8 @@ class CMF_Hydrogen_Environment_Resource_Language
 		$message	= 'Invalid language topic "'.$topic.'"';
 		if( $strict )
 			throw new RuntimeException( $message, 221 );
-		if( $force )
-			$this->env->getMessenger()->noteFailure( $message );
+		if( $force && $this->env->has( 'messenger' ) )
+			$this->env->get( 'messenger' )->noteFailure( $message );
 		return array();
 	}
 
@@ -183,8 +183,8 @@ class CMF_Hydrogen_Environment_Resource_Language
 		$message	= 'Invalid language section "'.$section.'" in topic "'.$topic.'"';
 		if( $strict )
 			throw new RuntimeException( $message, 221 );
-		if( $force )
-			$this->env->getMessenger()->noteFailure( $message );
+		if( $force && $this->env->has( 'messenger' ) )
+			$this->env->get( 'messenger' )->noteFailure( $message );
 		return array();
 	}
 
@@ -214,13 +214,13 @@ class CMF_Hydrogen_Environment_Resource_Language
 	{
 		if( !strlen( trim( $topic ) ) )
 			throw new InvalidArgumentException( "Topic cannot be empty" );
-		$this->env->clock->profiler->tick( 'Resource_Language::load('.$topic.')' );
+		$this->env->getRuntime()->reach( 'Resource_Language::load('.$topic.')' );
 		$fileName	= $this->getFilenameOfLanguage( $topic );
 		$reader		= new FS_File_Reader($fileName);
 		if( $reader->exists() )	{
 			$data	= FALSE;
 			$string	= $reader->readString();
-			$this->env->clock->profiler->tick( 'Resource_Language::load('.$topic.'): loaded file' );
+			$this->env->getRuntime()->reach( 'Resource_Language::load('.$topic.'): loaded file' );
 			$string	= preg_replace( "/\s;[^\n]+\n+/", "\n", $string );
 			$string	= preg_replace( "/\n;[^\n]+\n/Us", "\n", $string );
 #			$plain	= preg_replace( '/".+"/U', "", $string );
@@ -230,11 +230,11 @@ class CMF_Hydrogen_Environment_Resource_Language
 					foreach( $data as $section => $pairs )
 						foreach( $pairs as $key => $value )
 							$data[$section][$key]	= preg_replace( '/^"(.*)"\s*$/', '\\1', $value );
-				$this->env->clock->profiler->tick( 'Resource_Language::load: '.$topic.' @mode1' );
+				$this->env->getRuntime()->reach( 'Resource_Language::load: '.$topic.' @mode1' );
 			}
 			if( $data === FALSE ){
 				$data	= FS_File_INI_Reader::load( $fileName, TRUE );
-				$this->env->clock->profiler->tick( 'Resource_Language::load: '.$topic.' @mode2' );
+				$this->env->getRuntime()->reach( 'Resource_Language::load: '.$topic.' @mode2' );
 			}
 			$this->data[$topic]	= $data;
 			return $data;
@@ -243,11 +243,11 @@ class CMF_Hydrogen_Environment_Resource_Language
 			$message	= 'Invalid language file "'.$topic.'" ('.$fileName.')';
 			if( $strict )
 				throw new RuntimeException( $message, 221 );
-			if( $force )
-				$this->env->getMessenger()->noteFailure( $message );
+			if( $force && $this->env->has( 'messenger' ) )
+				$this->env->get( 'messenger' )->noteFailure( $message );
 			return array();
 		}
-		$this->env->clock->profiler->tick( 'Resource_Language: end' );
+		$this->env->getRuntime()->reach( 'Resource_Language: end' );
 	}
 
 	/**
@@ -264,7 +264,7 @@ class CMF_Hydrogen_Environment_Resource_Language
 			throw new DomainException( 'Language "'.$language.'" is not supported' );
 		$this->data		= array();
 		$this->language	= $language;
-		$this->load( 'main' );
+		$this->load( 'main', FALSE );
 		return $this;
 	}
 }

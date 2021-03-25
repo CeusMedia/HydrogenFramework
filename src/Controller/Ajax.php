@@ -2,40 +2,51 @@
 /**
  *	General (and therefore abstract) AJAX controller.
  */
+
+use CMF_Hydrogen_Environment as Environment;
+use CMF_Hydrogen_Environment_Web as WebEnvironment;
+use Net_HTTP_Response as HttpResponse;
+use Net_HTTP_Response_Sender as HttpResponseSender;
+
 /**
  *	General (and therefore abstract) AJAX controller.
  */
 abstract class CMF_Hydrogen_Controller_Ajax
 {
 	protected $env;
+
 	protected $request;
+
 	protected $response;
+
 	protected $session;
 
 	protected $defaultResponseMimeType	= 'text/json';
-	protected $compressionMethod		= 'gzip';
-	protected $exitAfterwards			= TRUE;
-	protected $sendLengthHeader			= FALSE;
 
+	protected $compressionMethod		= 'gzip';
+
+	protected $exitAfterwards			= TRUE;
+
+	protected $sendLengthHeader			= FALSE;
 
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		CMF_Hydrogen_Environment		$env		Environment object
+	 *	@param		WebEnvironment		$env		Environment object
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment $env )
+	public function __construct( WebEnvironment $env )
 	{
 		$this->env	= $env;
 		try{
 			$this->request		= $this->env->getRequest();
 			$this->session		= $this->env->getSession();
-			$this->response		= new Net_HTTP_Response();
+			$this->response		= new HttpResponse();
 		}
 		catch( Exception $e ){
 			$this->respondException( $e, 500 );
 		}
-		if( $this->env->mode & CMF_Hydrogen_Environment::MODE_LIVE ){
+		if( $this->env->getMode() & Environment::MODE_LIVE ){
 			if( !method_exists( $this->request, 'isAjax' ) || !$this->request->isAjax() )
 				$this->respondError( 400000, 'Access denied for non-AJAX requests', 406 );
 		}
@@ -147,7 +158,7 @@ abstract class CMF_Hydrogen_Controller_Ajax
 		if( ob_get_level() && strlen( trim( $dev = ob_get_clean() ) ) )
 			$this->response->addHeaderPair( 'X-Ajax-Dev', base64_encode( $dev ) );
 
-		$sender	= new Net_HTTP_Response_Sender( $this->response );
+		$sender	= new HttpResponseSender( $this->response );
         $sender->setCompression( $this->compressionMethod );
         return $sender->send( $this->sendLengthHeader, $this->exitAfterwards );
 	}

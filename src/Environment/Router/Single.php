@@ -39,14 +39,17 @@ class CMF_Hydrogen_Environment_Router_Single extends CMF_Hydrogen_Environment_Ro
 
 	public function parseFromRequest()
 	{
-		if( !$this->env->request )
+		if( !$this->env->has( 'request' ) )
 			throw new RuntimeException( 'Routing needs a registered request resource' );
 		$request	= $this->env->getRequest();
 
 		if( $request->has( '__path' ) )
 			self::$pathKey	= '__path';
 
-		$path		= $request->getFromSource( self::$pathKey, 'get' );
+		$path	= $request->get( self::$pathKey );
+		if( $this->env instanceof CMF_Hydrogen_Environment_Web )
+			if( $request instanceof Net_HTTP_Request )
+				$path		= $request->getFromSource( self::$pathKey, 'get' );
 		if( !trim( $path ) )
 			return;
 

@@ -251,7 +251,6 @@ class CMF_Hydrogen_Model
 	 *	Returns Data of all Lines selected by Indices.
 	 *	@access		public
 	 *	@param		array			$indices		Map of Index Keys and Values
-	 *	@param		array			$conditions		Map of Conditions to include in SQL Query
 	 *	@param		array			$orders			Map of Orders to include in SQL Query
 	 *	@param		array			$limits			List of Limits to include in SQL Query
 	 *	@param		array			$fields			List of fields or one field to return from result
@@ -302,7 +301,7 @@ class CMF_Hydrogen_Model
 	 *	@access		public
 	 *	@param		array			$indices		Map of Index Keys and Values
 	 *	@param		array			$orders			Map of Orders to include in SQL Query
-	 *	@param		string			$fields			List of fields or one field to return from result
+	 *	@param		array			$fields			List of fields or one field to return from result
 	 *	@param		boolean			$strict			Flag: throw exception if result is empty (default: FALSE)
 	 *	@return		mixed			Structure depending on fetch type, string if field selected, NULL if field selected and no entries
 	 *	@throws		InvalidArgumentException			If given fields list is neither a list nor a string
@@ -585,8 +584,8 @@ class CMF_Hydrogen_Model
 	 *	@param		mixed			$result			Query result as array or object
 	 *	@param		array			$fields			List of fields or one field
 	 *	@param		boolean			$strict			Flag: throw exception if result is empty
-	 *	@return		string|array|object			Structure depending on result and field list length
-	 *	@throws		InvalidArgumentException			If given fields list is neither a list nor a string
+	 *	@return		string|array|object				Structure depending on result and field list length
+	 *	@throws		InvalidArgumentException		If given fields list is neither a list nor a string
 	 */
 	protected function getFieldsFromResult( $result, array $fields = array(), bool $strict = TRUE )
 	{

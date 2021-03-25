@@ -24,6 +24,10 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+
+use CMF_Hydrogen_Environment_Resource_Module_Component_Config as ConfigComponent;
+use CMF_Hydrogen_Environment_Resource_Module_Component_File as FileComponent;
+
 /**
  *	Reader for local module XML files.
  *	@category		Library
@@ -219,7 +223,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader
 			$value		= (string) $pair;
 			if( in_array( $type, array( 'boolean', 'bool' ) ) )										//  value is boolean
 				$value	= !in_array( strtolower( $value ), array( 'no', 'false', '0', '' ) );		//  value is not negative
-			$object->config[$key]	= (object) array(
+/*			$object->config[$key]	= (object) array(
 				'key'				=> trim( $key ),
 				'type'				=> $type,
 				'value'				=> $value,
@@ -227,7 +231,11 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader
 				'mandatory'			=> self::castNodeAttributes( $pair, 'mandatory', 'bool' ),
 				'protected'			=> self::castNodeAttributes( $pair, 'protected' ),
 				'title'				=> $title,
-			);
+			);*/
+			$item				= new ConfigComponent( trim( $key ), $value, $type , $title );
+			$item->values		= self::castNodeAttributes( $pair, 'values', 'array' );
+			$item->mandatory	= self::castNodeAttributes( $pair, 'mandatory', 'bool' );
+			$item->protected	= self::castNodeAttributes( $pair, 'protected' );
 		}
 		return TRUE;
 	}
@@ -273,7 +281,8 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader
 		);
 		foreach( $map as $source => $target ){														//  iterate files
 			foreach( $xml->files->$source as $file ){
-				$item	= (object) array( 'file' => (string) $file );
+				$item	= new FileComponent( (string) $file );
+//				$item	= (object) array( 'file' => (string) $file );
 				foreach( $file->getAttributes() as $key => $value )
 					$item->$key	= $value;
 				$object->files->{$target}[]	= $item;

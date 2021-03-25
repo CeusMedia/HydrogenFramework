@@ -24,6 +24,9 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+
+use CMF_Hydrogen_Environment_Web as WebEnvironment;
+
 /**
  *	Generic Controller Class of Framework Hydrogen.
  *	@category		Library
@@ -49,7 +52,7 @@ class CMF_Hydrogen_Controller
 	/**	@var		string								$alias			Optional alternative path for restarting */
 	public $alias					= '';
 
-	/**	@var		CMF_Hydrogen_Environment			$env			Application Environment Object */
+	/**	@var		WebEnvironment						$env			Application Environment Object */
 	protected $env;
 	/**	@var		string								$defaultPath	Default controller URI path */
 	protected $defaultPath;
@@ -74,20 +77,20 @@ class CMF_Hydrogen_Controller
 	 *	Will set up related view class by default. Disable this for controllers without views.
 	 *	Calls __onInit() in the end.
 	 *	@access		public
-	 *	@param		CMF_Hydrogen_Environment			$env			Application Environment Object
+	 *	@param		WebEnvironment						$env			Application Environment Object
 	 *	@param		boolean								$setupView		Flag: auto create view object for controller (default: TRUE)
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment $env, bool $setupView = TRUE )
+	public function __construct( WebEnvironment $env, bool $setupView = TRUE )
 	{
-		$env->clock->profiler->tick( 'CMF_Controller('.get_class( $this ).')' );
+		$env->getRuntime()->reach( 'CMF_Controller('.get_class( $this ).')' );
 		static::$moduleId	= trim( static::$moduleId );
 		$this->setEnv( $env );
 
-//		$env->clock->profiler->tick( 'CMF_Controller('.get_class( $this ).'): env set' );
-		if( !( $env instanceof CMF_Hydrogen_Environment_Console ) && $setupView )
+//		$env->getRuntime()->reach( 'CMF_Controller('.get_class( $this ).'): env set' );
+		if( $setupView )
 			$this->setupView( !$env->getRequest()->isAjax() );
-		$env->clock->profiler->tick( 'CMF_Controller('.get_class( $this ).'): got view object' );
+		$env->getRuntime()->reach( 'CMF_Controller('.get_class( $this ).'): got view object' );
 
 		$controllerName		= preg_replace( "/^Controller_/", "", get_class( $this ) );				//  get controller name from class name
 		$this->defaultPath	= strtolower( str_replace( '_', '/', $controllerName ) );				//  to guess default controller URI path
@@ -107,7 +110,7 @@ class CMF_Hydrogen_Controller
 			$this->callHook( 'App', 'onException', $this, $payload );
 			throw new \Exception( $e->getMessage(), $e->getCode(), $e );
 		}
-		$env->clock->profiler->tick( 'CMF_Controller('.get_class( $this ).'): done' );				//  log time of construction
+		$env->getRuntime()->reach( 'CMF_Controller('.get_class( $this ).'): done' );				//  log time of construction
 	}
 
 	public function getView()
@@ -125,35 +128,35 @@ class CMF_Hydrogen_Controller
 	 */
 	public function renderView(): string
 	{
-		$this->env->clock->profiler->tick( 'Controller::getView: start' );
+		$this->env->getRuntime()->reach( 'Controller::getView: start' );
 		if( !$this->view )
 			throw new \RuntimeException( 'No view object created in constructor' );
 		if( !method_exists( $this->view, $this->action ) )
 			throw new \RuntimeException( 'View Action "'.$this->action.'" not defined yet', 302 );
 		$language		= $this->env->getLanguage();
-		$this->env->clock->profiler->tick( 'Controller::getView: got language' );
+		$this->env->getRuntime()->reach( 'Controller::getView: got language' );
 		if( $language->hasWords( $this->controller ) )
 			$this->view->setData( $language->getWords( $this->controller ), 'words' );
-		$this->env->clock->profiler->tick( 'Controller::getView: set words' );
+		$this->env->getRuntime()->reach( 'Controller::getView: set words' );
 
 		$factory	= new \Alg_Object_MethodFactory( $this->view, $this->action );
 		$result		= $factory->call();
 		if( is_string( $result ) ){
-			$this->env->clock->profiler->tick( 'Controller::getView: Action called' );
+			$this->env->getRuntime()->reach( 'Controller::getView: Action called' );
 		}
 		else if( $this->view->hasTemplate( $this->controller, $this->action ) ){
 			$result	= $this->view->loadTemplate( $this->controller, $this->action );
-			$this->env->clock->profiler->tick( 'Controller::getView: loadTemplate' );
+			$this->env->getRuntime()->reach( 'Controller::getView: loadTemplate' );
 		}
 		else if( $this->view->hasContent( $this->controller, $this->action, 'html/' ) ){
 			$result	= $this->view->loadContent( $this->controller, $this->action, NULL, 'html/' );
-			$this->env->clock->profiler->tick( 'Controller::getView: loadContent' );
+			$this->env->getRuntime()->reach( 'Controller::getView: loadContent' );
 		}
 		else{
 			$message	= 'Neither view template nor content file defined for request path "%s/%s"';
 			throw new \RuntimeException( sprintf( $message, $this->controller, $this->action ) );
 		}
-		$this->env->clock->profiler->tick( 'Controller::getView: done' );
+		$this->env->getRuntime()->reach( 'Controller::getView: done' );
 		return $result;
 	}
 

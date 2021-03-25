@@ -31,10 +31,10 @@ class CMF_Hydrogen_Environment_Resource_Profiler
 			$this->clock	= new Alg_Time_Clock();
 	}
 
-	public function tick( string $message )
+	public function tick( string $message, string $description = NULL )
 	{
 		if( $this->enabled )
-			$this->clock->stopLap( 0, 0, $message );
+			$this->clock->stopLap( 0, 0, $message, $description );
 	}
 
 	public function get(): array

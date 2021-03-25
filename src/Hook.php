@@ -1,14 +1,18 @@
 <?php
+
+use CMF_Hydrogen_Environment as Environment;
+use CMF_Hydrogen_Environment_Web as WebEnv;
+
 class CMF_Hydrogen_Hook
 {
-	public static function callHook( CMF_Hydrogen_Environment $env, string $resource, string $event, $context, $module, $data )
+	public static function callHook( Environment $env, string $resource, string $event, $context, $module, $data )
 	{
 		return $env->getCaptain()->callHook( $resource, $event, $context, $data );
 	}
 
 	//  --  PROTECTED  --  //
 
-	protected static function getModuleConfig( CMF_Hydrogen_Environment $env, $module )
+	protected static function getModuleConfig( Environment $env, $module )
 	{
 		return $env->getConfig()->get( 'module.'.strtolower( $module ).'.', TRUE );
 	}
@@ -20,15 +24,15 @@ class CMF_Hydrogen_Hook
 	 *	Attention: This is not recommended, please use restart in favour.
 	 *	@static
 	 *	@access		protected
-	 *	@param		object		$env				Instance of CMF_Hydrogen_Environment
-	 *	@param		string		$controller		Controller to be called, default: index
-	 *	@param		string		$action			Action to be called, default: index
-	 *	@param		array		$arguments		List of arguments to add to URL
-	 *	@param		array		$parameters		Map of additional parameters to set in request
-	 *	@return		boolean		Always returns TRUE to indicate that dispatching hook is done
+	 *	@param		Environment		$env			Instance of environment
+	 *	@param		string			$controller		Controller to be called, default: index
+	 *	@param		string			$action			Action to be called, default: index
+	 *	@param		array			$arguments		List of arguments to add to URL
+	 *	@param		array			$parameters		Map of additional parameters to set in request
+	 *	@return		void			Always returns TRUE to indicate that dispatching hook is done
 	 *	@todo		remove first 2 lines after Env::redirect has been deprecated
 	 */
-	protected static function redirect( CMF_Hydrogen_Environment $env, string $controller = 'index', string $action = "index", array $arguments = array(), array $parameters = array() )
+	protected static function redirect( Environment $env, string $controller = 'index', string $action = "index", array $arguments = array(), array $parameters = array() )
 	{
 //		$env->redirect( $controller, $action, $arguments, $parameters );
 //		return TRUE;
@@ -53,7 +57,6 @@ class CMF_Hydrogen_Hook
 	 *
 	 *	@static
 	 *	@access		protected
-	 *	@param		object		$env				Instance of CMF_Hydrogen_Environment
 	 *	@param		string		$uri				URI to request, may be external
 	 *	@param		integer		$status				HTTP status code to send, default: NULL -> 200
 	 *	@return		void
@@ -77,23 +80,32 @@ class CMF_Hydrogen_Hook
 	 *	This would look like this: static::restart( 'http://foreign.tld/', NULL, TRUE );
 	 *	There is a shorter alias: static::relocate( 'http://foreign.tld/' );
 	 *
-	 *	@static
 	 *	@access		protected
-	 *	@param		object		$env				Instance of CMF_Hydrogen_Environment
-	 *	@param		string		$uri				URI to request
-	 *	@param		integer		$status				HTTP status code to send, default: NULL -> 200
-	 *	@param		boolean		$allowForeignHost	Flag: allow redirection outside application base URL, default: no
-	 *	@param		integer		$modeFrom			How to handle FROM parameter from request or for new request, not handled atm
+	 *	@static
+	 *	@param		WebEnv			$env				Instance of Web Environment
+	 *	@param		string			$uri				URI to request
+	 *	@param		integer			$status				HTTP status code to send, default: NULL -> 200
+	 *	@param		boolean			$allowForeignHost	Flag: allow redirection outside application base URL, default: no
+	 *	@param		integer			$modeFrom			How to handle FROM parameter from request or for new request, not handled atm
 	 *	@return		void
 	 */
-	protected static function restart( CMF_Hydrogen_Environment $env, string $uri, int $status = NULL, bool $allowForeignHost = FALSE, int $modeFrom = 0 )
+	protected static function restart( WebEnv $env, string $uri, int $status = NULL, bool $allowForeignHost = FALSE, int $modeFrom = 0 )
 	{
 		$env->restart( $uri, $status, $allowForeignHost, $modeFrom );
 	}
 
-	static protected function sendMail( CMF_Hydrogen_Environment $env, Mail_Abstract $mail, array $receivers = array() )
+	/**
+	 *	Send mail using hook Hook::sendMail.
+	 *	@access		protected
+	 *	@static
+	 *	@param		Environment		$env			Instance of environment
+	 *	@param		Mail_Abstract	$mail			Mail object to handle
+	 *	@param		array			$receivers		List of receiver objects
+	 *	@return		void
+	 */
+	protected static function sendMail( Environment $env, Mail_Abstract $mail, array $receivers = array() )
 	{
-		$language	= $env->getLanguage()->getLanguage();										// @todo apply user language
+		$language	= $env->getLanguage()->getLanguage();											// @todo apply user language
 		foreach( $receivers as $receiver ){
 			if( is_string( $receiver ) )
  				$receiver	= (object) array( 'email' => $receiver );
@@ -101,7 +113,13 @@ class CMF_Hydrogen_Hook
  				$receiver	= (object) $receiver;
 			if( !property_exists( $receiver, 'email' ) )
 				throw new InvalidArgumentException( 'Given receiver is missing email address' );
-			$env->getLogic()->mail->handleMail( $mail, $receiver, $language );
+			$result	= $env->getCaptain()->callHook( 'Hook', 'sendMail', $env, [
+				'mail'		=> $mail,
+				'receiver'	=> $receiver,
+				'language'	=> $language,
+			] );
+			if( !( is_int( $result ) && $result > 0 ) )
+				$env->getLogic()->get( 'mail' )->handleMail( $mail, $receiver, $language );
 		}
 	}
 }

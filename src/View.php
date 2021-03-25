@@ -24,6 +24,8 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+use CMF_Hydrogen_Environment_Web as WebEnvironment;
+
 /**
  *	Generic View Class of Framework Hydrogen.
  *	@category		Library
@@ -40,7 +42,7 @@ class CMF_Hydrogen_View
 	/**	@var		array						$data			Collected Data for View */
 	protected $data			= array();
 
-	/**	@var		CMF_Hydrogen_Environment_Web	$env			Environment Object */
+	/**	@var		WebEnvironment	$env			Environment Object */
 	protected $env;
 
 	/**	@var		string						$controller		Name of called Controller */
@@ -49,7 +51,7 @@ class CMF_Hydrogen_View
 	/**	@var		string						$action			Name of called Action */
 	protected $action		= NULL;
 
-	/**	@var		array						$helpers		Map of view helper classes/objects */
+	/**	@var		ADT_List_Dictionary			$helpers		Map of view helper classes/objects */
 	protected $helpers;
 
 	/**	@var		string						$time			Instance of time converter */
@@ -58,8 +60,8 @@ class CMF_Hydrogen_View
 	/**	@var		string						$html			Instance of HTML library class */
 	protected $html;
 
-	/**	@var		CMM_TEA_Factory				$tea			Instance of TEA (Template Engine Abstraction) Factory (from cmModules) OR empty if TEA is not available */
-	protected $tea			= NULL;
+//	/**	@var		CMM_TEA_Factory				$tea			Instance of TEA (Template Engine Abstraction) Factory (from cmModules) OR empty if TEA is not available */
+//	protected $tea			= NULL;
 
 	/**	@var		string						$pathTemplates	Path to template file, can be set by config::path.templates */
 	protected $pathTemplates	= 'templates/';
@@ -72,17 +74,19 @@ class CMF_Hydrogen_View
 	 */
 	public function __construct( CMF_Hydrogen_Environment $env )
 	{
-		$env->clock->profiler->tick( 'CMF_View('.get_class( $this ).')::init start' );
+		$env->getRuntime()->reach( 'CMF_View('.get_class( $this ).')::init start' );
 		$this->setEnv( $env );
 		$this->html		= new UI_HTML_Elements;
 		$this->time		= new Alg_Time_Converter();
 		$this->helpers	= new ADT_List_Dictionary;
 
-		$path	= $this->env->getConfig()->get( 'path.templates' );									//  get template path from config
-		$this->pathTemplates	= strlen( $path ) ? $path : $this->pathTemplates;					//  use configured template path is set, else keep default path
+		if( NULL !== $this->env->getConfig()->get( 'path.templates' ) )
+			$this->pathTemplates	= $this->env->getConfig()->get( 'path.templates' );
+		if( 0 === strlen( trim( $this->pathTemplates ) ) )
+			$this->pathTemplates	= './';
 		if( !file_exists( $this->pathTemplates ) )													//  templates folder is not existing
 			throw new RuntimeException( 'Templates folder "'.$this->pathTemplates.'" is missing' );	//  quit with exception
-		$env->clock->profiler->tick( 'CMF_Controller('.get_class( $this ).')::init done' );
+		$env->getRuntime()->reach( 'CMF_Controller('.get_class( $this ).')::init done' );
 /*		if( class_exists( 'CMM_TEA_Factory' ) ){
 			$config	= 'config/TEA.ini';
 			if( !file_exists( 'config/TEA.ini' ) )
@@ -185,9 +189,9 @@ class CMF_Hydrogen_View
 		return file_exists( $uri );
 	}
 
-	public function loadContent( string $controller, string $action, array $data = array() ): string
+	public function loadContent( string $controller, string $action, array $data = array(), string $extension = '.html' ): string
 	{
-		$fileKey	= 'html/'.$controller.'/'.$action.'.html';
+		$fileKey	= 'html/'.$controller.'/'.$action.$extension;
 		return $this->loadContentFile( $fileKey, $data );
 	}
 
@@ -202,14 +206,23 @@ class CMF_Hydrogen_View
 		if( !file_exists( $uri ) )																	//  content file is not existing
 			throw new RuntimeException( 'Locale content file "'.$fileKey.'" is missing.', 321 );	//  throw exception
 //		$data	= array_merge( $this->data, $data );
-		if( 0 && $this->env->getPage()->tea ){															//  template engine abstraction is enabled
-			$this->env->getPage()->tea->setDefaultType( 'STE' );									//
-			$template	= $this->env->getPage()->tea->getTemplate( $uri );							//  create template object for content file
-			$template->setData( $data );															//  set given data
-			$content	= $template->render();														//  render template
-		}
-		else
+
+		//  new solution
+//		$payload	= (object) ['filePath' => $uri, 'data' => $data, 'content' => ''];
+//		$result	= $this->env->getCaptain()->callHook( 'View', 'renderContent', $this, $payload );
+//		if( $result )
+//			return $this->renderContent( $payload->content );										//  return loaded and rendered content
+
+		//  old solution, extract to module UI_TempateAbstraction
+//		if( 0 && $this->env->getPage()->tea ){														//  template engine abstraction is enabled
+//			$this->env->getPage()->tea->setDefaultType( 'STE' );									//
+//			$template	= $this->env->getPage()->tea->getTemplate( $uri );							//  create template object for content file
+//			$template->setData( $data );															//  set given data
+//			$content	= $template->render();														//  render template
+//		}
+//		else
 			$content	= UI_Template::render( $uri, $data );										//  render template with integrated template engine
+
 		$content	= $this->renderContent( $content );												//  apply modules to content
 		return $content;																			//  return loaded and rendered content
 	}
@@ -269,10 +282,17 @@ class CMF_Hydrogen_View
 		$data		= array_merge( $this->data, $data );											//
 		$content	= '';
 
+		//  new solution
+//		$payload	= (object) ['filePath' => $uri, 'data' => $data, 'content' => ''];
+//		$result	= $this->env->getCaptain()->callHook( 'View', 'renderContent', $this, $payload );
+//		if( $result )
+//			return $this->renderContent( $payload->content );										//  return loaded and rendered content
+
+		//  old solution, extract to module UI_TempateAbstraction
 		/*  --  LOAD TEMPLATE AND APPLY DATA  --  */
-		if( $this->env->getPage()->tea )
-			$content	= $this->realizeTemplateWithTEA( $filePath, $data );
-		else
+//		if( $this->env->getPage()->tea )
+//			$content	= $this->realizeTemplateWithTEA( $filePath, $data );
+//		else
 			$content	= $this->realizeTemplate( $filePath, $data );								//
 		if( $renderContent )
 			$content	= $this->renderContent( $content );											//  apply modules to content
@@ -391,14 +411,14 @@ class CMF_Hydrogen_View
 		return (string) $content;
 	}
 
-	/**
-	 *	...
-	 *	Check if template file is existing MUST be done beforehand.
-	 *	@param		string		$filePath		Template file path name with templates folder
-	 *	@param		array		$data			Additional template data, appened to assigned view data
-	 *	@return		string		Template content with applied data
-	 */
-	protected function realizeTemplateWithTEA( string $filePath, array $data = array() ): string
+//	/**
+//	 *	...
+//	 *	Check if template file is existing MUST be done beforehand.
+//	 *	@param		string		$filePath		Template file path name with templates folder
+//	 *	@param		array		$data			Additional template data, appened to assigned view data
+//	 *	@return		string		Template content with applied data
+//	 */
+/*	protected function realizeTemplateWithTEA( string $filePath, array $data = array() ): string
 	{
 		$data['view']		= $this;															//
 		$data['env']		= $this->env;														//
@@ -410,7 +430,7 @@ class CMF_Hydrogen_View
 		$template	= $this->env->getPage()->tea->getTemplate( $filePath );						//
 		$template->setData( $data );															//
 		return $template->render();																//  render content with template engine
-	}
+	}*/
 
 	protected function registerHelper( string $name, string $class, array $parameters = array() ): self
 	{
@@ -466,12 +486,12 @@ class CMF_Hydrogen_View
 	 *	Sets Environment of Controller by copying Framework Member Variables.
 	 *	@access		protected
 	 *	@param		CMF_Hydrogen_Environment		$env			Framework Resource Environment Object
-	 *	@return		void
+	 *	@return		self
 	 */
 	protected function setEnv( CMF_Hydrogen_Environment $env ): self
 	{
 		$this->env			= $env;
-		if( $env instanceof CMF_Hydrogen_Environment_Web ){
+		if( $env instanceof WebEnvironment ){
 			$this->controller	= $this->env->getRequest()->get( '__controller' );
 			$this->action		= $this->env->getRequest()->get( '__action' );
 		}
@@ -487,7 +507,7 @@ class CMF_Hydrogen_View
 	 *	@param		string		$section		Section in language file of current controller
 	 *	@param		string		$key			Pair key in this section
 	 *	@param		array		$data			List of arguments to insert using sprintf
-	 *	@param		mixed		$mode			Concat mode: 0 - set | 1 - append, -1 - prepend
+	 *	@param		integer		$mode			Concat mode: 0 - set | 1 - append, -1 - prepend
 	 *	@return		self
 	 */
 	protected function setPageTitle( string $section = 'index', string $key = 'title', array $data = array(), int $mode = 1 ): self

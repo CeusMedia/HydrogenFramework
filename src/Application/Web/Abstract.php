@@ -24,6 +24,9 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+
+use CMF_Hydrogen_Environment_Web as WebEnv;
+
 /**
  *	Base application class for MVC web application.
  *	@category		Library
@@ -38,6 +41,20 @@
 abstract class CMF_Hydrogen_Application_Web_Abstract extends CMF_Hydrogen_Application_Abstract
 {
 	protected $components			= array();
+
+	/**	@var		WebEnv			$env				Application Environment Object */
+	protected $env;
+
+	/**
+	 *	Constructor.
+	 *	@access		public
+	 *	@param		WebEnv			$env				Framework Environment
+	 *	@return		void
+	 */
+	public function __construct( WebEnv $env = NULL )
+	{
+		parent::__construct( $env );
+	}
 
 	protected function logOnComplete()
 	{

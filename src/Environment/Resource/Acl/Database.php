@@ -29,16 +29,18 @@
  *
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Acl
- *	@extends		CMF_Hydrogen_Environment_Resource_Acl_Abstract
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2010-2021 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
+ *	@deprecated		use module Resource_Authentication instead
+ *	@todo			remove in version 0.9
  */
 class CMF_Hydrogen_Environment_Resource_Acl_Database extends CMF_Hydrogen_Environment_Resource_Acl_Abstract
 {
 	public function index( string $controller = NULL, $roleId = NULL ): array
 	{
+		$this->markDeprecation();
 		if( $roleId === NULL ){
 			if( !$this->env->has( 'session' ) )
 				return array();
@@ -76,6 +78,7 @@ class CMF_Hydrogen_Environment_Resource_Acl_Database extends CMF_Hydrogen_Enviro
 	 */
 	public function setRight( $roleId, string $controller, string $action )
 	{
+		$this->markDeprecation();
 		if( $this->hasFullAccess( $roleId ) )
 			return -1;
 		if( $this->hasNoAccess( $roleId ) )
@@ -171,5 +174,14 @@ class CMF_Hydrogen_Environment_Resource_Acl_Database extends CMF_Hydrogen_Enviro
 			foreach( $classData->methods as $methodName => $methodData )
 				$this->controllerActions[$className][]	= $methodName;
 		}
+	}
+
+	protected function markDeprecation()
+	{
+		CMF_Hydrogen_Deprecation::getInstance()
+			->setErrorVersion( '0.8.7.8' )
+			->setExceptionVersion( '0.9' )
+			->message( 'Use module Resource_Authentication instead' );
+
 	}
 }

@@ -29,8 +29,6 @@
  *
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.View.Helper
- *	@extends		CMF_Hydrogen_View_Helper_Abstract
- *	@uses			UI_HTML_Tag
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2010-2021 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -89,7 +87,7 @@ class CMF_Hydrogen_View_Helper_Timestamp extends CMF_Hydrogen_View_Helper_Abstra
 		if( !$this->timestamp )
 			return '-';
 
-		$words	= $env->language->getWords( $languageTopic );
+		$words	= $env->getLanguage()->getWords( $languageTopic );
 		if( !isset( $words[$languageSection] ) )
 			throw new InvalidArgumentException( 'Invalid language section "'.$languageSection.'" in topic "'.$languageTopic.'"' );
 		$phraser	= new Alg_Time_DurationPhraser( $words[$languageSection] );

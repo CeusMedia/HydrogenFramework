@@ -93,7 +93,7 @@ class CMF_Hydrogen_Environment_Resource_Captain
 	 *	@param		string		$event			Name of hook event (e.G. onBuild or onRenderContent)
 	 *	@param		object		$context		Context object, will be available inside hook as $context
 	 *	@param		array		$payload		Map of hook payload data, will be available inside hook as $payload and $data
-	 *	@return		integer						Number of called hooks for event
+	 *	@return		integer|NULL|FALSE			Number of called hooks for event, FALSE if hook is disabled, NULL if no modules installed or no hooks defined
 	 *	@throws		RuntimeException			if given static class method is not existing
 	 *	@throws		RuntimeException			ig method call produces stdout output, for example warnings and notices
 	 *	@throws		RuntimeException			if method call is throwing an exception
@@ -105,10 +105,10 @@ class CMF_Hydrogen_Environment_Resource_Captain
 			return NULL;
 		if( array_key_exists( $resource."::".$event, $this->disabledHooks ) )
 			return FALSE;
-//		$this->env->clock->profiler->tick( 'Resource_Module_Library_Local::callHook: '.$event.'@'.$resource.' start' );
+//		$this->env->getRuntime()->reach( 'Resource_Module_Library_Local::callHook: '.$event.'@'.$resource.' start' );
 
 		if( array_key_exists( $resource.'::'.$event, $this->openHooks ) )
-			return false;
+			return FALSE;
 
 		$this->openHooks[$resource.'::'.$event]	= microtime( TRUE );
 
@@ -160,17 +160,17 @@ class CMF_Hydrogen_Environment_Resource_Captain
 					ob_start();
 					$args	= array( $this->env, &$context, $module, $payload );
 					$result	= call_user_func_array( $callback, $args );
-					$this->env->clock->profiler->tick( '<!--Resource_Module_Library_Local::call-->Hook: '.$event.'@'.$resource.': '.$module->id );
+					$this->env->getRuntime()->reach( '<!--Resource_Module_Library_Local::call-->Hook: '.$event.'@'.$resource.': '.$module->id );
 					$stdout	= ob_get_clean();
 					if( strlen( trim( $stdout ) ) )
 						if( $this->env->has( 'messenger' ) )
-							$this->env->getMessenger()->noteNotice( 'Call on event '.$event.'@'.$resource.' hooked by module '.$module->id.' reported: '.$stdout );
+							$this->env->get( 'messenger' )->noteNotice( 'Call on event '.$event.'@'.$resource.' hooked by module '.$module->id.' reported: '.$stdout );
 						else
 							throw new RuntimeException( $stdout );
 				}
 				catch( Exception $e ){
 					if( $this->env->has( 'messenger' ) ){
-						$this->env->getMessenger()->noteFailure( 'Call on event '.$event.'@'.$resource.' hooked by module '.$module->id.' failed: '.$e->getMessage() );
+						$this->env->get( 'messenger' )->noteFailure( 'Call on event '.$event.'@'.$resource.' hooked by module '.$module->id.' failed: '.$e->getMessage() );
 						$this->env->getLog()->logException( $e );
 					}
 					else
@@ -181,7 +181,7 @@ class CMF_Hydrogen_Environment_Resource_Captain
 				return $result;
 		}
 		unset( $this->openHooks[$resource.'::'.$event]);
-//		$this->env->clock->profiler->tick( 'Resource_Module_Library_Local::callHook: '.$event.'@'.$resource.' done' );
+//		$this->env->getRuntime()->reach( 'Resource_Module_Library_Local::callHook: '.$event.'@'.$resource.' done' );
 		return $result;
 	}
 

@@ -24,12 +24,14 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+
+use CMF_Hydrogen_Environment_Web as WebEnv;
+
 /**
  *	View helper to render a tab navigation from defined module page links.
  *
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.View.Helper.Navigation
- *	@uses			UI_HTML_Tag
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2012-2021 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -46,7 +48,7 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAutoTabs extends CMF_Hydrogen_Vi
 	public $classTabActive	= "ui-tabs-selected ui-state-active";
 	protected $container	= FALSE;
 
-	public function __construct( CMF_Hydrogen_Environment_Web $env )
+	public function __construct( WebEnv $env )
 	{
 		CMF_Hydrogen_Deprecation::getInstance()
 			->setErrorVersion( '0.8.5' )

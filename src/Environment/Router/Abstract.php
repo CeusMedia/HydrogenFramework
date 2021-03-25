@@ -24,6 +24,10 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+
+use CMF_Hydrogen_Environment as Environment;
+use CMF_Hydrogen_Environment_Router_Interface as RouterInterface;
+
 /**
  *	...
  *	@category		Library
@@ -33,15 +37,15 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-abstract class CMF_Hydrogen_Environment_Router_Abstract implements CMF_Hydrogen_Environment_Router_Interface
+abstract class CMF_Hydrogen_Environment_Router_Abstract implements RouterInterface
 {
 	/**	@var		string		Key of path in request, default: path */
 	static public $pathKey		= "path";
 
-	/**	@var	CMF_Hydrogen_Environment			$env		Environment object */
+	/**	@var	Environment		$env		Environment object */
 	protected $env;
 
-	public function __construct( CMF_Hydrogen_Environment $env )
+	public function __construct( Environment $env )
 	{
 		$this->env	= $env;
 		$this->parseFromRequest();
@@ -63,8 +67,8 @@ abstract class CMF_Hydrogen_Environment_Router_Abstract implements CMF_Hydrogen_
 	public function getRelativeUri( string $controller = NULL, string $action = NULL, array $arguments = array(), array $parameters = array(), string $fragmentId = NULL ): string
 	{
 		$data	= array(
-			'controller'	=> $this->env->request->get( '__controller' ),
-			'action'		=> $this->env->request->get( '__action' ),
+			'controller'	=> $this->env->getRequest()->get( '__controller' ),
+			'action'		=> $this->env->getRequest()->get( '__action' ),
 			'arguments'		=> array(),
 			'parameters'	=> array(),
 		);

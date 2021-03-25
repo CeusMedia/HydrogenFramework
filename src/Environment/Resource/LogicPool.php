@@ -10,6 +10,8 @@
  */
 /**
  *	...
+ *	Implements Property overloading.
+ *
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
@@ -165,12 +167,12 @@ class CMF_Hydrogen_Environment_Resource_LogicPool
 	 *	Returns NULL if neither a class nor an object is registered for key.
 	 *	@access		public
 	 *	@param		string			$key			Key of logic object in pool
-	 *	@return		boolean|NULL
+	 *	@return		boolean
 	 */
 	public function isInstantiated( string $key ): bool
 	{
 		if( !$this->has( $key ) )
-			return NULL;
+			return FALSE;
 		return is_object( $this->pool[$key] );
 	}
 

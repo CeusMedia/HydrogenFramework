@@ -24,6 +24,14 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+
+use CMF_Hydrogen_Environment as Environment;
+use CMF_Hydrogen_Environment_Resource_Module_Component_Config as ConfigComponent;
+use CMF_Hydrogen_Environment_Resource_Module_Component_File as FileComponent;
+use CMF_Hydrogen_View_Helper_StyleSheet as CssHelper;
+use CMF_Hydrogen_View_Helper_JavaScript as JsHelper;
+use UI_HTML_PageFrame as HtmlPage;
+
 /**
  *	XHTML Page Resource of Framework Hydrogen.
  *	@category		Library
@@ -33,9 +41,9 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
+class CMF_Hydrogen_Environment_Resource_Page extends HtmlPage
 {
-	/**	@var	CMF_Hydrogen_Environment				$env				Environment object */
+	/**	@var	Environment		$env				Environment object */
 	public $env;
 
 	protected $bodyClasses		= array();
@@ -50,16 +58,16 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 
 	protected $pathTheme;
 
-	/**	@var	CMF_Hydrogen_View_Helper_JavaScript		$js					JavaScript Collector Helper */
+	/**	@var	JsHelper		$js					JavaScript Collector Helper */
 	public $js;
 
 	/**	@var	stdClass								$css				CSS containers (primer, theme) */
 	public $css;
 
-	/**	@var	CMM_TEA_Factory							$tea				Instance of TEA (Template Engine Abstraction) Factory (from cmModules) OR empty if TEA is not available */
-	public $tea					= NULL;
+//	/**	@var	CMM_TEA_Factory							$tea				Instance of TEA (Template Engine Abstraction) Factory (from cmModules) OR empty if TEA is not available */
+//	public $tea					= NULL;
 
-	public function __construct( CMF_Hydrogen_Environment $env )
+	public function __construct( Environment $env )
 	{
 		$this->env	= $env;
 		$language	= 'en';
@@ -67,7 +75,7 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 			$language	= $this->env->getLanguage()->getLanguage();
 
 		parent::__construct( 'XHTML_10_STRICT', $language );
-		$this->js		= CMF_Hydrogen_View_Helper_JavaScript::getInstance( $env );
+		$this->js		= JsHelper::getInstance( $env );
 
 		$config			= $env->getConfig();
 		$pathStylesLib	= '';
@@ -81,10 +89,10 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 		$this->pathCommon	= $pathThemes.'common/';
 		$this->pathTheme	= $pathThemes.$config->get( 'layout.theme' ).'/';
 		$this->css			= new stdClass;
-		$this->css->primer	= new CMF_Hydrogen_View_Helper_StyleSheet( $this->pathPrimer.'css/' );
-		$this->css->common	= new CMF_Hydrogen_View_Helper_StyleSheet( $this->pathCommon.'css/' );
-		$this->css->theme	= new CMF_Hydrogen_View_Helper_StyleSheet( $this->pathTheme.'css/' );
-		$this->css->lib		= new CMF_Hydrogen_View_Helper_StyleSheet();
+		$this->css->primer	= new CssHelper( $this->pathPrimer.'css/' );
+		$this->css->common	= new CssHelper( $this->pathCommon.'css/' );
+		$this->css->theme	= new CssHelper( $this->pathTheme.'css/' );
+		$this->css->lib		= new CssHelper();
 		if( $config->get( 'app.revision' ) ){
 			$this->css->primer->setRevision( $config->get( 'app.revision' ) );
 			$this->css->theme->setRevision( $config->get( 'app.revision' ) );
@@ -157,7 +165,7 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 	}
 
 	/**
-	 *	@todo		kriss: apply JS levels after CMF_Hydrogen_View_Helper_JavaScript is supporting it
+	 *	@todo		kriss: apply JS levels after JsHelper is supporting it
 	 */
 	public function applyModules()
 	{
@@ -178,6 +186,7 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 //				'_title'	=> $module->title,
 //				'_version'	=> $module->version,
 			);
+			/** @var FileComponent $style */
 			foreach( $module->files->styles as $style ){											//  iterate module style files
 				if( !empty( $style->load ) && $style->load == "auto" ){								//  style file is to be loaded always
 					$source	= !empty( $style->source ) ? $style->source : NULL;						//  get source attribute if possible
@@ -191,7 +200,7 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 					else if( $source == 'lib' ){													//  style file is in styles library, which is enabled by configured path
 						if( !strlen( trim( $pathStylesLib ) ) )
 							throw new RuntimeException( 'Path to style library "path.styles.lib" is not configured' );
-						$this->css->lib->addUrl( $pathStylesLib.$style->file, $level );							//  load style file from styles library
+						$this->css->lib->addUrl( $pathStylesLib.$style->file, $level );				//  load style file from styles library
 					}
 					else if( $source == 'scripts-lib' && $pathScriptsLib ){							//  style file is in scripts library, which is enabled by configured path
 						if( !strlen( trim( $pathScriptsLib ) ) )
@@ -204,6 +213,7 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 						$this->css->primer->addUrl( /*$path.$source.'/'.*/$style->file );				//  load style file /*from source folder within themes folder*/
 				}
 			}
+			/** @var FileComponent $script */
 			foreach( $module->files->scripts as $script ){											//  iterate module script files
 				if( !empty( $script->load ) && $script->load == "auto" ){							//  script file is to be loaded always
 					$source	= empty( $script->source ) ? 'local' : $script->source;
@@ -230,6 +240,7 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 					}
 				}
 			}
+			/** @var ConfigComponent $pair */
 			foreach( $module->config as $pair ){													//  iterate module configuration pairs
 				if( !empty( $pair->protected ) && $pair->protected !== 'yes' ){
 					$value	= $config->get( strtolower( $module->id ).'.'.$pair->key );				//  get (user modified) module setting value
@@ -240,18 +251,21 @@ class CMF_Hydrogen_Environment_Resource_Page extends UI_HTML_PageFrame
 				unset( $settings[$module->id] );
 		}
 		$modules->callHook( 'Page', 'applyModules', $this );										//  call related module event hooks
-		$settings['Env']	= array(
-			'host'		=> $this->env->host,
-			'port'		=> $this->env->port,
-			'protocol'	=> $this->env->scheme,
-			'domain'	=> $this->env->host.( $this->env->port ? ':'.$this->env->port : '' ),
-			'path'		=> $this->env->path,
-//			'title'		=> $this->env->title,
-			'secure'	=> getEnv( 'HTTPS' ),
-		);
-		$script		= 'var settings = '.json_encode( $settings ).';';
-		$script		= UI_HTML_Tag::create( 'script', "<!--\n".$script."\n-->", array( 'type' => "text/javascript" ) );
-		$this->addHead( $script );
+
+		if( $this->env instanceof CMF_Hydrogen_Environment_Web ){
+			$settings['Env']	= array(
+				'host'		=> $this->env->host,
+				'port'		=> $this->env->port,
+				'protocol'	=> $this->env->scheme,
+				'domain'	=> $this->env->host.( $this->env->port ? ':'.$this->env->port : '' ),
+				'path'		=> $this->env->path,
+	//			'title'		=> $this->env->title,
+				'secure'	=> getEnv( 'HTTPS' ),
+			);
+			$script		= 'var settings = '.json_encode( $settings ).';';
+			$script		= UI_HTML_Tag::create( 'script', "<!--\n".$script."\n-->", array( 'type' => "text/javascript" ) );
+			$this->addHead( $script );
+		}
 	}
 
 	/**

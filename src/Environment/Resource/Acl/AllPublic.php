@@ -29,7 +29,6 @@
  *
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Acl
- *	@extends		CMF_Hydrogen_Environment_Resource_Acl_Abstract
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2010-2021 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -37,17 +36,6 @@
  */
 class CMF_Hydrogen_Environment_Resource_Acl_AllPublic extends CMF_Hydrogen_Environment_Resource_Acl_Abstract
 {
-	/**
-	 *	Returns all rights of a role.
-	 *	@access		protected
-	 *	@param		integer		$roleId			Role ID
-	 *	@return		array
-	 */
-	protected function getRights( $roleId ): array
-	{
-		return array();
-	}
-
 	/**
 	 *	Indicates whether access to a controller action is allowed for a given role.
 	 *	@access		public
@@ -93,6 +81,34 @@ class CMF_Hydrogen_Environment_Resource_Acl_AllPublic extends CMF_Hydrogen_Envir
 	}
 
 	//  --  PROTECTED  --  //
+
+	/**
+	 *	Returns all rights of a role.
+	 *	@access		protected
+	 *	@param		integer		$roleId			Role ID
+	 *	@return		array
+	 */
+	protected function getRights( $roleId ): array
+	{
+		return array();
+	}
+
+	/**
+	 *	Returns all rights of a role.
+	 *	@access		protected
+	 *	@param		integer		$roleId			Role ID
+	 *	@return		array
+	 */
+	protected function getRole( $roleId )
+	{
+		return [
+			'roleId'		=> 0,
+			'title'			=> 'public visitor',
+			'description'	=> 'Since there is no authentication, no roles are available. This role is a placeholder.',
+			'createdAt'		=> time(),
+			'modifiedAt'	=> time(),
+		];
+	}
 
 	/**
 	 *	Scan controller classes for actions using disclosure.

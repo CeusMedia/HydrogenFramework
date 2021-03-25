@@ -71,11 +71,12 @@ class CMF_Hydrogen_Environment_Resource_Log
 	 *	@access		public
 	 *	@param		int|string			$type			Message type as string (debug,info,note,warn,error) or constant value (see Model_Log_Message::TYPE_*)
 	 *	@param		mixed				$message		Message as string, array or data object
-	 *	@param		string|object		$context		Context of message as object or string
-	 *	@return		void
+	 *	@param		string|object|NULL	$context		Context of message as object or string
+	 *	@return		bool
 	 *	@trigger	Env::log			Calls hook for handling by installed modules
+	 *	@trigger	Env:Custom::log		Calls hook for handling by custom module hooks
 	 */
-	public function log( $type, string $message, $context = NULL ): bool
+	public function log( $type, $message, $context = NULL ): bool
 	{
 		$isHandled		= FALSE;
 		$data			= [

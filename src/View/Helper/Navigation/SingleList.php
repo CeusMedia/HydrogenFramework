@@ -40,11 +40,11 @@
 class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_Helper_Abstract
 {
 	protected $linkMap;
-	protected $innerClass		= 'single';
-	protected $innerId			= 'navigation-inner';
-	protected $needsEnv			= FALSE;
-	protected $linksToSkip		= array();
-	public static $pathRequestKey		= "__path";
+	protected $innerClass			= 'single';
+	protected $innerId				= 'navigation-inner';
+	protected $needsEnv				= FALSE;
+	protected $linksToSkip			= array();
+	public static $pathRequestKey	= "__path";
 
 	public function __construct( array $linkMap, string $innerClass = NULL, string $innerId = NULL )
 	{

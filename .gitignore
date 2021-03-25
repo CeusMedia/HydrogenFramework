@@ -1,5 +1,5 @@
-composer.lock
-vendor
-doc
-
+/composer.lock
+/vendor
+/doc
+/.phpunit.result.cache
 

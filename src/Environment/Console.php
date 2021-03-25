@@ -1,4 +1,8 @@
 <?php
+use CLI_ArgumentParser as ArgumentParser;
+use CMF_Hydrogen_Environment_Console_Messenger as Messenger;
+use CMF_Hydrogen_Environment_Resource_Language as Language;
+
 /**
  *	...
  *	@category		Library
@@ -19,33 +23,33 @@
  */
 class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment
 {
-	/**	@var	CLI_ArgumentParser								$request	Console Request Object */
+	/**	@var	ArgumentParser			$request	Console Request Object */
 	protected $request;
 
-	/** @var	CMF_Hydrogen_Environment_Console_Messenger		$messenger	Messenger Object */
+	/** @var	Messenger				$messenger	Messenger Object */
 	protected $messenger;
 
-	/** @var	CMF_Hydrogen_Environment_Resource_Language		$language	Language Object */
+	/** @var	Language				$language	Language Object */
 	protected $language;
 
-	/** @var	ADT_List_Dictionary								$session	Session Storage Object */
+	/** @var	ADT_List_Dictionary		$session	Session Storage Object */
 	protected $session;
 
 	protected $pathConfig	= '';
 
-	/**	@var	string											$host		Detected HTTP host */
+	/**	@var	string					$host		Detected HTTP host */
 	public $host;
 
-	/**	@var	int												$port		Detected HTTP port */
+	/**	@var	int						$port		Detected HTTP port */
 	public $port;
 
-	/**	@var	string											$scheme		Detected  */
+	/**	@var	string					$scheme		Detected  */
 	public $scheme;
 
-	/**	@var	string											$path		Detected HTTP path */
+	/**	@var	string					$path		Detected HTTP path */
 	public $path;
 
-	/**	@var	string											$url		Detected application base URL */
+	/**	@var	string					$url		Detected application base URL */
 	public $url;
 
 	/**
@@ -80,22 +84,22 @@ class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment
 		}
 	}
 
-	public function getLanguage(): CMF_Hydrogen_Environment_Resource_Language
+	public function getLanguage(): Language
 	{
 		return $this->language;
 	}
 
-	public function getMessenger(): CMF_Hydrogen_Environment_Console_Messenger
+	public function getMessenger(): Messenger
 	{
 		return $this->messenger;
 	}
 
-	public function getRequest()
+	public function getRequest(): ArgumentParser
 	{
 		return $this->request;
 	}
 
-	public function getSession()
+	public function getSession(): ADT_List_Dictionary
 	{
 		return $this->session;
 	}
@@ -122,18 +126,18 @@ class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment
 
 	protected function initLanguage()
 	{
-		$this->language		= new CMF_Hydrogen_Environment_Resource_Language( $this );
-		$this->clock->profiler->tick( 'env: language' );
+		$this->language		= new Language( $this );
+		$this->runtime->reach( 'env: language' );
 	}
 
 	protected function initMessenger()
 	{
-		$this->messenger	= new CMF_Hydrogen_Environment_Console_Messenger( $this );
+		$this->messenger	= new Messenger( $this );
 	}
 
 	protected function initRequest()
 	{
-		$this->request	= new CLI_ArgumentParser();
+		$this->request	= new ArgumentParser();
 		$this->request->parseArguments();
 	}
 

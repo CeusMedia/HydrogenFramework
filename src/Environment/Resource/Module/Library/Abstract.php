@@ -24,6 +24,9 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+
+use CMF_Hydrogen_Environment_Resource_Module_Library_Interface as LibraryInterface;
+
 /**
  *	Abstract module libraries.
  *	@category		Library
@@ -33,23 +36,14 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-abstract class CMF_Hydrogen_Environment_Resource_Module_Library_Abstract implements CMF_Hydrogen_Environment_Resource_Module_Library_Interface
+abstract class CMF_Hydrogen_Environment_Resource_Module_Library_Abstract implements LibraryInterface
 {
 	protected $modules			= array();
+
 	protected $scanResult		= array(
 		'source'	=> 'unscanned',
 		'count'		=> 0,
 	);
-
-	/**
-	 *	@todo		remove after interface changed not auto-scanning on construction
-	 *	@access		public
-	 *	@return		object
-	 */
-	public function getScanResults()
-	{
-		return $this->scanResult;
-	}
 
 	/**
 	 *	Return module definition by module ID.
@@ -58,7 +52,7 @@ abstract class CMF_Hydrogen_Environment_Resource_Module_Library_Abstract impleme
 	 *	@access		public
 	 *	@param		string		$moduleId		ID of module to get definition for
 	 *	@param		boolean		$activeOnly		Flag: exclude deactivated modules (default: yes)
-	 *	@param		string		$strict			Flag: throw exception if not installed (default: yes)
+	 *	@param		boolean		$strict			Flag: throw exception if not installed (default: yes)
 	 *	@return		object|NULL
 	 *	@throws		RangeException				if module is not installed (using strict mode)
 	 *	@throws		RuntimeException			if module is not active (using strict mode and activeOnly)
@@ -94,6 +88,16 @@ abstract class CMF_Hydrogen_Environment_Resource_Module_Library_Abstract impleme
 			if( $module->isActive )
 				$modules[$module->id]	= $module;
 		return $modules;
+	}
+
+	/**
+	 *	@todo		remove after interface changed not auto-scanning on construction
+	 *	@access		public
+	 *	@return		object
+	 */
+	public function getScanResults()
+	{
+		return $this->scanResult;
 	}
 
 	/**

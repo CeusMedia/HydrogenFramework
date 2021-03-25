@@ -65,15 +65,14 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 	 *	Indicates whether access to a controller action is allowed for role of current user.
 	 *	Needs session resource. Works only if user is logged and assigned role is existing.
 	 *	@access		public
-	 *	@param		integer		$roleId			Role ID
 	 *	@param		string		$controller		Name of controller
 	 *	@param		string		$action			Name of action
-	 *	@return		integer		Right state: -1: no access at all | 0: no access | 1: access | 2: access at all
+	 *	@return		bool
 	 */
 	public function has( string $controller = 'index', string $action = 'index' ): bool
 	{
 		if( !$this->env->has( 'session' ) )
-			return 0;
+			return FALSE;
 		$roleId	= $this->env->getSession()->get( 'roleId' );
 		$right	= $this->hasRight( $roleId, $controller, $action );
 #		remark( 'Controller: '.$controller.' | Action: '.$action.' | Right: '.$right );
@@ -229,8 +228,8 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 
 	/**
 	 *	Allowes access to a controller action for a role.
-	 *	@access		public
 	 *	@abstract
+	 *	@access		public
 	 *	@param		integer		$roleId			Role ID
 	 *	@param		string		$controller		Name of Controller
 	 *	@param		string		$action			Name of Action
@@ -244,19 +243,10 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 
 	/**
 	 *	Returns Role.
+	 *	@abstract
 	 *	@access		protected
 	 *	@param		integer		$roleId			Role ID
 	 *	@return		array|object
 	 */
-	protected function getRole( $roleId )
-	{
-		if( !$roleId )
-			return array();
-		if( !$this->roles ){
-			$model	= new Model_Role( $this->env );
-			foreach( $model->getAll() as $role )
-				$this->roles[$role->roleId]	= $role;
-		}
-		return $this->roles[$roleId];
-	}
+	abstract protected function getRole( $roleId );
 }
