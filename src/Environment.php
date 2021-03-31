@@ -565,7 +565,7 @@ class CMF_Hydrogen_Environment implements ArrayAccess
 	protected function initDatabase()
 	{
 		$data	= (object) array( 'managers' => array() );
-		$this->modules->callHook( 'Env', 'initDatabase', $this, $data );									//  call events hooked to database init
+		$this->captain->callHook( 'Env', 'initDatabase', $this, $data );									//  call events hooked to database init
 		if( count( $data->managers ) ){
 			$this->database	= current( $data->managers );
 			$this->modules->callHook( 'Database', 'init', $this->database );									//  call events hooked to database init

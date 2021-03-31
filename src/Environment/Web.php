@@ -174,7 +174,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment
 	 *	@access		public
 	 *	@return		CMF_Hydrogen_Environment_Resource_Messenger
 	 */
-	public function getMessenger(): CMF_Hydrogen_Environment_Resource_Messenger
+	public function getMessenger(): ?CMF_Hydrogen_Environment_Resource_Messenger
 	{
 		return $this->messenger;
 	}

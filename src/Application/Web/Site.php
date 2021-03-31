@@ -159,7 +159,8 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 			'config'		=> $this->env->getConfig(),												//  configuration object
 			'request'		=> $request,															//  request object
 			'content'		=> $content,															//  rendered response page view content
-			'clock'			=> $this->env->getClock(),												//  system clock for performance messure
+			'runtime'		=> $this->env->getRuntime(),											//  system clock for performance messure
+			'clock'			=> $this->env->getRuntime(),												//  legacy: alias for runtume @todo remove
 			'dev'			=> ob_get_clean(),														//  warnings, notices or development messages
 		);
 

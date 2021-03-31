@@ -236,6 +236,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader
 			$item->values		= self::castNodeAttributes( $pair, 'values', 'array' );
 			$item->mandatory	= self::castNodeAttributes( $pair, 'mandatory', 'bool' );
 			$item->protected	= self::castNodeAttributes( $pair, 'protected' );
+			$object->config[$key]	= $item;
 		}
 		return TRUE;
 	}
