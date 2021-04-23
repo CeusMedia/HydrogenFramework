@@ -28,7 +28,7 @@ class CMF_Hydrogen_Environment_Resource_Runtime
 
 	public function get( int $base = 3, int $precision = 3 ): float
 	{
-		return $this->clock->stop( $base = 6, $precision = 3 );
+		return $this->clock->stop( $base, $precision );
 	}
 
 	/**
