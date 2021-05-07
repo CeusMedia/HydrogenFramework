@@ -223,16 +223,8 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader
 			$value		= (string) $pair;
 			if( in_array( $type, array( 'boolean', 'bool' ) ) )										//  value is boolean
 				$value	= !in_array( strtolower( $value ), array( 'no', 'false', '0', '' ) );		//  value is not negative
-/*			$object->config[$key]	= (object) array(
-				'key'				=> trim( $key ),
-				'type'				=> $type,
-				'value'				=> $value,
-				'values'			=> self::castNodeAttributes( $pair, 'values', 'array' ),
-				'mandatory'			=> self::castNodeAttributes( $pair, 'mandatory', 'bool' ),
-				'protected'			=> self::castNodeAttributes( $pair, 'protected' ),
-				'title'				=> $title,
-			);*/
-			$item				= new ConfigComponent( trim( $key ), $value, $type , $title );
+
+			$item				= new ConfigComponent( trim( $key ), $value, $type , $title );		//  container for config entry
 			$item->values		= self::castNodeAttributes( $pair, 'values', 'array' );
 			$item->mandatory	= self::castNodeAttributes( $pair, 'mandatory', 'bool' );
 			$item->protected	= self::castNodeAttributes( $pair, 'protected' );

@@ -256,7 +256,7 @@ class CMF_Hydrogen_Environment implements ArrayAccess
 		CMF_Hydrogen_Deprecation::getInstance()
 			->setErrorVersion( '0.8.7.9' )
 			->setExceptionVersion( '0.9' )
-			->message( 'Use $[this->]env->getRuntime() instead' );
+			->message( 'Environment clock $env->getClock() is deprecated. Use $env->getRuntime() instead' );
 		return $this->runtime;
 	}
 

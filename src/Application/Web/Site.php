@@ -76,11 +76,12 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 	 *	@throws		Exception	if a exception is caught and neither error view not messenger is available
 	 *	@todo		handle exception by hook call "App@onDispatchException", see below
 	 */
-	protected function control( $defaultController = NULL, $defaultAction = NULL )
+	protected function control( $defaultController = NULL, $defaultAction = NULL ): string
 	{
 		$request	= $this->env->getRequest();
 		$captain	= $this->env->getCaptain();
 		$captain->callHook( 'App', 'onControl', $this, array() );
+		$output		= '';
 		try{
 			$result		= $captain->callHook( 'App', 'onDispatch', $this, array() );
 			if( is_string( $result ) && strlen( trim( $result ) ) )
@@ -96,7 +97,6 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 				'controller'	=> $request->get( '__controller' ),									//  called controller
 				'action'		=> $request->get( '__action' )										//  called action
 			) );
-			return $output;																			//  return generated output
 		}
 /*		catch( ErrorException $e ){
 			if( getEnv( 'HTTP_HOST' ) ){
@@ -137,6 +137,7 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 			}
 //			throw new RuntimeException( "Unhandled exception: ".$e->getMessage(), 0, $e );			//  last call: throw exception with unhandled exception nested
 		}
+		return $output;																				//  return generated output
 	}
 
 	/**

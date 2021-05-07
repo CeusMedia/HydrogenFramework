@@ -63,46 +63,69 @@ class CMF_Hydrogen_Environment_Resource_Runtime
 
 	public function stop( $base = 3, $round = 3 )
 	{
-		$this->markDeprecation();
+		$this->markDeprecation( 'stop' );
 		return $this->get( $base, $round );
 	}
 
 	public function stopLap( $base = 3, $round = 3, $label = NULL, $description = NULL )
 	{
-		$this->markDeprecation();
+		$this->markDeprecation( 'stopLap' );
 		return $this->reach( $base, $round );
 	}
 
 	public function sleep( $seconds )
 	{
-		$this->markDeprecation();
+		$this->markDeprecation( 'sleep' );
 		$this->clock->sleep( $seconds );
 	}
 
 	public function speed( $seconds )
 	{
-		$this->markDeprecation();
+		$this->markDeprecation( 'speed' );
 		$this->clock->speed( $seconds );
 	}
 
 	public function usleep( $microseconds )
 	{
-		$this->markDeprecation();
+		$this->markDeprecation( 'usleep' );
 		$this->clock->usleep( $microseconds );
 	}
 
 	public function uspeed( $microseconds )
 	{
-		$this->markDeprecation();
+		$this->markDeprecation( 'uspeed' );
 		$this->clock->uspeed( $microseconds );
 	}
 
-	protected function markDeprecation()
+	protected function markDeprecation( string $type = NULL )
 	{
+		switch( $type ){
+			case 'sleep':
+				$message	= 'Environment clock $env->getClock()->sleep() is deprecated.';
+				break;
+			case 'speed':
+				$message	= 'Environment clock $env->getClock()->speed() is deprecated.';
+				break;
+			case 'usleep':
+				$message	= 'Environment clock $env->getClock()->usleep() is deprecated.';
+				break;
+			case 'uspeed':
+				$message	= 'Environment clock $env->getClock()->uspeed() is deprecated.';
+				break;
+			case 'stop':
+				$message	= 'Environment clock $env->getClock()->stop() is deprecated. Use module $env->getRuntime()->get() instead';
+				break;
+			case 'stopLap':
+				$message	= 'Environment clock $env->getClock()->stopLap() is deprecated. Use module $env->getRuntime()->reach() instead';
+				break;
+			default:
+				$message	= 'Environment clock $env->getClock() is deprecated. Use module $env->getRuntime() instead';
+		}
+
 		CMF_Hydrogen_Deprecation::getInstance()
 			->setErrorVersion( '0.8.7.9' )
 			->setExceptionVersion( '0.9' )
-			->message( 'Use module $[this->]env->getRuntime() instead' );
+			->message( $message );
 	}
 }
 
@@ -119,14 +142,14 @@ class CMF_Hydrogen_Environment_Resource_Runtime_Profiler
 
 	public function tick( string $message, string $description = NULL )
 	{
-		$this->markDeprecation();
+		$this->markDeprecation( 'tick' );
 		if( $this->enabled )
 			$this->runtime->reach( $message, $description );
 	}
 
 	public function get(): array
 	{
-		$this->markDeprecation();
+		$this->markDeprecation( 'get' );
 		$list	= [];
 		if( $this->enabled ){
 			foreach( $this->runtime->getGoals() as $goal )
@@ -135,11 +158,14 @@ class CMF_Hydrogen_Environment_Resource_Runtime_Profiler
 		return $list;
 	}
 
-	protected function markDeprecation()
+	protected function markDeprecation( string $type )
 	{
+		$message	= 'CMF_Hydrogen_Environment_Resource_Runtime_Profiler::get is deprecated. Use $env->getRuntime()->getGoals() instead';
+		if( $type === 'tick' )
+			$message	= 'CMF_Hydrogen_Environment_Resource_Runtime_Profiler::tick is deprecated. Use $env->getRuntime()->reach() instead';
 		CMF_Hydrogen_Deprecation::getInstance()
 			->setErrorVersion( '0.8.7.9' )
 			->setExceptionVersion( '0.9' )
-			->message( 'Use $[this->]env->getClock()->reach() instead' );
+			->message( $message );
 	}
 }
