@@ -359,7 +359,7 @@ class CMF_Hydrogen_Environment implements ArrayAccess
 		return $this->runtime;
 	}
 
-	public function getSession(): ADT_List_Dictionary
+	public function getSession(): ?ADT_List_Dictionary
 	{
 		return $this->session;
 	}

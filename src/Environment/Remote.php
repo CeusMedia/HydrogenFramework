@@ -60,7 +60,7 @@ class CMF_Hydrogen_Environment_Remote extends CMF_Hydrogen_Environment
 
 		self::$configFile	= $this->path."/config/config.ini";
 
-		$this->initClock();																			//  setup clock
+		$this->initRuntime();																		//  setup clock
 		$this->initMessenger();																		//  setup user interface messenger
 		$this->initConfiguration();																	//  setup configuration
 		$this->initModules();																		//  setup module support
