@@ -112,7 +112,7 @@ class CMF_Hydrogen_Environment_Resource_LogicPool
 			class_exists( $className ) ? $this->add( $key, $className ) : NULL;
 		}
 		if( !$this->has( $key ) )
-			throw new RuntimeException( 'No logic class/object available for key "'.$key.'"' );
+			throw new RuntimeException( 'No logic class/object available for key "'.$key.'" (classname: '.$className.')' );
 
 		if( !$this->isInstantiated( $key ) ){
 			if( !class_exists( $this->pool[$key] ) )
