@@ -53,7 +53,8 @@ class CMF_Hydrogen_Environment_Resource_Logic
 		$this->os		= preg_match( '/win/i', PHP_OS ) ? self::OS_WINDOWS : $this->os;			//  detect Windows and set OS
 
 		$arguments		= array_slice( func_get_args(), 1 );										//  collect additional arguments for extended logic classes
-		Alg_Object_MethodFactory::callObjectMethod( $this, '__onInit', $arguments, TRUE, TRUE );	//  invoke possibly extended init method
+//		Alg_Object_MethodFactory::callObjectMethod( $this, '__onInit', $arguments, TRUE, TRUE );	//  invoke possibly extended init method
+		$this->__onInit();																			//  invoke possibly extended init method
 	}
 
 	//  --  PROTECTED  --  //
