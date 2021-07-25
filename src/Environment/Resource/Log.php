@@ -89,21 +89,21 @@ class CMF_Hydrogen_Environment_Resource_Log
 		];
 		foreach( $this->strategies as $strategy ){
 			switch( $strategy ){
-				case 'module-hooks':
+				case self::STRATEGY_MODULE_HOOKS:
 					$captain	= $this->env->getCaptain();
 					$isHandled	= $captain->callHook( 'Env', 'log', $context, $data );
 					break;
-				case 'custom-hooks':
+				case self::STRATEGY_CUSTOM_HOOKS:
 					$captain	= $this->env->getCaptain();
 					$isHandled	= $captain->callHook( 'Env:Custom', 'log', $context, $data );
 					break;
-				case 'custom-callback':
+				case self::STRATEGY_CUSTOM_CALLBACK:
 					$isHandled	= $this->handleLogWithCustomCallback( $data );
 					break;
-				case 'app-typed':
+				case self::STRATEGY_APP_TYPED:
 					$isHandled	= $this->handleLogWithAppTyped( $data );
 					break;
-				case 'app-default':
+				case self::STRATEGY_APP_DEFAULT:
 					$isHandled	= $this->handleLogWithAppDefault( $data );
 					break;
 			}
@@ -133,21 +133,21 @@ class CMF_Hydrogen_Environment_Resource_Log
 		];
 		foreach( $this->strategies as $strategy ){
 			switch( $strategy ){
-				case 'module-hooks':
+				case self::STRATEGY_MODULE_HOOKS:
 					$captain	= $this->env->getCaptain();
 					$isHandled	= $captain->callHook( 'Env', 'logException', $context, $data );
 					break;
-				case 'custom-hooks':
+				case self::STRATEGY_CUSTOM_HOOKS:
 					$captain	= $this->env->getCaptain();
 					$isHandled	= $captain->callHook( 'Env:Custom', 'logException', $context, $data );
 					break;
-				case 'custom-callback':
+				case self::STRATEGY_CUSTOM_CALLBACK:
 					$isHandled	= $this->handleExceptionWithCustomCallback( $data );
 					break;
-				case 'app-typed':
+				case self::STRATEGY_APP_TYPED:
 					$isHandled	= $this->handleExceptionWithAppTyped( $data );
 					break;
-				case 'app-default':
+				case self::STRATEGY_APP_DEFAULT:
 					$isHandled	= $this->handleExceptionWithAppDefault( $data );
 					break;
 			}

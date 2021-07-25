@@ -73,9 +73,9 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 	{
 		if( !$this->env->has( 'session' ) )
 			return FALSE;
-		$roleId	= $this->env->getSession()->get( 'roleId' );
+		$roleId	= $this->env->getSession()->get( 'auth_role_id' );
 		$right	= $this->hasRight( $roleId, $controller, $action );
-#		remark( 'Controller: '.$controller.' | Action: '.$action.' | Right: '.$right );
+//		remark( 'Controller: '.$controller.' | Action: '.$action.' | Right: '.$right );
 		return $right > 0;
 	}
 
