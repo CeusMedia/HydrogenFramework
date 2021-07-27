@@ -24,8 +24,15 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework;
 
-use CMF_Hydrogen_Environment_Web as WebEnvironment;
+use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
+use ADT_List_Dictionary as Dictionary;
+use Alg_Object_Factory as ObjectFactory;
+use Alg_Object_MethodFactory as MethodFactory;
+use Alg_Text_CamelCase as CamelCase;
+use Net_HTTP_Status as HttpStatus;
+use RuntimeException;
 
 /**
  *	Generic Controller Class of Framework Hydrogen.
@@ -36,7 +43,7 @@ use CMF_Hydrogen_Environment_Web as WebEnvironment;
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Controller
+class Controller
 {
 	const RESTART_FROM_IGNORE		= 0;
 	const RESTART_FROM_POP			= 1;
@@ -58,9 +65,9 @@ class CMF_Hydrogen_Controller
 	protected $defaultPath;
 	/**	@var		string								$path			Preferred controller URI path */
 	protected $path;
-	/**	@var		CMF_Hydrogen_View					$view			View instance for controller */
+	/**	@var		View								$view			View instance for controller */
 	protected $view;
-	/**	@var		ADT_List_Dictionary					$moduleConfig	Map of module configuration pairs */
+	/**	@var		Dictionary							$moduleConfig	Map of module configuration pairs */
 	protected $moduleConfig;
 
 	/**	@var		string								$controller		Name of called Controller */
@@ -108,7 +115,7 @@ class CMF_Hydrogen_Controller
 		catch( \Exception $e ){
 			$payload	= array( 'exception' => $e );
 			$this->callHook( 'App', 'onException', $this, $payload );
-			throw new \Exception( $e->getMessage(), $e->getCode(), $e );
+			throw new RuntimeException( $e->getMessage(), $e->getCode(), $e );
 		}
 		$env->getRuntime()->reach( 'CMF_Controller('.get_class( $this ).'): done' );				//  log time of construction
 	}
@@ -122,24 +129,24 @@ class CMF_Hydrogen_Controller
 	 *	Returns View Content of called Action.
 	 *	@access		public
 	 *	@return		string
-	 *	@throws		\RuntimeException			if no view has been set up
-	 *	@throws		\RuntimeException			if
-	 *	@throws		\RuntimeException			if
+	 *	@throws		RuntimeException			if no view has been set up
+	 *	@throws		RuntimeException			if
+	 *	@throws		RuntimeException			if
 	 */
 	public function renderView(): string
 	{
 		$this->env->getRuntime()->reach( 'Controller::getView: start' );
 		if( !$this->view )
-			throw new \RuntimeException( 'No view object created in constructor' );
+			throw new RuntimeException( 'No view object created in constructor' );
 		if( !method_exists( $this->view, $this->action ) )
-			throw new \RuntimeException( 'View Action "'.$this->action.'" not defined yet', 302 );
+			throw new RuntimeException( 'View Action "'.$this->action.'" not defined yet', 302 );
 		$language		= $this->env->getLanguage();
 		$this->env->getRuntime()->reach( 'Controller::getView: got language' );
 		if( $language->hasWords( $this->controller ) )
 			$this->view->setData( $language->getWords( $this->controller ), 'words' );
 		$this->env->getRuntime()->reach( 'Controller::getView: set words' );
 
-		$factory	= new \Alg_Object_MethodFactory( $this->view, $this->action );
+		$factory	= new MethodFactory( $this->view, $this->action );
 		$result		= $factory->call();
 		if( is_string( $result ) ){
 			$this->env->getRuntime()->reach( 'Controller::getView: Action called' );
@@ -154,7 +161,7 @@ class CMF_Hydrogen_Controller
 		}
 		else{
 			$message	= 'Neither view template nor content file defined for request path "%s/%s"';
-			throw new \RuntimeException( sprintf( $message, $this->controller, $this->action ) );
+			throw new RuntimeException( sprintf( $message, $this->controller, $this->action ) );
 		}
 		$this->env->getRuntime()->reach( 'Controller::getView: done' );
 		return $result;
@@ -249,10 +256,10 @@ class CMF_Hydrogen_Controller
 	 *
 	 *	@access		protected
 	 *	@param		string		$key		Key for logic class (ex: 'mailGroupMember' for 'Logic_Mail_Group_Member')
-	 *	@return		CMF_Hydrogen_Logic		Logic instance or logic pool if no key given
-	 *	@throws		\RuntimeException		if no logic class could be found for given short logic key
+	 *	@return		Logic					Logic instance or logic pool if no key given
+	 *	@throws		RuntimeException		if no logic class could be found for given short logic key
 	 */
-	protected function getLogic( string $key ): CMF_Hydrogen_Logic
+	protected function getLogic( string $key ): Logic
 	{
 //		if( is_null( $key ) || !strlen( trim( $key ) ) )
 //			return $this->env->getLogic();
@@ -264,7 +271,7 @@ class CMF_Hydrogen_Controller
 	 *	@access		protected
 	 *	@param		string		$key		Key for model class (eG. 'mailGroupMember' for 'Model_Mail_Group_Member')
 	 *	@return		object					Model instance
-	 *	@throws		\RuntimeException		if no model class could be found for given short model key
+	 *	@throws		RuntimeException		if no model class could be found for given short model key
 	 *	@todo		create model pool environment resource and apply to created shared single instances instead of new instances
 	 *	@todo		change \@return to CMF_Hydrogen_Model after CMF model refactoring
 	 *	@see		duplicate code with CMF_Hydrogen_Logic::getModel
@@ -274,12 +281,12 @@ class CMF_Hydrogen_Controller
 		if( preg_match( '/^[A-Z][A-Za-z0-9_]+$/', $key ) )
 			$className	= self::$prefixModel.$key;
 		else{
-			$classNameWords	= ucwords( \Alg_Text_CamelCase::decode( $key ) );
+			$classNameWords	= ucwords( CamelCase::decode( $key ) );
 			$className		= str_replace( ' ', '_', 'Model '.$classNameWords );
 		}
 		if( !class_exists( $className ) )
-			throw new \RuntimeException( 'Model class "'.$className.'" not found' );
-		return \Alg_Object_Factory::createObject( $className, array( $this->env ) );
+			throw new RuntimeException( 'Model class "'.$className.'" not found' );
+		return ObjectFactory::createObject( $className, array( $this->env ) );
 	}
 
 	/**
@@ -317,7 +324,7 @@ class CMF_Hydrogen_Controller
 			print( 'Headers already sent.' );
 		}
 		else{
-			header( 'HTTP/1.1 '.$httpStatusCode.' '.Net_HTTP_Status::getText( $httpStatusCode ) );
+			header( 'HTTP/1.1 '.$httpStatusCode.' '.HttpStatus::getText( $httpStatusCode ) );
 			header( 'Content-Type: application/json' );
 			header( 'Content-Length: '.strlen( $json ) );
 			print( $json );
@@ -343,7 +350,7 @@ class CMF_Hydrogen_Controller
 	 */
 	protected function redirect( string $controller = 'index', string $action = "index", array $arguments = array(), array $parameters = array() )
 	{
-		CMF_Hydrogen_Deprecation::getInstance()
+		Deprecation::getInstance()
 			->setErrorVersion( '0.8.6.4' )
 			->setExceptionVersion( '0.8.9' )
 			->message( 'Redirecting is usable for hooks within dispatching, only. Please use restart instead!' );
@@ -447,10 +454,10 @@ class CMF_Hydrogen_Controller
 	/**
 	 *	Sets Environment of Controller by copying Framework Member Variables.
 	 *	@access		protected
-	 *	@param		CMF_Hydrogen_Environment	$env			Framework Resource Environment Object
+	 *	@param		Environment	$env			Framework Resource Environment Object
 	 *	@return		self
 	 */
-	protected function setEnv( CMF_Hydrogen_Environment $env ): self
+	protected function setEnv( Environment $env ): self
 	{
 		$this->env			= $env;
 		$this->controller	= $env->getRequest()->get( '__controller' );
@@ -464,7 +471,7 @@ class CMF_Hydrogen_Controller
 		if( strlen( static::$moduleId ) && $env->getModules()->has( static::$moduleId ) )
 			foreach( $env->getModules()->get( static::$moduleId )->config as $entry )
 				$list[$entry->key]	= $entry->value;
-		$this->moduleConfig	= new \ADT_List_Dictionary( $list );
+		$this->moduleConfig	= new Dictionary( $list );
 		return $this;
 	}
 
@@ -480,10 +487,10 @@ class CMF_Hydrogen_Controller
 	{
 		$name		= str_replace( ' ', '_', ucwords( str_replace( '/', ' ', $this->controller ) ) );
 		$class		= self::$prefixView.$name;
-		$this->view	= new CMF_Hydrogen_View( $this->env );
+		$this->view	= new View( $this->env );
 		if( class_exists( $class, TRUE ) ){
-			$this->view	= Alg_Object_Factory::createObject( $class, array( &$this->env ) );
-			if( !$this->view instanceof CMF_Hydrogen_View)
+			$this->view	= ObjectFactory::createObject( $class, array( &$this->env ) );
+			if( !$this->view instanceof View)
 				throw new RuntimeException( 'View class is not a Hydrogen view', 301 );
 			$this->view->addData( 'moduleConfig', $this->moduleConfig );
 		}

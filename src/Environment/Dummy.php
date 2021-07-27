@@ -24,6 +24,12 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\Environment;
+
+use CeusMedia\HydrogenFramework\Environment;
+
+use ADT_List_Dictionary as Dictionary;
+
 /**
  *	Empty environment for remote dummy use.
  *	@category		Library
@@ -33,7 +39,7 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Environment_Dummy extends CMF_Hydrogen_Environment
+class Dummy extends Environment
 {
 	public $hasDatabase		= FALSE;
 
@@ -42,6 +48,6 @@ class CMF_Hydrogen_Environment_Dummy extends CMF_Hydrogen_Environment
 		$this->options		= $options;
 		$this->path			= isset( $options['pathApp'] ) ? $options['pathApp'] : getCwd().'/';
 		$this->initClock();
-		$this->config		= new ADT_List_Dictionary();											//  create empty configuration object
+		$this->config		= new Dictionary();											//  create empty configuration object
 	}
 }

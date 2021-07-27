@@ -1,5 +1,7 @@
 <?php
-class CMF_Hydrogen_Environment_Resource_Php_Version
+namespace CeusMedia\HydrogenFramework\Environment\Resource\Php;
+
+class Version
 {
 	protected $version;
 

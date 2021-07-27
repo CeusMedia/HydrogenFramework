@@ -24,6 +24,15 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\Environment\Resource;
+
+use CeusMedia\HydrogenFramework\Environment;
+use CeusMedia\HydrogenFramework\Environment\Resource\Php\Version as VersionResource;
+use ADT_Constant;
+use Exception;
+use RangeException;
+use RuntimeException;
+
 /**
  *	Early version of PHP environment resource.
  *	@category		Library
@@ -33,16 +42,16 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Environment_Resource_Php
+class Php
 {
 	public $version;
 
 	protected $env;
 
-	public function __construct( CMF_Hydrogen_Environment $env )
+	public function __construct( Environment $env )
 	{
 		$this->env		= $env;
-		$this->version	= new CMF_Hydrogen_Environment_Resource_Php_Version();
+		$this->version	= new VersionResource();
 		$this->applyConfig();																		//  apply PHP configuration from config file
 	}
 

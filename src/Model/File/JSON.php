@@ -1,5 +1,11 @@
 <?php
-class CMF_Hydrogen_Model_File_JSON extends CMF_Hydrogen_Model_File_Abstract
+namespace CeusMedia\HydrogenFramework\Model\File;
+
+use ADT_JSON_Formater as JsonFormatter;
+use FS_File_Writer as FileWriter;
+use FS_File_JSON_Reader as JsonFileReader;
+
+class JSON extends Abstraction
 {
 	public function create( string $fileName, $content ): int
 	{
@@ -8,13 +14,13 @@ class CMF_Hydrogen_Model_File_JSON extends CMF_Hydrogen_Model_File_Abstract
 		if( version_compare( phpversion(), '5.4.0' ) >= 0 )
 			$json		= json_encode( $content, JSON_PRETTY_PRINT );
 		else
-			$json		= ADT_JSON_Formater::format( json_encode( $content ) );
-		return \FS_File_Writer::save( $this->path.$fileName, $json );
+			$json		= JsonFormatter::format( json_encode( $content ) );
+		return FileWriter::save( $this->path.$fileName, $json );
 	}
 
 	public function delete( string $fileName ): bool
 	{
-		return \FS_File_Writer::delete( $this->path.$fileName );
+		return FileWriter::delete( $this->path.$fileName );
 	}
 
 	public function exists( string $fileName ): bool
@@ -24,7 +30,7 @@ class CMF_Hydrogen_Model_File_JSON extends CMF_Hydrogen_Model_File_Abstract
 
 	public function read( string $fileName )
 	{
-		return \FS_File_JSON_Reader::load( $this->path.$fileName );
+		return JsonFileReader::load( $this->path.$fileName );
 	}
 
 	public function update( string $fileName, $content ): int
@@ -35,9 +41,9 @@ class CMF_Hydrogen_Model_File_JSON extends CMF_Hydrogen_Model_File_Abstract
 		if( version_compare( phpversion(), '5.4.0' ) >= 0 )
 			$json		= json_encode( $content, JSON_PRETTY_PRINT );
 		else
-			$json		= ADT_JSON_Formater::format( json_encode( $content ) );
+			$json		= JsonFormatter::format( json_encode( $content ) );
 		if( $json == $current )
 			return FALSE;
-		return \FS_File_Writer::save( $this->path.$fileName, $json );
+		return FileWriter::save( $this->path.$fileName, $json );
 	}
 }

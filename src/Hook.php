@@ -1,9 +1,11 @@
 <?php
+namespace CeusMedia\HydrogenFramework;
 
-use CMF_Hydrogen_Environment as Environment;
-use CMF_Hydrogen_Environment_Web as WebEnv;
+use CeusMedia\HydrogenFramework\Environment as Environment;
+use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
+use InvalidArgumentException;
 
-class CMF_Hydrogen_Hook
+class Hook
 {
 	public static function callHook( Environment $env, string $resource, string $event, $context, $module, $data )
 	{
@@ -82,14 +84,14 @@ class CMF_Hydrogen_Hook
 	 *
 	 *	@access		protected
 	 *	@static
-	 *	@param		WebEnv			$env				Instance of Web Environment
+	 *	@param		WebEnvironment	$env				Instance of Web Environment
 	 *	@param		string			$uri				URI to request
 	 *	@param		integer			$status				HTTP status code to send, default: NULL -> 200
 	 *	@param		boolean			$allowForeignHost	Flag: allow redirection outside application base URL, default: no
 	 *	@param		integer			$modeFrom			How to handle FROM parameter from request or for new request, not handled atm
 	 *	@return		void
 	 */
-	protected static function restart( WebEnv $env, string $uri, int $status = NULL, bool $allowForeignHost = FALSE, int $modeFrom = 0 )
+	protected static function restart( WebEnvironment $env, string $uri, int $status = NULL, bool $allowForeignHost = FALSE, int $modeFrom = 0 )
 	{
 		$env->restart( $uri, $status, $allowForeignHost, $modeFrom );
 	}
@@ -99,11 +101,11 @@ class CMF_Hydrogen_Hook
 	 *	@access		protected
 	 *	@static
 	 *	@param		Environment		$env			Instance of environment
-	 *	@param		Mail_Abstract	$mail			Mail object to handle
+	 *	@param		\Mail_Abstract	$mail			Mail object to handle
 	 *	@param		array			$receivers		List of receiver objects
 	 *	@return		void
 	 */
-	protected static function sendMail( Environment $env, Mail_Abstract $mail, array $receivers = array() )
+	protected static function sendMail( Environment $env, \Mail_Abstract $mail, array $receivers = array() )
 	{
 		$language	= $env->getLanguage()->getLanguage();											// @todo apply user language
 		foreach( $receivers as $receiver ){

@@ -24,6 +24,8 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\Environment\Resource\Module;
+
 /**
  *	Interface for module libraries.
  *	@category		Library
@@ -33,7 +35,7 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-interface CMF_Hydrogen_Environment_Resource_Module_Library_Interface
+interface LibraryInterface
 {
 	/**
 	 *	Returns a module by its ID if found in source.

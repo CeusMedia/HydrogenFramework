@@ -24,6 +24,15 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\Environment\Resource\Module;
+
+use CeusMedia\HydrogenFramework\Deprecation;
+use CeusMedia\HydrogenFramework\Environment;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Library\Local as LocalModuleLibraryResource;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Reader as ModuleReaderResource;
+
+use RuntimeException;
+
 /**
  *	Handler for local modules.
  *	@category		Library
@@ -35,7 +44,7 @@
  *	@deprecated		since CMF_Hydrogen_Environment_Resource_Module_Library_Local is used within app instances
  *	@todo			to be removed in 0.8.7
  */
-class CMF_Hydrogen_Environment_Resource_Module_Handler
+class Handler
 {
 	protected $env;
 	protected $path;
@@ -43,9 +52,9 @@ class CMF_Hydrogen_Environment_Resource_Module_Handler
 	protected $modulesAvailable		= array();
 	protected $sources				= array();
 
-	public function __construct( CMF_Hydrogen_Environment $env )
+	public function __construct( Environment $env )
 	{
-		CMF_Hydrogen_Deprecation::getInstance()
+		Deprecation::getInstance()
 			->setErrorVersion( '0.8.6.5' )
 			->setExceptionVersion( '0.8.7' )
 			->message( 'Please use CMF_Hydrogen_Environment_Resource_Module_Library_Local instead' );
@@ -65,7 +74,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Handler
 		if( !file_exists( $this->path ) )
 			return;
 
-		$this->modulesInstalled	= new CMF_Hydrogen_Environment_Resource_Module_Library_Local( $env );
+		$this->modulesInstalled	= new LocalModuleLibraryResource( $env );
 	}
 
 	public function clearCache()
@@ -123,6 +132,6 @@ class CMF_Hydrogen_Environment_Resource_Module_Handler
 		}
 		if( !file_exists( $fileName ) )
 			throw new RuntimeException( 'Module "'.$moduleId.'" is not available in source "'.$sourceId.'"' );
-		return CMF_Hydrogen_Environment_Resource_Module_Reader::load( $fileName, $moduleId );
+		return ModuleReaderResource::load( $fileName, $moduleId );
 	}
 }

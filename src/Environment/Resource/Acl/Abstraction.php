@@ -24,6 +24,11 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\Environment\Resource\Acl;
+
+use CeusMedia\HydrogenFramework\Environment as Environment;
+use InvalidArgumentException;
+
 /**
  *	Abstract access control list resource.
  *
@@ -34,7 +39,7 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
+abstract class Abstraction
 {
 	protected $env;
 
@@ -53,10 +58,10 @@ abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		CMF_Hydrogen_Environment	$env	Environment Object
+	 *	@param		Environment		$env	Environment Object
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment $env )
+	public function __construct( Environment $env )
 	{
 		$this->env	= $env;
 	}

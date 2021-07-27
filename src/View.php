@@ -24,20 +24,30 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-use CMF_Hydrogen_Environment_Web as WebEnvironment;
+namespace CeusMedia\HydrogenFramework;
+
+use CeusMedia\HydrogenFramework\Environment as Environment;
+use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
+use ADT_List_Dictionary as Dictionary;
+use Alg_Object_Factory as ObjectFactory;
+use Alg_Text_CamelCase;
+use Alg_Time_Converter as TimeConverter;
+use UI_HTML_Elements as HtmlElements;
+use UI_HTML_Exception_Page as HtmlExceptionPage;
+use Exception;
+use InvalidArgumentException;
+use RuntimeException;
 
 /**
  *	Generic View Class of Framework Hydrogen.
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework
- *	@uses			UI_HTML_Elements
- *	@uses			Alg_Time_Converter
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2007-2021 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_View
+class View
 {
 	/**	@var		array						$data			Collected Data for View */
 	protected $data			= array();
@@ -51,7 +61,7 @@ class CMF_Hydrogen_View
 	/**	@var		string						$action			Name of called Action */
 	protected $action		= NULL;
 
-	/**	@var		ADT_List_Dictionary			$helpers		Map of view helper classes/objects */
+	/**	@var		Dictionary			$helpers		Map of view helper classes/objects */
 	protected $helpers;
 
 	/**	@var		string						$time			Instance of time converter */
@@ -69,16 +79,16 @@ class CMF_Hydrogen_View
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		CMF_Hydrogen_Environment	$env			Framework Resource Environment Object
+	 *	@param		Environment		$env			Framework Resource Environment Object
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment $env )
+	public function __construct( Environment $env )
 	{
 		$env->getRuntime()->reach( 'CMF_View('.get_class( $this ).')::init start' );
 		$this->setEnv( $env );
-		$this->html		= new UI_HTML_Elements;
-		$this->time		= new Alg_Time_Converter();
-		$this->helpers	= new ADT_List_Dictionary;
+		$this->html		= new HtmlElements();
+		$this->time		= new TimeConverter();
+		$this->helpers	= new Dictionary();
 
 		if( NULL !== $this->env->getConfig()->get( 'path.templates' ) )
 			$this->pathTemplates	= $this->env->getConfig()->get( 'path.templates' );
@@ -315,7 +325,7 @@ class CMF_Hydrogen_View
 		foreach( $files as $key => $value ){														//  iterate file contents
 			$id	= preg_replace( "/[^a-z]/i", " ", $key );											//  replace not allowed characters
 			$id	= $prefix ? $prefix." ".$id : $id;													//  prepend prefix to ID if set
-			$id	= Alg_Text_CamelCase::convert( $id, FALSE );										//  build camelcased ID
+			$id	= CamelCase::convert( $id, FALSE );										//  build camelcased ID
 			$list[$id]	= $value;																	//  append content to map
 		}
 		return $list;																				//  return map of collected files
@@ -390,7 +400,7 @@ class CMF_Hydrogen_View
 				throw new RuntimeException( 'Template file "'.$___templateUri.'" is not existing' );
 		}
 		catch( Exception $e ){
-			UI_HTML_Exception_Page::display( $e );die;
+			HtmlExceptionPage::display( $e );die;
 			$message	= 'Rendering template file "%1$s" failed: %2$s';
 			$message	= sprintf( $message, $filePath, $e->getMessage() );
 			$this->env->getLog()->log( 'error', $message, $this );
@@ -434,7 +444,7 @@ class CMF_Hydrogen_View
 
 	protected function registerHelper( string $name, string $class, array $parameters = array() ): self
 	{
-		$object	= Alg_Object_Factory::createObject( $class, $parameters );
+		$object	= ObjectFactory::createObject( $class, $parameters );
 		$this->addHelper( $name, $object );
 		return $this;
 	}
@@ -485,10 +495,10 @@ class CMF_Hydrogen_View
 	/**
 	 *	Sets Environment of Controller by copying Framework Member Variables.
 	 *	@access		protected
-	 *	@param		CMF_Hydrogen_Environment		$env			Framework Resource Environment Object
+	 *	@param		Environment		$env			Framework Resource Environment Object
 	 *	@return		self
 	 */
-	protected function setEnv( CMF_Hydrogen_Environment $env ): self
+	protected function setEnv( Environment $env ): self
 	{
 		$this->env			= $env;
 		if( $env instanceof WebEnvironment ){

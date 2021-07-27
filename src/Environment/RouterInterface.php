@@ -24,6 +24,10 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\Environment;
+
+use CeusMedia\HydrogenFramework\Environment;
+
 /**
  *	Router interface.
  *	@category		Library
@@ -33,9 +37,9 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-interface CMF_Hydrogen_Environment_Router_Interface
+interface RouterInterface
 {
-	public function __construct( CMF_Hydrogen_Environment $env );
+	public function __construct( Environment $env );
 
 	public function getAbsoluteUri( string $controller = NULL, string $action = NULL, array $arguments = array(), array $parameters = array(), string $fragmentId = NULL ): string;
 

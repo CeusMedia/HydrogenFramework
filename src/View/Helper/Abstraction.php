@@ -24,6 +24,11 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\View\Helper;
+
+use CeusMedia\HydrogenFramework\Environment;
+use CeusMedia\HydrogenFramework\View\Helper;
+
 /**
  *	Generic View Class of Framework Hydrogen.
  *	@category		Library
@@ -34,9 +39,9 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-abstract class CMF_Hydrogen_View_Helper_Abstract implements CMF_Hydrogen_View_Helper
+abstract class Abstraction implements Helper
 {
-	/**	@var		CMF_Hydrogen_Environment			$env			Environment Object */
+	/**	@var		Environment			$env			Environment Object */
 	protected		$env								= NULL;
 
 	/**	@var		boolean								$needsEnv		Flag: needs Environment to be set */
@@ -72,7 +77,7 @@ abstract class CMF_Hydrogen_View_Helper_Abstract implements CMF_Hydrogen_View_He
 	 */
 	public function hasEnv(): bool
 	{
-		return $this->env instanceof CMF_Hydrogen_Environment;
+		return $this->env instanceof Environment;
 	}
 
 	/**
@@ -94,11 +99,11 @@ abstract class CMF_Hydrogen_View_Helper_Abstract implements CMF_Hydrogen_View_He
 	/**
 	 *	Set environment if needed within this helper.
 	 *	@access		public
-	 *	@param		CMF_Hydrogen_Environment	$env			Environment Object
+	 *	@param		Environment	$env			Environment Object
 	 *	@return		void
 	 *	@todo 		kriss: remove after helper interface is updated
 	 */
-	public function setEnv( CMF_Hydrogen_Environment $env )
+	public function setEnv( Environment $env )
 	{
 		if( $this->needsEnv ){
 			$this->env	= $env;

@@ -24,6 +24,16 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\Environment\Resource;
+
+use CeusMedia\HydrogenFramework\Environment;
+use RuntimeException;
+use FS_Folder_Lister as FolderLister;
+use FS_File_Reader as FileReader;
+use FS_File_INI_Reader as IniFileReader;
+use InvalidArgumentException;
+use DomainException;
+
 /**
  *	Language Class of Framework Hydrogen.
  *	@category		Library
@@ -33,7 +43,7 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Environment_Resource_Language
+class Language
 {
 	/**	@var		string								$fileExtension	File extension of language files (default: ini) */
 	static public $fileExtension						= 'ini';
@@ -41,7 +51,7 @@ class CMF_Hydrogen_Environment_Resource_Language
 	/**	@var		array								$data			Array of loaded Language File Definitions */
 	protected $data;
 
-	/**	@var		CMF_Hydrogen_Environment			$env			Application Environment Object */
+	/**	@var		Environment			$env			Application Environment Object */
 	protected $env;
 
 	/**	@var		string								$filePath		Path to Language Files */
@@ -57,10 +67,10 @@ class CMF_Hydrogen_Environment_Resource_Language
 	 *	Constructor.
 	 *	Uses config::path.locales and defaults to 'locales/'.
 	 *	@access		public
-	 *	@param		CMF_Hydrogen_Environment			$env			Application Environment Object
+	 *	@param		Environment			$env			Application Environment Object
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment $env )
+	public function __construct( Environment $env )
 	{
 		$this->env			= $env;
 		$config				= $env->getConfig();
@@ -76,7 +86,7 @@ class CMF_Hydrogen_Environment_Resource_Language
 			foreach( explode( ',', $config['locale.allowed'] ) as $nr => $language )				//  iterate extracted languages
 				$this->languages[]	= trim( $language );											//  save language without surrounding spaces
 		else																						//  otherwise scan locales folder
-			foreach( FS_Folder_Lister::getFolderList( $this->filePath ) as $folder )				//  iterate found locale folders
+			foreach( FolderLister::getFolderList( $this->filePath ) as $folder )				//  iterate found locale folders
 				$this->languages[]	= $folder->getFilename();										//  save locale folder as language
 		$language			= $config->has( 'locale.default' ) ? $config['locale.default'] : 'en';
 
@@ -216,7 +226,7 @@ class CMF_Hydrogen_Environment_Resource_Language
 			throw new InvalidArgumentException( "Topic cannot be empty" );
 		$this->env->getRuntime()->reach( 'Resource_Language::load('.$topic.')' );
 		$fileName	= $this->getFilenameOfLanguage( $topic );
-		$reader		= new FS_File_Reader($fileName);
+		$reader		= new FileReader($fileName);
 		if( $reader->exists() )	{
 			$data	= FALSE;
 			$string	= $reader->readString();
@@ -233,7 +243,7 @@ class CMF_Hydrogen_Environment_Resource_Language
 				$this->env->getRuntime()->reach( 'Resource_Language::load: '.$topic.' @mode1' );
 			}
 			if( $data === FALSE ){
-				$data	= FS_File_INI_Reader::load( $fileName, TRUE );
+				$data	= IniFileReader::load( $fileName, TRUE );
 				$this->env->getRuntime()->reach( 'Resource_Language::load: '.$topic.' @mode2' );
 			}
 			$this->data[$topic]	= $data;

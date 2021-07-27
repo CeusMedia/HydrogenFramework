@@ -24,8 +24,12 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\Environment\Remote;
+
+use CeusMedia\HydrogenFramework\Environment\Resource\Messenger as MessengerResource;
+
 /**
-*	Fake messenger for remote enviroment.
+ *	Fake messenger for remote enviroment.
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Remote
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
@@ -33,7 +37,7 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Environment_Remote_Messenger extends CMF_Hydrogen_Environment_Resource_Messenger
+class Messenger extends MessengerResource
 {
 	protected function noteMessage( int $type, string $message )
 	{

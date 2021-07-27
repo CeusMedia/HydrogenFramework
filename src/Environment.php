@@ -26,6 +26,28 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework;
+
+use CeusMedia\HydrogenFramework\Environment\Exception as Exception;
+use CeusMedia\HydrogenFramework\Environment\Resource\Acl\Abstraction as AbstractAclResource;
+use CeusMedia\HydrogenFramework\Environment\Resource\Acl\AllPublic as AllPublicAclResource;
+use CeusMedia\HydrogenFramework\Environment\Resource\CacheDummy as DummyCacheResource;
+use CeusMedia\HydrogenFramework\Environment\Resource\Captain as CaptainResource;
+use CeusMedia\HydrogenFramework\Environment\Resource\Disclosure as DisclosureResource;
+use CeusMedia\HydrogenFramework\Environment\Resource\Language as LanguageResource;
+use CeusMedia\HydrogenFramework\Environment\Resource\Log as LogResource;
+use CeusMedia\HydrogenFramework\Environment\Resource\LogicPool as LogicPoolResource;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Library\Local as LocalModuleLibraryResource;
+use CeusMedia\HydrogenFramework\Environment\Resource\Php as PhpResource;
+use CeusMedia\HydrogenFramework\Environment\Resource\Runtime as RuntimeResource;
+use CeusMedia\HydrogenFramework\Environment\Remote as RemoteEnvironment;
+
+use ADT_List_Dictionary as Dictionary;
+use Alg_Object_Factory as ObjectFactory;
+use ArrayAccess;
+use InvalidArgumentException;
+use RuntimeException;
+
 /**
  *	General bootstrap of Hydrogen environment.
  *	Will be extended by client channel environment, like Web or Console.
@@ -37,7 +59,7 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Environment implements ArrayAccess
+class Environment implements ArrayAccess
 {
 	const MODE_UNKNOWN	= 0;
 	const MODE_DEV		= 1;
@@ -53,10 +75,10 @@ class CMF_Hydrogen_Environment implements ArrayAccess
 		self::MODE_LIVE,
 	];
 
-	/**	@var	string													$configFile		File path to base configuration */
+	/**	@var	string						$configFile		File path to base configuration */
 	public static $configFile				= 'config.ini';
 
-	/**	@var	array													$defaultPaths	Map of default paths to extend base configuration */
+	/**	@var	array						$defaultPaths	Map of default paths to extend base configuration */
 	public static $defaultPaths				= array(
 		'classes'	=> 'classes/',
 		'config'	=> 'config/',
@@ -65,64 +87,64 @@ class CMF_Hydrogen_Environment implements ArrayAccess
 
 	public static $timezone					= NULL;
 
-	/**	@var	string													$path			Absolute folder path of application */
+	/**	@var	string						$path			Absolute folder path of application */
 	public $path							= NULL;
 
-	/**	@var	CMF_Hydrogen_Environment_Resource_Php					$php			Instance of PHP environment collection */
+	/**	@var	PhpResource					$php			Instance of PHP environment collection */
 	public $php;
 
-	/**	@var	string													$uri			Application URI (absolute local path) */
+	/**	@var	string						$uri			Application URI (absolute local path) */
 	public $uri;
 
-	/**	@var	string													$url			Application URI */
+	/**	@var	string						$url			Application URI */
 	public $url;
 
-	/** @var	string													$version		Framework version */
+	/** @var	string						$version		Framework version */
 	public $version;
 
-	/** @var	CMF_Hydrogen_Environment_Resource_Acl_Abstract			$acl			Implementation of access control list */
+	/** @var	AclAbstractResource			$acl			Implementation of access control list */
 	protected $acl;
 
-	/**	@var	object													$cache			Instance of cache adapter */
+	/**	@var	object						$cache			Instance of cache adapter */
 	protected $cache;
 
-	/**	@var	CMF_Hydrogen_Environment_Resource_Captain				$captain		Instance of captain */
+	/**	@var	CaptainResource				$captain		Instance of captain */
 	protected $captain;
 
-	/**	@var	ADT_List_Dictionary										$config			Configuration Object */
+	/**	@var	Dictionary					$config			Configuration Object */
 	protected $config;
 
-	/**	@var	object													$database		Database Connection Object */
+	/**	@var	object						$database		Database Connection Object */
 	protected $database;
 
-	/**	@var	CMF_Hydrogen_Environment_Resource_Language				$language		Language support object */
+	/**	@var	LanguageResource			$language		Language support object */
 	protected $language;
 
-	/**	@var	CMF_Hydrogen_Environment_Resource_Log					$log			Log support object */
+	/**	@var	LogResource					$log			Log support object */
 	protected $log;
 
-	/**	@var	array													$disclosure		Map of classes ready to reflect */
+	/**	@var	array						$disclosure		Map of classes ready to reflect */
 	protected $disclosure;
 
-	/**	@var	CMF_Hydrogen_Environment_Resource_LogicPool				$logic			Pool for logic class instances */
+	/**	@var	LogicPoolResource                                                                                                                                                                                                              				$logic			Pool for logic class instances */
 	protected $logic;
 
-	/**	@var	integer													$mode			Environment mode (dev,test,live,...) */
+	/**	@var	integer						$mode			Environment mode (dev,test,live,...) */
 	protected $mode							= 0;
 
-	/**	@var	CMF_Hydrogen_Environment_Resource_Module_Library_Local	$modules		Handler for local modules */
+	/**	@var	LocalModuleLibraryResource	$modules		Handler for local modules */
 	protected $modules						= array();
 
-	/**	@var	array													$options		Set options to override static properties */
+	/**	@var	array						$options		Set options to override static properties */
 	protected $options						= array();
 
-	/**	@var	CMF_Hydrogen_Environment_Resource_Runtime				$runtime		Runtime Object */
+	/**	@var	RuntimeResource				$runtime		Runtime Object */
 	protected $runtime;
 
-	/**	@var	ADT_List_Dictionary										$request		Request Object */
+	/**	@var	Dictionary					$request		Request Object */
 	protected $request;
 
-	/**	@var	ADT_List_Dictionary										$session		Session Object */
+	/**	@var	Dictionary					$session		Session Object */
 	protected $session;
 
 	/**
@@ -204,7 +226,7 @@ class CMF_Hydrogen_Environment implements ArrayAccess
 		if( isset( $this->$key ) && !is_null( $this->$key ) )
 			return $this->$key;
 		if( $key === 'clock' ){
-			CMF_Hydrogen_Deprecation::getInstance()
+			Deprecation::getInstance()
 				->setErrorVersion( '0.8.7.9' )
 				->setExceptionVersion( '0.9' )
 				->message( 'Use $[this->]env->get( \'runtime\' ) or $[this->]env->runtime instead' );
@@ -221,9 +243,9 @@ class CMF_Hydrogen_Environment implements ArrayAccess
 	/**
 	 *	Initialize remote access control list.
 	 *	@access		public
-	 *	@return		CMF_Hydrogen_Environment_Resource_Acl_Abstract	Instance of access control list object
+	 *	@return		AbstractAclResource	Instance of access control list object
 	 */
-	public function getAcl(): CMF_Hydrogen_Environment_Resource_Acl_Abstract
+	public function getAcl(): AbstractAclResource
 	{
 		return $this->acl;
 	}
@@ -246,14 +268,14 @@ class CMF_Hydrogen_Environment implements ArrayAccess
 		return $this->cache;
 	}
 
-	public function getCaptain(): CMF_Hydrogen_Environment_Resource_Captain
+	public function getCaptain(): CaptainResource
 	{
 		return $this->captain;
 	}
 
-	public function getClock(): CMF_Hydrogen_Environment_Resource_Runtime
+	public function getClock(): RuntimeResource
 	{
-		CMF_Hydrogen_Deprecation::getInstance()
+		Deprecation::getInstance()
 			->setErrorVersion( '0.8.7.9' )
 			->setExceptionVersion( '0.9' )
 			->message( 'Environment clock $env->getClock() is deprecated. Use $env->getRuntime() instead' );
@@ -263,9 +285,9 @@ class CMF_Hydrogen_Environment implements ArrayAccess
 	/**
 	 *	Returns Configuration Object.
 	 *	@access		public
-	 *	@return		ADT_List_Dictionary
+	 *	@return		Dictionary
 	 */
-	public function getConfig(): ADT_List_Dictionary
+	public function getConfig(): Dictionary
 	{
 		return $this->config;
 	}
@@ -283,9 +305,9 @@ class CMF_Hydrogen_Environment implements ArrayAccess
 	/**
 	 *	Returns Language Object.
 	 *	@access		public
-	 *	@return		CMF_Hydrogen_Environment_Resource_Language
+	 *	@return		LanguageResource
 	 */
-	public function getLanguage(): CMF_Hydrogen_Environment_Resource_Language
+	public function getLanguage(): LanguageResource
 	{
 		return $this->language;
 	}
@@ -297,9 +319,9 @@ class CMF_Hydrogen_Environment implements ArrayAccess
 	/**
 	 *	Returns Logic Pool Object.
 	 *	@access		public
-	 *	@return		CMF_Hydrogen_Environment_Resource_LogicPool
+	 *	@return		LogicPoolResource
 	 */
-	public function getLogic(): CMF_Hydrogen_Environment_Resource_LogicPool
+	public function getLogic(): LogicPoolResource
 	{
 		return $this->logic;
 	}
@@ -317,9 +339,9 @@ class CMF_Hydrogen_Environment implements ArrayAccess
 	/**
 	 *	Returns handler for local module library.
 	 *	@access		public
-	 *	@return		CMF_Hydrogen_Environment_Resource_Module_Library_Local
+	 *	@return		LocalModuleLibraryResource
 	 */
-	public function getModules(): CMF_Hydrogen_Environment_Resource_Module_Library_Local
+	public function getModules(): LocalModuleLibraryResource
 	{
 		return $this->modules;
 	}
@@ -342,24 +364,24 @@ class CMF_Hydrogen_Environment implements ArrayAccess
 	/**
 	 *	Returns PHP configuration and version management.
 	 *	@access		public
-	 *	@return		CMF_Hydrogen_Environment_Resource_Php
+	 *	@return		PhpResource
 	 */
-	public function getPhp(): CMF_Hydrogen_Environment_Resource_Php
+	public function getPhp(): PhpResource
 	{
 		return $this->php;
 	}
 
-	public function getRequest(): ADT_List_Dictionary
+	public function getRequest(): Dictionary
 	{
 		return $this->request;
 	}
 
-	public function getRuntime(): CMF_Hydrogen_Environment_Resource_Runtime
+	public function getRuntime(): RuntimeResource
 	{
 		return $this->runtime;
 	}
 
-	public function getSession(): ?ADT_List_Dictionary
+	public function getSession(): ?Dictionary
 	{
 		return $this->session;
 	}
@@ -435,19 +457,19 @@ class CMF_Hydrogen_Environment implements ArrayAccess
 			switch( $mode ){
 				case 'dev':
 				case 'devel':
-					$this->mode		|= CMF_Hydrogen_Environment::MODE_DEV;
+					$this->mode		|= self::MODE_DEV;
 					break;
 				case 'test':
 				case 'testing':
-					$this->mode		|= CMF_Hydrogen_Environment::MODE_TEST;
+					$this->mode		|= self::MODE_TEST;
 					break;
 				case 'stage':
 				case 'staging':
-					$this->mode		|= CMF_Hydrogen_Environment::MODE_STAGE;
+					$this->mode		|= self::MODE_STAGE;
 					break;
 				case 'live':
 				case 'production':
-					$this->mode		|= CMF_Hydrogen_Environment::MODE_LIVE;
+					$this->mode		|= self::MODE_LIVE;
 					break;
 			}
 		}
@@ -462,14 +484,14 @@ class CMF_Hydrogen_Environment implements ArrayAccess
 	protected function initAcl()
 	{
 		$config		= $this->getConfig();
-		$type		= 'CMF_Hydrogen_Environment_Resource_Acl_AllPublic';
+		$type		= AllPublicAclResource::class;
 		if( $this->hasModules() ){																	//  module support and modules available
 			$payload	= (object) ['className' => NULL];
 			$isHandled	= $this->modules->callHook( 'Env', 'initAcl', $this, $payload );			//  call related module event hooks
 			if( $isHandled )
 				$type	= $payload->className;
 		}
-		$this->acl	= Alg_Object_Factory::createObject( $type, array( $this ) );
+		$this->acl	= ObjectFactory::createObject( $type, array( $this ) );
 		$this->acl->roleAccessNone	= 0;
 		$this->acl->roleAccessFull	= 128;
 
@@ -503,7 +525,7 @@ class CMF_Hydrogen_Environment implements ArrayAccess
 
 	protected function initCache()
 	{
-		$this->cache	= new CMF_Hydrogen_Environment_Resource_CacheDummy();
+		$this->cache	= new DummyCacheResource();
 		if( $this->modules )																		//  module support and modules available
 			$this->modules->callHook( 'Env', 'initCache', $this );									//  call related module event hooks
 		$this->runtime->reach( 'env: initCache', 'Finished setup of cache' );
@@ -511,13 +533,13 @@ class CMF_Hydrogen_Environment implements ArrayAccess
 
 	protected function initCaptain()
 	{
-		$this->captain	= new CMF_Hydrogen_Environment_Resource_Captain( $this );
+		$this->captain	= new CaptainResource( $this );
 		$this->runtime->reach( 'env: initCaptain', 'Finished setup of event handler.' );
 	}
 
 	protected function initClock()
 	{
-		CMF_Hydrogen_Deprecation::getInstance()
+		Deprecation::getInstance()
 			->setErrorVersion( '0.8.7.9' )
 			->setExceptionVersion( '0.9' )
 			->message( 'Use initRuntime() instead' );
@@ -536,11 +558,11 @@ class CMF_Hydrogen_Environment implements ArrayAccess
 			$configFile	= $this->options['configFile'];												//  get config file from options
 		if( !file_exists( $configFile ) ){															//  config file not found
 			$message	= sprintf( 'Config file "%s" not existing', $configFile );
-			throw new CMF_Hydrogen_Environment_Exception( $message );								//  quit with exception
+			throw new Exception( $message );														//  quit with exception
 		}
 		$data			= parse_ini_file( $configFile, FALSE );										//  parse configuration file (without section support)
 		ksort( $data );
-		$this->config	= new ADT_List_Dictionary( $data );											//  create dictionary from array
+		$this->config	= new Dictionary( $data );													//  create dictionary from array
 
 		/*  -- DEFAULT PATHS  --  */
 		foreach( static::$defaultPaths as $key => $value ){											//  iterate default paths
@@ -580,7 +602,7 @@ class CMF_Hydrogen_Environment implements ArrayAccess
 	 */
 	protected function initDisclosure()
 	{
-		$disclosure	= new CMF_Hydrogen_Environment_Resource_Disclosure( array() );
+		$disclosure	= new DisclosureResource( array() );
 		$this->disclosure	= $disclosure->reflect( 'classes/Controller/', array( 'classPrefix' => 'Controller_' ) );
 		$this->runtime->reach( 'env: disclosure', 'Finished setup of self disclosure handler.' );
 	}
@@ -592,18 +614,18 @@ class CMF_Hydrogen_Environment implements ArrayAccess
 	 */
 	protected function initLog()
 	{
-		$this->log	= new CMF_Hydrogen_Environment_Resource_Log( $this );
+		$this->log	= new LogResource( $this );
 	}
 
 	protected function initLanguage()
 	{
-		$this->language		= new CMF_Hydrogen_Environment_Resource_Language( $this );
+		$this->language		= new LanguageResource( $this );
 		$this->runtime->reach( 'env: language' );
 	}
 
 	protected function initLogic()
 	{
-		$this->logic		= new CMF_Hydrogen_Environment_Resource_LogicPool( $this );
+		$this->logic		= new LogicPoolResource( $this );
 		$this->runtime->reach( 'env: logic', 'Finished setup of logic pool.' );
 	}
 
@@ -617,14 +639,14 @@ class CMF_Hydrogen_Environment implements ArrayAccess
 		$this->runtime->reach( 'env: initModules: start', 'Started setup of modules.' );
 		$public	= array();
 		if( strlen( trim( $this->config->get( 'module.acl.public' ) ) ) ){
-			CMF_Hydrogen_Deprecation::getInstance()
+			Deprecation::getInstance()
 				->setErrorVersion( '0.8.7.2' )
 				->setExceptionVersion( '0.8.9' )
 				->message( 'Using config::module.acl.public is deprecated. Use ACL instead!' );
 			$public	= explode( ',', $this->config->get( 'module.acl.public' ) );					//  get current public link list
 		}
 
-		$this->modules	= new CMF_Hydrogen_Environment_Resource_Module_Library_Local( $this );
+		$this->modules	= new LocalModuleLibraryResource( $this );
 		$this->modules->stripFeatures( array(
 			'sql',
 			'versionLog',
@@ -661,7 +683,7 @@ class CMF_Hydrogen_Environment implements ArrayAccess
 		}
 		if( !$this->captain )																		//  just in case custom env did not init captain
 			$this->initCaptain();																	//  init caption for handling hooks
-		if( !( $this instanceof CMF_Hydrogen_Environment_Remote ) )
+		if( !( $this instanceof RemoteEnvironment ) )
 			$this->modules->callHook( 'Env', 'initModules', $this );								//  call related module event hooks
 		$this->config->set( 'module.acl.public', implode( ',', array_unique( $public ) ) );			//  save public link list
 		$this->runtime->reach( 'env: initModules: end', 'Finished setup of modules.' );
@@ -669,12 +691,12 @@ class CMF_Hydrogen_Environment implements ArrayAccess
 
 	protected function initPhp()
 	{
-		$this->php	= new CMF_Hydrogen_Environment_Resource_Php( $this );
+		$this->php	= new PhpResource( $this );
 	}
 
 	protected function initRuntime()
 	{
-		$this->runtime	= new CMF_Hydrogen_Environment_Resource_Runtime( $this );
+		$this->runtime	= new RuntimeResource( $this );
 		$this->runtime->reach( 'env: initRuntime', 'Finished setup of profiler.' );
 	}
 

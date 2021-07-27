@@ -24,6 +24,13 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\Environment;
+
+use CeusMedia\HydrogenFramework\Environment;
+use CeusMedia\HydrogenFramework\Environment\Remote\Messenger;
+
+use Loader;
+
 /**
  *	Setup for Resource Environment for Hydrogen Applications.
  *	@category		Library
@@ -35,12 +42,12 @@
  *	@todo			is a web environment needed instead? try to avoid this - maybe a console messenger needs to be implemented therefore
  *	@todo			finish path resolution (path is set twice at the moment)
  */
-class CMF_Hydrogen_Environment_Remote extends CMF_Hydrogen_Environment
+class Remote extends Environment
 {
 	/**	@var	boolean		$hasDatabase		Flag: indicates availability of a database connection */
 	public $hasDatabase		= FALSE;
 
-	/** @var	CMF_Hydrogen_Environment_Remote_Messenger	$messenger		Fake messenger */
+	/** @var	Messenger	$messenger		Fake messenger */
 	protected $messenger;
 
 	/**
@@ -51,7 +58,7 @@ class CMF_Hydrogen_Environment_Remote extends CMF_Hydrogen_Environment
 	 */
 	public function __construct( array $options = array() )
 	{
-//		self::$defaultPaths	= CMF_Hydrogen_Environment::$defaultPaths;
+//		self::$defaultPaths	= Environment::$defaultPaths;
 		$this->options	= $options;
 		$this->path		= isset( $options['pathApp'] ) ? $options['pathApp'] : getCwd().'/';
 		$this->uri		= isset( $options['pathApp'] ) ? $options['pathApp'] : getCwd().'/';											//
@@ -85,13 +92,13 @@ class CMF_Hydrogen_Environment_Remote extends CMF_Hydrogen_Environment
 		parent::close( array(), FALSE );															//  unbind bound resources but keep application alive
 	}
 
-	public function getMessenger(): CMF_Hydrogen_Environment_Remote_Messenger
+	public function getMessenger(): Messenger
 	{
 		return $this->messenger;
 	}
 
 	public function initMessenger()
 	{
-		$this->messenger	= new CMF_Hydrogen_Environment_Remote_Messenger( $this );
+		$this->messenger	= new Messenger( $this );
 	}
 }

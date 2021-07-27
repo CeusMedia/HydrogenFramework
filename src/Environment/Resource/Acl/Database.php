@@ -24,6 +24,12 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\Environment\Resource\Acl;
+
+use CeusMedia\HydrogenFramework\Environment\Resource\Disclosure as DisclosureResource;
+use CeusMedia\HydrogenFramework\Deprecation;
+use OutOfRangeException;
+
 /**
  *	Setup for access control list using a Database.
  *
@@ -36,7 +42,7 @@
  *	@deprecated		use module Resource_Authentication instead
  *	@todo			remove in version 0.9
  */
-class CMF_Hydrogen_Environment_Resource_Acl_Database extends CMF_Hydrogen_Environment_Resource_Acl_Abstract
+class Database extends Abstraction
 {
 	public function index( string $controller = NULL, $roleId = NULL ): array
 	{
@@ -166,7 +172,7 @@ class CMF_Hydrogen_Environment_Resource_Acl_Database extends CMF_Hydrogen_Enviro
 	 */
 	protected function scanControllerActions()
 	{
-		$disclosure	= new CMF_Hydrogen_Environment_Resource_Disclosure();
+		$disclosure	= new DisclosureResource();
 		$classes	= $disclosure->reflect( 'classes/Controller/' );
 		foreach( $classes as $className => $classData ){
 			$className	= strtolower( str_replace( '/', '_', $className ) );
@@ -178,7 +184,7 @@ class CMF_Hydrogen_Environment_Resource_Acl_Database extends CMF_Hydrogen_Enviro
 
 	protected function markDeprecation()
 	{
-		CMF_Hydrogen_Deprecation::getInstance()
+		Deprecation::getInstance()
 			->setErrorVersion( '0.8.7.9' )
 			->setExceptionVersion( '0.9' )
 			->message( 'Use module Resource_Authentication instead' );

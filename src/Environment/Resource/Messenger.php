@@ -24,8 +24,12 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\Environment\Resource;
 
-use CMF_Hydrogen_Environment as WebEnv;
+use CeusMedia\HydrogenFramework\Environment as WebEnvironment;
+use Alg_Time_Converter as TimeConverter;
+use UI_HTML_Elements as HtmlElements;
+use UI_HTML_Tag as HtmlTag;
 
 /**
  *	Message Output Handler of Framework Hydrogen.
@@ -36,9 +40,9 @@ use CMF_Hydrogen_Environment as WebEnv;
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Environment_Resource_Messenger
+class Messenger
 {
-	/**	@var		WebEnv			$env			Application Environment Object */
+	/**	@var		WebEnvironment	$env			Application Environment Object */
 	protected $env;
 
 	/**	@var		boolean			$enabled		Flag: store messages in session */
@@ -59,10 +63,10 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		WebEnv			$env			Instance of any Session Handler
+	 *	@param		WebEnvironment	$env			Instance of any Session Handler
 	 *	@return		void
 	 */
-	public function __construct( WebEnv $env, bool $enabled = TRUE )
+	public function __construct( WebEnvironment $env, bool $enabled = TRUE )
 	{
 		$this->env		= $env;
 		$this->enabled	= $enabled;
@@ -123,16 +127,16 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 				$ids[]	= $id;																		//  note calculated ID
 
 				$class		= $this->classes[$message['type']];
-				$message	= UI_HTML_Tag::create( 'span', $message['message'], array( 'class' => 'message' ) );
+				$message	= HtmlTag::create( 'span', $message['message'], array( 'class' => 'message' ) );
 				if( $timeFormat && !empty( $message['timestamp'] ) ){
 					$time		= $message['timestamp'];
-					$time		= Alg_Time_Converter::convertToHuman( $time, $timeFormat );
+					$time		= TimeConverter::convertToHuman( $time, $timeFormat );
 					$time		= '['.$time.'] ';
-					$time		= UI_HTML_Tag::create( 'span', $time, array( 'class' => 'time' ) );
+					$time		= HtmlTag::create( 'span', $time, array( 'class' => 'time' ) );
 					$message	= $time.$message;
 				}
 				if( $this->env->getModules()->has( 'UI_JS_Messenger' ) ){
-					$button		= UI_HTML_Tag::create( "div", '<span></span>', array(
+					$button		= HtmlTag::create( "div", '<span></span>', array(
 						'class'		=> 'button discard',
 						'onclick'	=> "UI.Messenger.discardMessage($(this).parent());",
 						'alt'		=> 'ausblenden',
@@ -140,9 +144,9 @@ class CMF_Hydrogen_Environment_Resource_Messenger
 					 ) );
 					$message	= $message.$button;
 				}
-				$list[] 	= UI_HTML_Elements::ListItem( $message, 0, array( 'class' => $class ) );
+				$list[] 	= HtmlElements::ListItem( $message, 0, array( 'class' => $class ) );
 			}
-			$list	= UI_HTML_Elements::unorderedList( $list, 0 );
+			$list	= HtmlElements::unorderedList( $list, 0 );
 			if( $clear )
 				$this->clear();
 		}

@@ -10,6 +10,16 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework;
+
+use CeusMedia\HydrogenFramework\Environment;
+use CeusMedia\HydrogenFramework\Environment\Resource\Captain as CaptainResource;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Library\Local as LocalModuleLibraryResource;
+use ADT_List_Dictionary as Dictionary;
+use Alg_Object_Factory as ObjectFactory;
+use Alg_Text_CamelCase as CamelCase;
+use RuntimeException;
+
 /**
  *	Basic logic class. Can be extended and uses as business logic layer class.
  *	Abstract logic class for contextual singletons. Every environment can have one instance.
@@ -21,27 +31,27 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Logic
+class Logic
 {
-	/**	@var	CMF_Hydrogen_Environment								$env			Application Environment Object */
+	/**	@var	Environment					$env			Application Environment Object */
 	protected $env;
 
-	/**	@var	CMF_Hydrogen_Environment_Resource_Captain				$captain		Event handler */
+	/**	@var	CaptainResource				$captain		Event handler */
 	protected $captain;
 
-	/**	@var	ADT_List_Dictionary										$config			Configuration collection */
+	/**	@var	Dictionary					$config			Configuration collection */
 	protected $config;
 
-	/**	@var	CMF_Hydrogen_Environment_Resource_Module_Library_Local	$modules		Module library */
+	/**	@var	LocalModuleLibraryResource	$modules		Module library */
 	protected $modules;
 
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		CMF_Hydrogen_Environment		$env		Environment instance
+	 *	@param		Environment		$env		Environment instance
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment $env )
+	public function __construct( Environment $env )
 	{
 		$logicPool	= $env->getLogic();
 		$key		= $logicPool->getKeyFromClassName( get_class( $this ) );
@@ -56,7 +66,7 @@ class CMF_Hydrogen_Logic
 		$this->__onInit();
 	}
 
-	public static function getInstance( CMF_Hydrogen_Environment $env )
+	public static function getInstance( Environment $env )
 	{
 		$logicPool	= $env->getLogic();
 		$className	= get_called_class();
@@ -95,17 +105,17 @@ class CMF_Hydrogen_Logic
 	 *	@access		protected
 	 *	@param		string		$key		Key for model class (eG. 'mailGroupMember' for 'Model_Mail_Group_Member')
 	 *	@return		object					Model instance
-	 *	@throws		\RuntimeException		if no model class could be found for given short model key
+	 *	@throws		RuntimeException		if no model class could be found for given short model key
 	 *	@todo		create model pool environment resource and apply to created shared single instances instead of new instances
 	 *	@todo		change \@return to CMF_Hydrogen_Model after CMF model refactoring
 	 *	@see		duplicate code with CMF_Hydrogen_Controller::getModel
 	 */
 	protected function getModel( string $key )
 	{
-		$classNameWords	= ucwords( \Alg_Text_CamelCase::decode( $key ) );
+		$classNameWords	= ucwords( CamelCase::decode( $key ) );
 		$className		= str_replace( ' ', '_', 'Model '.$classNameWords );
 		if( !class_exists( $className ) )
-			throw new \RuntimeException( 'Model class "'.$className.'" not found' );
-		return \Alg_Object_Factory::createObject( $className, array( $this->env ) );
+			throw new RuntimeException( 'Model class "'.$className.'" not found' );
+		return ObjectFactory::createObject( $className, array( $this->env ) );
 	}
 }
