@@ -41,7 +41,7 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAclList extends CMF_Hydrogen_Vie
 
 	public function getFilteredLinkMap( array $linkMap ): array
 	{
-		$roleId		= $this->env->getSession()->get( 'roleId' );
+		$roleId		= $this->env->getSession()->get( 'auth_role_id' );
 		if( !$roleId )
 			return $linkMap;
 

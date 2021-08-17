@@ -516,7 +516,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment
 		$this->runtime->reach( 'env: session: construction' );
 
 		// @todo check if this old workaround public URL paths extended by module is still needed and remove
-		$isInside	= (int) $this->session->get( 'userId' );
+		$isInside	= (int) $this->session->get( 'auth_user_id' );
 		$inside		= explode( ',', $this->config->get( 'module.acl.inside' ) );					//  get current inside link list
 		$outside	= explode( ',', $this->config->get( 'module.acl.outside' ) );					//  get current outside link list
 		if( $this->modules ){

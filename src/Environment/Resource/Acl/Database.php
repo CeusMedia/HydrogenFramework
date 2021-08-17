@@ -44,7 +44,7 @@ class CMF_Hydrogen_Environment_Resource_Acl_Database extends CMF_Hydrogen_Enviro
 		if( $roleId === NULL ){
 			if( !$this->env->has( 'session' ) )
 				return array();
-			$roleId	= $this->env->getSession()->get( 'roleId' );
+			$roleId	= $this->env->getSession()->get( 'auth_role_id' );
 		}
 		if( $this->hasFullAccess( $roleId ) ){
 			if( !$this->controllerActions )
