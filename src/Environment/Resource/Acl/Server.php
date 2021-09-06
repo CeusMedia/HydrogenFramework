@@ -26,6 +26,8 @@
  */
 namespace CeusMedia\HydrogenFramework\Environment\Resource\Acl;
 
+use Exception;
+
 /**
  *	Setup for access control list using a remote server.
  *

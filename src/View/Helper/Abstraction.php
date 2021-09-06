@@ -18,7 +18,7 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  *	@category		Library
- *	@package		CeusMedia.HydrogenFramework.View
+ *	@package		CeusMedia.HydrogenFramework.View.Helper
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2007-2021 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
@@ -32,7 +32,7 @@ use CeusMedia\HydrogenFramework\View\Helper;
 /**
  *	Generic View Class of Framework Hydrogen.
  *	@category		Library
- *	@package		CeusMedia.HydrogenFramework.View
+ *	@package		CeusMedia.HydrogenFramework.View.Helper
  *	@abstract		Needs to be extended
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2007-2021 Christian Würker

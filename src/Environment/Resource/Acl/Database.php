@@ -30,6 +30,9 @@ use CeusMedia\HydrogenFramework\Environment\Resource\Disclosure as DisclosureRes
 use CeusMedia\HydrogenFramework\Deprecation;
 use OutOfRangeException;
 
+use Model_Role;
+use Model_Role_Right;
+
 /**
  *	Setup for access control list using a Database.
  *
