@@ -50,7 +50,7 @@ class Database extends Abstraction
 		if( $roleId === NULL ){
 			if( !$this->env->has( 'session' ) )
 				return array();
-			$roleId	= $this->env->getSession()->get( 'roleId' );
+			$roleId	= $this->env->getSession()->get( 'auth_role_id' );
 		}
 		if( $this->hasFullAccess( $roleId ) ){
 			if( !$this->controllerActions )

@@ -60,7 +60,7 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAutoTabs extends CMF_Hydrogen_Vi
 	public function render( string $current = NULL, bool $niceUrls = FALSE ): string
 	{
 		$request	= $this->env->getRequest();
-		$userId		= $this->env->getSession()->get( 'userId' );
+		$userId		= $this->env->getSession()->get( 'auth_user_id' );
 		$language	= $this->env->getLanguage()->getLanguage();
 
 		$current			= $request->get( '__controller' ).'/'.$request->get( '__action' );
