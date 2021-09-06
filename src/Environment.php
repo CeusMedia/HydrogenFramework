@@ -46,6 +46,7 @@ use ADT_List_Dictionary as Dictionary;
 use Alg_Object_Factory as ObjectFactory;
 use ArrayAccess;
 use InvalidArgumentException;
+use RangeException;
 use RuntimeException;
 
 /**
@@ -102,7 +103,7 @@ class Environment implements ArrayAccess
 	/** @var	string						$version		Framework version */
 	public $version;
 
-	/** @var	AclAbstractResource			$acl			Implementation of access control list */
+	/** @var	AbstractAclResource			$acl			Implementation of access control list */
 	protected $acl;
 
 	/**	@var	object						$cache			Instance of cache adapter */

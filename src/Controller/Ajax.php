@@ -9,6 +9,7 @@ use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 use Net_HTTP_Response as HttpResponse;
 use Net_HTTP_Response_Sender as HttpResponseSender;
 use Exception;
+use Throwable;
 
 /**
  *	General (and therefore abstract) AJAX controller.

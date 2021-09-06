@@ -35,10 +35,12 @@ use FS_File_Iterator as FileIterator;
 use FS_File_Reader as FileReader;
 use FS_File_Writer as FileWriter;
 use Net_API_Google_ClosureCompiler;
+use Net_Reader as NetReader;
 use UI_HTML_Tag as HtmlTag;
 
 use JSMin;
 use RuntimeException;
+use Throwable;
 
 /**
  *	Component to collect and combine JavaScripts.
@@ -349,7 +351,7 @@ class JavaScript
 			try{
 				return JSMin::minify( $script );
 			}
-			catch( Exception $e ){}
+			catch( Throwable $t ){}
 		}
 		if( class_exists( 'Net_API_Google_ClosureCompiler' ) ){
 			return Net_API_Google_ClosureCompiler::minify( $script );
@@ -383,7 +385,7 @@ class JavaScript
 				$content	= "/* @revision ".$this->revision." */\n";
 			foreach( $this->getPlainUrlList() as $url ){
 				if( preg_match( "/^http/", $url ) )
-					$content	= Net_Reader::readUrl( $url );
+					$content	= NetReader::readUrl( $url );
 				else
 					$content	= FileReader::load( $url );
 				if( $content === FALSE )

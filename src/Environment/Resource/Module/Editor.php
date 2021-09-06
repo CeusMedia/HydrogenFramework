@@ -36,6 +36,7 @@ use XML_ElementReader as XmlReader;
 use InvalidArgumentException;
 use OutOfRangeException;
 use RuntimeException;
+use SimpleXMLElement;
 
 /**
  *	Editor for local module XML files.

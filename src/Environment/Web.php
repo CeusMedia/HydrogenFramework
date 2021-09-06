@@ -40,6 +40,7 @@ use Net_HTTP_Cookie as HttpCookie;
 use Net_HTTP_Request as HttpRequest;
 use Net_HTTP_Response as HttpResponse;
 use Net_HTTP_PartitionSession as HttpPartitionSession;
+use Net_HTTP_Status as HttpStatus;
 use UI_HTML_Exception_Page as HtmlExceptionPage;
 use UI_HTML_Tag as HtmlTag;
 use UI_HTML_PageFrame as HtmlPageFrame;
@@ -182,7 +183,7 @@ class Web extends Environment
 	 *	@return		HttpCookie
 	 *	@throws		RuntimeException		if cookie support has not been initialized
 	 */
-	public function getCookie(): Net_HTTP_Cookie
+	public function getCookie(): HttpCookie
 	{
 		if( !is_object( $this->cookie ) )
 			throw new RuntimeException( 'Cookie resource not initialized within environment' );
@@ -351,7 +352,7 @@ class Web extends Environment
 	#	$this->database->close();																	//  close database connection
 	#	$this->session->close();																	//  close session
 		if( $status )																				//  a HTTP status code is to be set
-			Net_HTTP_Status::sendHeader( (int) $status );											//  send HTTP status code header
+			HttpStatus::sendHeader( (int) $status );												//  send HTTP status code header
 		header( "Location: ".$base.$uri );															//  send HTTP redirect header
 
 		$link	= HtmlTag::create( 'a', $base.$uri, array( 'href' => $base.$uri ) );

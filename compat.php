@@ -2,6 +2,7 @@
 
 interface CMF_Hydrogen_Environment_Router_Interface extends CeusMedia\HydrogenFramework\Environment\RouterInterface {}
 interface CMF_Hydrogen_Environment_Resource_Module_Library_Interface extends CeusMedia\HydrogenFramework\Environment\Resource\Module\LibraryInterface {}
+interface CMF_Hydrogen_View_Helper extends CeusMedia\HydrogenFramework\View\Helper {}
 
 abstract class CMF_Hydrogen_Application_Web_Abstract extends CeusMedia\HydrogenFramework\Application\Web\Abstraction {}
 abstract class CMF_Hydrogen_Application_Abstract extends CeusMedia\HydrogenFramework\Application\Abstraction {}
@@ -40,7 +41,7 @@ class CMF_Hydrogen_Environment_Resource_Messenger extends CeusMedia\HydrogenFram
 class CMF_Hydrogen_Environment_Resource_Module_Component_Config extends CeusMedia\HydrogenFramework\Environment\Resource\Module\Component\Config {}
 class CMF_Hydrogen_Environment_Resource_Module_Component_File extends CeusMedia\HydrogenFramework\Environment\Resource\Module\Component\File {}
 class CMF_Hydrogen_Environment_Resource_Module_Library_Local extends CeusMedia\HydrogenFramework\Environment\Resource\Module\Library\Local {}
-class CMF_Hydrogen_Environment_Resource_Module_Library_Source extends CeusMedia\HydrogenFramework\Environment\Resource\Module\Source {}
+class CMF_Hydrogen_Environment_Resource_Module_Library_Source extends CeusMedia\HydrogenFramework\Environment\Resource\Module\Library\Source {}
 class CMF_Hydrogen_Environment_Resource_Module_Editor extends CeusMedia\HydrogenFramework\Environment\Resource\Module\Editor {}
 class CMF_Hydrogen_Environment_Resource_Module_Handler extends CeusMedia\HydrogenFramework\Environment\Resource\Module\Handler {}
 class CMF_Hydrogen_Environment_Resource_Module_Reader extends CeusMedia\HydrogenFramework\Environment\Resource\Module\Reader {}
@@ -59,7 +60,6 @@ class CMF_Hydrogen_Model_File_JSON extends CeusMedia\HydrogenFramework\Model\Fil
 class CMF_Hydrogen_Model_REST_JSON extends CeusMedia\HydrogenFramework\Model\REST\JSON {}
 class CMF_Hydrogen_Run_Web extends CeusMedia\HydrogenFramework\Run\Web {}
 class CMF_Hydrogen_View extends CeusMedia\HydrogenFramework\View {}
-class CMF_Hydrogen_View_Helper extends CeusMedia\HydrogenFramework\View\Helper {}
 class CMF_Hydrogen_View_Helper_Diff extends CeusMedia\HydrogenFramework\View\Helper\Diff {}
 class CMF_Hydrogen_View_Helper_JavaScript extends CeusMedia\HydrogenFramework\View\Helper\JavaScript {}
 class CMF_Hydrogen_View_Helper_Navigation_MultiList extends CeusMedia\HydrogenFramework\View\Helper\Navigation\MultiList {}
@@ -68,4 +68,3 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAutoTabs extends CeusMedia\Hydro
 class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CeusMedia\HydrogenFramework\View\Helper\Navigation\SingleList {}
 class CMF_Hydrogen_View_Helper_StyleSheet extends CeusMedia\HydrogenFramework\View\Helper\StyleSheet {}
 class CMF_Hydrogen_View_Helper_Timestamp extends CeusMedia\HydrogenFramework\View\Helper\Timestamp {}
-

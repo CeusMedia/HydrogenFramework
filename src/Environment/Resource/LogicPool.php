@@ -116,12 +116,17 @@ class LogicPool
 	 */
 	public function get( string $key )
 	{
+		$className = NULL;
 		if( !$this->has( $key ) ){
 			$className		= $this->getClassNameFromKey( $key );
 			class_exists( $className ) ? $this->add( $key, $className ) : NULL;
 		}
-		if( !$this->has( $key ) )
-			throw new RuntimeException( 'No logic class/object available for key "'.$key.'" (classname: '.$className.')' );
+		if( !$this->has( $key ) ){
+			$message	= 'No logic class/object available for key "'.$key.'"';
+			if( $className !== NULL )
+				$message	= 'No logic class/object available for key "'.$key.'" (classname: '.$className.')';
+			throw new RuntimeException( $message );
+		}
 
 		if( !$this->isInstantiated( $key ) ){
 			if( !class_exists( $this->pool[$key] ) )

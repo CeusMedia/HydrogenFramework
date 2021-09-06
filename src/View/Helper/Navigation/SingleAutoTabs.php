@@ -24,9 +24,9 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\View\Helper\Navigation;
 
 use CMF_Hydrogen_Environment_Web as WebEnv;
-
 use CeusMedia\HydrogenFramework\Deprecation;
 use UI_HTML_Tag as HtmlTag;
 

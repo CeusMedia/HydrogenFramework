@@ -5,6 +5,8 @@ use CeusMedia\HydrogenFramework\Environment as Environment;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 use InvalidArgumentException;
 
+use Mail_Abstract;
+
 class Hook
 {
 	public static function callHook( Environment $env, string $resource, string $event, $context, $module, $data )
@@ -101,11 +103,11 @@ class Hook
 	 *	@access		protected
 	 *	@static
 	 *	@param		Environment		$env			Instance of environment
-	 *	@param		\Mail_Abstract	$mail			Mail object to handle
+	 *	@param		Mail_Abstract	$mail			Mail object to handle
 	 *	@param		array			$receivers		List of receiver objects
 	 *	@return		void
 	 */
-	protected static function sendMail( Environment $env, \Mail_Abstract $mail, array $receivers = array() )
+	protected static function sendMail( Environment $env, Mail_Abstract $mail, array $receivers = array() )
 	{
 		$language	= $env->getLanguage()->getLanguage();											// @todo apply user language
 		foreach( $receivers as $receiver ){

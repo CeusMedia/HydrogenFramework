@@ -28,12 +28,15 @@ namespace CeusMedia\HydrogenFramework;
 
 use CeusMedia\HydrogenFramework\Environment as Environment;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
+
 use ADT_List_Dictionary as Dictionary;
 use Alg_Object_Factory as ObjectFactory;
-use Alg_Text_CamelCase;
+use Alg_Text_CamelCase as CamelCase;
 use Alg_Time_Converter as TimeConverter;
 use UI_HTML_Elements as HtmlElements;
 use UI_HTML_Exception_Page as HtmlExceptionPage;
+use UI_Template as TemplateEngine;
+
 use Exception;
 use InvalidArgumentException;
 use RuntimeException;
@@ -206,7 +209,7 @@ class View
 	}
 
 	/**
-	 *	@todo	remove use of UI_Template
+	 *	@todo	remove use of TemplateEngine (aka. UI_Template)
 	 */
 	public function loadContentFile( string $fileKey, array $data = array(), ?string $path = NULL ): string
 	{
@@ -231,7 +234,7 @@ class View
 //			$content	= $template->render();														//  render template
 //		}
 //		else
-			$content	= UI_Template::render( $uri, $data );										//  render template with integrated template engine
+			$content	= TemplateEngine::render( $uri, $data );									//  render template with integrated template engine
 
 		$content	= $this->renderContent( $content );												//  apply modules to content
 		return $content;																			//  return loaded and rendered content
