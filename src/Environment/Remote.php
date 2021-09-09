@@ -41,8 +41,9 @@ use Loader;
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			is a web environment needed instead? try to avoid this - maybe a console messenger needs to be implemented therefore
  *	@todo			finish path resolution (path is set twice at the moment)
+ *	@todo			extend from (namespaced) Environment after all modules are migrated to 0.9
  */
-class Remote extends Environment
+class Remote extends \CMF_Hydrogen_Environment
 {
 	/**	@var	boolean		$hasDatabase		Flag: indicates availability of a database connection */
 	public $hasDatabase		= FALSE;

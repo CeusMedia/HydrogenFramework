@@ -56,8 +56,9 @@ use RuntimeException;
  *	@copyright		2007-2021 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
+ *	@todo			extend from (namespaced) Environment after all modules are migrated to 0.9
  */
-class Web extends Environment
+class Web extends \CMF_Hydrogen_Environment
 {
 	public static $classRouter			= SingleRouter::class;
 

@@ -28,8 +28,9 @@ use RuntimeException;
  *	@copyright		2010-2021 Ceus Media
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
+ *	@todo			extend from (namespaced) Environment after all modules are migrated to 0.9
  */
-class Console extends Environment
+class Console extends \CMF_Hydrogen_Environment
 {
 	/**	@var	ArgumentParser			$request	Console Request Object */
 	protected $request;

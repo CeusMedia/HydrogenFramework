@@ -38,8 +38,9 @@ use ADT_List_Dictionary as Dictionary;
  *	@copyright		2012-2021 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
+ *	@todo			extend from (namespaced) Environment after all modules are migrated to 0.9
  */
-class Dummy extends Environment
+class Dummy extends \CMF_Hydrogen_Environment
 {
 	public $hasDatabase		= FALSE;
 
