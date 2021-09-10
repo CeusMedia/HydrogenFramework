@@ -24,6 +24,10 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\Environment\Resource\Acl;
+
+use CeusMedia\HydrogenFramework\Environment\Resource\Disclosure as DisclosureResource;
+
 /**
  *	Setup for access control list using a Database.
  *
@@ -34,7 +38,7 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Environment_Resource_Acl_AllPublic extends CMF_Hydrogen_Environment_Resource_Acl_Abstract
+class AllPublic extends Abstraction
 {
 	/**
 	 *	Indicates whether access to a controller action is allowed for a given role.
@@ -117,7 +121,7 @@ class CMF_Hydrogen_Environment_Resource_Acl_AllPublic extends CMF_Hydrogen_Envir
 	 */
 	protected function scanControllerActions()
 	{
-		$disclosure	= new CMF_Hydrogen_Environment_Resource_Disclosure();
+		$disclosure	= new DisclosureResource();
 		$classes	= $disclosure->reflect( 'classes/Controller/' );
 		foreach( $classes as $className => $classData ){
 			$className	= strtolower( str_replace( '_', '/', $className ) );

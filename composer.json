@@ -26,7 +26,10 @@
     "phpstan/phpstan": "*"
   },
   "autoload": {
-    "classmap": ["src/"]
+    "psr-4": {
+      "CeusMedia\\HydrogenFramework\\": "src/"
+    },
+    "files": ["compat.php"]
   },
   "minimum-stability": "dev"
 }

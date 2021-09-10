@@ -24,6 +24,13 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\Application;
+
+use CeusMedia\HydrogenFramework\Environment as Environment;
+use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
+use CeusMedia\HydrogenFramework\Environment\Console as ConsoleEnvironment;
+use RuntimeException;
+
 /**
  *	Application class for a console program.
  *	@category		Library
@@ -34,12 +41,12 @@
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			Code Documentation
  */
-class CMF_Hydrogen_Application_Console extends CMF_Hydrogen_Application_Abstract
+class Console extends Abstraction
 {
-	public function __construct( CMF_Hydrogen_Environment $env = NULL )
+	public function __construct( Environment $env = NULL )
 	{
-		if( self::$classEnvironment === 'CMF_Hydrogen_Environment_Web' )
-			self::$classEnvironment	= 'CMF_Hydrogen_Environment_Console';
+		if( self::$classEnvironment === WebEnvironment::class )
+			self::$classEnvironment	= ConsoleEnvironment::class;
 		parent::__construct( $env );
 //		$this->env->set( 'request', new Console_Command_ArgumentParser() );
 	}

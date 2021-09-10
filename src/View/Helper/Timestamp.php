@@ -24,6 +24,14 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\View\Helper;
+
+use CeusMedia\HydrogenFramework\Environment;
+
+use Alg_Time_DurationPhraser as TimeDurationPhraser;
+use UI_HTML_Tag as HtmlTag;
+
+use InvalidArgumentException;
 /**
  *	View helper for converting and displaying timestamps.
  *
@@ -35,7 +43,7 @@
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo 			enable environment after interface and abstract support $env on construction
  */
-class CMF_Hydrogen_View_Helper_Timestamp extends CMF_Hydrogen_View_Helper_Abstract
+class Timestamp extends Abstraction
 {
 	protected $timestamp			= NULL;
 
@@ -50,7 +58,7 @@ class CMF_Hydrogen_View_Helper_Timestamp extends CMF_Hydrogen_View_Helper_Abstra
 	/**
 	 *	@todo 		enable environment after interface and abstract support $env on construction
 	 */
-	public function __construct( /*CMF_Hydrogen_Environment $env,*/ $timestamp, string $stringEmpty = "---" )
+	public function __construct( /*Environment $env,*/ $timestamp, string $stringEmpty = "---" )
 	{
 		$this->timestamp	= $timestamp;
 		$this->stringEmpty	= $stringEmpty;
@@ -64,7 +72,7 @@ class CMF_Hydrogen_View_Helper_Timestamp extends CMF_Hydrogen_View_Helper_Abstra
 		$date	= date( $format, $this->timestamp );
 		if( $html ){
 			$attr	= array( 'class' => 'date' );
-			$date	= UI_HTML_Tag::create( 'span', $date, $attr );
+			$date	= HtmlTag::create( 'span', $date, $attr );
 		}
 		return $date;
 	}
@@ -77,12 +85,12 @@ class CMF_Hydrogen_View_Helper_Timestamp extends CMF_Hydrogen_View_Helper_Abstra
 		$date	= date( $format, $this->timestamp );
 		if( $html ){
 			$attr	= array( 'class' => 'datetime' );
-			$date	= UI_HTML_Tag::create( 'span', $date, $attr );
+			$date	= HtmlTag::create( 'span', $date, $attr );
 		}
 		return $date;
 	}
 
-	public function toPhrase( CMF_Hydrogen_Environment $env, bool $html = FALSE, string $languageTopic = 'main', string $languageSection = 'phrases-time' ): string
+	public function toPhrase( Environment $env, bool $html = FALSE, string $languageTopic = 'main', string $languageSection = 'phrases-time' ): string
 	{
 		if( !$this->timestamp )
 			return '-';
@@ -90,14 +98,14 @@ class CMF_Hydrogen_View_Helper_Timestamp extends CMF_Hydrogen_View_Helper_Abstra
 		$words	= $env->getLanguage()->getWords( $languageTopic );
 		if( !isset( $words[$languageSection] ) )
 			throw new InvalidArgumentException( 'Invalid language section "'.$languageSection.'" in topic "'.$languageTopic.'"' );
-		$phraser	= new Alg_Time_DurationPhraser( $words[$languageSection] );
+		$phraser	= new TimeDurationPhraser( $words[$languageSection] );
 		$phrase		= $phraser->getPhraseFromTimestamp( $this->timestamp );
 
 		if( $html ){
 			$attr		= array( 'class' => 'phrase' );
 			$datetime	= $this->toDatetime();
-			$acronym	= UI_HTML_Tag::create( 'abbr', $phrase, array( 'title' => $datetime ) );
-			$phrase		= UI_HTML_Tag::create( 'span', $acronym, $attr );
+			$acronym	= HtmlTag::create( 'abbr', $phrase, array( 'title' => $datetime ) );
+			$phrase		= HtmlTag::create( 'span', $acronym, $attr );
 		}
 		return $phrase;
 	}
@@ -110,14 +118,14 @@ class CMF_Hydrogen_View_Helper_Timestamp extends CMF_Hydrogen_View_Helper_Abstra
 		$time	= date( $format, $this->timestamp );
 		if( $html ){
 			$attr	= array( 'class' => 'time' );
-			$time	= UI_HTML_Tag::create( 'span', $time, $attr );
+			$time	= HtmlTag::create( 'span', $time, $attr );
 		}
 		return $time;
 	}
 
-	public static function statePhrase( $timestamp, CMF_Hydrogen_Environment $env, bool $html = FALSE, string $languageTopic = 'main', string $languageSection = 'phrases-time' ): string
+	public static function statePhrase( $timestamp, Environment $env, bool $html = FALSE, string $languageTopic = 'main', string $languageSection = 'phrases-time' ): string
 	{
-		$instance	= new CMF_Hydrogen_View_Helper_Timestamp( $timestamp );
+		$instance	= new self( $timestamp );
 		return $instance->toPhrase( $env, $html, $languageTopic, $languageSection );
 	}
 }

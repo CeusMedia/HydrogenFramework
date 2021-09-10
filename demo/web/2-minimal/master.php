@@ -8,7 +8,7 @@ $page->addStylesheet( 'style.css' );
 
 //  --  gimick: show runtime ticks caught by profiler
 $list	= [];
-$timeTotal	= $env->getRuntime()->stop( 6, 0 );
+$timeTotal	= $env->getRuntime()->get( 6, 0 );
 foreach( $env->getRuntime()->getGoals() as $nr => $tick ){
 	$label	= $tick->label;
 	if( !empty( $tick->description ) )
@@ -27,6 +27,6 @@ $page->addBody( $ticks );
 $page->addBody( $dev );
 
 $page->setTitle( $env->config->get( 'app.title' ) );
-$env->getResponse()->addHeaderPair( 'X-Hydrogen-Process-Time', $env->getRuntime()->stop( 3, 0 ).'ms' );
+$env->getResponse()->addHeaderPair( 'X-Hydrogen-Process-Time', $env->getRuntime()->get( 3, 0 ).'ms' );
 
 return $page->build();

@@ -24,6 +24,10 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\View;
+
+use CeusMedia\HydrogenFramework\Environment;
+
 /**
  *	Interface for view helpers.
  *
@@ -34,20 +38,20 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-interface CMF_Hydrogen_View_Helper
+interface Helper
 {
 	public function hasEnv();
 
 	public function needsEnv();
 
-	public function setEnv( CMF_Hydrogen_Environment $env );
+	public function setEnv( Environment $env );
 
 //	@todo 	kriss: see if this pattern (having render method) is realizable for all existing helpers
 //	public function render();
 //	public function __toString();
 
 //	@todo 	whats with __construct( $env ) for all helpers?
-//	public function __construct( CMF_Hydrogen_Environment $env )
+//	public function __construct( Environment $env )
 //	{
 //		$this->env	= $env;
 //	}

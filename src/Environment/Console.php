@@ -1,7 +1,15 @@
 <?php
+namespace CeusMedia\HydrogenFramework\Environment;
+
+use CeusMedia\HydrogenFramework\Environment;
+use CeusMedia\HydrogenFramework\Environment\Console\Messenger as Messenger;
+use CeusMedia\HydrogenFramework\Environment\Resource\Language as Language;
+
+use ADT_List_Dictionary as Dictionary;
 use CLI_ArgumentParser as ArgumentParser;
-use CMF_Hydrogen_Environment_Console_Messenger as Messenger;
-use CMF_Hydrogen_Environment_Resource_Language as Language;
+
+use Exception;
+use RuntimeException;
 
 /**
  *	...
@@ -20,8 +28,9 @@ use CMF_Hydrogen_Environment_Resource_Language as Language;
  *	@copyright		2010-2021 Ceus Media
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
+ *	@todo			extend from (namespaced) Environment after all modules are migrated to 0.9
  */
-class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment
+class Console extends \CMF_Hydrogen_Environment
 {
 	/**	@var	ArgumentParser			$request	Console Request Object */
 	protected $request;
@@ -32,7 +41,7 @@ class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment
 	/** @var	Language				$language	Language Object */
 	protected $language;
 
-	/** @var	ADT_List_Dictionary		$session	Session Storage Object */
+	/** @var	Dictionary				$session	Session Storage Object */
 	protected $session;
 
 	protected $pathConfig	= '';
@@ -99,7 +108,7 @@ class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment
 		return $this->request;
 	}
 
-	public function getSession(): ADT_List_Dictionary
+	public function getSession(): Dictionary
 	{
 		return $this->session;
 	}
@@ -121,7 +130,7 @@ class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment
 	}
 
 //	protected function initConfiguration(){
-//		$this->config	= new ADT_List_Dictionary();
+//		$this->config	= new Dictionary();
 //	}
 
 	protected function initLanguage()
@@ -146,7 +155,7 @@ class CMF_Hydrogen_Environment_Console extends CMF_Hydrogen_Environment
 	 */
 	protected function initSession()
 	{
-		$this->session	= new ADT_List_Dictionary();
+		$this->session	= new Dictionary();
 		return $this;
 	}
 }

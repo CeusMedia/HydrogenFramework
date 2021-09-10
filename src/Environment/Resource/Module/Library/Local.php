@@ -24,11 +24,12 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\Environment\Resource\Module\Library;
 
-use CMF_Hydrogen_Environment as Environment;
-use CMF_Hydrogen_Environment_Resource_Module_Reader as ModuleReader;
-use CMF_Hydrogen_Environment_Resource_Module_Library_Interface as LibraryInterface;
-use CMF_Hydrogen_Environment_Resource_Module_Library_Abstract as AbstractLibrary;
+use CeusMedia\HydrogenFramework\Environment as Environment;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Reader as ModuleReader;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\LibraryInterface as LibraryInterface;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Library\Abstraction as AbstractLibrary;
 use FS_File_Reader as FileReader;
 use FS_File_RegexFilter as FileRegexIndex;
 use FS_File_Writer as FileWriter;
@@ -44,7 +45,7 @@ use FS_File_Writer as FileWriter;
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			Code Documentation
  */
-class CMF_Hydrogen_Environment_Resource_Module_Library_Local extends AbstractLibrary implements LibraryInterface
+class Local extends AbstractLibrary implements LibraryInterface
 {
 	protected $env;
 	protected $modulePath;

@@ -24,6 +24,11 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\View\Helper\Navigation;
+
+use UI_HTML_Elements as HtmlElements;
+use UI_HTML_Tag as HtmlTag;
+
 /**
  *	...
  *
@@ -35,7 +40,7 @@
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			Code doc
  */
-class CMF_Hydrogen_View_Helper_Navigation_SingleAclList extends CMF_Hydrogen_View_Helper_Navigation_SingleList
+class SingleAclList extends SingleList
 {
 	protected $needsEnv			= TRUE;
 
@@ -71,17 +76,17 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAclList extends CMF_Hydrogen_Vie
 			$key		= str_replace( '_', '/', $key );
 			$class		= $active == $key ? 'active' : NULL;
 			$url		= $key == "index" ? "./" : './'.$key;
-			$link		= UI_HTML_Elements::Link( $url, $label, $class );
+			$link		= HtmlElements::Link( $url, $label, $class );
 			$attributes	= array( 'id' => 'navi-link-'.str_replace( '/', '-', $key ), 'class' => $class );
-			$list[]		= UI_HTML_Elements::ListItem( $link, 0, $attributes );
+			$list[]		= HtmlElements::ListItem( $link, 0, $attributes );
 		}
 		if( !$list )
 			return '';
-		$list	= UI_HTML_Elements::unorderedList( $list );
+		$list	= HtmlElements::unorderedList( $list );
 		$attr	= array(
 			'id'	=> $this->innerId,
 			'class'	=> $this->innerClass
 		);
-		return UI_HTML_Tag::create( 'div', $list, $attr );
+		return HtmlTag::create( 'div', $list, $attr );
 	}
 }

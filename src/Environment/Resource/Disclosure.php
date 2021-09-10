@@ -8,6 +8,14 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\Environment\Resource;
+
+use CeusMedia\HydrogenFramework\Deprecation;
+use FS_File_RecursiveRegexFilter as RecursiveRegexFileFilter;
+use ReflectionClass;
+use ReflectionMethod;
+use stdClass;
+
 /**
  *	...
  *	@category		Library
@@ -19,7 +27,7 @@
  *	@deprecated		use module Resource_Disclosure instead
  *	@todo			remove in version 0.9
  */
-class CMF_Hydrogen_Environment_Resource_Disclosure
+class Disclosure
 {
 	protected $options	= array(
 		'classPrefix'		=> 'Controller_',
@@ -38,7 +46,7 @@ class CMF_Hydrogen_Environment_Resource_Disclosure
 
 	public function __construct( $options = array() )
 	{
-		CMF_Hydrogen_Deprecation::getInstance()
+		Deprecation::getInstance()
 			->setErrorVersion( '0.8.8' )
 			->setExceptionVersion( '0.9' )
 			->message( 'Use module Resource_Disclosure instead' );
@@ -51,7 +59,7 @@ class CMF_Hydrogen_Environment_Resource_Disclosure
 
 		$classes	= array();
 		$path		= realpath( $path );
-		$index		= new FS_File_RecursiveRegexFilter( $path, '/^[^_].+\.'.$options['fileExtension'].'$/' );
+		$index		= new RecursiveRegexFileFilter( $path, '/^[^_].+\.'.$options['fileExtension'].'$/' );
 		foreach( $index as $entry ){
 			$fileName	= preg_replace( '@^'.$path.'/@', '', $entry->getPathname() );
 			$fileBase	= preg_replace( '@\.'.$options['fileExtension'].'$@', '', $fileName );

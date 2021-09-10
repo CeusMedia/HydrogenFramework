@@ -8,11 +8,17 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Common
  */
+namespace CeusMedia\HydrogenFramework;
+
+use Deprecation as CommonDeprecation;
+use Exception;
+
 /**
  *	Indicator for deprecated methods.
  *
  *	Example:
- *		CMF_Hydrogen_Deprecation::getInstance()
+ *		use CeusMedia\HydrogenFramework\Deprecation;
+ *		Deprecation::getInstance()
  *			->setErrorVersion( '0.9' )
  *			->setExceptionVersion( '0.9' )
  *			->message( 'Use method ... instead' );
@@ -22,7 +28,7 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Common
  */
-class CMF_Hydrogen_Deprecation extends Deprecation
+class Deprecation extends CommonDeprecation
 {
 	/**
 	 *	Contructor, needs to be called statically by getInstance.
