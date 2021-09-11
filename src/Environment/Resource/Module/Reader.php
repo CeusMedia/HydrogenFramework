@@ -380,6 +380,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader
 				'link'			=> self::castNodeAttributes( $link, 'link' ),
 				'rank'			=> self::castNodeAttributes( $link, 'rank', 'int', 10 ),
 				'label'			=> $label,
+				'icon'			=> self::castNodeAttributes( $link, 'icon', 'string' ),
 			);
 			(string) $link;
 		}
