@@ -65,9 +65,9 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_H
 	 *	@param		array		$linkMap		Map of links paths and labels
 	 *	@param		string		$current		Currently requested path, autodetected if not set
 	 *	@todo		correct implementation: rank by depth, not length, see todo below
-	 *	@return		string
+	 *	@return		string|NULL
 	 */
-	public static function getCurrentKey( array $linkMap, string $current = NULL ): string
+	public static function getCurrentKey( array $linkMap, string $current = NULL ): ?string
 	{
 		$path		= $current;
 		if( isset( $_REQUEST[self::$pathRequestKey] ) && $current === NULL )
