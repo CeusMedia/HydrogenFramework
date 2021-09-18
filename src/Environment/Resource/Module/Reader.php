@@ -60,6 +60,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader
 			'title'				=> (string) $xml->title,
 			'category'			=> (string) $xml->category,
 			'description'		=> (string) $xml->description,
+			'frameworks'		=> array(),
 			'version'			=> (string) $xml->version,
 			'versionAvailable'	=> NULL,
 			'versionInstalled'	=> NULL,
@@ -96,6 +97,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader
 				'source'		=> self::castNodeAttributes( $xml->version, 'install-source' ),			//  note install source
 			),
 		);
+		self::decorateObjectWithFrameworks( $object, $xml );
 		self::decorateObjectWithLog( $object, $xml );
 		self::decorateObjectWithFiles( $object, $xml );
 		self::decorateObjectWithAuthors( $object, $xml );
@@ -168,7 +170,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader
 	 *	@param		XML_Element		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 */
-	protected static function decorateObjectWithAuthors( $object, XML_Element $xml )
+	protected static function decorateObjectWithAuthors( $object, XML_Element $xml ): bool
 	{
 		if( !$xml->author )																			//  no author nodes existing
 			return FALSE;
@@ -189,7 +191,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader
 	 *	@param		XML_Element		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 */
-	protected static function decorateObjectWithCompanies( $object, XML_Element $xml )
+	protected static function decorateObjectWithCompanies( $object, XML_Element $xml ): bool
 	{
 		if( !$xml->company )																		//  no company nodes existing
 			return FALSE;
@@ -210,7 +212,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader
 	 *	@param		XML_Element		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 */
-	protected static function decorateObjectWithConfig( $object, XML_Element $xml )
+	protected static function decorateObjectWithConfig( $object, XML_Element $xml ): bool
 	{
 		if( !$xml->config )																			//  no config nodes existing
 			return FALSE;
@@ -240,7 +242,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader
 	 *	@param		XML_Element		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 */
-	protected static function decorateObjectWithDeprecation( $object, XML_Element $xml )
+	protected static function decorateObjectWithDeprecation( $object, XML_Element $xml ): bool
 	{
 		if( !$xml->deprecation )																	//  deprecation node is not existing
 			return FALSE;
@@ -259,7 +261,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 *	@todo		rethink the defined map of paths
 	 */
-	protected static function decorateObjectWithFiles( $object, XML_Element $xml )
+	protected static function decorateObjectWithFiles( $object, XML_Element $xml ): bool
 	{
 		if( !$xml->files )
 			return FALSE;
@@ -285,13 +287,35 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader
 	}
 
 	/**
+	 *	Decorates module object by framework support information, if set.
+	 *	@access		protected
+	 *	@param		object			$object			Data object of module
+	 *	@param		XML_Element		$xml			XML tree object of module created by ::load
+	 *	@return		boolean							TRUE if data object of module has been decorated
+	 */
+	protected static function decorateObjectWithFrameworks( $object, XML_Element $xml ): bool
+	{
+		$frameworks	= self::castNodeAttributes( $xml, 'frameworks', 'string', 'Hydrogen:<0.9' );
+		if( !strlen( trim( $frameworks ) ) )
+			return FALSE;
+		$list		= preg_split( '/\s*(,|\|)\s*/', $frameworks );
+		foreach( $list as $listItem ){
+			$parts	= preg_split( '/\s*(:|@)\s*/', $listItem );
+			if( count( $parts ) < 2 )
+				$parts[1]	= '*';
+			$object->frameworks[(string) $parts[0]]	= (string) $parts[1];
+		}
+		return TRUE;
+	}
+
+	/**
 	 *	Decorates module object by hook information, if set.
 	 *	@access		protected
 	 *	@param		object			$object			Data object of module
 	 *	@param		XML_Element		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 */
-	protected static function decorateObjectWithHooks( $object, XML_Element $xml )
+	protected static function decorateObjectWithHooks( $object, XML_Element $xml ): bool
 	{
 		if( !$xml->hook )																			//  hook node is not existing
 			return FALSE;
@@ -313,7 +337,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader
 	 *	@param		XML_Element		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 */
-	protected static function decorateObjectWithJobs( $object, XML_Element $xml )
+	protected static function decorateObjectWithJobs( $object, XML_Element $xml ): bool
 	{
 		if( !$xml->job )																			//  hook node is not existing
 			return FALSE;
@@ -342,7 +366,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader
 	 *	@param		XML_Element		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 */
-	protected static function decorateObjectWithLicenses( $object, XML_Element $xml )
+	protected static function decorateObjectWithLicenses( $object, XML_Element $xml ): bool
 	{
 		if( !$xml->license )																		//  no license nodes existing
 			return FALSE;
@@ -363,7 +387,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader
 	 *	@param		XML_Element		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 */
-	protected static function decorateObjectWithLinks( $object, XML_Element $xml )
+	protected static function decorateObjectWithLinks( $object, XML_Element $xml ): bool
 	{
 		if( !$xml->link )																			//  no link nodes existing
 			return FALSE;
@@ -394,7 +418,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader
 	 *	@param		XML_Element		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 */
-	protected static function decorateObjectWithLog( $object, XML_Element $xml )
+	protected static function decorateObjectWithLog( $object, XML_Element $xml ): bool
 	{
 		if( !$xml->log )																			//  no log nodes existing
 			return FALSE;
@@ -416,16 +440,28 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader
 	 *	@param		XML_Element		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 */
-	protected static function decorateObjectWithRelations( $object, XML_Element $xml )
+	protected static function decorateObjectWithRelations( $object, XML_Element $xml ): bool
 	{
 		if( !$xml->relations )																		//  no relation nodes existing
 			return FALSE;																			//  do nothing
 		if( $xml->relations->needs )																//  if needed modules are defined
 			foreach( $xml->relations->needs as $moduleName )										//  iterate list if needed modules
-				$object->relations->needs[]	= (string) $moduleName;									//  note needed
+				$object->relations->needs[(string) $moduleName]		= (object) array(				//  note relation
+					'relation'	=> 'needs',															//  ... as needed
+					'type'		=> self::castNodeAttributes( $moduleName, 'type' ),					//  ... with relation type
+					'id'		=> (string) $moduleName,											//  ... with module ID
+					'source'	=> self::castNodeAttributes( $moduleName, 'source' ),				//  ... with module source, if set
+					'version'	=> self::castNodeAttributes( $moduleName, 'version' ),				//  ... with version, if set
+				);
 		if( $xml->relations->supports )																//  if supported modules are defined
 			foreach( $xml->relations->supports as $moduleName )										//  iterate list if supported modules
-				$object->relations->supports[]	= (string) $moduleName;
+				$object->relations->supports[(string) $moduleName]	= (object) array(				//  note relation
+					'relation'	=> 'supports',														//  ... as supported
+					'type'		=> self::castNodeAttributes( $moduleName, 'type' ),					//  ... with relation type
+					'id'		=> (string) $moduleName,											//  ... with module ID
+					'source'	=> self::castNodeAttributes( $moduleName, 'source' ),				//  ... with module source, if set
+					'version'	=> self::castNodeAttributes( $moduleName, 'version' ),				//  ... with version, if set
+				);
 		return TRUE;
 	}
 
@@ -436,7 +472,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Reader
 	 *	@param		XML_Element		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 */
-	protected static function decorateObjectWithSql( $object, XML_Element $xml )
+	protected static function decorateObjectWithSql( $object, XML_Element $xml ): bool
 	{
 		if( !$xml->sql )																			//  no sql nodes existing
 			return FALSE;
