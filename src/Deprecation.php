@@ -53,7 +53,7 @@ class Deprecation extends CommonDeprecation
 	 *	@access		public
 	 *	@return		Deprecation
 	 */
-	static public function getInstance()
+	static public function getInstance(): Deprecation
 	{
 		return new self();
 	}

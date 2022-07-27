@@ -372,7 +372,7 @@ class Environment implements ArrayAccess
 		return $this->php;
 	}
 
-	public function getRequest(): Dictionary
+	public function getRequest()
 	{
 		return $this->request;
 	}
@@ -382,7 +382,7 @@ class Environment implements ArrayAccess
 		return $this->runtime;
 	}
 
-	public function getSession(): ?Dictionary
+	public function getSession()
 	{
 		return $this->session;
 	}
