@@ -243,7 +243,7 @@ class Language
 				$this->env->getRuntime()->reach( 'Resource_Language::load: '.$topic.' @mode1' );
 			}
 			if( $data === FALSE ){
-				$data	= IniFileReader::load( $fileName, TRUE );
+				$data	= IniFileReader::loadArray( $fileName, TRUE );
 				$this->env->getRuntime()->reach( 'Resource_Language::load: '.$topic.' @mode2' );
 			}
 			$this->data[$topic]	= $data;
