@@ -26,11 +26,10 @@
  */
 namespace CeusMedia\HydrogenFramework\Environment\Resource\Module;
 
+use CeusMedia\Common\XML\Element as XmlElement;
+use CeusMedia\Common\XML\ElementReader as XmlReader;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Component\Config as ConfigComponent;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Component\File as FileComponent;
-
-use XML_Element as XmlElement;
-use XML_ElementReader as XmlReader;
 
 use Exception;
 use RuntimeException;
