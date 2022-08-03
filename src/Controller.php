@@ -149,7 +149,7 @@ class CMF_Hydrogen_Controller
 			$this->env->getRuntime()->reach( 'Controller::getView: loadTemplate' );
 		}
 		else if( $this->view->hasContent( $this->controller, $this->action, 'html/' ) ){
-			$result	= $this->view->loadContent( $this->controller, $this->action, NULL, 'html/' );
+			$result	= $this->view->loadContent( $this->controller, $this->action );
 			$this->env->getRuntime()->reach( 'Controller::getView: loadContent' );
 		}
 		else{
