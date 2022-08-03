@@ -158,6 +158,7 @@ class Environment implements ArrayAccess
 	 */
 	public function __construct( array $options = array(), bool $isFinal = TRUE )
 	{
+		$this->modules->callHook( 'Env', 'constructStart', $this );									//  call module hooks for end of env construction
 		$frameworkConfig	= parse_ini_file( dirname( __DIR__ ).'/hydrogen.ini' );
 		$this->version		= $frameworkConfig['version'];
 
