@@ -24,6 +24,13 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\View\Helper\Navigation;
+
+use CeusMedia\HydrogenFramework\Deprecation;
+use CeusMedia\HydrogenFramework\View\Helper\Abstraction as AbstractViewHelper;
+use UI_HTML_Elements as HtmlElements;
+use UI_HTML_Tag as HtmlTag;
+
 /**
  *	...
  *
@@ -36,7 +43,7 @@
  *	@deprecated		use modules Info_Pages + UI_Navigation instead
  *	@todo			remove in version 0.9
  */
-class CMF_Hydrogen_View_Helper_Navigation_MultiList extends CMF_Hydrogen_View_Helper_Abstract
+class MultiList extends AbstractViewHelper
 {
 	protected $multiple		= FALSE;
 	protected $needsEnv		= FALSE;
@@ -44,7 +51,7 @@ class CMF_Hydrogen_View_Helper_Navigation_MultiList extends CMF_Hydrogen_View_He
 
 	public function __construct( $words )
 	{
-		CMF_Hydrogen_Deprecation::getInstance()
+		Deprecation::getInstance()
 			->setErrorVersion( '0.8.5' )
 			->setExceptionVersion( '0.9' )
 			->message( 'Use modules Info_Pages + UI_Navigation instead' );
@@ -59,7 +66,7 @@ class CMF_Hydrogen_View_Helper_Navigation_MultiList extends CMF_Hydrogen_View_He
 		if( $active )
 			$classes[]	= 'active';
 		$classes	= implode( ' ', $classes );
-		$container	= UI_HTML_Tag::create( 'div', $navi, array( 'id' => 'navigation-inner', 'class' => $classes ) );
+		$container	= HtmlTag::create( 'div', $navi, array( 'id' => 'navigation-inner', 'class' => $classes ) );
 		return $container;
 	}
 
@@ -80,12 +87,12 @@ class CMF_Hydrogen_View_Helper_Navigation_MultiList extends CMF_Hydrogen_View_He
 			$sub			= $this->buildNavigationLinkList( $linkSectionKey.'.'.$key, $current, $active, $level+1 );
 			$parentActive	= $parentActive || $active;
 			$class			= ( $active || $current == $key ) ? 'active' : NULL;
-			$link			= UI_HTML_Elements::Link( "?controller=".$key, $label.$sub, $class );
-			$list[]			= UI_HTML_Elements::ListItem( $link, $level );
+			$link			= HtmlElements::Link( "?controller=".$key, $label.$sub, $class );
+			$list[]			= HtmlElements::ListItem( $link, $level );
 		}
 		$classes	= array( 'level-'.$level );
 		if( $parentActive )
 			$classes[]	=  'active';
-		return UI_HTML_Elements::unorderedList( $list, $level, array( 'class' => implode( ' ', $classes ) ) );
+		return HtmlElements::unorderedList( $list, $level, array( 'class' => implode( ' ', $classes ) ) );
 	}
 }

@@ -24,6 +24,10 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\Environment\Resource\Acl;
+
+use Exception;
+
 /**
  *	Setup for access control list using a remote server.
  *
@@ -34,7 +38,7 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Environment_Resource_Acl_Server extends CMF_Hydrogen_Environment_Resource_Acl_Abstract
+class Server extends Abstraction
 {
 	/**
 	 *	Returns all rights of a role.

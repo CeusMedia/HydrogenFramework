@@ -24,6 +24,14 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\Environment\Router;
+
+use CeusMedia\HydrogenFramework\Environment\RouterInterface;
+use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
+
+use RuntimeException;
+use Net_HTTP_Request as HttpRequest;
+
 /**
  *	...
  *	@category		Library
@@ -33,7 +41,7 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Environment_Router_Single extends CMF_Hydrogen_Environment_Router_Abstract implements CMF_Hydrogen_Environment_Router_Interface
+class Single extends Abstraction implements RouterInterface
 {
 	protected $isSetUp	= FALSE;
 
@@ -47,8 +55,8 @@ class CMF_Hydrogen_Environment_Router_Single extends CMF_Hydrogen_Environment_Ro
 			self::$pathKey	= '__path';
 
 		$path	= $request->get( self::$pathKey );
-		if( $this->env instanceof CMF_Hydrogen_Environment_Web )
-			if( $request instanceof Net_HTTP_Request )
+		if( $this->env instanceof WebEnvironment )
+			if( $request instanceof HttpRequest )
 				$path		= $request->getFromSource( self::$pathKey, 'get' );
 		if( !trim( $path ) )
 			return;

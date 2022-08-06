@@ -24,8 +24,11 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\View\Helper\Navigation;
 
 use CMF_Hydrogen_Environment_Web as WebEnv;
+use CeusMedia\HydrogenFramework\Deprecation;
+use UI_HTML_Tag as HtmlTag;
 
 /**
  *	View helper to render a tab navigation from defined module page links.
@@ -39,7 +42,7 @@ use CMF_Hydrogen_Environment_Web as WebEnv;
  *	@deprecated		use modules Info_Pages + UI_Navigation instead
  *	@todo			remove in version 0.9
  */
-class CMF_Hydrogen_View_Helper_Navigation_SingleAutoTabs extends CMF_Hydrogen_View_Helper_Navigation_SingleList
+class SingleAutoTabs extends SingleList
 {
 	public $classContainer	= "";
 	public $classWidget		= "ui-tabs ui-widget ui-corner-all";
@@ -50,7 +53,7 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAutoTabs extends CMF_Hydrogen_Vi
 
 	public function __construct( WebEnv $env )
 	{
-		CMF_Hydrogen_Deprecation::getInstance()
+		Deprecation::getInstance()
 			->setErrorVersion( '0.8.5' )
 			->setExceptionVersion( '0.9' )
 			->message( 'Use modules Info_Pages + UI_Navigation instead' );
@@ -76,8 +79,8 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAutoTabs extends CMF_Hydrogen_Vi
 			$class	.= $active == $link->path ? ' '.$this->classTabActive : '';
 			$label	= $link->label;
 			$uri	= $link->link ? $link->link : $link->path;
-			$anchor	= UI_HTML_Tag::create( 'a', $label, array( 'href' => './'.$uri ) );
-			$item	= UI_HTML_Tag::create( 'li', $anchor, array( 'class' => $class ) );
+			$anchor	= HtmlTag::create( 'a', $label, array( 'href' => './'.$uri ) );
+			$item	= HtmlTag::create( 'li', $anchor, array( 'class' => $class ) );
 			if( !isset( $rankedLinkItemList[$link->rank] ) )
 				$rankedLinkItemList[$link->rank]	= array();
 			$rankedLinkItemList[$link->rank][]	= $item;
@@ -91,12 +94,12 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleAutoTabs extends CMF_Hydrogen_Vi
 			'class'	=> $this->classHelper,
 //			'style'	=> 'float: left; height: auto;'
 		);
-		$list		= UI_HTML_Tag::create( 'ul', join( $linkItemList ), $attributes	);
+		$list		= HtmlTag::create( 'ul', join( $linkItemList ), $attributes	);
 		if( $this->container )
-			$list	= UI_HTML_Tag::create( 'div', $list, array( 'class' => 'container' ) );
+			$list	= HtmlTag::create( 'div', $list, array( 'class' => 'container' ) );
 
-		$widget		= UI_HTML_Tag::create( 'div', $list, array( 'class' => $this->classWidget ) );
-		return UI_HTML_Tag::create( 'div', $widget, array( 'class' => $this->classContainer ) );
+		$widget		= HtmlTag::create( 'div', $list, array( 'class' => $this->classWidget ) );
+		return HtmlTag::create( 'div', $widget, array( 'class' => $this->classContainer ) );
 	}
 
 	public function setContainer( bool $boolean ): self

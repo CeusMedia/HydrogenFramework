@@ -24,6 +24,13 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\Application\Web;
+
+use CeusMedia\HydrogenFramework\Dispatcher\General as GeneralDispatcher;
+use Exception;
+use Net_HTTP_Header_Field as HttpHeaderField;
+use UI_HTML_Exception_Page as HtmlExceptionPage;
+
 /**
  *	Application class for a MVC web site.
  *	@category		Library
@@ -34,7 +41,7 @@
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			Code Documentation
  */
-class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abstract
+class Site extends Abstraction
 {
 	public static $checkClassActionArguments	= TRUE;
 
@@ -61,7 +68,7 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 			$this->env->close();																	//  teardown environment and quit application execution
 		}
 		catch( Exception $e ){
-			UI_HTML_Exception_Page::display( $e );
+			HtmlExceptionPage::display( $e );
 		}
 	}
 
@@ -86,7 +93,7 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 			$result		= $captain->callHook( 'App', 'onDispatch', $this, array() );
 			if( is_string( $result ) && strlen( trim( $result ) ) )
 				return $result;
-			$dispatcher	= new CMF_Hydrogen_Dispatcher_General( $this->env );
+			$dispatcher	= new GeneralDispatcher( $this->env );
 			$dispatcher->checkClassActionArguments	= self::$checkClassActionArguments;
 			if( $defaultController )
 				$dispatcher->defaultController	= $defaultController;
@@ -104,7 +111,7 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 					$view	= new View_ErrorException( $this->env );
 					return $view->handle( $e );
 				}
-				return UI_HTML_Exception_Page::render( $e );
+				return HtmlExceptionPage::render( $e );
 			}
 			else{
 				print( $e->getMessage().PHP_EOL );
@@ -118,7 +125,7 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 		 	$result		= $captain->callHook( 'App', 'onException', $this, $data );
 
 			if( $this->env->getRequest()->has( 'showException' ) ){									//  @todo: kriss: you need to secure this view by a configurable run mode etc.
-				$this->env->getResponse()->setBody( UI_HTML_Exception_Page::render( $e ) );			//  fill response with exception page
+				$this->env->getResponse()->setBody( HtmlExceptionPage::render( $e ) );			//  fill response with exception page
 				$this->env->getResponse()->setStatus( 500 );										//  indicate HTTP status 500 - internal server error
 				$this->env->getResponse()->send();													//  send response
 				exit;																				//  and quit
@@ -195,7 +202,7 @@ class CMF_Hydrogen_Application_Web_Site extends CMF_Hydrogen_Application_Web_Abs
 			$response->setBody( $body );
 
 		foreach( $headers as $key => $value ){
-			if( $value instanceof Net_HTTP_Header_Field )
+			if( $value instanceof HttpHeaderField )
 				$response->addHeader( $value );
 			else
 				$response->addHeaderPair( $key, $value );

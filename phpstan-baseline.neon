@@ -6,47 +6,17 @@ parameters:
 			path: src/Environment/Resource/Acl/Database.php
 
 		-
-			message: "#^Instantiated class Model_Role_Right not found\\.$#"
-			count: 3
-			path: src/Environment/Resource/Acl/Database.php
-
-		-
-			message: "#^Call to method add\\(\\) on an unknown class Model_Role_Right\\.$#"
-			count: 1
-			path: src/Environment/Resource/Acl/Database.php
-
-		-
-			message: "#^Call to method getAllByIndex\\(\\) on an unknown class Model_Role_Right\\.$#"
-			count: 1
-			path: src/Environment/Resource/Acl/Database.php
-
-		-
 			message: "#^Instantiated class Model_Role not found\\.$#"
 			count: 1
 			path: src/Environment/Resource/Acl/Database.php
 
 		-
-			message: "#^Call to method getAll\\(\\) on an unknown class Model_Role\\.$#"
-			count: 1
+			message: "#^Instantiated class Model_Role_Right not found\\.$#"
+			count: 3
 			path: src/Environment/Resource/Acl/Database.php
 
 		-
-			message: "#^Call to method getAll\\(\\) on an unknown class Model_Role_Right\\.$#"
+			message: "#^Parameter \\$mail of method CeusMedia\\\\HydrogenFramework\\\\Hook\\:\\:sendMail\\(\\) has invalid typehint type Mail_Abstract\\.$#"
 			count: 1
-			path: src/Environment/Resource/Acl/Database.php
-
-		-
-			message: "#^Access to an undefined property object\\:\\:\\$isActive\\.$#"
-			count: 1
-			path: src/Environment/Resource/Module/Library/Local.php
-
-		-
-			message: "#^Access to an undefined property object\\:\\:\\$isActive\\.$#"
-			count: 1
-			path: src/Environment/Resource/Module/Library/Source.php
-
-		-
-			message: "#^Parameter \\$mail of method CMF_Hydrogen_Hook\\:\\:sendMail\\(\\) has invalid typehint type Mail_Abstract\\.$#"
-			count: 2
 			path: src/Hook.php
 

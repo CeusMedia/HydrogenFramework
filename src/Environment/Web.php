@@ -24,46 +24,68 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\Environment;
+
+use CeusMedia\HydrogenFramework\Deprecation;
+use CeusMedia\HydrogenFramework\Environment;
+use CeusMedia\HydrogenFramework\Environment\Exception as EnvironmentException;
+use CeusMedia\HydrogenFramework\Environment\Router\Single as SingleRouter;
+use CeusMedia\HydrogenFramework\Environment\Router\Abstraction as AbstractRouter;
+use CeusMedia\HydrogenFramework\Environment\Resource\Messenger as MessengerResource;
+use CeusMedia\HydrogenFramework\Environment\Resource\Language as LanguageResource;
+use CeusMedia\HydrogenFramework\Environment\Resource\Page as PageResource;
+
+use Alg_Object_Factory as ObjectFactory;
+use Net_HTTP_Cookie as HttpCookie;
+use Net_HTTP_Request as HttpRequest;
+use Net_HTTP_Response as HttpResponse;
+use Net_HTTP_PartitionSession as HttpPartitionSession;
+use Net_HTTP_Status as HttpStatus;
+use UI_HTML_Exception_Page as HtmlExceptionPage;
+use UI_HTML_Tag as HtmlTag;
+use UI_HTML_PageFrame as HtmlPageFrame;
+
+use Exception;
+use RuntimeException;
+
 /**
  *	Setup for Resource Environment for Hydrogen Applications.
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment
- *	@uses			Net_HTTP_Request_Receiver
- *	@uses			Net_HTTP_Request_Response
- *	@uses			Net_HTTP_Session
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2007-2021 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
+ *	@todo			extend from (namespaced) Environment after all modules are migrated to 0.9
  */
-class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment
+class Web extends \CMF_Hydrogen_Environment
 {
-	public static $classRouter			= 'CMF_Hydrogen_Environment_Router_Single';
+	public static $classRouter			= SingleRouter::class;
 
 	public static $configKeyBaseHref	= 'app.base.url';
 
-	/**	@var	Net_HTTP_Request								$request	HTTP Request Object */
+	/**	@var	HttpRequest								$request	HTTP Request Object */
 	protected $request;
 
-	/**	@var	Net_HTTP_Response								$response	HTTP Response Object */
+	/**	@var	HttpResponse								$response	HTTP Response Object */
 	protected $response;
 
-	/**	@var	CMF_Hydrogen_Environment_Router_Abstract		$router		Router Object */
+	/**	@var	AbstractRouter		$router		Router Object */
 	protected $router;
 
-	/**	@var	Net_HTTP_PartitionSession						$session	Session Object */
+	/**	@var	HttpPartitionSession						$session	Session Object */
 	protected $session;
 
-	/**	@var	Net_HTTP_Cookie									$cookie		Cookie Object */
+	/**	@var	HttpCookie									$cookie		Cookie Object */
 	protected $cookie;
 
-	/** @var	CMF_Hydrogen_Environment_Resource_Messenger		$messenger	Messenger Object */
+	/** @var	MessengerResource		$messenger	Messenger Object */
 	protected $messenger;
 
-	/** @var	CMF_Hydrogen_Environment_Resource_Language		$language	Language Object */
+	/** @var	LanguageResource		$language	Language Object */
 	protected $language;
 
-	/**	@var	CMF_Hydrogen_Environment_Resource_Page			$page		Page Object */
+	/**	@var	PageResource			$page		Page Object */
 	protected $page;
 
 	/**	@var	string											$host		Detected HTTP host */
@@ -128,7 +150,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment
 		}
 		catch( Exception $e ){
 			if( getEnv( 'HTTP_HOST' ) )
-				print( UI_HTML_Exception_Page::render( $e ) );
+				print( HtmlExceptionPage::render( $e ) );
 			else{
 				print( $e->getMessage().PHP_EOL );
 				print( $e->getTraceAsString().PHP_EOL.PHP_EOL );
@@ -159,10 +181,10 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment
 	/**
 	 *	Returns Cookie Object.
 	 *	@access		public
-	 *	@return		Net_HTTP_Cookie
+	 *	@return		HttpCookie
 	 *	@throws		RuntimeException		if cookie support has not been initialized
 	 */
-	public function getCookie(): Net_HTTP_Cookie
+	public function getCookie(): HttpCookie
 	{
 		if( !is_object( $this->cookie ) )
 			throw new RuntimeException( 'Cookie resource not initialized within environment' );
@@ -172,9 +194,9 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment
 	/**
 	 *	Returns Messenger Object.
 	 *	@access		public
-	 *	@return		CMF_Hydrogen_Environment_Resource_Messenger
+	 *	@return		MessengerResource
 	 */
-	public function getMessenger(): ?CMF_Hydrogen_Environment_Resource_Messenger
+	public function getMessenger(): ?MessengerResource
 	{
 		return $this->messenger;
 	}
@@ -182,9 +204,9 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment
 	/**
 	 *	Get resource to communicate with chat server.
 	 *	@access		public
-	 *	@return		CMF_Hydrogen_Environment_Resource_Page
+	 *	@return		PageResource
 	 */
-	public function getPage(): CMF_Hydrogen_Environment_Resource_Page
+	public function getPage(): PageResource
 	{
 		return $this->page;
 	}
@@ -192,9 +214,9 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment
 	/**
 	 *	Returns Router Object.
 	 *	@access		public
-	 *	@return		CMF_Hydrogen_Environment_Router_Abstract
+	 *	@return		AbstractRouter
 	 */
-	public function getRouter(): CMF_Hydrogen_Environment_Router_Abstract
+	public function getRouter(): AbstractRouter
 	{
 		return $this->router;
 	}
@@ -202,9 +224,9 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment
 	/**
 	 *	Returns Request Object.
 	 *	@access		public
-	 *	@return		Net_HTTP_Request
+	 *	@return		HttpRequest
 	 */
-	public function getRequest(): Net_HTTP_Request
+	public function getRequest(): HttpRequest
 	{
 		return $this->request;
 	}
@@ -212,9 +234,9 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment
 	/**
 	 *	Returns HTTP Response Object.
 	 *	@access		public
-	 *	@return		Net_HTTP_Response
+	 *	@return		HttpResponse
 	 */
-	public function getResponse(): Net_HTTP_Response
+	public function getResponse(): HttpResponse
 	{
 		return $this->response;
 	}
@@ -222,9 +244,9 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment
 	/**
 	 *	Returns Session Object.
 	 *	@access		public
-	 *	@return		Net_HTTP_PartitionSession
+	 *	@return		HttpPartitionSession
 	 */
-	public function getSession(): Net_HTTP_PartitionSession
+	public function getSession(): HttpPartitionSession
 	{
 		return $this->session;
 	}
@@ -244,7 +266,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment
 	 */
 	public function redirect( string $controller = 'index', string $action = "index", array $arguments = array(), array $parameters = array() )
 	{
-		CMF_Hydrogen_Deprecation::getInstance()
+		Deprecation::getInstance()
 			->setErrorVersion( '0.8.6.4' )
 			->setExceptionVersion( '0.8.9' )
 			->message( 'Redirecting is usable for hooks within dispatching, only. Please use restart instead!' );
@@ -331,12 +353,12 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment
 	#	$this->database->close();																	//  close database connection
 	#	$this->session->close();																	//  close session
 		if( $status )																				//  a HTTP status code is to be set
-			Net_HTTP_Status::sendHeader( (int) $status );											//  send HTTP status code header
+			HttpStatus::sendHeader( (int) $status );												//  send HTTP status code header
 		header( "Location: ".$base.$uri );															//  send HTTP redirect header
 
-		$link	= UI_HTML_Tag::create( 'a', $base.$uri, array( 'href' => $base.$uri ) );
-		$text	= UI_HTML_Tag::create( 'small', 'Redirecting to '.$link.' ...' );
-		$page	= new UI_HTML_PageFrame();
+		$link	= HtmlTag::create( 'a', $base.$uri, array( 'href' => $base.$uri ) );
+		$text	= HtmlTag::create( 'small', 'Redirecting to '.$link.' ...' );
+		$page	= new HtmlPageFrame();
 		$page->addMetaTag( 'http-equiv', 'refresh', '0; '.$base.$uri );
 		$page->addBody( $text );
 		print( $page->build() );
@@ -352,25 +374,25 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment
 	 *	@access		protected
 	 *	@param		boolean		$strict			Flag: strict mode: throw exceptions
 	 *	@return		void
-	 *	@throws		CMF_Hydrogen_Environment_Exception	if strict mode and application has been executed outside a valid web server environment or no HTTP host has been provided by web server
-	 *	@throws		CMF_Hydrogen_Environment_Exception	if strict mode and no document root path has been provided by web server
-	 *	@throws		CMF_Hydrogen_Environment_Exception	if strict mode and no script file path has been provided by web server
+	 *	@throws		EnvironmentException	if strict mode and application has been executed outside a valid web server environment or no HTTP host has been provided by web server
+	 *	@throws		EnvironmentException	if strict mode and no document root path has been provided by web server
+	 *	@throws		EnvironmentException	if strict mode and no script file path has been provided by web server
 	 */
 	protected function detectSelf( bool $strict = TRUE )
 	{
 		if( $strict ){
 			if( !getEnv( 'HTTP_HOST' ) ){															//  application has been executed outside a valid web server environment or no HTTP host has been provided by web server
-				throw new CMF_Hydrogen_Environment_Exception(
+				throw new EnvironmentException(
 					'This application needs to be executed within by a web server'
 				);
 			}
 			if( !getEnv( 'DOCUMENT_ROOT' ) ){														//  no document root path has been provided by web server
-				throw new CMF_Hydrogen_Environment_Exception(
+				throw new EnvironmentException(
 					'Your web server needs to provide a document root path'
 				);
 			}
 			if( !getEnv( 'SCRIPT_NAME' ) ){															//  no script file path has been provided by web server
-				throw new CMF_Hydrogen_Environment_Exception(
+				throw new EnvironmentException(
 					'Your web server needs to provide the running scripts file path'
 				 );
 			}
@@ -424,28 +446,18 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment
 	{
 		if( !$this->url )
 			throw new RuntimeException( 'URL not detected yet, run detectSelf beforehand' );
-		$this->cookie	= new Net_HTTP_Cookie(
+		$this->cookie	= new HttpCookie(
 			parse_url( $this->url, PHP_URL_PATH ),
 			parse_url( $this->url, PHP_URL_HOST ),
 			(bool) getEnv( 'HTTPS' )
 		);
 	}
 
-/*	protected function initFieldDefinition()
-	{
-		$this->definition	= new CMF_Hydrogen_FieldDefinition(
-			"config/",
-			$this->config['config.use_cache'],
-			$this->config['config.cache_path']
-		);
-		$this->definition->setChannel( "html" );
-	}
-*/
 	protected function initMessenger( $enabled = "auto" )
 	{
 		if( $enabled === "auto" )																	//  auto detect mode
 			$enabled	= preg_match( "/html/", getEnv( 'HTTP_ACCEPT' ) );							//  enabled if HTML is requested
-		$this->messenger	= new CMF_Hydrogen_Environment_Resource_Messenger( $this, $enabled );
+		$this->messenger	= new MessengerResource( $this, $enabled );
 		$this->runtime->reach( 'env: messenger' );
 	}
 
@@ -458,7 +470,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment
 	 */
 	protected function initPage( bool $pageJavaScripts = TRUE, bool $packStyleSheets = TRUE )
 	{
-		$this->page	= new CMF_Hydrogen_Environment_Resource_Page( $this );
+		$this->page	= new PageResource( $this );
 		$this->page->setPackaging( $pageJavaScripts, $packStyleSheets );
 		$this->page->setBaseHref( $this->getBaseUrl( self::$configKeyBaseHref ) );
 		$this->page->applyModules();
@@ -477,7 +489,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment
 	 */
 	protected function initRequest()
 	{
-		$this->request		= new Net_HTTP_Request();
+		$this->request		= new HttpRequest();
 		$this->request->fromEnv( FALSE/*$this->has( 'session' )*/ );
 		$this->runtime->reach( 'env: request' );
 	}
@@ -489,14 +501,14 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment
 	 */
 	protected function initResponse()
 	{
-		$this->response	= new Net_HTTP_Response();
+		$this->response	= new HttpResponse();
 		$this->runtime->reach( 'env: response' );
 	}
 
 	protected function initRouter( string $routerClass = NULL )
 	{
 		$classRouter	= $routerClass ? $routerClass : self::$classRouter;
-		$this->router	= Alg_Object_Factory::createObject( $classRouter, array( $this ) );
+		$this->router	= ObjectFactory::createObject( $classRouter, array( $this ) );
 		$this->runtime->reach( 'env: router' );
 	}
 
@@ -509,7 +521,7 @@ class CMF_Hydrogen_Environment_Web extends CMF_Hydrogen_Environment
 		if( $keySessionName && $this->config->get( $keySessionName ) )
 			$sessionName	= $this->config->get( $keySessionName );
 
-		$this->session	= new Net_HTTP_PartitionSession(
+		$this->session	= new HttpPartitionSession(
 			$partitionName,
 			$sessionName
 		);

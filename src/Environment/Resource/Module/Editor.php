@@ -24,6 +24,20 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\Environment\Resource\Module;
+
+use CeusMedia\HydrogenFramework\Environment;
+use CeusMedia\HydrogenFramework\Deprecation;
+
+use FS_File_Writer as FileWriter;
+use XML_DOM_Formater as XmlFormatter;
+use XML_ElementReader as XmlReader;
+
+use InvalidArgumentException;
+use OutOfRangeException;
+use RuntimeException;
+use SimpleXMLElement;
+
 /**
  *	Editor for local module XML files.
  *	@category		Library
@@ -34,16 +48,16 @@
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			add support for hooks and jobs
  */
-class CMF_Hydrogen_Environment_Resource_Module_Editor
+class Editor
 {
 	protected $path;
 	protected $nsXml	= 'http://www.w3.org/XML/1998/namespace';
 
-	public function __construct( CMF_Hydrogen_Environment $env )
+	public function __construct( Environment $env )
 	{
 		$this->path		= $env->getConfig()->get( 'path.config' ).'/modules/';
 		if( $env->getConfig()->get( 'path.module.config' ) ){
-			CMF_Hydrogen_Deprecation::getInstance()
+			Deprecation::getInstance()
 				->setErrorVersion( '0.8.6.6' )
 				->setExceptionVersion( '0.8.9' )
 				->message( 'Using config path "module.config" is deprecated. Please remove this config pair!' );
@@ -323,7 +337,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Editor
 		$moduleFile	= $this->path.$moduleId.'.xml';
 		if( !file_exists( $moduleFile ) )
 			throw new RuntimeException( 'Module "'.$moduleId.'" is not installed' );
-		return XML_ElementReader::readFile( $moduleFile );
+		return XmlReader::readFile( $moduleFile );
 	}
 
 	protected function saveModuleXml( string $moduleId, SimpleXMLElement $xml )
@@ -331,7 +345,7 @@ class CMF_Hydrogen_Environment_Resource_Module_Editor
 		$moduleFile	= $this->path.$moduleId.'.xml';
 		if( !file_exists( $moduleFile ) )
 			throw new RuntimeException( 'Module "'.$moduleId.'" is not installed' );
-		$xml	= XML_DOM_Formater::format( $xml->asXML(), TRUE );
-		return FS_File_Writer::save( $moduleFile, $xml );
+		$xml	= XmlFormatter::format( $xml->asXML(), TRUE );
+		return FileWriter::save( $moduleFile, $xml );
 	}
 }

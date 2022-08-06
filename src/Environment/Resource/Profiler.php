@@ -8,6 +8,10 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\Environment\Resource;
+
+use Alg_Time_Clock as Clock;
+
 /**
  *	...
  *	@category		Library
@@ -17,9 +21,9 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Environment_Resource_Profiler
+class Profiler
 {
-	/**	@var	Alg_Time_Clock		$clock		Inner stopwatch with lap support */
+	/**	@var	Clock		$clock		Inner stopwatch with lap support */
 	protected $clock	= NULL;
 
 	protected $enabled	= TRUE;
@@ -28,7 +32,7 @@ class CMF_Hydrogen_Environment_Resource_Profiler
 	{
 		$this->enabled	= (bool) $enabled;
 		if( $this->enabled )
-			$this->clock	= new Alg_Time_Clock();
+			$this->clock	= new Clock();
 	}
 
 	public function tick( string $message, string $description = NULL )

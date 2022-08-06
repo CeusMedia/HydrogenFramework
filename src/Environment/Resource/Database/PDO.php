@@ -24,9 +24,13 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\Environment\Resource\Database;
 
 use CeusMedia\Database\PDO\Connection;
 use CeusMedia\Database\PDO\DataSourceName;
+use CeusMedia\HydrogenFramework\Environment;
+use InvalidArgumentException;
+use RuntimeException;
 
 /**
  *	Database resource using PDO extension of CeusMedia:Common.
@@ -37,11 +41,11 @@ use CeusMedia\Database\PDO\DataSourceName;
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Environment_Resource_Database_PDO extends Connection
+class PDO extends Connection
 {
 	protected $env;
 
-	public function __construct( CMF_Hydrogen_Environment $env )
+	public function __construct( Environment $env )
 	{
 		$this->env	= $env;
 		$this->setUp();

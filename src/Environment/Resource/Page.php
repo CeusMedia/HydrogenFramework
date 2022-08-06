@@ -24,13 +24,21 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\Environment\Resource;
 
-use CMF_Hydrogen_Environment as Environment;
-use CMF_Hydrogen_Environment_Resource_Module_Component_Config as ConfigComponent;
-use CMF_Hydrogen_Environment_Resource_Module_Component_File as FileComponent;
-use CMF_Hydrogen_View_Helper_StyleSheet as CssHelper;
-use CMF_Hydrogen_View_Helper_JavaScript as JsHelper;
+use CeusMedia\HydrogenFramework\Environment as Environment;
+use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Component\Config as ConfigComponent;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Component\File as FileComponent;
+use CeusMedia\HydrogenFramework\View\Helper\StyleSheet as CssHelper;
+use CeusMedia\HydrogenFramework\View\Helper\JavaScript as JsHelper;
+
 use UI_HTML_PageFrame as HtmlPage;
+use UI_HTML_Tag as HtmlTag;
+
+use InvalidArgumentException;
+use RuntimeException;
+use stdClass;
 
 /**
  *	XHTML Page Resource of Framework Hydrogen.
@@ -41,7 +49,7 @@ use UI_HTML_PageFrame as HtmlPage;
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Environment_Resource_Page extends HtmlPage
+class Page extends HtmlPage
 {
 	/**	@var	Environment		$env				Environment object */
 	public $env;
@@ -88,7 +96,7 @@ class CMF_Hydrogen_Environment_Resource_Page extends HtmlPage
 			$this->pathPrimer	= $pathThemes.$config->get( 'layout.primer' ).'/';
 		$this->pathCommon	= $pathThemes.'common/';
 		$this->pathTheme	= $pathThemes.$config->get( 'layout.theme' ).'/';
-		$this->css			= new stdClass;
+		$this->css			= new \stdClass;
 		$this->css->primer	= new CssHelper( $this->pathPrimer.'css/' );
 		$this->css->common	= new CssHelper( $this->pathCommon.'css/' );
 		$this->css->theme	= new CssHelper( $this->pathTheme.'css/' );
@@ -252,7 +260,7 @@ class CMF_Hydrogen_Environment_Resource_Page extends HtmlPage
 		}
 		$modules->callHook( 'Page', 'applyModules', $this );										//  call related module event hooks
 
-		if( $this->env instanceof CMF_Hydrogen_Environment_Web ){
+		if( $this->env instanceof WebEnvironment ){
 			$settings['Env']	= array(
 				'host'		=> $this->env->host,
 				'port'		=> $this->env->port,
@@ -263,7 +271,7 @@ class CMF_Hydrogen_Environment_Resource_Page extends HtmlPage
 				'secure'	=> getEnv( 'HTTPS' ),
 			);
 			$script		= 'var settings = '.json_encode( $settings ).';';
-			$script		= UI_HTML_Tag::create( 'script', "<!--\n".$script."\n-->", array( 'type' => "text/javascript" ) );
+			$script		= HtmlTag::create( 'script', "<!--\n".$script."\n-->", array( 'type' => "text/javascript" ) );
 			$this->addHead( $script );
 		}
 	}

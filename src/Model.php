@@ -24,8 +24,19 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework;
 
+use CeusMedia\HydrogenFramework\Environment;
 use CeusMedia\Database\PDO\Table\Writer as DatabaseTableWriter;
+
+use ADT_List_Dictionary as Dictionary;
+use Alg_Object_Factory as ObjectFactory;
+
+use DomainException;
+use Exception;
+use InvalidArgumentException;
+use PDO;
+use RuntimeException;
 
 /**
  *	Generic Model Class of Framework Hydrogen.
@@ -36,39 +47,39 @@ use CeusMedia\Database\PDO\Table\Writer as DatabaseTableWriter;
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Model
+class Model
 {
-	/**	@var		CMF_Hydrogen_Environment		$env			Application Environment Object */
+	/**	@var		Environment				$env			Application Environment Object */
 	protected $env;
-	/**	@var		string							$name			Name of Database Table without Prefix */
-	protected $name									= "";
-	/**	@var		array							$columns		List of Database Table Columns */
-	protected $columns								= array();
-	/**	@var		array							$name			List of foreign Keys of Database Table */
- 	protected $indices								= array();
-	/**	@var		string							$primaryKey		Primary Key of Database Table */
-	protected $primaryKey							= "";
-	/**	@var		DatabaseTableWriter				$table			Database Table Writer Object for reading from and writing to Database Table */
+	/**	@var		string					$name			Name of Database Table without Prefix */
+	protected $name							= "";
+	/**	@var		array					$columns		List of Database Table Columns */
+	protected $columns						= array();
+	/**	@var		array					$name			List of foreign Keys of Database Table */
+ 	protected $indices						= array();
+	/**	@var		string					$primaryKey		Primary Key of Database Table */
+	protected $primaryKey					= "";
+	/**	@var		DatabaseTableWriter		$table			Database Table Writer Object for reading from and writing to Database Table */
 	protected $table;
-	/**	@var		string							$prefix			Database Table Prefix */
+	/**	@var		string					$prefix			Database Table Prefix */
  	protected $prefix;
-	/**	@var		ADT_List_Dictionary				$cache			Model data cache */
+	/**	@var		Dictionary				$cache			Model data cache */
 	protected $cache;
-	/**	@var		integer							$fetchMode		PDO fetch mode */
+	/**	@var		integer					$fetchMode		PDO fetch mode */
 	protected $fetchMode;
-	/**	@var		string							$cacheKey		Base key in cache */
+	/**	@var		string					$cacheKey		Base key in cache */
 	protected $cacheKey;
 
-	public static $cacheClass						= 'ADT_List_Dictionary';
+	public static $cacheClass				= Dictionary::class;
 
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		CMF_Hydrogen_Environment		$env			Application Environment Object
+	 *	@param		Environment		$env			Application Environment Object
 	 *	@param		integer							$id				ID to focus on
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment $env, $id = NULL )
+	public function __construct( Environment $env, $id = NULL )
 	{
 		$this->setEnv( $env );
 		$this->table	= new DatabaseTableWriter(
@@ -81,7 +92,7 @@ class CMF_Hydrogen_Model
 		if( $this->fetchMode )
 			$this->table->setFetchMode( $this->fetchMode );
 		$this->table->setIndices( $this->indices );
-		$this->cache	= Alg_Object_Factory::createObject( self::$cacheClass );
+		$this->cache	= ObjectFactory::createObject( self::$cacheClass );
 		$this->cacheKey	= 'db.'.$this->prefix.$this->name.'.';
 
 		if( !empty( $this->env->storage ) )
@@ -287,7 +298,7 @@ class CMF_Hydrogen_Model
 		if( is_string( $fields ) )
 			$fields	= strlen( trim( $fields ) ) ? array( trim( $fields ) ) : array();
 		if( !is_array( $fields ) )
-			throw new \InvalidArgumentException( 'Fields must be of array or string' );
+			throw new InvalidArgumentException( 'Fields must be of array or string' );
 		foreach( $fields as $field )
 			$this->checkField( $field, FALSE, TRUE );
 		$this->table->focusIndex( $key, $value );
@@ -312,7 +323,7 @@ class CMF_Hydrogen_Model
 		if( is_string( $fields ) )
 			$fields	= strlen( trim( $fields ) ) ? array( trim( $fields ) ) : array();
 		if( !is_array( $fields ) )
-			throw new \InvalidArgumentException( 'Fields must be of array or string' );
+			throw new InvalidArgumentException( 'Fields must be of array or string' );
 		foreach( $fields as $field )
 			$field	= $this->checkField( $field, FALSE, TRUE );
 		$this->checkIndices( $indices, TRUE, TRUE );
@@ -455,8 +466,8 @@ class CMF_Hydrogen_Model
 			$number = $this->table->delete();
 			foreach( $rows as $row ){
 				switch( $this->fetchMode ){
-					case \PDO::FETCH_CLASS:
-					case \PDO::FETCH_OBJ:
+					case PDO::FETCH_CLASS:
+					case PDO::FETCH_OBJ:
 						$id	= $row->{$this->primaryKey};
 						break;
 					default:
@@ -488,8 +499,8 @@ class CMF_Hydrogen_Model
 			$number	= $this->table->delete();
 			foreach( $rows as $row ){
 				switch( $this->fetchMode ){
-					case \PDO::FETCH_CLASS:
-					case \PDO::FETCH_OBJ:
+					case PDO::FETCH_CLASS:
+					case PDO::FETCH_OBJ:
 						$id	= $row->{$this->primaryKey};
 						break;
 					default:
@@ -535,14 +546,14 @@ class CMF_Hydrogen_Model
 		if( !is_string( $field ) ){
 			if( !$strict )
 				return FALSE;
-			throw new \InvalidArgumentException( 'Field must be a string' );
+			throw new InvalidArgumentException( 'Field must be a string' );
 		}
 		$field	= trim( $field );
 		if( !strlen( $field ) ){
 			if( $mandatory ){
 				if( !$strict )
 					return FALSE;
-				throw new \InvalidArgumentException( 'Field must have a value' );
+				throw new InvalidArgumentException( 'Field must have a value' );
 			}
 			return NULL;
 		}
@@ -550,7 +561,7 @@ class CMF_Hydrogen_Model
 			if( !$strict )
 				return FALSE;
 			$message	= 'Field "%s" is not an existing column of table %s';
-			throw new \InvalidArgumentException( sprintf( $message, $field, $this->getName() ) );
+			throw new InvalidArgumentException( sprintf( $message, $field, $this->getName() ) );
 		}
 		return $field;
 	}
@@ -592,10 +603,10 @@ class CMF_Hydrogen_Model
 		if( is_string( $fields ) )
 			$fields	= strlen( trim( $fields ) ) ? array( trim( $fields ) ) : array();
 		if( !is_array( $fields ) )
-			throw new \InvalidArgumentException( 'Fields must be of array or string' );
+			throw new InvalidArgumentException( 'Fields must be of array or string' );
 		if( !$result ){
 			if( $strict )
-				throw new \Exception( 'Result is empty' );
+				throw new Exception( 'Result is empty' );
 			if( count( $fields ) === 1 )
 				return NULL;
 			return array();
@@ -604,28 +615,28 @@ class CMF_Hydrogen_Model
 			return $result;
 		foreach( $fields as $field )
 			if( !in_array( $field, $this->columns ) )
-				throw new \InvalidArgumentException( 'Field "'.$field.'" is not an existing column' );
+				throw new InvalidArgumentException( 'Field "'.$field.'" is not an existing column' );
 
 		if( count( $fields ) === 1 ){
 			switch( $this->fetchMode ){
-				case \PDO::FETCH_CLASS:
-				case \PDO::FETCH_OBJ:
+				case PDO::FETCH_CLASS:
+				case PDO::FETCH_OBJ:
 					if( !property_exists( $result, $field ) )
-						throw new \DomainException( 'Field "'.$field.'" is not an column of result set' );
+						throw new DomainException( 'Field "'.$field.'" is not an column of result set' );
 					return $result->$field;
 				default:
 					if( !array_key_exists( $field, $result ) )
-						throw new \DomainException( 'Field "'.$field.'" is not an column of result set' );
+						throw new DomainException( 'Field "'.$field.'" is not an column of result set' );
 					return $result[$field];
 			}
 		}
 		switch( $this->fetchMode ){
-			case \PDO::FETCH_CLASS:
-			case \PDO::FETCH_OBJ:
+			case PDO::FETCH_CLASS:
+			case PDO::FETCH_OBJ:
 				$map	= (object) array();
 				foreach( $fields as $field ){
 					if( !property_exists( $result, $field ) )
-						throw new \DomainException( 'Field "'.$field.'" is not an column of result set' );
+						throw new DomainException( 'Field "'.$field.'" is not an column of result set' );
 					$map->$field	= $result->$field;
 				}
 				return $map;
@@ -633,7 +644,7 @@ class CMF_Hydrogen_Model
 				$list	= array();
 				foreach( $fields as $field ){
 					if( !array_key_exists( $field, $result ) )
-						throw new \DomainException( 'Field "'.$field.'" is not an column of result set' );
+						throw new DomainException( 'Field "'.$field.'" is not an column of result set' );
 					$list[$field]	= $result[$field];
 				}
 				return $list;
@@ -643,11 +654,11 @@ class CMF_Hydrogen_Model
 	/**
 	 *	Sets Environment of Controller by copying Framework Member Variables.
 	 *	@access		protected
-	 *	@param		CMF_Hydrogen_Environment	$env			Application Environment Object
+	 *	@param		Environment			$env			Application Environment Object
 	 *	@return		self
 	 *	@throws		RuntimeException			if no database resource is available in given environment
 	 */
-	protected function setEnv( CMF_Hydrogen_Environment $env ): self
+	protected function setEnv( Environment $env ): self
 	{
 		$this->env		= $env;
 		if( !$env->getDatabase() )
