@@ -8,6 +8,11 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\Environment\Resource;
+
+use CeusMedia\HydrogenFramework\Environment;
+use InvalidArgumentException;
+
 /**
  *	Basic logic class. Can be extended and uses as business logic layer class.
  *	@category		Library
@@ -17,13 +22,13 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Environment_Resource_Logic
+class Logic
 {
 	const OS_UNKNOWN			= 0;
 	const OS_LINUX				= 1;
 	const OS_WINDOWS			= 2;
 
-	/**	@var	CMF_Hydrogen_Environment			$env	Environment object */
+	/**	@var	Environment			$env	Environment object */
 	protected $env;
 
 	protected $config;
@@ -42,10 +47,10 @@ class CMF_Hydrogen_Environment_Resource_Logic
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		CMF_Hydrogen_Environment		$env	Environment
+	 *	@param		Environment		$env	Environment
 	 *	@return		void
 	 */
-	public function  __construct( CMF_Hydrogen_Environment $env )
+	public function  __construct( Environment $env )
 	{
 		$this->env		= $env;
 		$this->config	= $env->getConfig();

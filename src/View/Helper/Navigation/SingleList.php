@@ -24,6 +24,13 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\View\Helper\Navigation;
+
+use CeusMedia\HydrogenFramework\Deprecation;
+use CeusMedia\HydrogenFramework\View\Helper\Abstraction as AbstractViewHelper;
+use UI_HTML_Elements as HtmlElements;
+use UI_HTML_Tag as HtmlTag;
+
 /**
  *	...
  *
@@ -37,7 +44,7 @@
  *	@deprecated		use modules Info_Pages + UI_Navigation instead
  *	@todo			remove in version 0.9
  */
-class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_Helper_Abstract
+class SingleList extends AbstractViewHelper
 {
 	protected $linkMap;
 	protected $innerClass			= 'single';
@@ -48,7 +55,7 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_H
 
 	public function __construct( array $linkMap, string $innerClass = NULL, string $innerId = NULL )
 	{
-		CMF_Hydrogen_Deprecation::getInstance()
+		Deprecation::getInstance()
 			->setErrorVersion( '0.8.5' )
 			->setExceptionVersion( '0.9' )
 			->message( 'Use modules Info_Pages + UI_Navigation instead' );
@@ -103,18 +110,18 @@ class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CMF_Hydrogen_View_H
 				continue;
 			$class		= $active == $key ? 'active' : NULL;
 			$url		= $key == "index" ? "./" : ( $niceUrls ? './'.$key : './?controller='.$key );
-			$link		= UI_HTML_Elements::Link( $url, $label, $class );
-			$list[]		= UI_HTML_Elements::ListItem( $link, 0, array( 'class' => $class ) );
+			$link		= HtmlElements::Link( $url, $label, $class );
+			$list[]		= HtmlElements::ListItem( $link, 0, array( 'class' => $class ) );
 		}
 		if( !$list )
 			return $list;
 		$attr	= array( 'class' => $class );
-		$list	= UI_HTML_Elements::unorderedList( $list, 0, $attr );
+		$list	= HtmlElements::unorderedList( $list, 0, $attr );
 		$attr	= array(
 			'id'	=> $this->innerId,
 			'class'	=> $this->innerClass
 		);
-		return UI_HTML_Tag::create( 'div', $list, $attr );
+		return HtmlTag::create( 'div', $list, $attr );
 	}
 
 	public function setInnerClass( string $class ): self

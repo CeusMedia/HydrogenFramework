@@ -1,5 +1,11 @@
 <?php
-abstract class CMF_Hydrogen_Model_Abstract
+namespace CeusMedia\HydrogenFramework\Model;
+
+use CeusMedia\HydrogenFramework\Environment;
+use DomainException;
+use Exception;
+
+abstract class Abstraction
 {
 	protected $env;
 
@@ -7,7 +13,7 @@ abstract class CMF_Hydrogen_Model_Abstract
 
 	protected $className;
 
-	public function __construct( CMF_Hydrogen_Environment $env )
+	public function __construct( Environment $env )
 	{
 		$this->env	= $env;
 		$this->__onInit();

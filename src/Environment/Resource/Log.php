@@ -8,6 +8,13 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\Environment\Resource;
+
+use CeusMedia\HydrogenFramework\Environment;
+use ReflectionMethod;
+use Throwable;
+use DateTime;
+
 /**
  *	...
  *	@category		Library
@@ -17,7 +24,7 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Environment_Resource_Log
+class Log
 {
 	const STRATEGY_APP_DEFAULT		= 'app-default';
 	const STRATEGY_APP_TYPED		= 'app-typed';
@@ -33,7 +40,7 @@ class CMF_Hydrogen_Environment_Resource_Log
 		self::STRATEGY_CUSTOM_CALLBACK,
 	];
 
-	/**	@var	CMF_Hydrogen_Environment	$env				Environment instance */
+	/**	@var	Environment	$env				Environment instance */
 	protected $env;
 
 	/**	@var	array						$lastStrategies		List of log strategies that end handling on positive result */
@@ -60,7 +67,7 @@ class CMF_Hydrogen_Environment_Resource_Log
 	 *	@return		void
 	 *	@todo 		add path fallback using Null-Coalesce
 	 */
-	public function __construct( CMF_Hydrogen_Environment $env )
+	public function __construct( Environment $env )
 	{
 		$this->env	= $env;
 		$this->path	= $env->getConfig()->get( 'path.logs' );
@@ -116,7 +123,7 @@ class CMF_Hydrogen_Environment_Resource_Log
 	/**
 	 *	Logs exception by registered hooks or local log file failback.
 	 *	@access		public
-	 *	@param		exception			$exception		Exception to log
+	 *	@param		Throwable			$exception		Exception to log
 	 *	@param		string|object		$context		Context of message as object or string
 	 *	@return		boolean				TRUE if handled by called module hooks
 	 *	@trigger	Env::logException	Calls hook for handling by installed modules

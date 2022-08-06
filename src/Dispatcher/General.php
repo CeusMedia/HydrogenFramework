@@ -24,22 +24,27 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-use CMF_Hydrogen_Environment_Web as WebEnv;
+namespace CeusMedia\HydrogenFramework\Dispatcher;
+
+use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
+use CeusMedia\HydrogenFramework\Controller;
+
+use Alg_Object_Factory as ObjectFactory;
+use Alg_Object_MethodFactory as MethodFactory;
+use RuntimeException;
+use ReflectionMethod;
 
 /**
  *	Generic Main Class of Framework Hydrogen
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Dispatcher
- *	@uses			RuntimeException
- *	@uses			ReflectionMethod
- *	@uses			Alg_Object_Factory
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2007-2021 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			Code Documentation
  */
-class CMF_Hydrogen_Dispatcher_General
+class General
 {
 	protected $env;
 
@@ -57,7 +62,7 @@ class CMF_Hydrogen_Dispatcher_General
 
 	public static $prefixController		= "Controller_";
 
-	public function __construct( WebEnv $env )
+	public function __construct( WebEnvironment $env )
 	{
 		$this->env		= $env;
 		$this->request	= $env->getRequest();
@@ -103,14 +108,14 @@ class CMF_Hydrogen_Dispatcher_General
 			$this->checkClass( $className );
 			$this->env->clock->reach( 'Dispatcher_General::dispatch: check: controller' );
 			$this->checkAccess( $controller, $action);
-			$instance	= Alg_Object_Factory::createObject( $className, array( $this->env ) );		// build controller instance
+			$instance	= ObjectFactory::createObject( $className, array( $this->env ) );		// build controller instance
 			$this->env->clock->reach( 'Dispatcher_General::dispatch: factorized controller' );
 			$this->checkClassAction( $className, $instance, $action );
 			if( $this->checkClassActionArguments )
 				$this->checkClassActionArguments( $className, $instance, $action, $arguments );
 			$this->env->clock->reach( 'Dispatcher_General::dispatch: check@'.$controller.'/'.$action );
 
-			$factory	= new \Alg_Object_MethodFactory( $instance );								// create method factory on controller instance
+			$factory	= new MethodFactory( $instance );								// create method factory on controller instance
 			$result		= $factory->callMethod( $action, $arguments );								// call action method in controller class with arguments
 			$this->noteLastCall( $instance );
 		}
@@ -183,7 +188,7 @@ class CMF_Hydrogen_Dispatcher_General
 		return self::$prefixController.$name;														//  return controller class name
 	}
 
-	protected function noteLastCall( CMF_Hydrogen_Controller $instance )
+	protected function noteLastCall( Controller $instance )
 	{
 		$session	= $this->env->getSession();
 		if( !$session )

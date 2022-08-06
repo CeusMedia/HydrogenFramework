@@ -1,5 +1,10 @@
 <?php
-abstract class CMF_Hydrogen_Model_REST_JSON extends CMF_Hydrogen_Model_Abstract
+namespace CeusMedia\HydrogenFramework\Model\REST;
+
+use CeusMedia\HydrogenFramework\Model\Abstraction;
+use Exception;
+
+abstract class JSON extends Abstraction
 {
 	public static $resourceRouteBasePath	= '';
 	public static $tokenSessionKey			= 'token';

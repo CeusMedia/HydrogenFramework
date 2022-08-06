@@ -25,6 +25,23 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\View\Helper;
+
+use CeusMedia\HydrogenFramework\Environment;
+use CeusMedia\HydrogenFramework\Deprecation;
+use CeusMedia\HydrogenFramework\Environment\Resource\Captain as CaptainResource;
+
+use FS_File_Iterator as FileIterator;
+use FS_File_Reader as FileReader;
+use FS_File_Writer as FileWriter;
+use Net_API_Google_ClosureCompiler;
+use Net_Reader as NetReader;
+use UI_HTML_Tag as HtmlTag;
+
+use JSMin;
+use RuntimeException;
+use Throwable;
+
 /**
  *	Component to collect and combine JavaScripts.
  *	@category		Library
@@ -34,7 +51,7 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_View_Helper_JavaScript
+class JavaScript
 {
 	protected static $instance;
 
@@ -69,10 +86,10 @@ class CMF_Hydrogen_View_Helper_JavaScript
 	 *	@param		string		$key		Optional: script key in case of later removal
 	 *	@return		self
 	 */
-	public function addModuleFile( string $filePath, $level = CMF_Hydrogen_Environment_Resource_Captain::LEVEL_MID, string $key = NULL ): self
+	public function addModuleFile( string $filePath, $level = CaptainResource::LEVEL_MID, string $key = NULL ): self
 	{
 		$path	= $this->env->getConfig()->get( 'path.scripts' );
-		$level	= CMF_Hydrogen_Environment_Resource_Captain::interpretLoadLevel( $level );
+		$level	= CaptainResource::interpretLoadLevel( $level );
 		return $this->addUrl( $path.$filePath, $level, $key );
 	}
 
@@ -87,15 +104,15 @@ class CMF_Hydrogen_View_Helper_JavaScript
 	 *	@deprecated	use addModuleFile instead
 	 *	@todo		remove in v0.8.8
 	 */
-	public function addModuleScript( $script, $level = CMF_Hydrogen_Environment_Resource_Captain::LEVEL_MID, string $key = NULL ): self
+	public function addModuleScript( $script, $level = CaptainResource::LEVEL_MID, string $key = NULL ): self
 	{
-		CMF_Hydrogen_Deprecation::getInstance()
+		Deprecation::getInstance()
 			->setErrorVersion( '0.8.6.3' )
 			->setExceptionVersion( '0.8.7' )
 			->message( 'Please use addModuleFile instead' );
 
 		$path	= $this->env->getConfig()->get( 'path.scripts' );
-		$level	= CMF_Hydrogen_Environment_Resource_Captain::interpretLoadLevel( $level );
+		$level	= CaptainResource::interpretLoadLevel( $level );
 		return $this->addUrl( $path.$script, $level, $key );
 	}
 
@@ -108,13 +125,13 @@ class CMF_Hydrogen_View_Helper_JavaScript
 	 *	@return		self
 	 *	@todo		remove support for level "ready", see below
 	 */
-	public function addScript( string $script, $level = CMF_Hydrogen_Environment_Resource_Captain::LEVEL_MID, string $key = NULL ): self
+	public function addScript( string $script, $level = CaptainResource::LEVEL_MID, string $key = NULL ): self
 	{
 		/* @todo		remove after all ->addScript( '...', 'ready' ) are replaced by ->addScriptOnReady( '...' ) */
 		if( $level === "ready" )
 			return $this->addScriptOnReady( $script, $level );
 
-		$level	= CMF_Hydrogen_Environment_Resource_Captain::interpretLoadLevel( $level );		//  sanitize level supporting old string values
+		$level	= CaptainResource::interpretLoadLevel( $level );		//  sanitize level supporting old string values
 		if( !array_key_exists( $level, $this->scripts ) )										//  level is not yet defined in scripts list
 			$this->scripts[$level]	= array();													//  create empty scripts list for level
 		$key	= strlen( $key ) ? md5( $key ) : 'default';
@@ -133,9 +150,9 @@ class CMF_Hydrogen_View_Helper_JavaScript
 	 *	@return		self
 	 *	@todo		implement support of a script key (3rd argument)
 	 */
-	public function addScriptOnReady( string $script, $level = CMF_Hydrogen_Environment_Resource_Captain::LEVEL_MID, string $key = NULL ): self
+	public function addScriptOnReady( string $script, $level = CaptainResource::LEVEL_MID, string $key = NULL ): self
 	{
-		$level	= CMF_Hydrogen_Environment_Resource_Captain::interpretLoadLevel( $level );		//  sanitize level supporting old string values
+		$level	= CaptainResource::interpretLoadLevel( $level );		//  sanitize level supporting old string values
 		if( !array_key_exists( $level, $this->scriptsOnReady ) )								//  level is not yet defined in scripts list
 			$this->scriptsOnReady[$level]	= array();											//  create empty scripts list for level
 		$key	= strlen( $key ) ? md5( $key ) : 'default';
@@ -154,9 +171,9 @@ class CMF_Hydrogen_View_Helper_JavaScript
 	 *	@return		self
 	 *	@todo		implement support of a script key (3rd argument)
 	 */
-	public function addUrl( string $url, $level = CMF_Hydrogen_Environment_Resource_Captain::LEVEL_MID, string $key = NULL ): self
+	public function addUrl( string $url, $level = CaptainResource::LEVEL_MID, string $key = NULL ): self
 	{
-		$level	= CMF_Hydrogen_Environment_Resource_Captain::interpretLoadLevel( $level );		//  sanitize level supporting old string values
+		$level	= CaptainResource::interpretLoadLevel( $level );		//  sanitize level supporting old string values
 		if( !array_key_exists( $level, $this->urls ) )											//  level is not yet defined in scripts list
 			$this->urls[$level]	= array();														//  create empty scripts list for level
 		$key	= strlen( $key ) ? md5( $key ) : 'default';
@@ -173,7 +190,7 @@ class CMF_Hydrogen_View_Helper_JavaScript
 	 */
 	public function clearCache(): self
 	{
-		$index			= new FS_File_Iterator( $this->pathCache );
+		$index			= new FileIterator( $this->pathCache );
 		$lengthPrefix	= strlen( $this->prefix );
 		$lengthSuffix	= strlen( $suffix = $this->suffix.'.js' );
 		foreach( $index as $item ){
@@ -222,7 +239,7 @@ class CMF_Hydrogen_View_Helper_JavaScript
 	 */
 	public function getUrlList(): array
 	{
-		CMF_Hydrogen_Deprecation::getInstance()
+		Deprecation::getInstance()
 			->setErrorVersion( '0.8.6.3' )
 			->setExceptionVersion( '0.8.7' )
 			->message( 'Please use getPlainUrlList or getStructuredUrlList instead' );
@@ -318,10 +335,10 @@ class CMF_Hydrogen_View_Helper_JavaScript
 	 *	Constructor is disabled from public context.
 	 *	Use static call 'getInstance()' instead of 'new'.
 	 *	@access		protected
-	 *	@param		CMF_Hydrogen_Environment	$env		Environment object
+	 *	@param		Environment	$env		Environment object
 	 *	@return		void
 	 */
-	protected function __construct( CMF_Hydrogen_Environment $env )
+	protected function __construct( Environment $env )
 	{
 		$this->env	= $env;
 	}
@@ -334,7 +351,7 @@ class CMF_Hydrogen_View_Helper_JavaScript
 			try{
 				return JSMin::minify( $script );
 			}
-			catch( Exception $e ){}
+			catch( Throwable $t ){}
 		}
 		if( class_exists( 'Net_API_Google_ClosureCompiler' ) ){
 			return Net_API_Google_ClosureCompiler::minify( $script );
@@ -368,9 +385,9 @@ class CMF_Hydrogen_View_Helper_JavaScript
 				$content	= "/* @revision ".$this->revision." */\n";
 			foreach( $this->getPlainUrlList() as $url ){
 				if( preg_match( "/^http/", $url ) )
-					$content	= Net_Reader::readUrl( $url );
+					$content	= NetReader::readUrl( $url );
 				else
-					$content	= FS_File_Reader::load( $url );
+					$content	= FileReader::load( $url );
 				if( $content === FALSE )
 					throw new RuntimeException( 'Script file "'.$url.'" not existing' );
 				if( preg_match( "/\.min\.js$/", $url ) )
@@ -379,7 +396,7 @@ class CMF_Hydrogen_View_Helper_JavaScript
 					$contents[]	= $this->compress( $content );
 			}
 			$content	= implode( "\n\n", $contents );
-			FS_File_Writer::save( $fileJs, $content );
+			FileWriter::save( $fileJs, $content );
 		}
 		return $fileJs;
 	}
@@ -406,7 +423,7 @@ class CMF_Hydrogen_View_Helper_JavaScript
 			$content	= $this->compress( $content );
 		if( !$wrapInTag )
 			return $content;
-		return UI_HTML_Tag::create( 'script', $content, array( 'type' => 'text/javascript' ) );
+		return HtmlTag::create( 'script', $content, array( 'type' => 'text/javascript' ) );
 	}
 
 	/**
@@ -441,7 +458,7 @@ class CMF_Hydrogen_View_Helper_JavaScript
 			$content	= $this->compress( $content );
 		if( !$wrapInTag )
 			return $content;
-		return UI_HTML_Tag::create( 'script', $content, array( 'type' => 'text/javascript' ) );
+		return HtmlTag::create( 'script', $content, array( 'type' => 'text/javascript' ) );
 	}
 
 	protected function renderUrls( bool $compress = FALSE, bool $wrapInTag = FALSE, bool $forceFresh = FALSE ): string
@@ -457,7 +474,7 @@ class CMF_Hydrogen_View_Helper_JavaScript
 	//			'language'	=> 'JavaScript',
 				'src'		=> $fileJs
 			);
-			$links	= UI_HTML_Tag::create( 'script', NULL, $attributes );
+			$links	= HtmlTag::create( 'script', NULL, $attributes );
 		}
 		else{
 			$list	= array();
@@ -469,7 +486,7 @@ class CMF_Hydrogen_View_Helper_JavaScript
 		//			'language'	=> 'JavaScript',
 					'src'		=> $url
 				);
-				$list[]	= UI_HTML_Tag::create( 'script', NULL, $attributes );
+				$list[]	= HtmlTag::create( 'script', NULL, $attributes );
 			}
 			$links	= implode( "\n".$this->indent, $list  );
 		}

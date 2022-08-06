@@ -9,6 +9,14 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\Environment\Resource;
+
+use CeusMedia\HydrogenFramework\Environment;
+use Exception;
+use InvalidArgumentException;
+use RuntimeException;
+use RangeException;
+
 /**
  *	The Captain is giving orders, depending on the changes of the situation.
  *	On every reported or spotted change he is able to shout out some commands if suitable.
@@ -48,7 +56,7 @@
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			code documentation
  */
-class CMF_Hydrogen_Environment_Resource_Captain
+class Captain
 {
 	const LEVEL_UNKNOWN		= 0;
 	const LEVEL_TOP			= 1;
@@ -63,7 +71,7 @@ class CMF_Hydrogen_Environment_Resource_Captain
 	const LEVEL_BOTTOM		= 9;
 	const LEVEL_END			= 9;
 
-	/**	@var		CMF_Hydrogen_Environment			$env			Environment object */
+	/**	@var		Environment			$env			Environment object */
 	protected $env;
 
 	/**	@var		array								$disabledHooks	List of disabled hooks */
@@ -78,10 +86,10 @@ class CMF_Hydrogen_Environment_Resource_Captain
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		CMF_Hydrogen_Environment			$env			Environment object
+	 *	@param		Environment			$env			Environment object
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment $env )
+	public function __construct( Environment $env )
 	{
 		$this->env	= $env;
 	}

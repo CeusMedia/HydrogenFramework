@@ -24,9 +24,10 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\Environment\Router;
 
-use CMF_Hydrogen_Environment as Environment;
-use CMF_Hydrogen_Environment_Router_Interface as RouterInterface;
+use CeusMedia\HydrogenFramework\Environment;
+use CeusMedia\HydrogenFramework\Environment\RouterInterface;
 
 /**
  *	...
@@ -37,7 +38,7 @@ use CMF_Hydrogen_Environment_Router_Interface as RouterInterface;
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-abstract class CMF_Hydrogen_Environment_Router_Abstract implements RouterInterface
+abstract class Abstraction implements RouterInterface
 {
 	/**	@var		string		Key of path in request, default: path */
 	static public $pathKey		= "path";

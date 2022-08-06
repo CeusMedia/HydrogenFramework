@@ -24,23 +24,28 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\Application;
+
+use CeusMedia\HydrogenFramework\Environment;
+use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
+use Alg_Object_Factory as ObjectFactory;
+
 /**
  *	Base application class for Hydrogen application.
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Application.Web
- *	@uses			Alg_Object_Factory
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2007-2021 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			Code Documentation
  */
-abstract class CMF_Hydrogen_Application_Abstract
+abstract class Abstraction
 {
 	/**	@var		string								$classEnvironment		Class Name of Application Environment to build */
-	public static $classEnvironment						= 'CMF_Hydrogen_Environment_Web';
+	public static $classEnvironment						= WebEnvironment::class;
 
-	/**	@var		CMF_Hydrogen_Environment			$env					Application Environment Object */
+	/**	@var		Environment			$env					Application Environment Object */
 	protected $env;
 
 	public static $modulesNeeded						= array();				//  @todo for PHP 5.3+: make protected and use static:: instead of self:: on use -> now you can set value on App class construction
@@ -48,15 +53,15 @@ abstract class CMF_Hydrogen_Application_Abstract
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		CMF_Hydrogen_Environment			$env					Framework Environment
+	 *	@param		Environment			$env					Framework Environment
 	 *	@return		void
 	 */
-	public function __construct( CMF_Hydrogen_Environment $env = NULL )
+	public function __construct( Environment $env = NULL )
 	{
 		if( !$env )
-			$env		= Alg_Object_Factory::createObject( self::$classEnvironment );
+			$env		= ObjectFactory::createObject( self::$classEnvironment );
 		else if( is_string( $env ) )
-			$env		= Alg_Object_Factory::createObject( $env );
+			$env		= ObjectFactory::createObject( $env );
 		$this->env		= $env;
 		if( self::$modulesNeeded )																	//  needed modules are defined
 			$this->checkNeededModules();															//  check for missing modules

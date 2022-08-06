@@ -24,6 +24,20 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\View\Helper;
+
+use CeusMedia\HydrogenFramework\Environment\Resource\Captain as CaptainResource;
+
+use FS_File_CSS_Combiner as CssCombiner;
+use FS_File_CSS_Compressor as CssCompressor;
+use FS_File_CSS_Relocator as CssRelocator;
+use FS_File_Reader as FileReader;
+use FS_File_RegexFilter as RegexFileFilter;
+use FS_File_Writer as FileWriter;
+use FS_Folder_Lister as FolderLister;
+use Net_Reader as NetReader;
+use UI_HTML_Tag as HtmlTag;
+
 /**
  *	Component to collect and combine StyleSheet.
  *	@category		Library
@@ -33,7 +47,7 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_View_Helper_StyleSheet
+class StyleSheet
 {
 	protected $pathBase				= "";
 	protected $pathCache			= "";
@@ -63,9 +77,9 @@ class CMF_Hydrogen_View_Helper_StyleSheet
 	 *	@param		integer		$level		Optional: Load level (1-9 or {top(1),mid(=5),end(9)}, default: 5)
 	 *	@return		self
 	 */
-	public function addStyle( string $style, $level = CMF_Hydrogen_Environment_Resource_Captain::LEVEL_MID ): self
+	public function addStyle( string $style, $level = CaptainResource::LEVEL_MID ): self
 	{
-		$level	= CMF_Hydrogen_Environment_Resource_Captain::interpretLoadLevel( $level );		//  sanitize level supporting old string values
+		$level	= CaptainResource::interpretLoadLevel( $level );		//  sanitize level supporting old string values
 		$this->styles[$level][]		= $style;
 		return $this;
 	}
@@ -78,9 +92,9 @@ class CMF_Hydrogen_View_Helper_StyleSheet
 	 *	@param		array		$attributes	Optional: Additional style tag attributes
 	 *	@return		self
 	 */
-	public function addUrl( string $url, $level = CMF_Hydrogen_Environment_Resource_Captain::LEVEL_MID, array $attributes = array() ): self
+	public function addUrl( string $url, $level = CaptainResource::LEVEL_MID, array $attributes = array() ): self
 	{
-		$level	= CMF_Hydrogen_Environment_Resource_Captain::interpretLoadLevel( $level );		//  sanitize level supporting old string values
+		$level	= CaptainResource::interpretLoadLevel( $level );		//  sanitize level supporting old string values
 		$this->urls[$level][]		= (object) array( 'url' => $url, 'attributes' => $attributes );
 		return $this;
 	}
@@ -93,7 +107,7 @@ class CMF_Hydrogen_View_Helper_StyleSheet
 	public function clearCache()
 	{
 		$prefix = preg_replace( "/^([a-z0-9]+)/", "\\1", $this->prefix );
-		$index	= new FS_File_RegexFilter( $this->pathCache, '/^'.$prefix.'\w+\.css$/' );
+		$index	= new RegexFileFilter( $this->pathCache, '/^'.$prefix.'\w+\.css$/' );
 		foreach( $index as $file ){
 			unlink( $file->getPathname() );
 		}
@@ -173,7 +187,7 @@ class CMF_Hydrogen_View_Helper_StyleSheet
 				$attributes	= array_merge( $linkAttributes, [
 					'href'		=> $this->getPackageFileName( $forceFresh )
 				] );
-				$items[]	= UI_HTML_Tag::create( 'link', NULL, $linkAttributes );
+				$items[]	= HtmlTag::create( 'link', NULL, $linkAttributes );
 			}
 			else{
 				foreach( $urls as $url ){
@@ -182,14 +196,14 @@ class CMF_Hydrogen_View_Helper_StyleSheet
 					$attributes	= array_merge( $linkAttributes, $url->attributes, [
 						'href'		=> $url->url
 					] );
-					$items[]	= UI_HTML_Tag::create( 'link', NULL, $attributes );
+					$items[]	= HtmlTag::create( 'link', NULL, $attributes );
 				}
 			}
 		}
 		if( $styles ){
 			$content	= PHP_EOL.implode( PHP_EOL, $styles ).PHP_EOL.$this->indent;
 			$attributes	= array( 'type' => 'text/css' );
-			$items[]	= UI_HTML_Tag::create( 'style', $content, $attributes );
+			$items[]	= HtmlTag::create( 'style', $content, $attributes );
 		}
 		return implode( PHP_EOL.$this->indent, $items );
 	}
@@ -266,14 +280,14 @@ class CMF_Hydrogen_View_Helper_StyleSheet
 		$fileCss	= $this->getPackageCacheFileName();												//  calculate CSS package file name for collected CSS files
 		if( file_exists( $fileCss ) && !$forceFresh )												//  CSS package file has been built before and is not to be rebuild
 			return $fileCss;																		//  return CSS package file name
-		$combiner	= new FS_File_CSS_Combiner();													//  load CSS combiner for nested CSS files
-		$compressor	= new FS_File_CSS_Compressor();													//  load CSS compressor
-		$relocator	= new FS_File_CSS_Relocator();													//  load CSS relocator
+		$combiner	= new CssCombiner();															//  load CSS combiner for nested CSS files
+		$compressor	= new CssCompressor();															//  load CSS compressor
+		$relocator	= new CssRelocator();															//  load CSS relocator
 		$pathRoot	= getEnv( 'DOCUMENT_ROOT' );													//  get server document root path for CSS relocator
 		$pathSelf	= str_replace( $pathRoot, '', dirname( getEnv( 'SCRIPT_FILENAME' ) ) );			//  get path relative to document root for symbolic link map
 
 		$symlinks	= array();																		//  prepare map of symbolic links for CSS relocator
-		foreach( FS_Folder_Lister::getFolderList( 'themes' ) as $item )								//  iterate theme folders
+		foreach( FolderLister::getFolderList( 'themes' ) as $item )									//  iterate theme folders
 			if( is_link( ( $path = $item->getPathname() ) ) )										//  if theme folder is a link
 				$symlinks['/'.$pathSelf.'/themes/'.$item->getFilename()] = realpath( $path );		//  not symbolic link
 
@@ -283,18 +297,18 @@ class CMF_Hydrogen_View_Helper_StyleSheet
 
 		foreach( $this->getUrlList() as $url ){														//  iterate collected URLs
 			if( preg_match( "/^http/", $url->url ) ){												//  CSS resource is global (using HTTP)
-				$contents[]	= Net_Reader::readUrl( $url->url );										//  read global CSS content and append to content list
+				$contents[]	= NetReader::readUrl( $url->url );										//  read global CSS content and append to content list
 				continue;																			//  skip to next without relocation etc.
 			}
 			$pathFile	= dirname( $url->url ).'/';													//  get path to CSS file within app
-			$content	= FS_File_Reader::load( $url->url );										//  read local CSS content
+			$content	= FileReader::load( $url->url );											//  read local CSS content
 			$content	= $combiner->combineString( $pathFile, $content, TRUE );					//  insert imported CSS files within CSS content
 			if( preg_match( "/\/[a-z]+/", $content ) )												//  CSS content contains path notations
 				$content	= $relocator->rewrite( $content, $pathFile, $pathRoot, $symlinks );		//  relocate resources paths in CSS content
 			$contents[]	= $content;																	//  add CSS content after import and relocation
 		}
 		$content	= $compressor->compress( implode( "\n\n", $contents ) );						//  compress collected CSS contents
-		FS_File_Writer::save( $fileCss, $content );													//  save CSS package file
+		FileWriter::save( $fileCss, $content );														//  save CSS package file
 		return $fileCss;																			//  return CSS package file name
 	}
 }

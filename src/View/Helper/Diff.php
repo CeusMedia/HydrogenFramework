@@ -16,7 +16,9 @@
 	returns the differences in HTML. The tags used are <ins> and <del>,
 	which can easily be styled with CSS.
 */
-class CMF_Hydrogen_View_Helper_Diff
+namespace CeusMedia\HydrogenFramework\View\Helper;
+
+class Diff
 {
 	static public function diff( array $old, array $new ): array
 	{

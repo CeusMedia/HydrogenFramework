@@ -2,16 +2,19 @@
 /**
  *	General (and therefore abstract) AJAX controller.
  */
+namespace CeusMedia\HydrogenFramework\Controller;
 
-use CMF_Hydrogen_Environment as Environment;
-use CMF_Hydrogen_Environment_Web as WebEnvironment;
+use CeusMedia\HydrogenFramework\Environment as Environment;
+use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 use Net_HTTP_Response as HttpResponse;
 use Net_HTTP_Response_Sender as HttpResponseSender;
+use Exception;
+use Throwable;
 
 /**
  *	General (and therefore abstract) AJAX controller.
  */
-abstract class CMF_Hydrogen_Controller_Ajax
+abstract class Ajax
 {
 	protected $env;
 
@@ -159,7 +162,7 @@ abstract class CMF_Hydrogen_Controller_Ajax
 			$this->response->addHeaderPair( 'X-Ajax-Dev', base64_encode( $dev ) );
 
 		$sender	= new HttpResponseSender( $this->response );
-        $sender->setCompression( $this->compressionMethod );
-        return $sender->send( $this->sendLengthHeader, $this->exitAfterwards );
+	    $sender->setCompression( $this->compressionMethod );
+	    return $sender->send( $this->sendLengthHeader, $this->exitAfterwards );
 	}
 }

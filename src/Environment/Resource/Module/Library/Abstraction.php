@@ -24,8 +24,11 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\Environment\Resource\Module\Library;
 
-use CMF_Hydrogen_Environment_Resource_Module_Library_Interface as LibraryInterface;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\LibraryInterface;
+use RangeException;
+use RuntimeException;
 
 /**
  *	Abstract module libraries.
@@ -36,7 +39,7 @@ use CMF_Hydrogen_Environment_Resource_Module_Library_Interface as LibraryInterfa
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-abstract class CMF_Hydrogen_Environment_Resource_Module_Library_Abstract implements LibraryInterface
+abstract class Abstraction implements LibraryInterface
 {
 	protected $modules			= array();
 

@@ -1,12 +1,16 @@
 <?php
-abstract class CMF_Hydrogen_Model_File_Abstract
+namespace CeusMedia\HydrogenFramework\Model\File;
+
+//use CeusMedia\HydrogenFramework\Environment;
+
+abstract class Abstraction
 {
 	protected $path;
 
 	/**
 	 *	@todo		enable env to be first argument, after thinking twice
 	 */
-	public function __construct( /*CMF_Hydrogen_Environment $env,*/ string $path )
+	public function __construct( /*Environment $env,*/ string $path )
 	{
 		$this->path	= $path;
 	}

@@ -1,5 +1,7 @@
 <?php
-class CMF_Hydrogen_Environment_Resource_Module_Component_File
+namespace CeusMedia\HydrogenFramework\Environment\Resource\Module\Component;
+
+class File
 {
 	public $file;
 

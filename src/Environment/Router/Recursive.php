@@ -24,6 +24,14 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\Environment\Router;
+
+use CeusMedia\HydrogenFramework\Environment\RouterInterface;
+use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
+
+use Net_HTTP_Request as HttpRequest;
+use RuntimeException;
+
 /**
  *	...
  *	@category		Library
@@ -33,7 +41,7 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Environment_Router_Recursive extends CMF_Hydrogen_Environment_Router_Abstract implements CMF_Hydrogen_Environment_Router_Interface
+class Recursive extends Abstraction implements RouterInterface
 {
 	public function parseFromRequest()
 	{
@@ -46,8 +54,8 @@ class CMF_Hydrogen_Environment_Router_Recursive extends CMF_Hydrogen_Environment
 			self::$pathKey	= '__path';
 
 		$path	= $request->get( self::$pathKey );
-		if( $this->env instanceof CMF_Hydrogen_Environment_Web )
-			if( $request instanceof Net_HTTP_Request )
+		if( $this->env instanceof WebEnvironment )
+			if( $request instanceof HttpRequest )
 				$path	= $request->getFromSource( self::$pathKey, 'get' );
 
 		$path	= urldecode( $path );

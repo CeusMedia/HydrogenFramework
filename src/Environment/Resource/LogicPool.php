@@ -8,6 +8,15 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\Environment\Resource;
+
+use CeusMedia\HydrogenFramework\Environment;
+use Alg_Object_Factory as ObjectFactory;
+use Alg_Text_CamelCase as CamelCase;
+use DomainException;
+use InvalidArgumentException;
+use RuntimeException;
+
 /**
  *	...
  *	Implements Property overloading.
@@ -19,9 +28,9 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class CMF_Hydrogen_Environment_Resource_LogicPool
+class LogicPool
 {
-	/**	@var			CMF_Hydrogen_Environment	$env		Environment object */
+	/**	@var			Environment	$env		Environment object */
 	protected $env;
 
 	/**	@var			array						$pool		Map of logic class names or instances */
@@ -30,10 +39,10 @@ class CMF_Hydrogen_Environment_Resource_LogicPool
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		CMF_Hydrogen_Environment		$env		Environment object
+	 *	@param		Environment		$env		Environment object
 	 *	@return		void
 	 */
-	public function  __construct( CMF_Hydrogen_Environment $env )
+	public function  __construct( Environment $env )
 	{
 		$this->env		= $env;
 	}
@@ -107,14 +116,16 @@ class CMF_Hydrogen_Environment_Resource_LogicPool
 	 */
 	public function get( string $key )
 	{
+		$className = NULL;
 		if( !$this->has( $key ) ){
 			$className		= $this->getClassNameFromKey( $key );
 			class_exists( $className ) ? $this->add( $key, $className ) : NULL;
 		}
 		if( !$this->has( $key ) ){
-			if( isset( $className ) )
-				throw new RuntimeException( 'No logic class/object available for key "'.$key.'" (classname: '.$className.')' );
-			throw new RuntimeException( 'No logic class/object available for key "'.$key.'"' );
+			$message	= 'No logic class/object available for key "'.$key.'"';
+			if( $className !== NULL )
+				$message	= 'No logic class/object available for key "'.$key.'" (classname: '.$className.')';
+			throw new RuntimeException( $message );
 		}
 
 		if( !$this->isInstantiated( $key ) ){
@@ -141,7 +152,7 @@ class CMF_Hydrogen_Environment_Resource_LogicPool
 		$prefix	= array_shift( $parts );
 		if( $prefix !== 'Logic' )
 			throw new InvalidArgumentException( 'Given class is not a logic class (needs to start with Logic_)' );
-		return \Alg_Text_CamelCase::encode( implode( ' ', $parts ), TRUE );
+		return CamelCase::encode( implode( ' ', $parts ), TRUE );
 	}
 
 	/**
@@ -223,17 +234,17 @@ class CMF_Hydrogen_Environment_Resource_LogicPool
 	 */
 	protected function createInstance( string $className )
 	{
-		if( is_subclass_of( $className, 'CMF_Hydrogen_Logic' ) )
-			return Alg_Object_Factory::createObject( $className, array( $this->env ) );
+		if( is_subclass_of( $className, 'CeusMedia\HydrogenFramework\Logic' ) )
+			return ObjectFactory::createObject( $className, array( $this->env ) );
 
 		// @todo activate this line after deprecation of old logic classes
 //		throw new InvalidArgumentException( 'Given class "'.$className.'" is not a valid logic class' );
 		$arguments	= array( $this->env );
-		if( is_subclass_of( $className, 'CMF_Hydrogen_Logic_Singleton' ) )
+		if( is_subclass_of( $className, 'CeusMedia\HydrogenFramework\Logic\Singleton' ) )
 			return call_user_func_array( array( $className, 'getInstance' ), $arguments );
-		if( is_subclass_of( $className, 'CMF_Hydrogen_Logic_Multiple' ) )
-			return Alg_Object_Factory::createObject( $className, $arguments );
-		return Alg_Object_Factory::createObject( $className, $arguments );
+		if( is_subclass_of( $className, 'CeusMedia\HydrogenFramework\Logic\Multiple' ) )
+			return ObjectFactory::createObject( $className, $arguments );
+		return ObjectFactory::createObject( $className, $arguments );
 	}
 
 	/**
@@ -250,7 +261,7 @@ class CMF_Hydrogen_Environment_Resource_LogicPool
 	{
 		if( preg_match( '/^[A-Z]/', $key ) )
 			return 'Logic_'.$key;
-		$classNameWords	= ucwords( Alg_Text_CamelCase::decode( $key ) );
+		$classNameWords	= ucwords( CamelCase::decode( $key ) );
 		return str_replace( ' ', '_', 'Logic '.$classNameWords );
 	}
 }

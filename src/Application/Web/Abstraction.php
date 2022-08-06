@@ -24,34 +24,36 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+namespace CeusMedia\HydrogenFramework\Application\Web;
 
-use CMF_Hydrogen_Environment_Web as WebEnv;
+use CeusMedia\HydrogenFramework\Application\Abstraction as ApplicationAbstraction;
+use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
+use CeusMedia\HydrogenFramework\View;
 
 /**
  *	Base application class for MVC web application.
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Application.Web
- *	@uses			CMF_Hydrogen_View
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2007-2021 Christian Würker
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			Code Documentation
  */
-abstract class CMF_Hydrogen_Application_Web_Abstract extends CMF_Hydrogen_Application_Abstract
+abstract class Abstraction extends ApplicationAbstraction
 {
 	protected $components			= array();
 
-	/**	@var		WebEnv			$env				Application Environment Object */
+	/**	@var		WebEnvironment			$env				Application Environment Object */
 	protected $env;
 
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		WebEnv			$env				Framework Environment
+	 *	@param		WebEnvironment			$env				Framework Environment
 	 *	@return		void
 	 */
-	public function __construct( WebEnv $env = NULL )
+	public function __construct( WebEnvironment $env = NULL )
 	{
 		parent::__construct( $env );
 	}
@@ -129,7 +131,7 @@ abstract class CMF_Hydrogen_Application_Web_Abstract extends CMF_Hydrogen_Applic
 			default:
 				$templateFile	= $masterTemplate;
 		}
-		$view	= new CMF_Hydrogen_View( $this->env );
+		$view	= new View( $this->env );
 		return $view->loadTemplateFile( $templateFile, $this->components );
 	}
 }
