@@ -26,6 +26,15 @@
  */
 namespace CeusMedia\HydrogenFramework\Environment;
 
+use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
+use CeusMedia\Common\Net\HTTP\Cookie as HttpCookie;
+use CeusMedia\Common\Net\HTTP\Request as HttpRequest;
+use CeusMedia\Common\Net\HTTP\Response as HttpResponse;
+use CeusMedia\Common\Net\HTTP\PartitionSession as HttpPartitionSession;
+use CeusMedia\Common\Net\HTTP\Status as HttpStatus;
+use CeusMedia\Common\UI\HTML\ExceptionßPage as HtmlExceptionPage;
+use CeusMedia\Common\UI\HTML\Tag as HtmlTag;
+use CeusMedia\Common\UI\HTML\PageFrame as HtmlPageFrame;
 use CeusMedia\HydrogenFramework\Deprecation;
 use CeusMedia\HydrogenFramework\Environment;
 use CeusMedia\HydrogenFramework\Environment\Exception as EnvironmentException;
@@ -34,16 +43,6 @@ use CeusMedia\HydrogenFramework\Environment\Router\Abstraction as AbstractRouter
 use CeusMedia\HydrogenFramework\Environment\Resource\Messenger as MessengerResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\Language as LanguageResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\Page as PageResource;
-
-use Alg_Object_Factory as ObjectFactory;
-use Net_HTTP_Cookie as HttpCookie;
-use Net_HTTP_Request as HttpRequest;
-use Net_HTTP_Response as HttpResponse;
-use Net_HTTP_PartitionSession as HttpPartitionSession;
-use Net_HTTP_Status as HttpStatus;
-use UI_HTML_Exception_Page as HtmlExceptionPage;
-use UI_HTML_Tag as HtmlTag;
-use UI_HTML_PageFrame as HtmlPageFrame;
 
 use Exception;
 use RuntimeException;
@@ -58,25 +57,59 @@ use RuntimeException;
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			extend from (namespaced) Environment after all modules are migrated to 0.9
  */
-class Web extends \CMF_Hydrogen_Environment
+class Web extends Environment
 {
 	public static $classRouter			= SingleRouter::class;
 
 	public static $configKeyBaseHref	= 'app.base.url';
 
-	/**	@var	HttpRequest								$request	HTTP Request Object */
+	/**	@var	array					$defaultPaths	Map of default paths to extend base configuration */
+	public static $defaultPaths			= [
+		'config'	=> 'config/',
+		'classes'	=> 'classes/',
+		'contents'	=> 'contents/',
+		'images'	=> 'contents/images/',
+		'locales'	=> 'contents/locales/',
+		'scripts'	=> 'contents/scripts/',
+		'themes'	=> 'contents/themes/',
+		'logs'		=> 'logs/',
+		'templates'	=> 'templates/',
+	];
+
+	/**	@var	string					$host		Detected HTTP host */
+	public $host;
+
+	/**	@var	int						$port		Detected HTTP port */
+	public $port;
+
+	/**	@var	string					$path		Detected HTTP path */
+	public $path;
+
+	/**	@var	string					$root		Detected  */
+	public $root;
+
+	/**	@var	string					$scheme		Detected  */
+	public $scheme;
+
+	/**	@var	string					$uri		Detected  */
+	public $uri;
+
+	/**	@var	string					$url		Detected application base URL */
+	public $url;
+
+	/**	@var	HttpRequest				$request	HTTP Request Object */
 	protected $request;
 
-	/**	@var	HttpResponse								$response	HTTP Response Object */
+	/**	@var	HttpResponse			$response	HTTP Response Object */
 	protected $response;
 
-	/**	@var	AbstractRouter		$router		Router Object */
+	/**	@var	AbstractRouter			$router		Router Object */
 	protected $router;
 
-	/**	@var	HttpPartitionSession						$session	Session Object */
+	/**	@var	HttpPartitionSession	$session	Session Object */
 	protected $session;
 
-	/**	@var	HttpCookie									$cookie		Cookie Object */
+	/**	@var	HttpCookie				$cookie		Cookie Object */
 	protected $cookie;
 
 	/** @var	MessengerResource		$messenger	Messenger Object */
@@ -88,41 +121,8 @@ class Web extends \CMF_Hydrogen_Environment
 	/**	@var	PageResource			$page		Page Object */
 	protected $page;
 
-	/**	@var	string											$host		Detected HTTP host */
-	public $host;
 
-	/**	@var	int												$port		Detected HTTP port */
-	public $port;
-
-	/**	@var	string											$path		Detected HTTP path */
-	public $path;
-
-	/**	@var	string											$root		Detected  */
-	public $root;
-
-	/**	@var	string											$scheme		Detected  */
-	public $scheme;
-
-	/**	@var	string											$uri		Detected  */
-	public $uri;
-
-	/**	@var	string											$url		Detected application base URL */
-	public $url;
-
-	/**	@var	array											$defaultPaths	Map of default paths to extend base configuration */
-	public static $defaultPaths				= array(
-		'config'	=> 'config/',
-		'classes'	=> 'classes/',
-		'contents'	=> 'contents/',
-		'images'	=> 'contents/images/',
-		'locales'	=> 'contents/locales/',
-		'scripts'	=> 'contents/scripts/',
-		'themes'	=> 'contents/themes/',
-		'logs'		=> 'logs/',
-		'templates'	=> 'templates/',
-	);
-
-	protected $resourcesToClose					= array();
+	protected $resourcesToClose			= [];
 
 	/**
 	 *	Constructor, sets up Resource Environment.

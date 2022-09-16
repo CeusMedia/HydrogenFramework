@@ -28,8 +28,8 @@ namespace CeusMedia\HydrogenFramework\View\Helper\Navigation;
 
 use CeusMedia\HydrogenFramework\Deprecation;
 use CeusMedia\HydrogenFramework\View\Helper\Abstraction as AbstractViewHelper;
-use UI_HTML_Elements as HtmlElements;
-use UI_HTML_Tag as HtmlTag;
+use CeusMedia\Common\UI\HTML\Elements as HtmlElements;
+use CeusMedia\Common\UI\HTML\Tag as HtmlTag;
 
 /**
  *	...

@@ -26,14 +26,13 @@
  */
 namespace CeusMedia\HydrogenFramework\Environment\Resource\Module\Library;
 
+use CeusMedia\Common\FS\File\Reader as FileReader;
+use CeusMedia\Common\FS\File\RegexFilter as FileRegexIndex;
+use CeusMedia\Common\FS\File\Writer as FileWriter;
 use CeusMedia\HydrogenFramework\Environment as Environment;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Reader as ModuleReader;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\LibraryInterface as LibraryInterface;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Library\Abstraction as AbstractLibrary;
-use FS_File_Reader as FileReader;
-use FS_File_RegexFilter as FileRegexIndex;
-use FS_File_Writer as FileWriter;
-
 
 /**
  *	Handler for local module library.

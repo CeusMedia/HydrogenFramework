@@ -26,16 +26,15 @@
  */
 namespace CeusMedia\HydrogenFramework;
 
+use CeusMedia\Common\ADT\Collection\Dictionary as Dictionary;
+use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
+use CeusMedia\Common\Alg\Text\CamelCase as CamelCase;
+use CeusMedia\Common\Alg\Time\Converter as TimeConverter;
+use CeusMedia\Common\UI\HTML\Elements as HtmlElements;
+use CeusMedia\Common\UI\HTML\Exception\Page as HtmlExceptionPage;
+use CeusMedia\Common\UI\Template as TemplateEngine;
 use CeusMedia\HydrogenFramework\Environment as Environment;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
-
-use ADT_List_Dictionary as Dictionary;
-use Alg_Object_Factory as ObjectFactory;
-use Alg_Text_CamelCase as CamelCase;
-use Alg_Time_Converter as TimeConverter;
-use UI_HTML_Elements as HtmlElements;
-use UI_HTML_Exception_Page as HtmlExceptionPage;
-use UI_Template as TemplateEngine;
 
 use Exception;
 use InvalidArgumentException;

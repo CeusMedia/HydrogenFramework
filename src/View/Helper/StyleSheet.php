@@ -26,17 +26,16 @@
  */
 namespace CeusMedia\HydrogenFramework\View\Helper;
 
+use CeusMedia\Common\FS\FileßCSS\Combiner as CssCombiner;
+use CeusMedia\Common\FS\File\CSS\Compressor as CssCompressor;
+use CeusMedia\Common\FS\File\CSS\Relocator as CssRelocator;
+use CeusMedia\Common\FS\File\Reader as FileReader;
+use CeusMedia\Common\FS\File\RegexFilter as RegexFileFilter;
+use CeusMedia\Common\FS\File\Writer as FileWriter;
+use CeusMedia\Common\FS\Folder\Lister as FolderLister;
+use CeusMedia\Common\Net\Reader as NetReader;
+use CeusMedia\Common\UI\HTML\Tag as HtmlTag;
 use CeusMedia\HydrogenFramework\Environment\Resource\Captain as CaptainResource;
-
-use FS_File_CSS_Combiner as CssCombiner;
-use FS_File_CSS_Compressor as CssCompressor;
-use FS_File_CSS_Relocator as CssRelocator;
-use FS_File_Reader as FileReader;
-use FS_File_RegexFilter as RegexFileFilter;
-use FS_File_Writer as FileWriter;
-use FS_Folder_Lister as FolderLister;
-use Net_Reader as NetReader;
-use UI_HTML_Tag as HtmlTag;
 
 /**
  *	Component to collect and combine StyleSheet.

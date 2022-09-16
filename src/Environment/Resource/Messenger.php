@@ -26,11 +26,10 @@
  */
 namespace CeusMedia\HydrogenFramework\Environment\Resource;
 
+use CeusMedia\Common\Alg\Time\Converter as TimeConverter;
+use CeusMedia\Common\UI\HTML\Elements as HtmlElements;
+use CeusMedia\Common\UI\HTML\Tag as HtmlTag;
 use CeusMedia\HydrogenFramework\Environment as WebEnvironment;
-
-use Alg_Time_Converter as TimeConverter;
-use UI_HTML_Elements as HtmlElements;
-use UI_HTML_Tag as HtmlTag;
 
 use InvalidArgumentException;
 use ReflectionFunction;

@@ -26,15 +26,14 @@
  */
 namespace CeusMedia\HydrogenFramework\Environment\Resource;
 
+use CeusMedia\Common\UI\HTML\PageFrame as HtmlPage;
+use CeusMedia\Common\UI\HTML\Tag as HtmlTag;
 use CeusMedia\HydrogenFramework\Environment as Environment;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Component\Config as ConfigComponent;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Component\File as FileComponent;
 use CeusMedia\HydrogenFramework\View\Helper\StyleSheet as CssHelper;
 use CeusMedia\HydrogenFramework\View\Helper\JavaScript as JsHelper;
-
-use UI_HTML_PageFrame as HtmlPage;
-use UI_HTML_Tag as HtmlTag;
 
 use InvalidArgumentException;
 use RuntimeException;
@@ -279,7 +278,7 @@ class Page extends HtmlPage
 	/**
 	 *	@todo		set type hint after CeusMedia::Common updated
 	 */
-	public function build( $bodyAttributes = array(), $htmlAttributes = array() )
+	public function build( $bodyAttributes = [], $htmlAttributes = [] ): string
 	{
 		$controller			= $this->env->getRequest()->get( '__controller' );
 		$action				= $this->env->getRequest()->get( '__action' );

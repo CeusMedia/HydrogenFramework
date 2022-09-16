@@ -1,11 +1,10 @@
 <?php
 namespace CeusMedia\HydrogenFramework\Environment\Resource;
 
+use CeusMedia\Common\Alg\Time\Clock as Clock;
 use CeusMedia\HydrogenFramework\Deprecation;
 use CeusMedia\HydrogenFramework\Environment as Environment;
 use CeusMedia\HydrogenFramework\Environment\Resource\Runtime\Profiler as Profiler;
-
-use Alg_Time_Clock as Clock;
 
 class Runtime
 {

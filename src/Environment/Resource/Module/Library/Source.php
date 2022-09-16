@@ -26,15 +26,14 @@
  */
 namespace CeusMedia\HydrogenFramework\Environment\Resource\Module\Library;
 
+use CeusMedia\Common\FS\File\Reader as FileReader;
+use CeusMedia\Common\FS\File\RecursiveNameFilter as RecursiveFileIndex;
+use CeusMedia\Common\Net\HTTP\Request\Sender as HttpRequestSender;
+use CeusMedia\Common\Net\Reader as HttpReader;
 use CeusMedia\HydrogenFramework\Environment as Environment;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\LibraryInterface as LibraryInterface;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Library\Abstraction as AbstractLibrary;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Reader as ModuleReader;
-
-use FS_File_RecursiveNameFilter as RecursiveFileIndex;
-use FS_File_Reader as FileReader;
-use Net_HTTP_Request_Sender as HttpRequestSender;
-use Net_Reader as HttpReader;
 
 use Exception;
 use RuntimeException;

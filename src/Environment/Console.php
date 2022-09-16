@@ -1,12 +1,11 @@
 <?php
 namespace CeusMedia\HydrogenFramework\Environment;
 
+use CeusMedia\Common\ADT\Collection\Dictionary as Dictionary;
+use CeusMedia\Common\CLI\ArgumentParser as ArgumentParser;
 use CeusMedia\HydrogenFramework\Environment;
 use CeusMedia\HydrogenFramework\Environment\Console\Messenger as Messenger;
 use CeusMedia\HydrogenFramework\Environment\Resource\Language as Language;
-
-use ADT_List_Dictionary as Dictionary;
-use CLI_ArgumentParser as ArgumentParser;
 
 use Exception;
 use RuntimeException;
@@ -30,22 +29,8 @@ use RuntimeException;
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			extend from (namespaced) Environment after all modules are migrated to 0.9
  */
-class Console extends \CMF_Hydrogen_Environment
+class Console extends Environment
 {
-	/**	@var	ArgumentParser			$request	Console Request Object */
-	protected $request;
-
-	/** @var	Messenger				$messenger	Messenger Object */
-	protected $messenger;
-
-	/** @var	Language				$language	Language Object */
-	protected $language;
-
-	/** @var	Dictionary				$session	Session Storage Object */
-	protected $session;
-
-	protected $pathConfig	= '';
-
 	/**	@var	string					$host		Detected HTTP host */
 	public $host;
 
@@ -61,12 +46,24 @@ class Console extends \CMF_Hydrogen_Environment
 	/**	@var	string					$url		Detected application base URL */
 	public $url;
 
+	/**	@var	ArgumentParser			$request	Console Request Object */
+	protected $request;
+
+	/** @var	Messenger				$messenger	Messenger Object */
+	protected $messenger;
+
+	/** @var	Language				$language	Language Object */
+	protected $language;
+
+	/** @var	Dictionary				$session	Session Storage Object */
+	protected $session;
+
 	/**
 	 *	Constructor, sets up Resource Environment.
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function __construct( array $options = array(), bool $isFinal = TRUE )
+	public function __construct( array $options = [], bool $isFinal = TRUE )
 	{
 //		ob_start();
 		try{

@@ -10,7 +10,7 @@
  */
 namespace CeusMedia\HydrogenFramework\Environment\Resource;
 
-use Alg_Time_Clock as Clock;
+use CeusMedia\Common\Alg\Time\Clock as Clock;
 
 /**
  *	...

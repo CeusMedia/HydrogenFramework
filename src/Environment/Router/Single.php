@@ -26,11 +26,11 @@
  */
 namespace CeusMedia\HydrogenFramework\Environment\Router;
 
+use CeusMedia\Common\Net\HTTP\Request as HttpRequest;
 use CeusMedia\HydrogenFramework\Environment\RouterInterface;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 
 use RuntimeException;
-use Net_HTTP_Request as HttpRequest;
 
 /**
  *	...

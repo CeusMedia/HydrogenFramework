@@ -26,10 +26,10 @@
  */
 namespace CeusMedia\HydrogenFramework\Application\Web;
 
+use CeusMedia\Common\Net\HTTP\Header\Field as HttpHeaderField;
+use CeusMedia\Common\UI\HTML\Exception\Page as HtmlExceptionPage;
 use CeusMedia\HydrogenFramework\Dispatcher\General as GeneralDispatcher;
 use Exception;
-use Net_HTTP_Header_Field as HttpHeaderField;
-use UI_HTML_Exception_Page as HtmlExceptionPage;
 
 /**
  *	Application class for a MVC web site.

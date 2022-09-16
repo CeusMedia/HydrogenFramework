@@ -1,12 +1,12 @@
 <?php
 namespace CeusMedia\HydrogenFramework\Run;
 
+use CeusMedia\Common\Loader;
+use CeusMedia\Common\UI\HTML\Exception\Page as ExceptionPage;
 use CeusMedia\HydrogenFramework\Application\Web\Site as WebApp;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
-use UI_HTML_Exception_Page as ExceptionPage;
 use Exception;
 use ErrorException;
-use Loader;
 
 class Web
 {
@@ -58,7 +58,7 @@ class Web
 		if( !file_exists( $pathVendor ) )
 		 	die( 'Please install first, using composer!' );
 		require_once $pathVendor.'autoload.php';
-		require_once $pathVendor.'ceus-media/common/compat.php';
+		require_once $pathVendor.'ceus-media/common/src/compat8.php';
 
 		if( NULL !== $this->defaultTimezone )
 			date_default_timezone_set( $this->defaultTimezone );				//  set default time zone

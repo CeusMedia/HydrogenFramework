@@ -27,16 +27,15 @@
  */
 namespace CeusMedia\HydrogenFramework\View\Helper;
 
-use CeusMedia\HydrogenFramework\Environment;
+use CeusMedia\Common\FS\File\Iterator as FileIterator;
+use CeusMedia\Common\FS\File\Reader as FileReader;
+use CeusMedia\Common\FS\File\Writer as FileWriter;
+use CeusMedia\Common\Net\API\Google\ClosureCompiler;
+use CeusMedia\Common\Net\Reader as NetReader;
+use CeusMedia\Common\UI\HTML\Tag as HtmlTag;
 use CeusMedia\HydrogenFramework\Deprecation;
+use CeusMedia\HydrogenFramework\Environment;
 use CeusMedia\HydrogenFramework\Environment\Resource\Captain as CaptainResource;
-
-use FS_File_Iterator as FileIterator;
-use FS_File_Reader as FileReader;
-use FS_File_Writer as FileWriter;
-use Net_API_Google_ClosureCompiler;
-use Net_Reader as NetReader;
-use UI_HTML_Tag as HtmlTag;
 
 use JSMin;
 use RuntimeException;

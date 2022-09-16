@@ -10,7 +10,7 @@
  */
 namespace CeusMedia\HydrogenFramework;
 
-use Deprecation as CommonDeprecation;
+use CeusMedia\Common\Deprecation as CommonDeprecation;
 use Exception;
 
 /**

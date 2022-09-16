@@ -26,9 +26,9 @@
  */
 namespace CeusMedia\HydrogenFramework\Application;
 
+use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
 use CeusMedia\HydrogenFramework\Environment;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
-use Alg_Object_Factory as ObjectFactory;
 
 /**
  *	Base application class for Hydrogen application.

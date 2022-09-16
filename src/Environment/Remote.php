@@ -29,7 +29,7 @@ namespace CeusMedia\HydrogenFramework\Environment;
 use CeusMedia\HydrogenFramework\Environment;
 use CeusMedia\HydrogenFramework\Environment\Remote\Messenger;
 
-use Loader;
+use CeusMedia\Common\Loader;
 
 /**
  *	Setup for Resource Environment for Hydrogen Applications.
@@ -43,7 +43,7 @@ use Loader;
  *	@todo			finish path resolution (path is set twice at the moment)
  *	@todo			extend from (namespaced) Environment after all modules are migrated to 0.9
  */
-class Remote extends \CMF_Hydrogen_Environment
+class Remote extends Environment
 {
 	/**	@var	boolean		$hasDatabase		Flag: indicates availability of a database connection */
 	public $hasDatabase		= FALSE;

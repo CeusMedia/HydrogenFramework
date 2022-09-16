@@ -1,9 +1,9 @@
 <?php
 namespace CeusMedia\HydrogenFramework\Model\File;
 
-use ADT_JSON_Formater as JsonFormatter;
-use FS_File_Writer as FileWriter;
-use FS_File_JSON_Reader as JsonFileReader;
+use CeusMedia\Common\ADT\JSON\Pretty as JsonFormatter;
+use CeusMedia\Common\FS\File\Writer as FileWriter;
+use CeusMedia\Common\FS\File\JSON\Reader as JsonFileReader;
 
 class JSON extends Abstraction
 {

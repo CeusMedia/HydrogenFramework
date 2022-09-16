@@ -27,6 +27,7 @@
 namespace CeusMedia\HydrogenFramework\Environment\Resource\Module\Library;
 
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\LibraryInterface;
+
 use RangeException;
 use RuntimeException;
 

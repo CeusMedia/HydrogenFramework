@@ -11,7 +11,7 @@
 namespace CeusMedia\HydrogenFramework\Environment\Resource;
 
 use CeusMedia\HydrogenFramework\Deprecation;
-use FS_File_RecursiveRegexFilter as RecursiveRegexFileFilter;
+use CeusMedia\Common\FS\File\RecursiveRegexFilter as RecursiveRegexFileFilter;
 use ReflectionClass;
 use ReflectionMethod;
 use stdClass;

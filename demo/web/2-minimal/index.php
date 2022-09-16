@@ -1,6 +1,9 @@
 <?php
+ini_set('display_errors', 'on');
 #require_once '../../../src/Run/Web.php';
-require '../../../vendor/autoload.php';
+
+$pathVendor	= dirname( __DIR__, 3 ).'/vendor/';
+( include_once $pathVendor.'autoload.php' ) or die( 'Install packages using composer, first!'.PHP_EOL );
 
 use CeusMedia\HydrogenFramework\Run\Web as WebRunner;
 
@@ -12,7 +15,7 @@ $appRun->catchErrors		= !TRUE;
 //$appRun->defaultTimezone	= 'Europe/Berlin';								//  default time zone
 $appRun->classFileExtension	= 'php';
 $appRun->paths				= [
-	'vendor'		=> '../../../vendor/',
+	'vendor'		=> $pathVendor,
 	'config'		=> '',
 	'classes'		=> '',
 	'contents'		=> '',

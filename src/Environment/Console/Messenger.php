@@ -27,7 +27,7 @@
 namespace CeusMedia\HydrogenFramework\Environment\Console;
 
 use CeusMedia\HydrogenFramework\Environment\Resource\Messenger as MessengerResource;
-use CLI;
+use CeusMedia\Common\CLI;
 
 /**
  *	Fake messenger for console enviroment.

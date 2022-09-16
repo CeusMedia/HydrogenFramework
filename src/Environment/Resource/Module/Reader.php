@@ -296,10 +296,10 @@ class Reader
 	 *	Decorates module object by framework support information, if set.
 	 *	@access		protected
 	 *	@param		object			$object			Data object of module
-	 *	@param		XML_Element		$xml			XML tree object of module created by ::load
+	 *	@param		XmlElement		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 */
-	protected static function decorateObjectWithFrameworks( $object, XML_Element $xml ): bool
+	protected static function decorateObjectWithFrameworks( $object, XmlElement $xml ): bool
 	{
 		$frameworks	= self::castNodeAttributes( $xml, 'frameworks', 'string', 'Hydrogen:<0.9' );
 		if( !strlen( trim( $frameworks ) ) )

@@ -26,12 +26,11 @@
  */
 namespace CeusMedia\HydrogenFramework\Environment\Resource\Module;
 
+use CeusMedia\Common\FS\File\Writer as FileWriter;
+use CeusMedia\Common\XML\DOM\Formater as XmlFormatter;
+use CeusMedia\Common\XML\ElementReader as XmlReader;
 use CeusMedia\HydrogenFramework\Environment;
 use CeusMedia\HydrogenFramework\Deprecation;
-
-use FS_File_Writer as FileWriter;
-use XML_DOM_Formater as XmlFormatter;
-use XML_ElementReader as XmlReader;
 
 use InvalidArgumentException;
 use OutOfRangeException;

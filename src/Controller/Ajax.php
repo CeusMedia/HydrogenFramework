@@ -4,10 +4,10 @@
  */
 namespace CeusMedia\HydrogenFramework\Controller;
 
+use CeusMedia\Common\Net\HTTP\Response as HttpResponse;
+use CeusMedia\Common\Net\HTTP\Response\Sender as HttpResponseSender;
 use CeusMedia\HydrogenFramework\Environment as Environment;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
-use Net_HTTP_Response as HttpResponse;
-use Net_HTTP_Response_Sender as HttpResponseSender;
 use Exception;
 use Throwable;
 

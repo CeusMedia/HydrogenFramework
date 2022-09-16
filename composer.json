@@ -16,8 +16,8 @@
     "jabber": "cwuerker@ceusmedia.de"
   },
   "require": {
-    "php": ">=7.2",
-    "ceus-media/common": "* | dev-master",
+    "php": ">=7.3",
+    "ceus-media/common": "0.9.x-dev",
     "ceus-media/database": "* | dev-master"
   },
   "require-dev": {

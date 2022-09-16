@@ -26,9 +26,9 @@
  */
 namespace CeusMedia\HydrogenFramework\View\Helper\Navigation;
 
-use CMF_Hydrogen_Environment_Web as WebEnv;
 use CeusMedia\HydrogenFramework\Deprecation;
-use UI_HTML_Tag as HtmlTag;
+use CeusMedia\HydrogenFramework\Environment\Web as WebEnv;
+use CeusMedia\Common\UI\HTML\Tag as HtmlTag;
 
 /**
  *	View helper to render a tab navigation from defined module page links.

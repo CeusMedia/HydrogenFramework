@@ -28,7 +28,7 @@ namespace CeusMedia\HydrogenFramework\Environment;
 
 use CeusMedia\HydrogenFramework\Environment;
 
-use ADT_List_Dictionary as Dictionary;
+use CeusMedia\Common\ADT\Collection\Dictionary as Dictionary;
 
 /**
  *	Empty environment for remote dummy use.

@@ -26,11 +26,11 @@
  */
 namespace CeusMedia\HydrogenFramework\Dispatcher;
 
+use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
+use CeusMedia\Common\Alg\Obj\MethodFactory as MethodFactory;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 use CeusMedia\HydrogenFramework\Controller;
 
-use Alg_Object_Factory as ObjectFactory;
-use Alg_Object_MethodFactory as MethodFactory;
 use RuntimeException;
 use ReflectionMethod;
 

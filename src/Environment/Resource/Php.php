@@ -26,9 +26,10 @@
  */
 namespace CeusMedia\HydrogenFramework\Environment\Resource;
 
+use CeusMedia\Common\ADT\Constant;
 use CeusMedia\HydrogenFramework\Environment;
 use CeusMedia\HydrogenFramework\Environment\Resource\Php\Version as VersionResource;
-use ADT_Constant;
+
 use Exception;
 use RangeException;
 use RuntimeException;

@@ -26,10 +26,9 @@
  */
 namespace CeusMedia\HydrogenFramework\View\Helper;
 
+use CeusMedia\Common\Alg\Time\DurationPhraser as TimeDurationPhraser;
+use CeusMedia\Common\UI\HTML\Tag as HtmlTag;
 use CeusMedia\HydrogenFramework\Environment;
-
-use Alg_Time_DurationPhraser as TimeDurationPhraser;
-use UI_HTML_Tag as HtmlTag;
 
 use InvalidArgumentException;
 /**

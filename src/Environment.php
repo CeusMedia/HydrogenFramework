@@ -28,6 +28,8 @@
  */
 namespace CeusMedia\HydrogenFramework;
 
+use CeusMedia\Common\ADT\Collection\Dictionary as Dictionary;
+use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
 use CeusMedia\HydrogenFramework\Environment\Exception as Exception;
 use CeusMedia\HydrogenFramework\Environment\Resource\Acl\Abstraction as AbstractAclResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\Acl\AllPublic as AllPublicAclResource;
@@ -42,8 +44,6 @@ use CeusMedia\HydrogenFramework\Environment\Resource\Php as PhpResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\Runtime as RuntimeResource;
 use CeusMedia\HydrogenFramework\Environment\Remote as RemoteEnvironment;
 
-use ADT_List_Dictionary as Dictionary;
-use Alg_Object_Factory as ObjectFactory;
 use ArrayAccess;
 use InvalidArgumentException;
 use RangeException;
@@ -134,7 +134,7 @@ class Environment implements ArrayAccess
 	protected $mode							= 0;
 
 	/**	@var	LocalModuleLibraryResource	$modules		Handler for local modules */
-	protected $modules						= array();
+	protected $modules;
 
 	/**	@var	array						$options		Set options to override static properties */
 	protected $options						= array();
@@ -158,7 +158,7 @@ class Environment implements ArrayAccess
 	 */
 	public function __construct( array $options = array(), bool $isFinal = TRUE )
 	{
-		$this->modules->callHook( 'Env', 'constructStart', $this );									//  call module hooks for end of env construction
+//		$this->modules->callHook( 'Env', 'constructStart', $this );									//  call module hooks for end of env construction
 		$frameworkConfig	= parse_ini_file( dirname( __DIR__ ).'/hydrogen.ini' );
 		$this->version		= $frameworkConfig['version'];
 

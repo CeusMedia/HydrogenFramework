@@ -26,13 +26,12 @@
  */
 namespace CeusMedia\HydrogenFramework;
 
+use CeusMedia\Common\ADT\Collection\Dictionary as Dictionary;
+use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
+use CeusMedia\Common\Alg\Obj\MethodFactory as MethodFactory;
+use CeusMedia\Common\Alg\Text\CamelCase as CamelCase;
+use CeusMedia\Common\Net\HTTP\Status as HttpStatus;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
-
-use ADT_List_Dictionary as Dictionary;
-use Alg_Object_Factory as ObjectFactory;
-use Alg_Object_MethodFactory as MethodFactory;
-use Alg_Text_CamelCase as CamelCase;
-use Net_HTTP_Status as HttpStatus;
 
 use DateTime;
 use RuntimeException;
@@ -91,7 +90,7 @@ class Controller
 	 *	@param		boolean								$setupView		Flag: auto create view object for controller (default: TRUE)
 	 *	@return		void
 	 */
-	public function __construct( WebEnvironment $env, bool $setupView = TRUE )
+	public function __construct( Environment $env, bool $setupView = TRUE )
 	{
 		$env->getRuntime()->reach( 'CMF_Controller('.get_class( $this ).')' );
 		static::$moduleId	= trim( static::$moduleId );

@@ -11,8 +11,8 @@
 namespace CeusMedia\HydrogenFramework\Environment\Resource;
 
 use CeusMedia\HydrogenFramework\Environment;
-use Alg_Object_Factory as ObjectFactory;
-use Alg_Text_CamelCase as CamelCase;
+use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
+use CeusMedia\Common\Alg\Text\CamelCase as CamelCase;
 use DomainException;
 use InvalidArgumentException;
 use RuntimeException;

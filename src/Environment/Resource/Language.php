@@ -26,11 +26,12 @@
  */
 namespace CeusMedia\HydrogenFramework\Environment\Resource;
 
+use CeusMedia\Common\FS\File\INI\Reader as IniFileReader;
+use CeusMedia\Common\FS\File\Reader as FileReader;
+use CeusMedia\Common\FS\Folder\Lister as FolderLister;
 use CeusMedia\HydrogenFramework\Environment;
+
 use RuntimeException;
-use FS_Folder_Lister as FolderLister;
-use FS_File_Reader as FileReader;
-use FS_File_INI_Reader as IniFileReader;
 use InvalidArgumentException;
 use DomainException;
 
@@ -269,12 +270,14 @@ class Language
 	 */
 	public function setLanguage( string $language ): self
 	{
-		$language	= strtolower( $language );
-		if( !in_array( $language, $this->languages ) )
-			throw new DomainException( 'Language "'.$language.'" is not supported' );
-		$this->data		= array();
-		$this->language	= $language;
-		$this->load( 'main', FALSE );
+		if( 0 !== count( $this->languages ) ){
+			$language	= strtolower( $language );
+			if( !in_array( $language, $this->languages ) )
+				throw new DomainException( 'Language "'.$language.'" is not supported' );
+			$this->data		= array();
+			$this->language	= $language;
+			$this->load( 'main', FALSE );
+		}
 		return $this;
 	}
 }
