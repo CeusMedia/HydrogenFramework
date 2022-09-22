@@ -1,8 +1,9 @@
-<?php
+<?php /** @noinspection PhpUnused */
+
 /**
  *	Generic Model Class of Framework Hydrogen.
  *
- *	Copyright (c) 2007-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2007-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +21,7 @@
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2021 Christian Würker
+ *	@copyright		2007-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -42,7 +43,7 @@ use RuntimeException;
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2021 Christian Würker
+ *	@copyright		2007-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -53,9 +54,9 @@ class Model
 	/**	@var		string					$name			Name of Database Table without Prefix */
 	protected $name							= "";
 	/**	@var		array					$columns		List of Database Table Columns */
-	protected $columns						= array();
+	protected $columns						= [];
 	/**	@var		array					$name			List of foreign Keys of Database Table */
- 	protected $indices						= array();
+ 	protected $indices						= [];
 	/**	@var		string					$primaryKey		Primary Key of Database Table */
 	protected $primaryKey					= "";
 	/**	@var		DatabaseTableWriter		$table			Database Table Writer Object for reading from and writing to Database Table */
@@ -118,7 +119,7 @@ class Model
 	 *	@param		array			$conditions		Map of conditions
 	 *	@return		integer			Number of entries
 	 */
-	public function count( array $conditions = array() ): int
+	public function count( array $conditions = [] ): int
 	{
 		return $this->table->count( $conditions );
 	}
@@ -162,12 +163,12 @@ class Model
 	/**
 	 *	Modifies data of single row by ID.
 	 *	@access		public
-	 *	@param		integer			$id				ID to focus on
+	 *	@param		string			$id				ID to focus on
 	 *	@param		array			$data			Data to edit
 	 *	@param		boolean			$stripTags		Flag: strip HTML Tags from values, default: yes
 	 *	@return		integer			Number of changed rows
 	 */
-	public function edit( $id, $data, bool $stripTags = TRUE )
+	public function edit( string $id, array $data, bool $stripTags = TRUE ): int
 	{
 		$this->table->focusPrimary( $id );
 		$result	= 0;
@@ -186,7 +187,7 @@ class Model
 	 *	@param		boolean			$stripTags		Flag: strip HTML Tags from values, default: yes
 	 *	@return		integer			Number of changed rows
 	 */
-	public function editByIndices( array $indices, $data, bool $stripTags = TRUE )
+	public function editByIndices( array $indices, array $data, bool $stripTags = TRUE )
 	{
 		$indices	= $this->checkIndices( $indices, TRUE, TRUE );
 		return $this->table->updateByConditions( $data, $indices, $stripTags );
@@ -195,11 +196,11 @@ class Model
 	/**
 	 *	Returns Data of single Line by ID.
 	 *	@access		public
-	 *	@param		integer			$id				ID to focus on
+	 *	@param		string			$id				ID to focus on
 	 *	@param		string			$field			Single Field to return
 	 *	@return		mixed
 	 */
-	public function get( $id, $field = '' )
+	public function get( string $id, string $field = '' )
 	{
 		$field	= $this->checkField( $field, FALSE, TRUE );
 		$data	= $this->cache->get( $this->cacheKey.$id );
@@ -226,7 +227,7 @@ class Model
 	 *	@param		boolean			$strict			Flag: throw exception if result is empty and fields are selected (default: FALSE)
 	 *	@return		array
 	 */
-	public function getAll( array $conditions = array(), array $orders = array(), array $limits = array(), array $fields = array(), array $groupings = array(), array $havings = array(), bool $strict = FALSE ): array
+	public function getAll( array $conditions = [], array $orders = [], array $limits = [], array $fields = [], array $groupings = [], array $havings = [], bool $strict = FALSE ): array
 	{
 		$data	= $this->table->find( $fields, $conditions, $orders, $limits, $groupings, $havings );
 		if( $fields )
@@ -239,14 +240,14 @@ class Model
 	 *	Returns Data of all Lines selected by Index.
 	 *	@access		public
 	 *	@param		string			$key			Key of Index
-	 *	@param		string			$value			Value of Index
+	 *	@param		mixed			$value			Value of Index
 	 *	@param		array			$orders			Map of Orders to include in SQL Query
 	 *	@param		array			$limits			List of Limits to include in SQL Query
 	 *	@param		array			$fields			List of fields or one field to return from result
 	 *	@param		boolean			$strict			Flag: throw exception if result is empty and fields are selected (default: FALSE)
 	 *	@return		array
 	 */
-	public function getAllByIndex( string $key, $value, array $orders = array(), array $limits = array(), array $fields = array(), bool $strict = FALSE ): array
+	public function getAllByIndex( string $key, $value, array $orders = [], array $limits = [], array $fields = [], bool $strict = FALSE ): array
 	{
 		$this->table->focusIndex( $key, $value );
 		$data	= $this->table->get( FALSE, $orders, $limits );
@@ -267,7 +268,7 @@ class Model
 	 *	@param		boolean			$strict			Flag: throw exception if result is empty and fields are selected (default: FALSE)
 	 *	@return		array
 	 */
-	public function getAllByIndices( array $indices = array(), array $orders = array(), array $limits = array(), array $fields = array(), bool $strict = FALSE )
+	public function getAllByIndices( array $indices = [], array $orders = [], array $limits = [], array $fields = [], bool $strict = FALSE ): array
 	{
 		$indices	= $this->checkIndices( $indices, TRUE, TRUE );
 		foreach( $indices as $key => $value )
@@ -284,7 +285,7 @@ class Model
 	 *	Returns data of first entry selected by index.
 	 *	@access		public
 	 *	@param		string			$key			Key of Index
-	 *	@param		string			$value			Value of Index
+	 *	@param		mixed			$value			Value of Index
 	 *	@param		array			$orders			Map of Orders to include in SQL Query
 	 *	@param		array			$fields			List of fields or one field to return from result
 	 *	@param		boolean			$strict			Flag: throw exception if result is empty (default: FALSE)
@@ -292,10 +293,10 @@ class Model
 	 *	@todo		change argument order: move fields to end
 	 *	@throws		InvalidArgumentException			If given fields list is neither a list nor a string
 	 */
-	public function getByIndex( string $key, $value, array $orders = array(), array $fields = array(), bool $strict = FALSE )
+	public function getByIndex( string $key, $value, array $orders = [], array $fields = [], bool $strict = FALSE )
 	{
 		if( is_string( $fields ) )
-			$fields	= strlen( trim( $fields ) ) ? array( trim( $fields ) ) : array();
+			$fields	= strlen( trim( $fields ) ) ? array( trim( $fields ) ) : [];
 		if( !is_array( $fields ) )
 			throw new InvalidArgumentException( 'Fields must be of array or string' );
 		foreach( $fields as $field )
@@ -317,10 +318,10 @@ class Model
 	 *	@throws		InvalidArgumentException			If given fields list is neither a list nor a string
 	 *	@todo  		change default value of argument 'strict' to TRUE
 	 */
-	public function getByIndices( array $indices, array $orders = array(), array $fields = array(), bool $strict = FALSE )
+	public function getByIndices( array $indices, array $orders = [], array $fields = [], bool $strict = FALSE )
 	{
 		if( is_string( $fields ) )
-			$fields	= strlen( trim( $fields ) ) ? array( trim( $fields ) ) : array();
+			$fields	= strlen( trim( $fields ) ) ? array( trim( $fields ) ) : [];
 		if( !is_array( $fields ) )
 			throw new InvalidArgumentException( 'Fields must be of array or string' );
 		foreach( $fields as $field )
@@ -352,7 +353,7 @@ class Model
 	 *	@param		array			$limits			List of Limits to include in SQL Query
 	 *	@return		array			List of distinct column values
 	 */
-	public function getDistinct( string $column, array $conditions, array $orders = array(), array $limits = array() ): array
+	public function getDistinct( string $column, array $conditions, array $orders = [], array $limits = [] ): array
 	{
 		return $this->table->getDistinctColumnValues( $column, $conditions, $orders, $limits );
 	}
@@ -367,7 +368,7 @@ class Model
 		return $this->table->getIndices();
 	}
 
-	public function getLastQuery()
+	public function getLastQuery(): ?string
 	{
 		return $this->table->getLastQuery();
 	}
@@ -397,10 +398,10 @@ class Model
 
 	/**
 	 *	Indicates whether a table row is existing by ID.
-	 *	@param		integer			$id				ID to focus on
+	 *	@param		string			$id				ID to focus on
 	 *	@return		boolean
 	 */
-	public function has( $id ): bool
+	public function has( string $id ): bool
 	{
 		if( $this->cache->has( $this->cacheKey.$id ) )
 			return TRUE;
@@ -411,7 +412,7 @@ class Model
 	 *	Indicates whether a table row is existing by index.
 	 *	@access		public
 	 *	@param		string			$key			Key of Index
-	 *	@param		string			$value			Value of Index
+	 *	@param		mixed			$value			Value of Index
 	 *	@return		boolean
 	 */
 	public function hasByIndex( string $key, $value ): bool
@@ -433,10 +434,10 @@ class Model
 	/**
 	 *	Returns Data of single Line by ID.
 	 *	@access		public
-	 *	@param		integer			$id				ID to focus on
+	 *	@param		string			$id				ID to focus on
 	 *	@return		boolean
 	 */
-	public function remove( $id ): bool
+	public function remove( string $id ): bool
 	{
 		$this->table->focusPrimary( $id );
 		$result	= FALSE;
@@ -453,7 +454,7 @@ class Model
 	 *	Removes entries selected by index.
 	 *	@access		public
 	 *	@param		string			$key			Key of Index
-	 *	@param		string			$value			Value of Index
+	 *	@param		mixed			$value			Value of Index
 	 *	@return		boolean
 	 */
 	public function removeByIndex( string $key, $value ): bool
@@ -542,11 +543,6 @@ class Model
 	 */
 	protected function checkField( string $field, bool $mandatory = FALSE, bool $strict = TRUE )
 	{
-		if( !is_string( $field ) ){
-			if( !$strict )
-				return FALSE;
-			throw new InvalidArgumentException( 'Field must be a string' );
-		}
 		$field	= trim( $field );
 		if( !strlen( $field ) ){
 			if( $mandatory ){
@@ -572,7 +568,7 @@ class Model
 	 *	FYI: The next logical check - if index keys are valid columns and noted indices - is done by used table reader class.
 	 *	@access		protected
 	 *	@param		array 			$indices		Map of Index Keys and Values
-	 *	@param		boolean			$mandatory		Force atleast one pair, otherwise return FALSE or throw exception in strict mode
+	 *	@param		boolean			$mandatory		Force at least one pair, otherwise return FALSE or throw exception in strict mode
 	 *	@param		boolean			$strict			Strict mode (default): throw exception instead of returning FALSE
 	 *	@return		array|boolean	Map if valid, FALSE otherwise or exceptions in strict mode
 	 *	@throws		InvalidArgumentException		in strict mode if field is empty but mandatory
@@ -583,7 +579,7 @@ class Model
 		if( count( $indices ) === 0 && $mandatory ){
 			if( !$strict )
 				return FALSE;
-			throw new InvalidArgumentException( 'Index map must have atleast one pair' );
+			throw new InvalidArgumentException( 'Index map must have at least one pair' );
 		}
 		return $indices;
 	}
@@ -597,10 +593,10 @@ class Model
 	 *	@return		string|array|object				Structure depending on result and field list length
 	 *	@throws		InvalidArgumentException		If given fields list is neither a list nor a string
 	 */
-	protected function getFieldsFromResult( $result, array $fields = array(), bool $strict = TRUE )
+	protected function getFieldsFromResult( $result, array $fields = [], bool $strict = TRUE )
 	{
 		if( is_string( $fields ) )
-			$fields	= strlen( trim( $fields ) ) ? array( trim( $fields ) ) : array();
+			$fields	= strlen( trim( $fields ) ) ? array( trim( $fields ) ) : [];
 		if( !is_array( $fields ) )
 			throw new InvalidArgumentException( 'Fields must be of array or string' );
 		if( !$result ){
@@ -608,7 +604,7 @@ class Model
 				throw new Exception( 'Result is empty' );
 			if( count( $fields ) === 1 )
 				return NULL;
-			return array();
+			return [];
 		}
 		if( !count( $fields ) )
 			return $result;
@@ -617,6 +613,7 @@ class Model
 				throw new InvalidArgumentException( 'Field "'.$field.'" is not an existing column' );
 
 		if( count( $fields ) === 1 ){
+			$field	= current( $fields );
 			switch( $this->fetchMode ){
 				case PDO::FETCH_CLASS:
 				case PDO::FETCH_OBJ:
@@ -632,7 +629,7 @@ class Model
 		switch( $this->fetchMode ){
 			case PDO::FETCH_CLASS:
 			case PDO::FETCH_OBJ:
-				$map	= (object) array();
+				$map	= (object) [];
 				foreach( $fields as $field ){
 					if( !property_exists( $result, $field ) )
 						throw new DomainException( 'Field "'.$field.'" is not an column of result set' );
@@ -640,7 +637,7 @@ class Model
 				}
 				return $map;
 			default:
-				$list	= array();
+				$list	= [];
 				foreach( $fields as $field ){
 					if( !array_key_exists( $field, $result ) )
 						throw new DomainException( 'Field "'.$field.'" is not an column of result set' );

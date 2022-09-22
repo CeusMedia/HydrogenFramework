@@ -4,13 +4,15 @@
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2015-2021 Ceus Media
+ *	@copyright		2015-2022 Ceus Media
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+
 namespace CeusMedia\HydrogenFramework\Environment\Resource;
 
 use CeusMedia\HydrogenFramework\Environment;
+use DateTimeInterface;
 use ReflectionMethod;
 use Throwable;
 use DateTime;
@@ -20,7 +22,7 @@ use DateTime;
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2015-2021 Ceus Media
+ *	@copyright		2015-2022 Ceus Media
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -40,18 +42,18 @@ class Log
 		self::STRATEGY_CUSTOM_CALLBACK,
 	];
 
-	/**	@var	Environment	$env				Environment instance */
+	/**	@var	Environment			$env				Environment instance */
 	protected $env;
 
-	/**	@var	array						$lastStrategies		List of log strategies that end handling on positive result */
+	/**	@var	array				$lastStrategies		List of log strategies that end handling on positive result */
 	protected $lastStrategies	= [
 		self::STRATEGY_APP_DEFAULT,
 	];
 
-	/**	@var	string						$path				Path to log files */
+	/**	@var	string				$path				Path to log files */
 	protected $path;
 
-	/**	@var	array						$lastStrategies		List of log strategies to use */
+	/**	@var	array				$lastStrategies		List of log strategies to use */
 	protected $strategies		= [
 		self::STRATEGY_MODULE_HOOKS,
 		self::STRATEGY_APP_DEFAULT,
@@ -91,7 +93,7 @@ class Log
 			'message'		=> $message,
 			'context'		=> $context,
 			'env'			=> $this->env,
-			'datetime'		=> date( DateTime::RFC3339_EXTENDED ),
+			'datetime'		=> date( DateTimeInterface::RFC3339_EXTENDED ),
 			'microtime'		=> microtime( TRUE ),
 		];
 		foreach( $this->strategies as $strategy ){
@@ -135,7 +137,7 @@ class Log
 			'exception'		=> $exception,
 			'context'		=> $context,
 			'env'			=> $this->env,
-			'datetime'		=> date( DateTime::RFC3339_EXTENDED ),
+			'datetime'		=> date( DateTimeInterface::RFC3339_EXTENDED ),
 			'microtime'		=> microtime( TRUE ),
 		];
 		foreach( $this->strategies as $strategy ){
@@ -170,7 +172,7 @@ class Log
 	 *	@param		array		$callback		Callback, like [class, method] or [object, method]
 	 *	@return		self
 	 */
-	public function setCustomerLogCallback( $callback ): self
+	public function setCustomerLogCallback( array $callback ): self
 	{
 		$this->customLogCallback	= $callback;
 		return $this;
@@ -182,7 +184,7 @@ class Log
 	 *	@param		array		$callback		Callback, like [class, method] or [object, method]
 	 *	@return		self
 	 */
-	public function setCustomerExceptionCallback( $callback ): self
+	public function setCustomerExceptionCallback( array $callback ): self
 	{
 		$this->customExceptionCallback	= $callback;
 		return $this;

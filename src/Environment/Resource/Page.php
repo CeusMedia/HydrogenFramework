@@ -2,7 +2,7 @@
 /**
  *	XHTML Page Resource of Framework Hydrogen.
  *
- *	Copyright (c) 2010-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2010-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2010-2021 Christian Würker
+ *	@copyright		2010-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -44,7 +44,7 @@ use stdClass;
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2010-2021 Christian Würker
+ *	@copyright		2010-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -53,7 +53,7 @@ class Page extends HtmlPage
 	/**	@var	Environment		$env				Environment object */
 	public $env;
 
-	protected $bodyClasses		= array();
+	protected $bodyClasses		= [];
 
 	protected $packJavaScripts	= FALSE;
 
@@ -85,17 +85,13 @@ class Page extends HtmlPage
 		$this->js		= JsHelper::getInstance( $env );
 
 		$config			= $env->getConfig();
-		$pathStylesLib	= '';
-		if( $config->get( 'path.styles.lib' ) )
-			$pathStylesLib	= rtrim( $config->get( 'path.styles.lib' ), '/' ).'/';
-
 		$pathThemes		= rtrim( $config->get( 'path.themes' ), '/' ).'/';
 		$this->pathPrimer	= $pathThemes;
 		if( $config->get( 'layout.primer' ) )
 			$this->pathPrimer	= $pathThemes.$config->get( 'layout.primer' ).'/';
 		$this->pathCommon	= $pathThemes.'common/';
 		$this->pathTheme	= $pathThemes.$config->get( 'layout.theme' ).'/';
-		$this->css			= new \stdClass;
+		$this->css			= new stdClass;
 		$this->css->primer	= new CssHelper( $this->pathPrimer.'css/' );
 		$this->css->common	= new CssHelper( $this->pathCommon.'css/' );
 		$this->css->theme	= new CssHelper( $this->pathTheme.'css/' );
@@ -109,15 +105,14 @@ class Page extends HtmlPage
 		if( strlen( $title	= $config->get( 'app.name' ) ) )
 			$this->setTitle( $title );
 		if( ( $modules = $this->env->getModules() ) )												//  get module handler resource if existing
-			$modules->callHook( 'Page', 'init', $this );											//  call related module event hooks
-//		$this->applyModules();																		//  @todo kriss: remove, is called by environment now
+			$modules->callHook( 'Page', 'init', $this );								//  call related module event hooks
 	}
 
 	/**
 	 *	Note to class to be set on body tag.
 	 *	@access		public
 	 *	@param		string		$class			Class to be set on body tag
-	 *	@return		self						Instance for chainability
+	 *	@return		self						Instance for method chaining
 	 */
 	public function addBodyClass( string $class ): self
 	{
@@ -135,9 +130,9 @@ class Page extends HtmlPage
 	 *	@param		string		$fileName		Style file to load from common style folder
 	 *	@param		integer		$level			Load level, default: 5 (mid), less: earlier, more: later
 	 *	@param		array		$attributes		Map of style tag attributes
-	 *	@return		self						Instance for chainability
+	 *	@return		self						Instance for method chaining
 	 */
-	public function addCommonStyle( string $fileName, $level = 5, array $attributes = array() ): self
+	public function addCommonStyle( string $fileName, int $level = 5, array $attributes = [] ): self
 	{
 		$this->css->common->addUrl( $fileName, $level, $attributes );
 		return $this;
@@ -149,9 +144,9 @@ class Page extends HtmlPage
 	 *	@param		string		$fileName		Style file to load from primer style folder
 	 *	@param		integer		$level			Load level, default: 5 (mid), less: earlier, more: later
 	 *	@param		array		$attributes		Map of style tag attributes
-	 *	@return		self						Instance for chainability
+	 *	@return		self						Instance for method chaining
 	 */
-	public function addPrimerStyle( string $fileName, $level = 5, array $attributes = array() ): self
+	public function addPrimerStyle( string $fileName, int $level = 5, array $attributes = [] ): self
 	{
 		$this->css->primer->addUrl( $fileName, $level, $attributes );
 		return $this;
@@ -163,42 +158,41 @@ class Page extends HtmlPage
 	 *	@param		string		$fileName		Style file to load from theme style folder
 	 *	@param		integer		$level			Load level, default: 5 (mid), less: earlier, more: later
 	 *	@param		array		$attributes		Map of style tag attributes
-	 *	@return		self						Instance for chainability
+	 *	@return		self						Instance for method chaining
 	 */
-	public function addThemeStyle( string $fileName, $level = 5, array $attributes = array() ): self
+	public function addThemeStyle( string $fileName, int $level = 5, array $attributes = [] ): self
 	{
 		$this->css->theme->addUrl( $fileName, $level, $attributes );
 		return $this;
 	}
 
 	/**
-	 *	@todo		kriss: apply JS levels after JsHelper is supporting it
+	 *	@todo		apply JS levels after JsHelper is supporting it
 	 */
 	public function applyModules()
 	{
-		$config		= $this->env->getConfig()->getAll( 'module.', TRUE );							//  dictionary of (user modified) module settings
+		$config		= $this->env->getConfig()->getAll( 'module.', TRUE );			//  dictionary of (user modified) module settings
 		$modules	= $this->env->getModules();														//  get module handler resource
-		if( !$modules )																				//  module handler resource is not existing
+		if( 0 === $modules->count() )																//  no active modules found
 			return;
 
 		$pathScripts	= $this->env->getConfig()->get( 'path.scripts' );
 		$pathScriptsLib	= $this->env->getConfig()->get( 'path.scripts.lib' );
 		$pathStylesLib	= $this->env->getConfig()->get( 'path.styles.lib' );
-		$listConfig		= array();
-		$settings		= array();
+		$settings		= [];
 
 		foreach( $modules->getAll() as $module ){													//  iterate installed modules
-			$settings[$module->id]	= array(
+			$settings[$module->id]	= [
 //				'_id'		=> $module->id,
 //				'_title'	=> $module->title,
 //				'_version'	=> $module->version,
-			);
+			];
 			/** @var FileComponent $style */
 			foreach( $module->files->styles as $style ){											//  iterate module style files
 				if( !empty( $style->load ) && $style->load == "auto" ){								//  style file is to be loaded always
 					$source	= !empty( $style->source ) ? $style->source : NULL;						//  get source attribute if possible
 					$level	= !empty( $style->level ) ? $style->level : 'mid';						//  get load level (top, mid, end), default: mid
-					if( preg_match( "/^[a-z]+:\/\/.+$/", $style->file ) )							//  style file is absolute URL
+					if( preg_match( "/^[a-z]+:\/\/.+$/", $style->file ) )					//  style file is absolute URL
 						$this->css->theme->addUrl( $style->file, $level );							//  add style file URL
 					else if( $source == 'primer' )													//  style file is in primer theme
 						$this->addPrimerStyle( $style->file, $level );								//  load style file from primer theme folder
@@ -260,7 +254,7 @@ class Page extends HtmlPage
 		$modules->callHook( 'Page', 'applyModules', $this );										//  call related module event hooks
 
 		if( $this->env instanceof WebEnvironment ){
-			$settings['Env']	= array(
+			$settings['Env']	= [
 				'host'		=> $this->env->host,
 				'port'		=> $this->env->port,
 				'protocol'	=> $this->env->scheme,
@@ -268,9 +262,9 @@ class Page extends HtmlPage
 				'path'		=> $this->env->path,
 	//			'title'		=> $this->env->title,
 				'secure'	=> getEnv( 'HTTPS' ),
-			);
+			];
 			$script		= 'var settings = '.json_encode( $settings ).';';
-			$script		= HtmlTag::create( 'script', "<!--\n".$script."\n-->", array( 'type' => "text/javascript" ) );
+			$script		= HtmlTag::create( 'script', "<!--\n".$script."\n-->", ['type' => "text/javascript"] );
 			$this->addHead( $script );
 		}
 	}
@@ -299,12 +293,12 @@ class Page extends HtmlPage
 		$this->addBodyClass( 'action-'.$actionKey );
 		$this->addBodyClass( 'site-'.$controllerKey.'-'.$actionKey );
 
-		if( ( $modules = $this->env->getModules() ) ){												//  get module handler resource if existin
-			$data	= (object) array(
+		if( ( $modules = $this->env->getModules() ) ){												//  get module handler resource if existing
+			$data	= [
 				'content'   => $this->getBody(),
-			);
+			];
 			$modules->callHook( 'Page', 'build', $this, $data );									//  call related module event hooks
-			$this->setBody( $data->content );
+			$this->setBody( $data['content'] );
 		}
 
 		if( $this->packStyleSheets && $this->env->getRequest()->has( 'flushStyleCache') ){
@@ -320,14 +314,14 @@ class Page extends HtmlPage
 			'theme'		=> $this->css->theme->render( $this->packStyleSheets ),
 			'lib'		=> $this->css->lib->render( $this->packStyleSheets ),
 		];
-		foreach( $headStyleBlocks as $blockKey => $blocksContent )
+		foreach( $headStyleBlocks as $blocksContent )
 			if( strlen( trim( $blocksContent ) ) !== 0 )
 				$this->addHead( $blocksContent );
 
 		$this->addBody( $this->js->render() );
 
 		/*  --  BODY CLASSES  --  */
-		$classes	= array();
+		$classes	= [];
 		foreach( $this->bodyClasses as $class )
 			$classes[]	= $class;
 		if( isset( $bodyAttributes['class'] ) && strlen( trim( $bodyAttributes['class'] ) ) )
@@ -351,14 +345,14 @@ class Page extends HtmlPage
 	}
 
 	/**
-	 *	Notes to load a JavaScript in local scripts folder.
+	 *	Notes to load a JavaScript in local script folder.
 	 *	@access		public
 	 *	@param		string		$filePath		Script file path within scripts folder
 	 *	@param		integer		$level			Run level (load order), default: 5 (mid), less: earlier, more: later
-	 *	@return		self						Instance for chainability
-	 *	@throws		RuntimeException			if script file is not existint
+	 *	@return		self						Instance for method chaining
+	 *	@throws		RuntimeException			if script file is not existing
 	 */
-	public function loadLocalScript( string $filePath, $level = 5 ): self
+	public function loadLocalScript( string $filePath, int $level = 5 ): self
 	{
 		$path	= $this->env->getConfig()->get( 'path.scripts' );
 		if( !file_exists( $path.$filePath ) )
@@ -372,9 +366,9 @@ class Page extends HtmlPage
 	 *	@access		public
 	 *	@param		string		$script			JavaScript code to execute on ready
 	 *	@param		integer		$level			Run level (load order), default: 5 (mid), less: earlier, more: later
-	 *	@return		self						Instance for chainability
+	 *	@return		self						Instance for method chaining
 	 */
-	public function runScript( string $script, $level = 5 ): self
+	public function runScript( string $script, int $level = 5 ): self
 	{
 		$this->js->addScriptOnReady( $script, $level );
 		return $this;
@@ -384,7 +378,7 @@ class Page extends HtmlPage
 	 *	Deprecated.
 	 *	@param		boolean		$packJavaScripts		Flag: pack collected script files
 	 *	@param		boolean		$packStyleSheets		Flag: pack collected style files
-	 *	@return		self						Instance for chainability
+	 *	@return		self								Instance for method chaining
 	 *	@deprecated		will be removed in favour of module UI_Compressor
 	 *	@todo			step 1: enable messenger note and let apps adjust
 	 *	@todo			step 2: remove method

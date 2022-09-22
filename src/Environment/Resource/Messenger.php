@@ -2,7 +2,7 @@
 /**
  *	Message Output Handler of Framework Hydrogen.
  *
- *	Copyright (c) 2007-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2007-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,10 +20,11 @@
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2021 Christian Würker
+ *	@copyright		2007-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+
 namespace CeusMedia\HydrogenFramework\Environment\Resource;
 
 use CeusMedia\Common\Alg\Time\Converter as TimeConverter;
@@ -31,7 +32,6 @@ use CeusMedia\Common\UI\HTML\Elements as HtmlElements;
 use CeusMedia\Common\UI\HTML\Tag as HtmlTag;
 use CeusMedia\HydrogenFramework\Environment as WebEnvironment;
 
-use InvalidArgumentException;
 use ReflectionFunction;
 
 /**
@@ -39,7 +39,7 @@ use ReflectionFunction;
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2021 Christian Würker
+ *	@copyright		2007-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -51,13 +51,13 @@ class Messenger
 	/**	@var		boolean			$enabled		Flag: store messages in session */
 	protected $enabled;
 
-	/**	@var		array			$classes		CSS Classes of Message Types */
-	protected $classes	= array(
+	/**	@var		array			$classes		CSS classes of message types */
+	protected $classes	= [
 		'0'	=> 'failure',
 		'1'	=> 'error',
 		'2'	=> 'notice',
 		'3'	=> 'success',
-	);
+	];
 
 	protected $keyHeadings	= 'messenger_headings';
 
@@ -66,7 +66,7 @@ class Messenger
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		WebEnvironment	$env			Instance of any Session Handler
+	 *	@param		WebEnvironment	$env			Instance of any session handler
 	 *	@return		void
 	 */
 	public function __construct( WebEnvironment $env, bool $enabled = TRUE )
@@ -85,7 +85,7 @@ class Messenger
 	{
 		$headings	= $this->env->getSession()->get( $this->keyHeadings );
 		if( !is_array( $headings ) )
-			$headings	= array();
+			$headings	= [];
 		$headings[]	= $heading;
 		$this->env->getSession()->set( $this->keyHeadings, $headings );
 		return $this;
@@ -99,44 +99,42 @@ class Messenger
 	public function buildHeadings(): string
 	{
 		$headings	= $this->env->getSession()->get( $this->keyHeadings );
-		$heading		= implode( " / ", $headings );
-		return $heading;
+		return implode( " / ", $headings );
 	}
 
 	/**
-	 *	Builds Output for each Message on the Message Stack.
+	 *	Builds output for each message on the message stack.
 	 *	@access		public
-	 *	@param		string		$timeFormat		Date string to format message timestamp with
-	 *	@param		bool		$clear			Flag: clear stack in session after rendering
-	 *	@param		bool		$linkResources	Flag: try to link resources in message
+	 *	@param		string|NULL		$timeFormat		Date string to format message timestamp with
+	 *	@param		bool			$clear			Flag: clear stack in session after rendering
+	 *	@param		bool			$linkResources	Flag: try to link resources in message
 	 *	@return		string
 	 */
 	public function buildMessages( string $timeFormat = NULL, bool $clear = TRUE, bool $linkResources = FALSE ): string
 	{
 		$messages	= (array) $this->env->getSession()->get( $this->keyMessages );
 		$list		= '';
-		$ids		= array();
+		$ids		= [];
 		if( count( $messages ) ){
-			$list	= array();
+			$list	= [];
 			foreach( $messages as $message ){
-				if( $linkResources )																//  @todo	kriss: check what is the point of this? where is it used? can it be removed?
+				if( $linkResources )																//  realize URLs as links
 					$message['message']	= preg_replace( '/(http.+)("|\'| )/U', '<a href="\\1">\\1</a>\\2', $message['message'] );
 
-				/*  --  kriss: don't repeat yourself!  --  */
-				/*  (avoid dubplicate messages which were collected during several redirects)  */
+				/*  (avoid duplicate messages which were collected during several redirects)  */
 				$id	= md5( json_encode( array( $message['type'], $message['message'] ) ) );			//  calculate message ID
 				if( in_array( $id, $ids ) )															//  ID has been calculated before
 					continue;																		//  skip this duplicate message
 				$ids[]	= $id;																		//  note calculated ID
 
 				$class		= $this->classes[$message['type']];
-				$message	= HtmlTag::create( 'span', $message['message'], array( 'class' => 'message' ) );
+				$span		= HtmlTag::create( 'span', $message['message'], array( 'class' => 'message' ) );
 				if( $timeFormat && !empty( $message['timestamp'] ) ){
-					$time		= $message['timestamp'];
-					$time		= TimeConverter::convertToHuman( $time, $timeFormat );
-					$time		= '['.$time.'] ';
-					$time		= HtmlTag::create( 'span', $time, array( 'class' => 'time' ) );
-					$message	= $time.$message;
+					$time	= $message['timestamp'];
+					$time	= TimeConverter::convertToHuman( $time, $timeFormat );
+					$time	= '['.$time.'] ';
+					$time	= HtmlTag::create( 'span', $time, array( 'class' => 'time' ) );
+					$span	= $time.$span;
 				}
 				if( $this->env->getModules()->has( 'UI_JS_Messenger' ) ){
 					$button		= HtmlTag::create( "div", '<span></span>', array(
@@ -145,11 +143,11 @@ class Messenger
 						'alt'		=> 'ausblenden',
 						'title'		=> 'ausblenden',
 					 ) );
-					$message	= $message.$button;
+					$span	= $span.$button;
 				}
-				$list[] 	= HtmlElements::ListItem( $message, 0, array( 'class' => $class ) );
+				$list[] 	= HtmlElements::ListItem( $span, 0, array( 'class' => $class ) );
 			}
-			$list	= HtmlElements::unorderedList( $list, 0 );
+			$list	= HtmlElements::unorderedList( $list );
 			if( $clear )
 				$this->clear();
 		}
@@ -157,14 +155,14 @@ class Messenger
 	}
 
 	/**
-	 *	Clears stack of Messages.
+	 *	Clears stack of messages.
 	 *	@access		public
 	 *	@return		void
 	 */
 	public function clear()
 	{
-		$this->env->getSession()->set( $this->keyHeadings, array() );
-		$this->env->getSession()->set( $this->keyMessages, array() );
+		$this->env->getSession()->set( $this->keyHeadings, [] );
+		$this->env->getSession()->set( $this->keyMessages, [] );
 	}
 
 	public function enable( bool $yesOrNo ): self
@@ -179,7 +177,7 @@ class Messenger
 	}
 
 	/**
-	 *	Indicates wheteher an Error or a Failure has been noted.
+	 *	Indicates whether an Error or a Failure has been noted.
 	 *	@access		public
 	 *	@return		integer		Number of noted errors or failures
 	 */
@@ -194,11 +192,11 @@ class Messenger
 	}
 
 	/**
-	 *	Saves a Error Message on the Message Stack.
+	 *	Saves an error message on the message stack.
 	 *	@access		public
 	 *	@param		string		$message			Message to display
-	 *	@param		mixed|NULL	$arg1				Arguments to be set into Message
-	 *	@param		mixed|NULL	$arg2				Arguments to be set into Message
+	 *	@param		mixed|NULL	$arg1				Arguments to be set into message
+	 *	@param		mixed|NULL	$arg2				Arguments to be set into message
 	 *	@return		void
 	 */
 	public function noteError( string $message, $arg1 = NULL, $arg2 = NULL )
@@ -281,8 +279,6 @@ class Messenger
 	protected function noteMessage( int $type, string $message )
 	{
 		if( $this->enabled ){
-			if( is_array( $message ) || is_object( $message ) || is_resource( $message ) )
-				throw new InvalidArgumentException( 'Message must be a string or numeric' );
 			$messages	= (array) $this->env->getSession()->get( $this->keyMessages );
 			$messages[]	= array( "message" => $message, "type" => $type, "timestamp" => time() );
 			$this->env->getSession()->set( $this->keyMessages, $messages );

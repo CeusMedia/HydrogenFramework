@@ -36,7 +36,7 @@ class Web
 			$this->setupErrorHandling();
 			$this->setupEnvironment();
 
-			$app    = new WebApp();												//  create default web site application instance
+			$app	= new WebApp();												//  create default web site application instance
 			$app->run();														//  and run it
 		}
 		catch( Exception $t ){													//  an uncatched exception happend

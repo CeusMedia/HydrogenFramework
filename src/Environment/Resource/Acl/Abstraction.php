@@ -2,7 +2,7 @@
 /**
  *	Abstract access control list resource.
  *
- *	Copyright (c) 2011-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2011-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Acl
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2011-2021 Christian Würker
+ *	@copyright		2011-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -35,7 +35,7 @@ use InvalidArgumentException;
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Acl
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2011-2021 Christian Würker
+ *	@copyright		2011-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -43,17 +43,17 @@ abstract class Abstraction
 {
 	protected $env;
 
-	public $roleAccessNone	= 0;
-	public $roleAccessFull	= 1;
-	public $roleAccessAcl	= 2;
+	public const ROLE_ACCESS_NONE	= 0;
+	public const ROLE_ACCESS_ACL	= 1;
+	public const ROLE_ACCESS_FULL	= 128;
 
-	protected $controllerActions	= array();
-	protected $rights				= array();
-	protected $roles				= array();
+	protected $controllerActions	= [];
+	protected $rights				= [];
+	protected $roles				= [];
 	/*	@var		$publicLinks				Map of links with public access */
-	protected $linksPublic			= array();
-	protected $linksPublicInside	= array();
-	protected $linksPublicOutside	= array();
+	protected $linksPublic			= [];
+	protected $linksPublicInside	= [];
+	protected $linksPublicOutside	= [];
 
 	/**
 	 *	Constructor.
@@ -88,48 +88,63 @@ abstract class Abstraction
 	 *	Return list controller actions or matrix of controllers and actions of role.
 	 *	@abstract
 	 *	@public
-	 *	@param		string		$controller		Controller to list actions for, otherwise return matrix
-	 *	@param		integer		$roleId			Specified role, otherwise current role
-	 *	@return		array						List of actions or matrix of controllers and actions
+	 *	@param		string|NULL		$controller		Controller to list actions for, otherwise return matrix
+	 *	@param		string|NULL		$roleId			Specified role, otherwise current role
+	 *	@return		array							List of actions or matrix of controllers and actions
 	 */
-	abstract public function index( string $controller = NULL, $roleId = NULL );
+	abstract public function index( ?string $controller = NULL, ?string $roleId = NULL ): array;
+
+	public function getPublicInsideLinks(): array
+	{
+		return $this->linksPublicInside;
+	}
+
+	public function getPublicOutsideLinks(): array
+	{
+		return $this->linksPublicOutside;
+	}
+
+	public function getPublicLinks(): array
+	{
+		return $this->linksPublic;
+	}
 
 	/**
-	 *	Indicates wheter a role is system operator and has access to all controller actions.
+	 *	Indicates whether a role is system operator and has access to all controller actions.
 	 *	@access		public
-	 *	@param		integer		$roleId			Role ID
+	 *	@param		string		$roleId			Role ID
 	 *	@return		boolean
 	 */
-	public function hasFullAccess( $roleId ): bool
+	public function hasFullAccess( string $roleId ): bool
 	{
 		if( !$roleId )
 			return FALSE;
 		$role	= $this->getRole( $roleId );
 		if( !$role )
 			throw new InvalidArgumentException( 'Role with ID '.$roleId.' is not existing' );
-		return isset( $role->access ) && $role->access == $this->roleAccessFull;
+		return isset( $role->access ) && $role->access == self::ROLE_ACCESS_FULL;
 	}
 
 	/**
 	 *	Indicates whether a role has no access as all.
 	 *	@access		public
-	 *	@param		integer		$roleId			Role ID
+	 *	@param		string		$roleId			Role ID
 	 *	@return		boolean
 	 */
-	public function hasNoAccess( $roleId ): bool
+	public function hasNoAccess( string $roleId ): bool
 	{
 		if( !$roleId )
 			return FALSE;
 		$role	= $this->getRole( $roleId );
 		if( !$role )
 			throw new InvalidArgumentException( 'Role with ID '.$roleId.' is not existing' );
-		return !isset( $role->access ) || $role->access == $this->roleAccessNone;
+		return !isset( $role->access ) || $role->access == self::ROLE_ACCESS_NONE;
 	}
 
 	/**
 	 *	Indicates whether access to a controller action is allowed for a given role.
 	 *	@access		public
-	 *	@param		integer		$roleId			Role ID
+	 *	@param		string		$roleId			Role ID
 	 *	@param		string		$controller		Name of controller
 	 *	@param		string		$action			Name of action
 	 *	@return		integer		Right state
@@ -144,7 +159,7 @@ abstract class Abstraction
 	 *	 4: public access if outside
 	 *	 5: public access if inside
 	 */
-	public function hasRight( $roleId, string $controller = 'index', string $action = 'index' ): int
+	public function hasRight( string $roleId, string $controller = 'index', string $action = 'index' ): int
 	{
 		$controller	= strtolower( str_replace( '/', '_', $controller ) );
 		$linkPath	= $controller && $action ? $controller.'_'.$action : '';
@@ -174,84 +189,81 @@ abstract class Abstraction
 	/**
 	 *	Sets a list of links with public access.
 	 *	@access		public
-	 *	@param		array		$links			Map of links, eg. auth_login
+	 *	@param		array		$links			Map of links, e.g. auth_login
 	 *	@param		string		$mode			Mode: set (default) or append
-	 *	@return		void
-	 *	@todo		refactor return type to "self" and implement getPublicLinks()
+	 *	@return		self
 	 */
-	public function setPublicLinks( array $links, string $mode = 'set' )
+	public function setPublicLinks( array $links, string $mode = 'set' ): self
 	{
-		if( is_array( $links ) && count( $links ) ){
+		if( count( $links ) ){
 			if( $mode === 'append' )
 				foreach( $links as $link )
 					$this->linksPublic[]	= $link;
 			else
 				$this->linksPublic	= $links;
 		}
-		return $this->linksPublic;
+		return $this;
 	}
 
 	/**
 	 *	Sets a list of links with public access.
 	 *	@access		public
-	 *	@param		array		$links			Map of links, eg. auth_login
+	 *	@param		array		$links			Map of links, e.g. auth_login
 	 *	@param		string		$mode			Mode: set (default) or append
-	 *	@return		void
-	 *	@todo		refactor return type to "self" and implement getPublicInsideLinks()
+	 *	@return		self
 	 */
-	public function setPublicInsideLinks( array $links, string $mode = 'set' )
+	public function setPublicInsideLinks( array $links, string $mode = 'set' ): self
 	{
-		if( is_array( $links ) && count( $links ) ){
+		if( count( $links ) ){
 			if( $mode === 'append' )
 				foreach( $links as $link )
 					$this->linksPublicInside[]	= $link;
 			else
 				$this->linksPublicInside	= $links;
 		}
-		return $this->linksPublicInside;
+		return $this;
 	}
 
 	/**
 	 *	Sets a list of links with public access.
 	 *	@access		public
-	 *	@param		array		$links			Map of links, eg. auth_login
+	 *	@param		array		$links			Map of links, e.g. auth_login
 	 *	@param		string		$mode			Mode: set (default) or append
-	 *	@return		void
-	 *	@todo		refactor return type to "self" and implement getPublicOutsideLinks()
+	 *	@return		self
 	 */
-	public function setPublicOutsideLinks( array $links, string $mode = 'set' )
+	public function setPublicOutsideLinks( array $links, string $mode = 'set' ): self
 	{
-		if( is_array( $links ) && count( $links ) ){
+		if( count( $links ) ){
 			if( $mode === 'append' )
 				foreach( $links as $link )
 					$this->linksPublicOutside[]	= $link;
 			else
 				$this->linksPublicOutside	= $links;
 		}
-		return $this->linksPublicOutside;
+		return $this;
 	}
 
 	/**
-	 *	Allowes access to a controller action for a role.
+	 *	Allows access to a controller action for a role.
 	 *	@abstract
 	 *	@access		public
-	 *	@param		integer		$roleId			Role ID
+	 *	@param		string		$roleId			Role ID
 	 *	@param		string		$controller		Name of Controller
 	 *	@param		string		$action			Name of Action
 	 *	@return		integer
 	 */
-	abstract public function setRight( $roleId, string $controller, string $action );
+	abstract public function setRight( string $roleId, string $controller, string $action ): int;
 
 	//  --  PROTECTED  --  //
 
-	abstract protected function getRights( $roleId );
+	abstract protected function getRights( string $roleId ): array;
 
 	/**
 	 *	Returns Role.
 	 *	@abstract
 	 *	@access		protected
-	 *	@param		integer		$roleId			Role ID
+	 *	@param		string		$roleId			Role ID
 	 *	@return		array|object
 	 */
-	abstract protected function getRole( $roleId );
+	abstract protected function getRole( string $roleId );
 }

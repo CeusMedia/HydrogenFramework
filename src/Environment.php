@@ -4,7 +4,7 @@
  *	Will be extended by client channel environment, like Web or Console.
  *
  *
- *	Copyright (c) 2007-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2007-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -22,15 +22,18 @@
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2021 Christian Würker
+ *	@copyright		2007-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+
 namespace CeusMedia\HydrogenFramework;
 
+use CeusMedia\Cache\SimpleCacheInterface;
+use CeusMedia\Cache\SimpleCacheFactory;
 use CeusMedia\Common\ADT\Collection\Dictionary as Dictionary;
 use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
-use CeusMedia\HydrogenFramework\Environment\Exception as Exception;
+use CeusMedia\HydrogenFramework\Environment\Exception as EnvironmentException;
 use CeusMedia\HydrogenFramework\Environment\Resource\Acl\Abstraction as AbstractAclResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\Acl\AllPublic as AllPublicAclResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\CacheDummy as DummyCacheResource;
@@ -45,8 +48,10 @@ use CeusMedia\HydrogenFramework\Environment\Resource\Runtime as RuntimeResource;
 use CeusMedia\HydrogenFramework\Environment\Remote as RemoteEnvironment;
 
 use ArrayAccess;
+use Exception;
 use InvalidArgumentException;
 use RangeException;
+use ReflectionException;
 use RuntimeException;
 
 /**
@@ -56,7 +61,7 @@ use RuntimeException;
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2021 Ceus Media
+ *	@copyright		2007-2022 Ceus Media
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -80,11 +85,11 @@ class Environment implements ArrayAccess
 	public static $configFile				= 'config.ini';
 
 	/**	@var	array						$defaultPaths	Map of default paths to extend base configuration */
-	public static $defaultPaths				= array(
+	public static $defaultPaths				= [
 		'classes'	=> 'classes/',
 		'config'	=> 'config/',
 		'logs'		=> 'logs/',
-	);
+	];
 
 	public static $timezone					= NULL;
 
@@ -106,7 +111,7 @@ class Environment implements ArrayAccess
 	/** @var	AbstractAclResource			$acl			Implementation of access control list */
 	protected $acl;
 
-	/**	@var	object						$cache			Instance of cache adapter */
+	/**	@var	SimpleCacheInterface		$cache			Instance of simple cache adapter */
 	protected $cache;
 
 	/**	@var	CaptainResource				$captain		Instance of captain */
@@ -137,7 +142,7 @@ class Environment implements ArrayAccess
 	protected $modules;
 
 	/**	@var	array						$options		Set options to override static properties */
-	protected $options						= array();
+	protected $options						= [];
 
 	/**	@var	RuntimeResource				$runtime		Runtime Object */
 	protected $runtime;
@@ -155,8 +160,10 @@ class Environment implements ArrayAccess
 	 *	@param		boolean		$isFinal			Flag: there is no extending environment class, default: TRUE
 	 *	@return		void
 	 *	@todo		possible error: call to onInit is to soon of another environment if existing
+	 *	@throws		EnvironmentException
+	 *	@throws		Exception
 	 */
-	public function __construct( array $options = array(), bool $isFinal = TRUE )
+	public function __construct( array $options = [], bool $isFinal = TRUE )
 	{
 //		$this->modules->callHook( 'Env', 'constructStart', $this );									//  call module hooks for end of env construction
 		$frameworkConfig	= parse_ini_file( dirname( __DIR__ ).'/hydrogen.ini' );
@@ -164,7 +171,7 @@ class Environment implements ArrayAccess
 
 		static::$defaultPaths['cache']	= sys_get_temp_dir().'/cache/';
 		$this->options		= $options;																//  store given environment options
-		$this->path			= isset( $options['pathApp'] ) ? $options['pathApp'] : getCwd().'/';	//  detect application path
+		$this->path			= $options['pathApp'] ?? getCwd() . '/';								//  detect application path
 		$this->uri			= getCwd().'/';															//  detect application base URI
 
 		date_default_timezone_set( @date_default_timezone_get() );									//  avoid having no timezone set
@@ -186,6 +193,11 @@ class Environment implements ArrayAccess
 		$this->__onInit();																			//  default callback for construction end
 	}
 
+	/**
+	 *	@param		string		$key
+	 *	@return		mixed|null
+	 *	@throws		Exception
+	 */
 	public function __get( string $key )
 	{
 		if( $key === 'clock' )
@@ -200,7 +212,7 @@ class Environment implements ArrayAccess
 	 *	@param		boolean		$keepAppAlive			Flag: do not end execution right now if turned on
 	 *	@return		void
 	 */
-	public function close( array $additionalResources = array(), bool $keepAppAlive = FALSE )
+	public function close( array $additionalResources = [], bool $keepAppAlive = FALSE )
 	{
 		$resources	= array(																		//  list of resource handler member names, namely of ...
 			'config',																				//  ... base application configuration handler
@@ -223,9 +235,15 @@ class Environment implements ArrayAccess
 			exit( 0 );																				//  so end of environment is end of application
 	}
 
+	/**
+	 *	@param		string		$key
+	 *	@param		bool		$strict
+	 *	@return		mixed|null
+	 *	@throws		Exception
+	 */
 	public function get( string $key, bool $strict = TRUE )
 	{
-		if( isset( $this->$key ) && !is_null( $this->$key ) )
+		if( isset( $this->$key ) )
 			return $this->$key;
 		if( $key === 'clock' ){
 			Deprecation::getInstance()
@@ -265,16 +283,27 @@ class Environment implements ArrayAccess
 		return '';
 	}
 
-	public function getCache()
+	/**
+	 *	@return		SimpleCacheInterface
+	 */
+	public function getCache(): SimpleCacheInterface
 	{
 		return $this->cache;
 	}
 
+	/**
+	 *	@return		CaptainResource
+	 */
 	public function getCaptain(): CaptainResource
 	{
 		return $this->captain;
 	}
 
+	/**
+	 *	@return		RuntimeResource
+	 *	@throws		Exception
+	 *	@deprected	use getRuntime instead
+	 */
 	public function getClock(): RuntimeResource
 	{
 		Deprecation::getInstance()
@@ -314,7 +343,8 @@ class Environment implements ArrayAccess
 		return $this->language;
 	}
 
-	public function getLog(){
+	public function getLog(): LogResource
+	{
 		return $this->log;
 	}
 
@@ -356,7 +386,7 @@ class Environment implements ArrayAccess
 	 *	@return		string|NULL
 	 *	@throws		RangeException			if path is not configured using strict mode
 	 */
-	public function getPath( string $key, bool $strict = TRUE )
+	public function getPath( string $key, bool $strict = TRUE ): ?string
 	{
 		if( $strict && !$this->hasPath( $key ) )
 			throw new RangeException( 'Path "'.$key.'" is not configured' );
@@ -389,7 +419,7 @@ class Environment implements ArrayAccess
 	}
 
 	/**
-	 *	Indicates wheter a resource is an available object by its access method key.
+	 *	Indicates whether a resource is an available object by its access method key.
 	 *	@access		public
 	 *	@param		string		$key		Resource access method key, ie. session, language, request
 	 *	@return		boolean
@@ -400,7 +430,7 @@ class Environment implements ArrayAccess
 		if( is_callable( array( $this, $method ) ) )
 			if( is_object( call_user_func( array( $this, $method ) ) ) )
 				return TRUE;
-		if( isset( $this->$key ) && !is_null( isset( $this->$key ) ) )
+		if( $this->$key ?? FALSE )
 			return TRUE;
 		return FALSE;
 	}
@@ -415,14 +445,15 @@ class Environment implements ArrayAccess
 
 	public function hasModule( string $moduleId ): bool
 	{
-		if( !$this->hasModules() )
-			return FALSE;
-		return $this->getModules()->has( $moduleId );
+		return !$this->hasModules() && $this->modules->has( $moduleId );
 	}
 
+	/**
+	 *	@return		bool
+	 */
 	public function hasModules(): bool
 	{
-		return $this->modules !== NULL;
+		return $this->modules !== NULL && 0 !== count( $this->modules );
 	}
 
 	/**
@@ -452,7 +483,7 @@ class Environment implements ArrayAccess
 			$this->modules->callHook( 'Env', 'init', $this );										//  call related module event hooks
 	}
 
-	protected function detectMode()
+	protected function detectMode(): self
 	{
 		$modes	= preg_split( '/[_.:;>#@\/-]/', strtolower( $this->config->get( 'app.mode' ) ) );
 		foreach( $modes as $mode ){
@@ -475,31 +506,31 @@ class Environment implements ArrayAccess
 					break;
 			}
 		}
+		return $this;
 	}
 
 	/**
 	 *	Initialize remote access control list if roles module is installed.
-	 *	Calls hook and applies return class name. Otherwise use all-public handler.
+	 *	Calls hook and applies return class name. Otherwise, use all-public handler.
 	 *	@access		protected
-	 *	@return		void
+	 *	@return		self
+	 *	@throws		ReflectionException
 	 */
-	protected function initAcl()
+	protected function initAcl(): self
 	{
 		$config		= $this->getConfig();
 		$type		= AllPublicAclResource::class;
 		if( $this->hasModules() ){																	//  module support and modules available
-			$payload	= (object) ['className' => NULL];
+			$payload	= ['className' => NULL];
 			$isHandled	= $this->modules->callHook( 'Env', 'initAcl', $this, $payload );			//  call related module event hooks
 			if( $isHandled )
-				$type	= $payload->className;
+				$type	= $payload['className'];
 		}
 		$this->acl	= ObjectFactory::createObject( $type, array( $this ) );
-		$this->acl->roleAccessNone	= 0;
-		$this->acl->roleAccessFull	= 128;
 
-		$linksPublic		= array();
-		$linksPublicOutside	= array();
-		$linksPublicInside	= array();
+		$linksPublic		= [];
+		$linksPublicOutside	= [];
+		$linksPublicInside	= [];
 		foreach( $this->getModules()->getAll() as $module ){
 			foreach( $module->links as $link ){
 				switch( $link->access ){
@@ -523,44 +554,53 @@ class Environment implements ArrayAccess
 			$this->acl->setPublicInsideLinks( $linksPublicInside );
 
 		$this->runtime->reach( 'env: initAcl', 'Finished setup of access control list.' );
+		return $this;
 	}
 
-	protected function initCache()
+	protected function initCache(): self
 	{
-		$this->cache	= new DummyCacheResource();
+		$this->cache	= SimpleCacheFactory::createStorage('Noop' );
 		if( $this->modules )																		//  module support and modules available
 			$this->modules->callHook( 'Env', 'initCache', $this );									//  call related module event hooks
 		$this->runtime->reach( 'env: initCache', 'Finished setup of cache' );
+		return $this;
 	}
 
-	protected function initCaptain()
+	protected function initCaptain(): self
 	{
 		$this->captain	= new CaptainResource( $this );
 		$this->runtime->reach( 'env: initCaptain', 'Finished setup of event handler.' );
+		return $this;
 	}
 
-	protected function initClock()
+	/**
+	 *	@return		self
+	 *	@throws		Exception
+	 */
+	protected function initClock(): self
 	{
 		Deprecation::getInstance()
 			->setErrorVersion( '0.8.7.9' )
 			->setExceptionVersion( '0.9' )
 			->message( 'Use initRuntime() instead' );
 		$this->initRuntime();
+		return $this;
 	}
 
 	/**
 	 *	Sets up configuration resource reading main config file and module config files.
 	 *	@access		protected
-	 *	@return		void
+	 *	@return		self
+	 *	@throws		EnvironmentException
 	 */
-	protected function initConfiguration()
+	protected function initConfiguration(): self
 	{
 		$configFile	= static::$defaultPaths['config'].static::$configFile;							//  get config file @todo remove this old way
 		if( !empty( $this->options['configFile'] ) )												//  get config file from options @todo enforce this new way
 			$configFile	= $this->options['configFile'];												//  get config file from options
 		if( !file_exists( $configFile ) ){															//  config file not found
 			$message	= sprintf( 'Config file "%s" not existing', $configFile );
-			throw new Exception( $message );														//  quit with exception
+			throw new EnvironmentException( $message );														//  quit with exception
 		}
 		$data			= parse_ini_file( $configFile, FALSE );										//  parse configuration file (without section support)
 		ksort( $data );
@@ -577,6 +617,7 @@ class Environment implements ArrayAccess
 
 		$this->detectMode();
 		$this->runtime->reach( 'env: config', 'Finished setup of base app configuration.' );
+		return $this;
 	}
 
 	/**
@@ -584,62 +625,73 @@ class Environment implements ArrayAccess
 	 *	Calls hook Env::initDatabase to get resource.
 	 *	Calls hook Database::init if resource is available and retrieved
 	 *	@access		protected
-	 *	@return		void
+	 *	@return		self
+	 *	@todo		implement database connection pool/manager
 	 */
-	protected function initDatabase()
+	protected function initDatabase(): self
 	{
-		$data	= (object) array( 'managers' => array() );
+		$data	= ['managers' => []];
 		$this->captain->callHook( 'Env', 'initDatabase', $this, $data );									//  call events hooked to database init
-		if( count( $data->managers ) ){
-			$this->database	= current( $data->managers );
+		if( count( $data['managers'] ) ){
+			$this->database	= current( $data['managers'] );
 			$this->modules->callHook( 'Database', 'init', $this->database );									//  call events hooked to database init
 		}
 		$this->runtime->reach( 'env: database', 'Finished setup of database connection.' );
-	}
-
-	/**
-	 *	@todo  		why not keep the resource object instead of reflected class list? would need refactoring of resource and related modules, thou...
-	 *	@todo  		extract to resource module: question is where to store the resource? in env again?
-	 *	@todo  		to be deprecated in 0.9: please use module Resource_Disclosure instead
-	 */
-	protected function initDisclosure()
-	{
-		$disclosure	= new DisclosureResource( array() );
-		$this->disclosure	= $disclosure->reflect( 'classes/Controller/', array( 'classPrefix' => 'Controller_' ) );
-		$this->runtime->reach( 'env: disclosure', 'Finished setup of self disclosure handler.' );
-	}
-
-	/**
-	 *	@todo  		extract to resource module
-	 *	@todo  		extract to resource module: question is where to store the resource? in env again?
-	 *	@todo  		to be deprecated in 0.9: please use module Resource_Disclosure instead
-	 */
-	protected function initLog()
-	{
-		$this->log	= new LogResource( $this );
-	}
-
-	protected function initLanguage()
-	{
-		$this->language		= new LanguageResource( $this );
-		$this->runtime->reach( 'env: language' );
-	}
-
-	protected function initLogic()
-	{
-		$this->logic		= new LogicPoolResource( $this );
-		$this->runtime->reach( 'env: logic', 'Finished setup of logic pool.' );
+		return $this;
 	}
 
 	/**
 	 *	@access		protected
-	 *	@return		void
-	 *	@todo		remove support for base_config::module.acl.public
+	 *	@return		self
+	 *	@todo  		why not keep the resource object instead of reflected class list? would need refactoring of resource and related modules, thou...
+	 *	@todo  		extract to resource module: question is where to store the resource? in env again?
+	 *	@todo  		to be deprecated in 0.9: please use module Resource_Disclosure instead
 	 */
-	protected function initModules()
+	protected function initDisclosure(): self
+	{
+		$disclosure	= new DisclosureResource( [] );
+		$this->disclosure	= $disclosure->reflect( 'classes/Controller/', array( 'classPrefix' => 'Controller_' ) );
+		$this->runtime->reach( 'env: disclosure', 'Finished setup of self disclosure handler.' );
+		return $this;
+	}
+
+	/**
+	 *	@access		protected
+	 *	@return		self
+	 *	@todo  		extract to resource module
+	 *	@todo  		extract to resource module: question is where to store the resource? in env again?
+	 *	@todo  		to be deprecated in 0.9: please use module Resource_Disclosure instead
+	 */
+	protected function initLog(): self
+	{
+		$this->log	= new LogResource( $this );
+		return $this;
+	}
+
+	protected function initLanguage(): self
+	{
+		$this->language		= new LanguageResource( $this );
+		$this->runtime->reach( 'env: language' );
+		return $this;
+	}
+
+	protected function initLogic(): self
+	{
+		$this->logic		= new LogicPoolResource( $this );
+		$this->runtime->reach( 'env: logic', 'Finished setup of logic pool.' );
+		return $this;
+	}
+
+	/**
+	 *	@access		protected
+	 *	@return		self
+	 *	@todo		remove support for base_config::module.acl.public
+	 *	@throws		Exception
+	 */
+	protected function initModules(): self
 	{
 		$this->runtime->reach( 'env: initModules: start', 'Started setup of modules.' );
-		$public	= array();
+		$public	= [];
 		if( strlen( trim( $this->config->get( 'module.acl.public' ) ) ) ){
 			Deprecation::getInstance()
 				->setErrorVersion( '0.8.7.2' )
@@ -689,35 +741,39 @@ class Environment implements ArrayAccess
 			$this->modules->callHook( 'Env', 'initModules', $this );								//  call related module event hooks
 		$this->config->set( 'module.acl.public', implode( ',', array_unique( $public ) ) );			//  save public link list
 		$this->runtime->reach( 'env: initModules: end', 'Finished setup of modules.' );
+		return $this;
 	}
 
-	protected function initPhp()
+	protected function initPhp(): self
 	{
 		$this->php	= new PhpResource( $this );
+		return $this;
 	}
 
-	protected function initRuntime()
+	protected function initRuntime(): self
 	{
 		$this->runtime	= new RuntimeResource( $this );
 		$this->runtime->reach( 'env: initRuntime', 'Finished setup of profiler.' );
+		return $this;
 	}
 
-	public function offsetExists( $key )
+	public function offsetExists( $offset ): bool
 	{
 //		return property_exists( $this, $key );														//  PHP 5.3
-		return isset( $this->$key );																//  PHP 5.2
+		return isset( $this->$offset );																//  PHP 5.2
 	}
 
-	public function offsetGet( $key ){
-		return $this->get( $key );
+	public function offsetGet( $offset )
+	{
+		return $this->get( $offset );
 	}
 
-	public function offsetSet( $key, $value ){
-		return $this->set( $key, $value );
+	public function offsetSet( $offset, $value ){
+		return $this->set( $offset, $value );
 	}
 
-	public function offsetUnset( $key ){
-		return $this->remove( $key );
+	public function offsetUnset( $offset ){
+		return $this->remove( $offset );
 	}
 
 	public function remove( string $key ): self
@@ -750,8 +806,9 @@ class Environment implements ArrayAccess
 	 *	@param		boolean		$override	Flag: override path if already existing and strict mode off, default: yes
 	 *	@param		boolean		$strict		Flag: throw exception if already existing, default: yes
 	 *	@return		self
+	 *	@throws		RuntimeException
 	 */
-	public function setPath( string $key, string $path, bool $override = TRUE, $strict = TRUE ): self
+	public function setPath( string $key, string $path, bool $override = TRUE, bool $strict = TRUE ): self
 	{
 		if( $this->hasPath( $key ) && !$override && $strict )
 			throw new RuntimeException( 'Path "'.$key.'" is already set' );

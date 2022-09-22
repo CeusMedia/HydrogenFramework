@@ -2,7 +2,7 @@
 /**
  *	Base application class for Hydrogen application.
  *
- *	Copyright (c) 2007-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2007-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Application.Web
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2021 Christian Würker
+ *	@copyright		2007-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -29,13 +29,14 @@ namespace CeusMedia\HydrogenFramework\Application;
 use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
 use CeusMedia\HydrogenFramework\Environment;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
+use ReflectionException;
 
 /**
  *	Base application class for Hydrogen application.
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Application.Web
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2021 Christian Würker
+ *	@copyright		2007-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			Code Documentation
@@ -53,16 +54,13 @@ abstract class Abstraction
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		Environment			$env					Framework Environment
+	 *	@param		Environment|NULL			$env					Framework Environment
 	 *	@return		void
+	 *	@throws		ReflectionException
 	 */
 	public function __construct( Environment $env = NULL )
 	{
-		if( !$env )
-			$env		= ObjectFactory::createObject( self::$classEnvironment );
-		else if( is_string( $env ) )
-			$env		= ObjectFactory::createObject( $env );
-		$this->env		= $env;
+		$this->env	= $env ?? ObjectFactory::createObject( self::$classEnvironment );
 		if( self::$modulesNeeded )																	//  needed modules are defined
 			$this->checkNeededModules();															//  check for missing modules
 	}

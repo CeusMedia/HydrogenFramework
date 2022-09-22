@@ -31,12 +31,13 @@ use Exception;
 class Deprecation extends CommonDeprecation
 {
 	/**
-	 *	Contructor, needs to be called statically by getInstance.
+	 *	Constructor, needs to be called statically by getInstance.
 	 *	Will detect library version.
-	 *	Will set error version to curent library version by default.
+	 *	Will set error version to current library version by default.
 	 *	Will not set an exception version.
-	 *	@access		protected
-	 *	@return		void
+	 *	@access			protected
+	 *	@return			void
+	 *	@noinspection	PhpMissingParentConstructorInspection
 	 */
 	protected function __construct()
 	{
@@ -48,12 +49,12 @@ class Deprecation extends CommonDeprecation
 	}
 
 	/**
-	 *	Creates a new deprection object.
+	 *	Creates a new deprecation object.
 	 *	@static
 	 *	@access		public
-	 *	@return		Deprecation
+	 *	@return		self
 	 */
-	static public function getInstance(): Deprecation
+	static public function getInstance(): self
 	{
 		return new self();
 	}
@@ -65,11 +66,10 @@ class Deprecation extends CommonDeprecation
 	 *	Will throw a deprecation notice if set error version reached detected library version using PHP lower 5.3.
 	 *	@access		public
 	 *	@param		string		$message	Message to show
-	 *	@return		void
+	 *	@return		self
 	 *	@throws		Exception				if set exception version reached detected library version
-	 *	@todo		set type hint after CeusMedia::Common updated
 	 */
-	public function message( $message )
+	public function message( string $message ): self
 	{
 		$trace	= debug_backtrace();
 		$caller = next( $trace );
@@ -81,6 +81,7 @@ class Deprecation extends CommonDeprecation
 		if( version_compare( $this->version, $this->errorVersion ) >= 0 ){
 			self::notify( $message );
 		}
+		return $this;
 	}
 
 	/**
@@ -88,22 +89,18 @@ class Deprecation extends CommonDeprecation
 	 */
 	public static function notify( $message )
 	{
-		$message .= ', triggered';
-		if( version_compare( phpversion(), "5.3.0" ) >= 0 )
-			trigger_error( $message, E_USER_DEPRECATED );
-		else
-			trigger_error( 'Deprecated: '.$message, E_USER_NOTICE );
+		trigger_error( $message.', triggered', E_USER_DEPRECATED );
 	}
 
 	/**
 	 *	Set library version to start showing deprecation error or notice.
-	 *	Returns deprecation object for chainability.
+	 *	Returns deprecation object for method chaining.
 	 *	@access		public
 	 *	@param		string		$version	Library version to start showing deprecation error or notice
 	 *	@return		self
 	 *	@todo		set type hint after CeusMedia::Common updated
 	 */
-	public function setErrorVersion( $version ): self
+	public function setErrorVersion( string $version ): self
 	{
 		$this->errorVersion		= $version;
 		return $this;
@@ -111,13 +108,13 @@ class Deprecation extends CommonDeprecation
 
 	/**
 	 *	Set library version to start throwing deprecation exception.
-	 *	Returns deprecation object for chainability.
+	 *	Returns deprecation object for method chaining.
 	 *	@access		public
 	 *	@param		string		$version	Library version to start throwing deprecation exception
 	 *	@return		self
 	 *	@todo		set type hint after CeusMedia::Common updated
 	 */
-	public function setExceptionVersion( $version ): self
+	public function setExceptionVersion( string $version ): self
 	{
 		$this->exceptionVersion		= $version;
 		return $this;

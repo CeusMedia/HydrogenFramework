@@ -2,7 +2,7 @@
 /**
  *	Interface for module libraries.
  *
- *	Copyright (c) 2012-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2012-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module.Libary
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2012-2021 Christian Würker
+ *	@copyright		2012-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -31,7 +31,7 @@ namespace CeusMedia\HydrogenFramework\Environment\Resource\Module;
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module.Libary
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2012-2021 Christian Würker
+ *	@copyright		2012-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -46,7 +46,7 @@ interface LibraryInterface
 	 *	@param		boolean		$strict			Flag: throw exception if not found (default: yes)
 	 *	@return		object|NULL
 	 */
-	public function get( string $moduleId, bool $activeOnly = TRUE, bool $strict = TRUE );
+	public function get( string $moduleId, bool $activeOnly = TRUE, bool $strict = TRUE ): ?object;
 
 	/**
 	 *	Return a list of all modules found in source.
@@ -75,5 +75,5 @@ interface LibraryInterface
 	 *	@param		boolean		$forceReload	Flag: clear cache beforehand if available
 	 *	@return		object		Data object containing the result source and number of found modules
 	 */
-	public function scan( bool $useCache = FALSE, bool $forceReload = FALSE );
+	public function scan( bool $useCache = FALSE, bool $forceReload = FALSE ): object;
 }

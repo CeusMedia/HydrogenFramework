@@ -15,7 +15,7 @@ use RuntimeException;
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2010-2021 Ceus Media
+ *	@copyright		2010-2022 Ceus Media
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -24,7 +24,7 @@ use RuntimeException;
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2010-2021 Ceus Media
+ *	@copyright		2010-2022 Ceus Media
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			extend from (namespaced) Environment after all modules are migrated to 0.9
@@ -130,27 +130,30 @@ class Console extends Environment
 //		$this->config	= new Dictionary();
 //	}
 
-	protected function initLanguage()
+	protected function initLanguage(): self
 	{
 		$this->language		= new Language( $this );
 		$this->runtime->reach( 'env: language' );
+		return $this;
 	}
 
-	protected function initMessenger()
+	protected function initMessenger(): self
 	{
 		$this->messenger	= new Messenger( $this );
+		return $this;
 	}
 
-	protected function initRequest()
+	protected function initRequest(): self
 	{
 		$this->request	= new ArgumentParser();
 		$this->request->parseArguments();
+		return $this;
 	}
 
 	/**
 	 * Setup a "session", which is persistent storage for this run only.
 	 */
-	protected function initSession()
+	protected function initSession(): self
 	{
 		$this->session	= new Dictionary();
 		return $this;

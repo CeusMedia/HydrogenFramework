@@ -1,8 +1,9 @@
-<?php
+<?php /** @noinspection PhpComposerExtensionStubsInspection */
+
 /**
  *	Editor for local module XML files.
  *
- *	Copyright (c) 2012-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2012-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +21,7 @@
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2012-2021 Christian Würker
+ *	@copyright		2012-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -28,10 +29,12 @@ namespace CeusMedia\HydrogenFramework\Environment\Resource\Module;
 
 use CeusMedia\Common\FS\File\Writer as FileWriter;
 use CeusMedia\Common\XML\DOM\Formater as XmlFormatter;
+use CeusMedia\Common\XML\Element;
 use CeusMedia\Common\XML\ElementReader as XmlReader;
 use CeusMedia\HydrogenFramework\Environment;
 use CeusMedia\HydrogenFramework\Deprecation;
 
+use Exception;
 use InvalidArgumentException;
 use OutOfRangeException;
 use RuntimeException;
@@ -42,7 +45,7 @@ use SimpleXMLElement;
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2012-2021 Christian Würker
+ *	@copyright		2012-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			add support for hooks and jobs
@@ -52,6 +55,10 @@ class Editor
 	protected $path;
 	protected $nsXml	= 'http://www.w3.org/XML/1998/namespace';
 
+	/**
+	 *	@param		Environment		$env
+	 *	@throws		Exception
+	 */
 	public function __construct( Environment $env )
 	{
 		$this->path		= $env->getConfig()->get( 'path.config' ).'/modules/';
@@ -68,12 +75,12 @@ class Editor
 	/**
 	 *	Adds a new configuration pair to module XML file.
 	 *	@access		public
-	 *	@param		string		$moduleId	Module ID
-	 *	@param		string		$name		Author name
-	 *	@param		string		$email		Author email address
+	 *	@param		string			$moduleId	Module ID
+	 *	@param		string			$name		Author name
+	 *	@param		string|NULL		$email		Author email address
 	 *	@return		void
 	 */
-	public function addAuthor( string $moduleId, string $name, string $email = NULL )
+	public function addAuthor( string $moduleId, string $name, ?string $email = NULL )
 	{
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
 		$link		= $xml->addChild( 'author', $name );
@@ -85,9 +92,9 @@ class Editor
 	/**
 	 *	Adds a company to module XML file.
 	 *	@access		public
-	 *	@param		string		$moduleId	Module ID
-	 *	@param		string		$name		Company name
-	 *	@param		string		$site		Company web address
+	 *	@param		string			$moduleId	Module ID
+	 *	@param		string			$name		Company name
+	 *	@param		string|NULL		$site		Company web address
 	 *	@return		void
 	 */
 	public function addCompany( string $moduleId, string $name, ?string $site = NULL )
@@ -102,14 +109,14 @@ class Editor
 	/**
 	 *	Adds a new configuration pair to module XML file.
 	 *	@access		public
-	 *	@param		string		$moduleId	Module ID
-	 *	@param		string		$name		Pair key
-	 *	@param		string		$type		Type (boolean,integer,float,string)
-	 *	@param		string		$value		Pair value
-	 *	@param		string		$values		List of possible values
-	 *	@param		string		$mandatory	Flag: this pair needs to be set
-	 *	@param		string		$protected	Flag: do not deliver this pair to frontend
-	 *	@param		string		$title		Description
+	 *	@param		string			$moduleId	Module ID
+	 *	@param		string			$name		Pair key
+	 *	@param		string			$type		Type (boolean,integer,float,string)
+	 *	@param		string			$value		Pair value
+	 *	@param		string			$values		List of possible values
+	 *	@param		string			$mandatory	Flag: this pair needs to be set
+	 *	@param		string			$protected	Flag: do not deliver this pair to frontend
+	 *	@param		string|NULL		$title		Description
 	 *	@return		void
 	 */
 	public function addConfig( string $moduleId, string $name, string $type, string $value, string $values, string $mandatory, string $protected, ?string $title = NULL )
@@ -133,16 +140,17 @@ class Editor
 	/**
 	 *	Adds a new configuration pair to module XML file.
 	 *	@access		public
-	 *	@param		string		$moduleId	Module ID
-	 *	@param		string		$type		File resource type (class,template,locale,script,style,image)
-	 *	@param		string		$resource	Typed file resource
-	 *	@param		string		$source		Source, depending on type
-	 *	@param		string		$load		Load mode, empty or "auto"
+	 *	@param		string			$moduleId	Module ID
+	 *	@param		string			$type		File resource type (class,template,locale,script,style,image)
+	 *	@param		string			$resource	Typed file resource
+	 *	@param		string			$source		Source, depending on type
+	 *	@param		string|NULL		$load		Load mode, empty or "auto"
 	 *	@return		void
+	 *	@throws		Exception
 	 */
 	public function addFile( string $moduleId, string $type, string $resource, string $source, string $load = NULL )
 	{
-		$attributes	= array( 'source', 'load' );
+		$attributes	= ['source', 'load'];
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
 		if( !strlen( trim( $type ) ) )
 			throw new InvalidArgumentException( 'No type given' );
@@ -159,14 +167,15 @@ class Editor
 	/**
 	 *	Adds a new configuration pair to module XML file.
 	 *	@access		public
-	 *	@param		string		$moduleId	Module ID
-	 *	@param		string		$path		Link path
-	 *	@param		string		$link		?
-	 *	@param		string		$label		Link label
-	 *	@param		string		$access		Access mode (public|inside|outside|acl)
-	 *	@param		string		$language	Link language
-	 *	@param		string		$rank		Link rank in navigation
+	 *	@param		string			$moduleId	Module ID
+	 *	@param		string			$path		Link path
+	 *	@param		string|NULL		$link		?
+	 *	@param		string|NULL		$label		Link label
+	 *	@param		string|NULL		$access		Access mode (public|inside|outside|acl)
+	 *	@param		string|NULL		$language	Link language
+	 *	@param		string|NULL		$rank		Link rank in navigation
 	 *	@return		void
+	 *	@throws		Exception
 	 */
 	public function addLink( string $moduleId, string $path, ?string $link = NULL, ?string $label = NULL, ?string $access = NULL, ?string $language = NULL, ?string $rank = NULL )
 	{
@@ -185,6 +194,13 @@ class Editor
 		$this->saveModuleXml( $moduleId, $xml );													//  save modified module XML
 	}
 
+	/**
+	 *	@param		string		$moduleId
+	 *	@param		string		$type
+	 *	@param		string		$relatedModuleId
+	 *	@return		void
+	 *	@throws		Exception
+	 */
 	public function addRelation( string $moduleId, string $type, string $relatedModuleId )
 	{
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
@@ -195,6 +211,15 @@ class Editor
 		$this->saveModuleXml( $moduleId, $xml );													//  save modified module XML
 	}
 
+	/**
+	 *	@param		string		$moduleId
+	 *	@param		string		$ddl
+	 *	@param		string		$event
+	 *	@param		string		$type
+	 *	@param		string		$version
+	 *	@return		void
+	 *	@throws		Exception
+	 */
 	public function addSql( string $moduleId, string $ddl, string $event, string $type, string $version )
 	{
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
@@ -206,9 +231,20 @@ class Editor
 			$node->addAttribute( 'version', $version );												//  set update source version
 		}
 		$this->saveModuleXml( $moduleId, $xml );													//  save modified module XML
-
 	}
 
+	/**
+	 *	@param		string			$moduleId
+	 *	@param		int				$number
+	 *	@param		string			$path
+	 *	@param		string|NULL		$link
+	 *	@param		string|NULL		$label
+	 *	@param		string|NULL		$access
+	 *	@param		string|NULL		$language
+	 *	@param		$rank
+	 *	@return		void
+	 *	@throws		Exception
+	 */
 	public function editLink( string $moduleId, int $number, string $path, ?string $link = NULL, ?string $label = NULL, ?string $access = NULL, ?string $language = NULL, $rank = NULL )
 	{
 		$xml	= $this->loadModuleXml( $moduleId );												//  load module XML
@@ -228,6 +264,12 @@ class Editor
 		$this->saveModuleXml( $moduleId, $xml );													//  save modified module XML
 	}
 
+	/**
+	 *	@param		string		$moduleId
+	 *	@param		string		$name
+	 *	@return		bool
+	 *	@throws		Exception
+	 */
 	public function removeAuthor( string $moduleId, string $name ): bool
 	{
 		$xml	= $this->loadModuleXml( $moduleId );												//  load module XML
@@ -241,6 +283,12 @@ class Editor
 		return FALSE;
 	}
 
+	/**
+	 *	@param		string		$moduleId
+	 *	@param		string		$name
+	 *	@return		bool
+	 *	@throws		Exception
+	 */
 	public function removeCompany( string $moduleId, string $name ): bool
 	{
 		$xml	= $this->loadModuleXml( $moduleId );												//  load module XML
@@ -254,6 +302,12 @@ class Editor
 		return FALSE;
 	}
 
+	/**
+	 *	@param		string		$moduleId
+	 *	@param		string		$name
+	 *	@return		bool
+	 *	@throws		Exception
+	 */
 	public function removeConfig( string $moduleId, string $name ): bool
 	{
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
@@ -267,6 +321,13 @@ class Editor
 		return FALSE;
 	}
 
+	/**
+	 *	@param		string		$moduleId
+	 *	@param		string		$type
+	 *	@param		string		$resource
+	 *	@return		bool
+	 *	@throws		Exception
+	 */
 	public function removeFile( string $moduleId, string $type, string $resource ): bool
 	{
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
@@ -282,6 +343,12 @@ class Editor
 		return FALSE;
 	}
 
+	/**
+	 *	@param		string		$moduleId
+	 *	@param		int			$number
+	 *	@return		bool
+	 *	@throws		Exception
+	 */
 	public function removeLink( string $moduleId, int $number ): bool
 	{
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
@@ -305,6 +372,15 @@ class Editor
 		return FALSE;
 	}
 
+	/**
+	 *	@param		string			$moduleId
+	 *	@param		string			$event
+	 *	@param		string			$type
+	 *	@param		string|NULL		$versionFrom
+	 *	@param		string|NULL		$versionTo
+	 *	@return		bool
+	 *	@throws		Exception
+	 */
 	public function removeSql( string $moduleId, string $event, string $type, ?string $versionFrom = NULL, ?string $versionTo = NULL ): bool
 	{
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
@@ -331,7 +407,12 @@ class Editor
 		return in_array( $nodeName, $children );
 	}
 
-	protected function loadModuleXml( string $moduleId )
+	/**
+	 *	@param		string		$moduleId
+	 *	@return		Element
+	 *	@throws		Exception
+	 */
+	protected function loadModuleXml( string $moduleId ): Element
 	{
 		$moduleFile	= $this->path.$moduleId.'.xml';
 		if( !file_exists( $moduleFile ) )
@@ -339,7 +420,12 @@ class Editor
 		return XmlReader::readFile( $moduleFile );
 	}
 
-	protected function saveModuleXml( string $moduleId, SimpleXMLElement $xml )
+	/**
+	 *	@param		string				$moduleId
+	 *	@param		SimpleXMLElement	$xml
+	 *	@return		int
+	 */
+	protected function saveModuleXml( string $moduleId, SimpleXMLElement $xml ): int
 	{
 		$moduleFile	= $this->path.$moduleId.'.xml';
 		if( !file_exists( $moduleFile ) )

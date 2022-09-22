@@ -2,7 +2,7 @@
 /**
  *	Abstract module libraries.
  *
- *	Copyright (c) 2018-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2018-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module.Libary
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2018-2021 Christian Würker
+ *	@copyright		2018-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -36,7 +36,7 @@ use RuntimeException;
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module.Libary
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2018-2021 Christian Würker
+ *	@copyright		2018-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -61,7 +61,7 @@ abstract class Abstraction implements LibraryInterface
 	 *	@throws		RangeException				if module is not installed (using strict mode)
 	 *	@throws		RuntimeException			if module is not active (using strict mode and activeOnly)
 	 */
-	public function get( string $moduleId, bool $activeOnly = TRUE, bool $strict = TRUE )
+	public function get( string $moduleId, bool $activeOnly = TRUE, bool $strict = TRUE ): ?object
 	{
 		$moduleId	= $this->sanitizeId( $moduleId );
 		if( !array_key_exists( $moduleId, $this->modules ) ){										//  module is not installed

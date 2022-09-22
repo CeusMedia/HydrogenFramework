@@ -2,7 +2,7 @@
 /**
  *	Handler for local module library.
  *
- *	Copyright (c) 2012-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2012-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module.Library
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2012-2021 Christian Würker
+ *	@copyright		2012-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -33,22 +33,24 @@ use CeusMedia\HydrogenFramework\Environment as Environment;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Reader as ModuleReader;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\LibraryInterface as LibraryInterface;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Library\Abstraction as AbstractLibrary;
+use Countable;
+use RuntimeException;
 
 /**
  *	Handler for local module library.
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module.Library
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2012-2021 Christian Würker
+ *	@copyright		2012-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			Code Documentation
  */
-class Local extends AbstractLibrary implements LibraryInterface
+class Local extends AbstractLibrary implements Countable, LibraryInterface
 {
 	protected $env;
 	protected $modulePath;
-	protected $modules			= array();
+	protected $modules			= [];
 	protected $cacheFile;
 
 	/**
@@ -62,8 +64,9 @@ class Local extends AbstractLibrary implements LibraryInterface
 		$this->env			= $env;
 		$config				= $this->env->getConfig();
 		$envClass			= get_class( $this->env );
-		$this->modulePath	= $env->path.$envClass::$defaultPaths['config'].'modules/';
-		$this->cacheFile	= $this->modulePath.'../modules.cache.serial';
+		$defaultPaths		= $envClass::$defaultPaths;
+		$this->modulePath	= $env->path.$defaultPaths['config'].'modules/';
+		$this->cacheFile	= $env->path.$defaultPaths['config'].'modules.cache.serial';
 		if( $config->get( 'path.module.config' ) )
 			$this->modulePath	= $config->get( 'path.module.config' );
 		$this->env->getRuntime()->reach( 'Resource_Module_Library_Local::construction' );
@@ -71,14 +74,25 @@ class Local extends AbstractLibrary implements LibraryInterface
 	}
 
 	/**
+	 *	...
+	 *	@access		public
+	 *	@param		string		$resource		Name of resource (e.G. Page or View)
+	 *	@param		string		$event			Name of hook event (e.G. onBuild or onRenderContent)
+	 *	@param		object		$context		Context object, will be available inside hook as $context
+	 *	@param		array		$payload		Map of hook payload data, will be available inside hook as $payload and $data
+	 *	@return		integer						Number of called hooks for event
+	 *	@throws		RuntimeException			if given static class method is not existing
+	 *	@throws		RuntimeException			ig method call produces stdout output, for example warnings and notices
+	 *	@throws		RuntimeException			if method call is throwing an exception
+	 *	@todo 		rename $data to $payload
 	 *	@todo		check if this is needed anymore and remove otherwise
 	 */
-	public function callHook( string $resource, string $event, $context, $arguments = array() )
+	public function callHook( string $resource, string $event, object $context, array & $payload = [] ): int
 	{
 		$captain	= $this->env->getCaptain();
-		$countHooks	= $captain->callHook( $resource, $event, $context, $arguments );
+		$countHooks	= $captain->callHook( $resource, $event, $context, $payload );
 //		remark( 'Library_Local@'.$event.': '.$countHooks );
-		return $countHooks;
+		return (int) $countHooks;
 	}
 
 	/**
@@ -93,12 +107,22 @@ class Local extends AbstractLibrary implements LibraryInterface
 	}
 
 	/**
+	 *	Returns number of found (and active) modules.
+	 *	@æccess		public
+	 *	@return		int			Number of found (and active) modules
+	 */
+	public function count(): int
+	{
+		return count( $this->getAll() );
+	}
+
+	/**
 	 *	Returns module providing class of given controller, if resolvable.
 	 *	@access		public
 	 *	@param		string			$controller			Name of controller class to get module for
 	 *	@return		object|NULL
 	 */
-	public function getModuleFromControllerClassName( string $controller )
+	public function getModuleFromControllerClassName( string $controller ): ?object
 	{
 		$controllerPathName	= "Controller/".str_replace( "_", "/", $controller );
 		foreach( $this->env->getModules()->getAll() as $module ){
@@ -120,18 +144,18 @@ class Local extends AbstractLibrary implements LibraryInterface
 	 *	@param		boolean		$forceReload	Flag: clear cache beforehand if available
 	 *	@return		object		Data object containing the result source and number of found modules
 	 */
-	public function scan( bool $useCache = FALSE, bool $forceReload = FALSE )
+	public function scan( bool $useCache = FALSE, bool $forceReload = FALSE ): object
 	{
 		if( $useCache ){
 			if( $forceReload )
 				$this->clearCache();
 			if( file_exists( $this->cacheFile ) ){
 				$this->modules	= unserialize( FileReader::load( $this->cacheFile ) );
-				$this->env->clock->reach( 'Resource_Module_Library_Local::scan (cache)' );
-				return (object) array(
+				$this->env->getRuntime()->reach( 'Resource_Module_Library_Local::scan (cache)' );
+				return (object) [
 					'source' 	=> 'cache',
 					'count'		=> count( $this->modules ),
-				);
+				];
 			}
 		}
 
@@ -164,7 +188,7 @@ class Local extends AbstractLibrary implements LibraryInterface
 		ksort( $this->modules );
 		if( $useCache )
 			FileWriter::save( $this->cacheFile, serialize( $this->modules ) );
-		$this->env->clock->reach( 'Resource_Module_Library_Local::scan (files)' );
+		$this->env->getRuntime()->reach( 'Resource_Module_Library_Local::scan (files)' );
 		return $this->scanResult = (object) array(
 			'source' 	=> 'files',
 			'count'		=> count( $this->modules ),

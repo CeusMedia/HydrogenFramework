@@ -1,8 +1,9 @@
-<?php
+<?php /** @noinspection PhpComposerExtensionStubsInspection */
+
 /**
  *	Handler for module source library. Can read local folder or HTTP resource.
  *
- *	Copyright (c) 2012-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2012-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,20 +21,23 @@
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module.Library
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2012-2021 Christian Würker
+ *	@copyright		2012-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+
 namespace CeusMedia\HydrogenFramework\Environment\Resource\Module\Library;
 
 use CeusMedia\Common\FS\File\Reader as FileReader;
 use CeusMedia\Common\FS\File\RecursiveNameFilter as RecursiveFileIndex;
-use CeusMedia\Common\Net\HTTP\Request\Sender as HttpRequestSender;
-use CeusMedia\Common\Net\Reader as HttpReader;
+use CeusMedia\Common\Net\HTTP\Header\Section;
+use CeusMedia\Common\Net\HTTP\Reader as HttpReader;
+use CeusMedia\Common\Net\Reader as NetReader;
 use CeusMedia\HydrogenFramework\Environment as Environment;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\LibraryInterface as LibraryInterface;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Library\Abstraction as AbstractLibrary;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Reader as ModuleReader;
+use Psr\SimpleCache\InvalidArgumentException;
 
 use Exception;
 use RuntimeException;
@@ -43,7 +47,7 @@ use RuntimeException;
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module.Library
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2012-2021 Christian Würker
+ *	@copyright		2012-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			Code Documentation
@@ -51,7 +55,7 @@ use RuntimeException;
 class Source extends AbstractLibrary implements LibraryInterface
 {
 	protected $env;
-	protected $modules		= array();
+	protected $modules		= [];
 	protected $source;
 
 	/**
@@ -60,8 +64,9 @@ class Source extends AbstractLibrary implements LibraryInterface
 	 *	@param		Environment		$env			Environment instance
 	 *	@param		object			$source			Data object defining source by: {id: ..., type: [folder|http], path: ...}
 	 *	@return		void
+	 *	@throws		InvalidArgumentException
 	 */
-	public function __construct( Environment $env, $source )
+	public function __construct( Environment $env, object $source )
 	{
 		$this->env		= $env;
 		$this->source	= $source;
@@ -75,8 +80,9 @@ class Source extends AbstractLibrary implements LibraryInterface
 	 *	@param		boolean		$useCache		Flag: use cache if available
 	 *	@param		boolean		$forceReload	Flag: clear cache beforehand if available
 	 *	@return		object		Data object containing the result source and number of found modules
+	 *	@throws		InvalidArgumentException
 	 */
-	public function scan( bool $useCache = FALSE, bool $forceReload = FALSE )
+	public function scan( bool $useCache = FALSE, bool $forceReload = FALSE ): object
 	{
 		$cache			= $this->env->getCache();
 		$cacheKeySource	= NULL;
@@ -86,10 +92,10 @@ class Source extends AbstractLibrary implements LibraryInterface
 				$cache->remove( $cacheKeySource );
 			if( $cache->has( $cacheKeySource ) ){
 				$this->modules	= $cache->get( $cacheKeySource );
-				return $this->scanResult = (object) array(
+				return $this->scanResult = (object) [
 					'source'	=> 'cache',
 					'count'		=> count( $this->modules ),
-				);
+				];
 			}
 		}
 
@@ -119,9 +125,9 @@ class Source extends AbstractLibrary implements LibraryInterface
 #		if( !file_exists( $this->source->path.'source.xml' ) )
 #			throw new RuntimeException( 'Source XML "'.$this->source->path.'source.xml" is not existing' );
 
-		$list	= array();
+		$list	= [];
 		$index	= new RecursiveFileIndex( $this->source->path, 'module.xml' );
-		$this->env->clock->reach( 'Hydrogen: Environment_Resource_Module_Library_Source::scanFolder: init' );
+		$this->env->getRuntime()->reach( 'Hydrogen: Environment_Resource_Module_Library_Source::scanFolder: init' );
 		foreach( $index as $entry ){
 			if( preg_match( "@/templates$@", $entry->getPath() ) )
 				continue;
@@ -138,7 +144,7 @@ class Source extends AbstractLibrary implements LibraryInterface
 			$icon	= $entry->getPath().'/icon';
 			$filePath	= $entry->getPathname();
 			if( !is_readable( $filePath ) )
-				$this->env->messenger->noteFailure( 'Module file "'.$filePath.'" is not readable.' );
+				$this->env->getMessenger()->noteFailure( 'Module file "'.$filePath.'" is not readable.' );
 			else{
 				try{
 					$module	= ModuleReader::load( $filePath, $id );
@@ -155,7 +161,7 @@ class Source extends AbstractLibrary implements LibraryInterface
 					$list[$id]	= $module;
 				}
 				catch( Exception $e ){
-					$this->env->messenger->noteFailure( 'XML of available Module "'.$id.'" is broken ('.$e->getMessage().').' );
+					$this->env->getMessenger()->noteFailure( 'XML of available Module "'.$id.'" is broken ('.$e->getMessage().').' );
 				}
 //				if( $cache )
 //					$cache->set( $cacheKey, $module );
@@ -170,18 +176,16 @@ class Source extends AbstractLibrary implements LibraryInterface
 	{
 		$host		= parse_url( $this->source->path, PHP_URL_HOST );
 		$path		= parse_url( $this->source->path, PHP_URL_PATH );
-		$request	= new HttpRequestSender( $host, $path.'?do=list' );
+		$reader		= new HttpReader();
+		$headers	= Section::instantiate()->addFieldPair( 'Accept', 'application/json' );
+		$response	= $reader->get( $host.$path.'?do=list', $headers );
+		$status		= $reader->getCurlInfo( CURLINFO_HTTP_CODE );
 
-		$request->addHeaderPair( 'Accept', 'application/json' );
-		$response	= $request->send();
-		if( !in_array( $response->getStatus(), array( 200 ) ) )										//  @todo		extend by more HTTP codes, like 30X
-			throw new RuntimeException( 'Source URL "'.$this->source->path.'" is not existing (Code '.$response->getStatus().')' );
-		$mimeType	= $response->getHeader( 'Content-Type', TRUE )->getValue();
-		if( $mimeType != 'application/json' )
+		if( 200 !== $status )																//  @todo		extend by more HTTP codes, like 30X
+			throw new RuntimeException( 'Source URL "'.$this->source->path.'" is not existing (Code '.$status.')' );
+		if( $reader->getResponseHeader( 'Content-Type' ) !== 'application/json' )
 			throw new RuntimeException( 'Source did not return JSON data' );
-		$modules	= @json_decode( $response->getBody() );
-		if( !$modules )
-			throw new RuntimeException( 'Source return invalid JSON data' );
+		$modules	= json_decode( $response->getBody(), JSON_THROW_ON_ERROR );
 		foreach( $modules as $module ){
 			$module->source				= $this->source->id;
 			$module->path				= $this->source->path.str_replace( '_', '/', $module->id );
@@ -189,12 +193,12 @@ class Source extends AbstractLibrary implements LibraryInterface
 
 			$icon	= $module->path.'/icon';
 			try{
-				$content		= HttpReader::readUrl( $icon.'.png' );
+				$content		= NetReader::readUrl( $icon.'.png' );
 				$module->icon	= 'data:image/png;base64,'.base64_encode( $content );
 			}
 			catch( Exception $e ){}
 			try{
-				$content		= HttpReader::readUrl( $icon.'.ico' );
+				$content		= NetReader::readUrl( $icon.'.ico' );
 				$module->icon	= 'data:image/png;base64,'.base64_encode( $content );
 			}
 			catch( Exception $e ){}

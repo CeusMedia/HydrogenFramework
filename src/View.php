@@ -1,8 +1,9 @@
-<?php
+<?php /** @noinspection PhpUnused */
+
 /**
  *	Generic View Class of Framework Hydrogen.
  *
- *	Copyright (c) 2007-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2007-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +21,7 @@
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2021 Christian Würker
+ *	@copyright		2007-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -38,6 +39,7 @@ use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 
 use Exception;
 use InvalidArgumentException;
+use ReflectionException;
 use RuntimeException;
 
 /**
@@ -45,14 +47,14 @@ use RuntimeException;
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2021 Christian Würker
+ *	@copyright		2007-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
 class View
 {
 	/**	@var		array						$data			Collected Data for View */
-	protected $data			= array();
+	protected $data			= [];
 
 	/**	@var		WebEnvironment	$env			Environment Object */
 	protected $env;
@@ -114,7 +116,7 @@ class View
 			$this->tea->setCompilePath( 'tmp/cache/templates_c/' );
 		}*/
 //		$this->env->getMessenger()->noteNotice( "View::Construct: ".get_class( $this ) );
-		$this->env->getCaptain()->callHook( 'View', 'onConstruct', $this, array() );
+		$this->env->getCaptain()->callHook( 'View', 'onConstruct', $this );
 		$this->__onInit();
 	}
 
@@ -123,7 +125,14 @@ class View
 		return $this->setData( array( $key => $value ), $topic );
 	}
 
-	public function addHelper( string $name, $object, array $parameters = array() ): self
+	/**
+	 *	@param		string			$name
+	 *	@param		object|string	$object
+	 *	@param		array			$parameters
+	 *	@return		$this
+	 *	@throws		ReflectionException
+	 */
+	public function addHelper( string $name, $object, array $parameters = [] ): self
 	{
 		if( is_object( $object ) ){
 			$object->setEnv( $this->env );
@@ -138,11 +147,10 @@ class View
 	{
 		$path		= preg_replace( '/^(.+)(\/)*$/U', '\\1/', $path );
 		$pathLocale	= $this->env->getLanguage()->getLanguagePath();
-		$uri		= $pathLocale.$path.$fileKey;
-		return $uri;
+		return $pathLocale.$path.$fileKey;
 	}
 
-	public function & getData( $key = NULL, $autoSetTo = NULL )
+	public function & getData( string $key = NULL, $autoSetTo = NULL )
 	{
 		if( !$key )
 			return $this->data;
@@ -162,7 +170,7 @@ class View
 		throw new InvalidArgumentException( 'No view helper set by name "'.htmlentities( $name, ENT_QUOTES, 'UTF-8' ).'"' );
 	}
 
-	public function getHelpers(): array
+	public function getHelpers(): Dictionary
 	{
 		return $this->helpers;
 	}
@@ -201,7 +209,7 @@ class View
 		return file_exists( $uri );
 	}
 
-	public function loadContent( string $controller, string $action, array $data = array(), string $extension = '.html' ): string
+	public function loadContent( string $controller, string $action, array $data = [], string $extension = '.html' ): string
 	{
 		$fileKey	= 'html/'.$controller.'/'.$action.$extension;
 		return $this->loadContentFile( $fileKey, $data );
@@ -210,10 +218,10 @@ class View
 	/**
 	 *	@todo	remove use of TemplateEngine (aka. UI_Template)
 	 */
-	public function loadContentFile( string $fileKey, array $data = array(), ?string $path = NULL ): string
+	public function loadContentFile( string $fileKey, array $data = [], ?string $path = NULL ): string
 	{
 		if( !is_array( $data ) )																	//  no data given
-			$data	= array();																		//  ensure empty array
+			$data	= [];																		//  ensure empty array
 		$uri	= $this->getContentUri( $fileKey, $path );											//  calculate file pathname
 		if( !file_exists( $uri ) )																	//  content file is not existing
 			throw new RuntimeException( 'Locale content file "'.$fileKey.'" is missing.', 321 );	//  throw exception
@@ -235,8 +243,7 @@ class View
 //		else
 			$content	= TemplateEngine::render( $uri, $data );									//  render template with integrated template engine
 
-		$content	= $this->renderContent( $content );												//  apply modules to content
-		return $content;																			//  return loaded and rendered content
+		return $this->renderContent( $content );												//  apply modules to content
 	}
 
 	/**
@@ -246,9 +253,9 @@ class View
 	 *	@param		array		$keys		List of file keys (without .html extension)
 	 *	@return		array		Map of collected file contents
 	 */
-	public function loadContentFiles( string $path, array $keys, array $data = array() ): array
+	public function loadContentFiles( string $path, array $keys, array $data = [] ): array
 	{
-		$list	= array();
+		$list	= [];
 		$path	= preg_replace( "/\/+$/", "", $path ).'/';											//  correct path
 		$keys	= is_string( $keys ) ? array( $keys ) : $keys;										//  convert single key to list
 		foreach( $keys as $key ){																	//  iterate keys
@@ -271,7 +278,7 @@ class View
 	 *	@param		boolean		$renderContent		Flag: inject content blocks of modules
 	 *	@return		string
 	 */
-	public function loadTemplate( string $controller, string $action, array $data = array(), bool $renderContent = TRUE ): string
+	public function loadTemplate( string $controller, string $action, array $data = [], bool $renderContent = TRUE ): string
 	{
 		$fileKey	= $controller.'/'.$action.'.php';
 		$uri		= $this->getTemplateUri( $controller, $action );
@@ -280,7 +287,7 @@ class View
 		return $this->loadTemplateFile( $fileKey, $data, $renderContent );
 	}
 
-	public function loadTemplateFile( string $fileName, array $data = array(), bool $renderContent = TRUE ): string
+	public function loadTemplateFile( string $fileName, array $data = [], bool $renderContent = TRUE ): string
 	{
 		$filePath	= $this->getTemplateUriFromFile( $fileName );
 		if( !file_exists( $filePath ) )
@@ -318,16 +325,14 @@ class View
 	 *	@param		string		$path		Path to files within locales, like "html/controller/action/"
 	 *	@return		array		Prefixed map of collected file contents mapped by prefixed IDs
 	 */
-	public function populateTexts( array $keys, string $path, array $data = array(), string $prefix = "text" ): array
+	public function populateTexts( array $keys, string $path, array $data = [], string $prefix = "text" ): array
 	{
-		if( is_string( $keys ) )																	//  list if keys is comma separated
-			$keys	= preg_split( '/\s*,\s*/', trim( trim( $keys, ',' ) ) );						//  split string into array
-		$list	= array();																			//  prepare empty list
+		$list	= [];																			//  prepare empty list
 		$files	= $this->loadContentFiles( $path, $keys, $data );									//  try to load files
 		foreach( $files as $key => $value ){														//  iterate file contents
 			$id	= preg_replace( "/[^a-z]/i", " ", $key );											//  replace not allowed characters
 			$id	= $prefix ? $prefix." ".$id : $id;													//  prepend prefix to ID if set
-			$id	= CamelCase::convert( $id, FALSE );										//  build camelcased ID
+			$id	= CamelCase::convert( $id, FALSE );										//  build camel-cased ID
 			$list[$id]	= $value;																	//  append content to map
 		}
 		return $list;																				//  return map of collected files
@@ -363,11 +368,11 @@ class View
 	/**
 	 *	Loads View Class of called Controller.
 	 *	@access		protected
-	 *	@param		string		$section	Section in locale file
-	 *	@param		string		$topic		Locale file key, eg. test/my, default: current controller
-	 *	@return		void
+	 *	@param		string|NULL		$section	Section in locale file
+	 *	@param		string|NULL		$topic		Locale file key, eg. test/my, default: current controller
+	 *	@return		array|object
 	 */
-	protected function getWords( $section = NULL, $topic = NULL )
+	protected function getWords( ?string $section = NULL, ?string $topic = NULL )
 	{
 		if( empty( $topic ) /*&& $this->env->getLanguage()->hasWords( $this->controller ) */)
 			$topic = $this->controller;
@@ -383,7 +388,7 @@ class View
 	 *	@param		array		$data			Additional template data, appened to assigned view data
 	 *	@return		string		Template content with applied data
 	 */
-	protected function realizeTemplate( string $filePath, array $data = array() ): string
+	protected function realizeTemplate( string $filePath, array $data = [] ): string
 	{
 		$___content	= '';
 		$___templateUri	= $filePath;
@@ -430,7 +435,7 @@ class View
 //	 *	@param		array		$data			Additional template data, appened to assigned view data
 //	 *	@return		string		Template content with applied data
 //	 */
-/*	protected function realizeTemplateWithTEA( string $filePath, array $data = array() ): string
+/*	protected function realizeTemplateWithTEA( string $filePath, array $data = [] ): string
 	{
 		$data['view']		= $this;															//
 		$data['env']		= $this->env;														//
@@ -444,7 +449,14 @@ class View
 		return $template->render();																//  render content with template engine
 	}*/
 
-	protected function registerHelper( string $name, string $class, array $parameters = array() ): self
+	/**
+	 *	@param		string		$name
+	 *	@param		string		$class
+	 *	@param		array		$parameters
+	 *	@return		$this
+	 *	@throws		ReflectionException
+	 */
+	protected function registerHelper( string $name, string $class, array $parameters = [] ): self
 	{
 		$object	= ObjectFactory::createObject( $class, $parameters );
 		$this->addHelper( $name, $object );
@@ -453,41 +465,40 @@ class View
 
 	public function renderContent( string $content, string $dataType = "HTML" ): string
 	{
-		$data	= (object) array(
+		$data	= [
 			'content'	=> $content,
 			'type'		=> $dataType
-		);
+		];
 		$this->env->getCaptain()->callHook( 'View', 'onRenderContent', $this, $data );
-		return $data->content;
+		return $data['content'];
 	}
 
-	static public function renderContentStatic( $env, $context, $content, $dataType = "HTML" ){
-		$data	= (object) array(
+	static public function renderContentStatic( $env, $context, $content, $dataType = "HTML" )
+	{
+		$data	= [
 			'content'	=> $content,
 			'type'		=> $dataType
-		);
+		];
 		$env->getCaptain()->callHook( 'View', 'onRenderContent', $context, $data );
-		return $data->content;
+		return $data['content'];
 	}
 
 	/**
 	 *	Sets Data of View.
 	 *	@access		public
-	 *	@param		array		$data			Array of Data for View
-	 *	@param		string		$topic			Optional: Topic Name of Data
+	 *	@param		array			$data			Array of Data for View
+	 *	@param		string|NULL		$topic			Optional: Topic Name of Data
 	 *	@return		self
 	 */
-	public function setData( array $data, $topic = NULL ): self
+	public function setData( array $data, ?string $topic = NULL ): self
 	{
-		if( $topic )
-		{
+		if( $topic ){
 			if( !isset( $this->data[$topic] ) )
-				$this->data[$topic]	= array();
+				$this->data[$topic]	= [];
 			foreach( $data as $key => $value )
 				$this->data[$topic][$key]	= $value;
 		}
-		else
-		{
+		else{
 			foreach( $data as $key => $value )
 				$this->data[$key]	= $value;
 		}
@@ -512,7 +523,7 @@ class View
 
 	/**
 	 *	Sets HTML page title from language file assigned by controller.
-	 *	Lets you select an language section and key and inserts given data.
+	 *	Lets you select a language section and key and inserts given data.
 	 *	Can set a new page title or append or prepend to currently set title.
 	 *	Usage: Call this method in your view methods!
 	 *	@access		protected
@@ -522,7 +533,7 @@ class View
 	 *	@param		integer		$mode			Concat mode: 0 - set | 1 - append, -1 - prepend
 	 *	@return		self
 	 */
-	protected function setPageTitle( string $section = 'index', string $key = 'title', array $data = array(), int $mode = 1 ): self
+	protected function setPageTitle( string $section = 'index', string $key = 'title', array $data = [], int $mode = 1 ): self
 	{
 		$data	= $this->getData();
 		if( isset( $data['words'][$section][$key] ) )

@@ -2,7 +2,7 @@
 /**
  *	Generic Action Dispatcher Class of Framework Hydrogen
  *
- *	Copyright (c) 2007-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2007-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,10 +20,11 @@
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Dispatcher
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2021 Christian Würker
+ *	@copyright		2007-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+
 namespace CeusMedia\HydrogenFramework\Dispatcher;
 
 use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
@@ -31,6 +32,7 @@ use CeusMedia\Common\Alg\Obj\MethodFactory as MethodFactory;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 use CeusMedia\HydrogenFramework\Controller;
 
+use ReflectionException;
 use RuntimeException;
 use ReflectionMethod;
 
@@ -39,7 +41,7 @@ use ReflectionMethod;
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Dispatcher
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2021 Christian Würker
+ *	@copyright		2007-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			Code Documentation
@@ -54,9 +56,9 @@ class General
 
 	public $defaultAction				= 'index';
 
-	public $defaultArguments			= array();
+	public $defaultArguments			= [];
 
-	protected $history					= array();
+	protected $history					= [];
 
 	public $checkClassActionArguments	= TRUE;
 
@@ -92,10 +94,12 @@ class General
 	 *	Returns rendering result of view action.
 	 *	@access		public
 	 *	@return		string
+	 *	@throws		ReflectionException
 	 */
 	public function dispatch(): string
 	{
-		$this->env->clock->reach( 'Dispatcher_General::dispatch' );
+		$runtime	= $this->env->getRuntime();
+		$runtime->reach( 'Dispatcher_General::dispatch' );
 		do{
 			$this->realizeCall();
 			$this->checkForLoop();
@@ -106,23 +110,26 @@ class General
 
 			$className	= self::getControllerClassFromPath( $controller );							// get controller class name from requested controller path
 			$this->checkClass( $className );
-			$this->env->clock->reach( 'Dispatcher_General::dispatch: check: controller' );
+			$runtime->reach( 'Dispatcher_General::dispatch: check: controller' );
 			$this->checkAccess( $controller, $action);
-			$instance	= ObjectFactory::createObject( $className, array( $this->env ) );		// build controller instance
-			$this->env->clock->reach( 'Dispatcher_General::dispatch: factorized controller' );
+
+			/** @var Controller $instance */
+			$instance	= ObjectFactory::createObject( $className, array( $this->env ) );			// build controller instance
+			$runtime->reach( 'Dispatcher_General::dispatch: factorized controller' );
+
 			$this->checkClassAction( $className, $instance, $action );
 			if( $this->checkClassActionArguments )
 				$this->checkClassActionArguments( $className, $instance, $action, $arguments );
-			$this->env->clock->reach( 'Dispatcher_General::dispatch: check@'.$controller.'/'.$action );
+			$runtime->reach( 'Dispatcher_General::dispatch: check@'.$controller.'/'.$action );
 
-			$factory	= new MethodFactory( $instance );								// create method factory on controller instance
-			$result		= $factory->callMethod( $action, $arguments );								// call action method in controller class with arguments
+			$factory	= new MethodFactory( $instance );											// create method factory on controller instance
+			$factory->callMethod( $action, $arguments );											// call action method in controller class with arguments
 			$this->noteLastCall( $instance );
 		}
 		while( $instance->redirect );
-		$this->env->clock->reach( 'Dispatcher_General::dispatch: done' );
+		$runtime->reach( 'Dispatcher_General::dispatch: done' );
 		$view	= $instance->renderView();
-		$this->env->clock->reach( 'Dispatcher_General::dispatch: view' );
+		$runtime->reach( 'Dispatcher_General::dispatch: view' );
 		return $view;
 	}
 
@@ -145,7 +152,15 @@ class General
 		}
 	}
 
-	protected function checkClassActionArguments( string $className, $instance, string $action, array $arguments = array() )
+	/**
+	 *	@param		string		$className
+	 *	@param		object		$instance
+	 *	@param		string		$action
+	 *	@param		array		$arguments
+	 *	@return		void
+	 *	@throws		ReflectionException
+	 */
+	protected function checkClassActionArguments( string $className, object $instance, string $action, array $arguments = [] )
 	{
 		$numberArgsAtLeast	= 0;
 		$numberArgsTotal	= 0;
@@ -191,8 +206,6 @@ class General
 	protected function noteLastCall( Controller $instance )
 	{
 		$session	= $this->env->getSession();
-		if( !$session )
-			return;
 		if( $this->request->getMethod() != 'GET' )
 			return;
 		if( $instance->redirect )

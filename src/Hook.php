@@ -9,9 +9,9 @@ use Mail_Abstract;
 
 class Hook
 {
-	public static function callHook( Environment $env, string $resource, string $event, $context, $module, $data )
+	public static function callHook( Environment $env, string $resource, string $event, ?object $context, array & $payload ): ?bool
 	{
-		return $env->getCaptain()->callHook( $resource, $event, $context, $data );
+		return $env->getCaptain()->callHook( $resource, $event, $context, $payload );
 	}
 
 	//  --  PROTECTED  --  //
@@ -28,7 +28,7 @@ class Hook
 	 *	Attention: This is not recommended, please use restart in favour.
 	 *	@static
 	 *	@access		protected
-	 *	@param		Environment		$env			Instance of environment
+	 *	@param		WebEnvironment	$env			Instance of environment
 	 *	@param		string			$controller		Controller to be called, default: index
 	 *	@param		string			$action			Action to be called, default: index
 	 *	@param		array			$arguments		List of arguments to add to URL
@@ -36,7 +36,7 @@ class Hook
 	 *	@return		void			Always returns TRUE to indicate that dispatching hook is done
 	 *	@todo		remove first 2 lines after Env::redirect has been deprecated
 	 */
-	protected static function redirect( Environment $env, string $controller = 'index', string $action = "index", array $arguments = array(), array $parameters = array() )
+	protected static function redirect( WebEnvironment $env, string $controller = 'index', string $action = "index", array $arguments = array(), array $parameters = array() )
 	{
 //		$env->redirect( $controller, $action, $arguments, $parameters );
 //		return TRUE;
@@ -61,21 +61,22 @@ class Hook
 	 *
 	 *	@static
 	 *	@access		protected
-	 *	@param		string		$uri				URI to request, may be external
-	 *	@param		integer		$status				HTTP status code to send, default: NULL -> 200
+	 *	@param		WebEnvironment	$env			Instance of environment
+	 *	@param		string			$uri				URI to request, may be external
+	 *	@param		integer|NULL	$status				HTTP status code to send, default: NULL -> 200
 	 *	@return		void
-	 *	@todo		kriss: check for better HTTP status
+	 *	@todo		check for better HTTP status
 	 */
-	protected static function relocate( string $uri, int $status = NULL )
+	protected static function relocate( WebEnvironment $env, string $uri, int $status = NULL )
 	{
-		static::restart( $uri, $status, TRUE );
+		static::restart( $env, $uri, $status, TRUE );
 	}
 
 	/**
 	 *	Redirects by requesting a URI.
 	 *	Attention: This *WILL* effect the URL displayed in browser / need request clients (eG. cURL) to allow forwarding.
 	 *
-	 *	By default, redirect URIs are are request path within the current application, eg. "./[CONTROLLER]/[ACTION]"
+	 *	By default, redirect URIs are request path within the current application, eg. "./[CONTROLLER]/[ACTION]"
 	 *	ATTENTION: For browser compatibility local paths should start with "./"
 	 *
 	 *	If second parameter is set to a valid HTTP status code, the code and its HTTP status text will be set for response.
@@ -88,7 +89,7 @@ class Hook
 	 *	@static
 	 *	@param		WebEnvironment	$env				Instance of Web Environment
 	 *	@param		string			$uri				URI to request
-	 *	@param		integer			$status				HTTP status code to send, default: NULL -> 200
+	 *	@param		integer|NULL	$status				HTTP status code to send, default: NULL -> 200
 	 *	@param		boolean			$allowForeignHost	Flag: allow redirection outside application base URL, default: no
 	 *	@param		integer			$modeFrom			How to handle FROM parameter from request or for new request, not handled atm
 	 *	@return		void
@@ -117,11 +118,12 @@ class Hook
  				$receiver	= (object) $receiver;
 			if( !property_exists( $receiver, 'email' ) )
 				throw new InvalidArgumentException( 'Given receiver is missing email address' );
-			$result	= $env->getCaptain()->callHook( 'Hook', 'sendMail', $env, [
+			$payload	= [
 				'mail'		=> $mail,
 				'receiver'	=> $receiver,
 				'language'	=> $language,
-			] );
+			];
+			$result	= $env->getCaptain()->callHook( 'Hook', 'sendMail', $env, $payload );
 			if( !( is_int( $result ) && $result > 0 ) )
 				$env->getLogic()->get( 'mail' )->handleMail( $mail, $receiver, $language );
 		}

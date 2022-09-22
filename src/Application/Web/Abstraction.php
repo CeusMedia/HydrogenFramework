@@ -2,7 +2,7 @@
 /**
  *	Base application class for MVC web application.
  *
- *	Copyright (c) 2007-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2007-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,22 +20,24 @@
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Application.Web
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2021 Christian Würker
+ *	@copyright		2007-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+
 namespace CeusMedia\HydrogenFramework\Application\Web;
 
 use CeusMedia\HydrogenFramework\Application\Abstraction as ApplicationAbstraction;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 use CeusMedia\HydrogenFramework\View;
+use ReflectionException;
 
 /**
  *	Base application class for MVC web application.
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Application.Web
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2021 Christian Würker
+ *	@copyright		2007-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			Code Documentation
@@ -50,8 +52,9 @@ abstract class Abstraction extends ApplicationAbstraction
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		WebEnvironment			$env				Framework Environment
+	 *	@param		WebEnvironment|NULL			$env				Framework Environment
 	 *	@return		void
+	 *	@throws		ReflectionException
 	 */
 	public function __construct( WebEnvironment $env = NULL )
 	{
@@ -61,11 +64,11 @@ abstract class Abstraction extends ApplicationAbstraction
 	protected function logOnComplete()
 	{
 		$captain	= $this->env->getCaptain();
-		$data		= (object) array(
+		$data		= [
 			'response'	=> $this->env->getResponse(),
-			'microtime'	=> $this->env->getClock()->stop( 6, 0 ),
+			'microtime'	=> $this->env->getRuntime()->get( 6, 0 ),
 			// ...
-		);
+		];
 		$captain->callHook( 'App', 'logOnComplete', $this, $data );
 		// ...
 	}
@@ -98,6 +101,7 @@ abstract class Abstraction extends ApplicationAbstraction
 	/**
 	 *	Sets collected View Components for Master View.
 	 *	@access		protected
+	 *	@param		array		$components
 	 *	@return		self
 	 */
 	protected function setViewComponents( array $components = array() ): self
@@ -117,12 +121,13 @@ abstract class Abstraction extends ApplicationAbstraction
 	 */
 	protected function view( string $templateFile = "master.php" ): string
 	{
-		$masterTemplate	= (string) $this->env->getCaptain()->callHook( 'App', 'getMasterTemplate', $this );
+		$payload	= ['templateFile' => ''];
+		$this->env->getCaptain()->callHook( 'App', 'getMasterTemplate', $this, $payload );
+		$masterTemplate	= $payload['templateFile'];
 		switch( $masterTemplate ){
 			case '':
 			case 'default':
 			case 'inherit':
-				$templateFile	= 'master.php';
 				break;
 			case 'theme':
 				$pathTheme		= $this->env->getPage()->getThemePath();

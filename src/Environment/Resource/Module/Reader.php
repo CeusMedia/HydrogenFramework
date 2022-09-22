@@ -2,7 +2,7 @@
 /**
  *	Reader for local module XML files.
  *
- *	Copyright (c) 2012-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2012-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,10 +20,11 @@
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2012-2021 Christian Würker
+ *	@copyright		2012-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+
 namespace CeusMedia\HydrogenFramework\Environment\Resource\Module;
 
 use CeusMedia\Common\XML\Element as XmlElement;
@@ -39,7 +40,7 @@ use RuntimeException;
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2012-2021 Christian Würker
+ *	@copyright		2012-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -52,13 +53,14 @@ class Reader
 	 *	@param		string		$filePath		File path to module XML file
 	 *	@param		string		$id				Module ID
 	 *	@return		object						Module data object
+	 *	@throws		Exception
 	 */
-	public static function load( string $filePath, string $id )
+	public static function load( string $filePath, string $id ): object
 	{
 		if( !file_exists( $filePath ) )
 			throw new RuntimeException( 'Module file "'.$filePath.'" is not existing' );
 		$xml	= XmlReader::readFile( $filePath );
-		$object	= (object) array(
+		$object	= (object) [
 			'id'				=> $id,
 			'file'				=> $filePath,
 			'uri'				=> realpath( $filePath ),
@@ -66,43 +68,43 @@ class Reader
 			'title'				=> (string) $xml->title,
 			'category'			=> (string) $xml->category,
 			'description'		=> (string) $xml->description,
-			'frameworks'		=> array(),
+			'frameworks'		=> [],
 			'version'			=> (string) $xml->version,
 			'versionAvailable'	=> NULL,
 			'versionInstalled'	=> NULL,
-			'versionLog'		=> array(),
+			'versionLog'		=> [],
 			'deprecation'		=> NULL,
 			'isActive'			=> TRUE,
 			'isInstalled'		=> FALSE,
-			'companies'			=> array(),
-			'authors'			=> array(),
-			'licenses'			=> array(),
+			'companies'			=> [],
+			'authors'			=> [],
+			'licenses'			=> [],
 			'price'				=> (string) $xml->price,
 			'icon'				=> NULL,
-			'files'				=> (object) array(
-				'classes'		=> array(),
-				'locales'		=> array(),
-				'templates'		=> array(),
-				'styles'		=> array(),
-				'scripts'		=> array(),
-				'images'		=> array(),
-				'files'			=> array(),
-			),
-			'config'			=> array(),
-			'relations'			=> (object) array(
-				'needs'			=> array(),
-				'supports'		=> array(),
-			),
-			'sql'				=> array(),
-			'links'				=> array(),
-			'hooks'				=> array(),
-			'jobs'				=> array(),
-			'install'			=> (object) array(
+			'files'				=> (object) [
+				'classes'		=> [],
+				'locales'		=> [],
+				'templates'		=> [],
+				'styles'		=> [],
+				'scripts'		=> [],
+				'images'		=> [],
+				'files'			=> [],
+			],
+			'config'			=> [],
+			'relations'			=> (object) [
+				'needs'			=> [],
+				'supports'		=> [],
+			],
+			'sql'				=> [],
+			'links'				=> [],
+			'hooks'				=> [],
+			'jobs'				=> [],
+			'install'			=> (object) [
 				'type'			=> self::castNodeAttributes( $xml->version, 'install-type', 'int' ),	//  note install type
 				'date'			=> self::castNodeAttributes( $xml->version, 'install-date', 'time' ),	//  note install date
 				'source'		=> self::castNodeAttributes( $xml->version, 'install-source' ),			//  note install source
-			),
-		);
+			],
+		];
 		self::decorateObjectWithFrameworks( $object, $xml );
 		self::decorateObjectWithLog( $object, $xml );
 		self::decorateObjectWithFiles( $object, $xml );
@@ -124,8 +126,9 @@ class Reader
 	 *	@param		string		$filePath		File path to module XML file
 	 *	@param		string		$id				Module ID
 	 *	@return		object						Module data object
+	 *	@throws		Exception
 	 */
-	public function read( string $filePath, string $id )
+	public function read( string $filePath, string $id ): object
 	{
 		return self::load( $filePath, $id );
 	}
@@ -137,7 +140,7 @@ class Reader
 		if( !$node->hasAttribute( $attribute ) ){
 			switch( $type ){
 				case 'array':
-					return !is_null( $default ) ? $default : array();
+					return !is_null( $default ) ? $default : [];
 				case 'string':
 					return !is_null( $default ) ? $default : '';
 				case 'bool':
@@ -176,7 +179,7 @@ class Reader
 	 *	@param		XmlElement		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 */
-	protected static function decorateObjectWithAuthors( $object, XmlElement $xml ): bool
+	protected static function decorateObjectWithAuthors( object $object, XmlElement $xml ): bool
 	{
 		if( !$xml->author )																			//  no author nodes existing
 			return FALSE;
@@ -197,7 +200,7 @@ class Reader
 	 *	@param		XmlElement		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 */
-	protected static function decorateObjectWithCompanies( $object, XmlElement $xml ): bool
+	protected static function decorateObjectWithCompanies( object $object, XmlElement $xml ): bool
 	{
 		if( !$xml->company )																		//  no company nodes existing
 			return FALSE;
@@ -218,7 +221,7 @@ class Reader
 	 *	@param		XmlElement		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 */
-	protected static function decorateObjectWithConfig( $object, XmlElement $xml ): bool
+	protected static function decorateObjectWithConfig( object $object, XmlElement $xml ): bool
 	{
 		if( !$xml->config )																			//  no config nodes existing
 			return FALSE;
@@ -248,7 +251,7 @@ class Reader
 	 *	@param		XmlElement		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 */
-	protected static function decorateObjectWithDeprecation( $object, XmlElement $xml ): bool
+	protected static function decorateObjectWithDeprecation( object $object, XmlElement $xml ): bool
 	{
 		if( !$xml->deprecation )																	//  deprecation node is not existing
 			return FALSE;
@@ -267,7 +270,7 @@ class Reader
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 *	@todo		rethink the defined map of paths
 	 */
-	protected static function decorateObjectWithFiles( $object, XmlElement $xml ): bool
+	protected static function decorateObjectWithFiles( object $object, XmlElement $xml ): bool
 	{
 		if( !$xml->files )
 			return FALSE;
@@ -299,7 +302,7 @@ class Reader
 	 *	@param		XmlElement		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 */
-	protected static function decorateObjectWithFrameworks( $object, XmlElement $xml ): bool
+	protected static function decorateObjectWithFrameworks( object $object, XmlElement $xml ): bool
 	{
 		$frameworks	= self::castNodeAttributes( $xml, 'frameworks', 'string', 'Hydrogen:<0.9' );
 		if( !strlen( trim( $frameworks ) ) )
@@ -321,7 +324,7 @@ class Reader
 	 *	@param		XmlElement		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 */
-	protected static function decorateObjectWithHooks( $object, XmlElement $xml ): bool
+	protected static function decorateObjectWithHooks( object $object, XmlElement $xml ): bool
 	{
 		if( !$xml->hook )																			//  hook node is not existing
 			return FALSE;
@@ -343,7 +346,7 @@ class Reader
 	 *	@param		XmlElement		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 */
-	protected static function decorateObjectWithJobs( $object, XmlElement $xml ): bool
+	protected static function decorateObjectWithJobs( object $object, XmlElement $xml ): bool
 	{
 		if( !$xml->job )																			//  hook node is not existing
 			return FALSE;
@@ -355,7 +358,7 @@ class Reader
 				'method'		=> $callable[1],
 				'commands'		=> self::castNodeAttributes( $job, 'commands' ),
 				'arguments'		=> self::castNodeAttributes( $job, 'arguments' ),
-				'mode'			=> self::castNodeAttributes( $job, 'mode', 'array', array() ),
+				'mode'			=> self::castNodeAttributes( $job, 'mode', 'array', [] ),
 				'interval'		=> self::castNodeAttributes( $job, 'interval' ),
 				'multiple'		=> self::castNodeAttributes( $job, 'multiple', 'bool' ),
 				'deprecated'	=> self::castNodeAttributes( $job, 'deprecated' ),
@@ -372,7 +375,7 @@ class Reader
 	 *	@param		XmlElement		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 */
-	protected static function decorateObjectWithLicenses( $object, XmlElement $xml ): bool
+	protected static function decorateObjectWithLicenses( object $object, XmlElement $xml ): bool
 	{
 		if( !$xml->license )																		//  no license nodes existing
 			return FALSE;
@@ -393,7 +396,7 @@ class Reader
 	 *	@param		XmlElement		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 */
-	protected static function decorateObjectWithLinks( $object, XmlElement $xml ): bool
+	protected static function decorateObjectWithLinks( object $object, XmlElement $xml ): bool
 	{
 		if( !$xml->link )																			//  no link nodes existing
 			return FALSE;
@@ -402,7 +405,7 @@ class Reader
 			if( $link->hasAttribute( 'lang', 'xml' ) )
 				$language	= $link->getAttribute( 'lang', 'xml' );
 			$label		= (string) $link;
-			$object->links[]	= (object) array(
+			$object->links[]	= (object) [
 				'parent'		=> self::castNodeAttributes( $link, 'parent' ),
 				'access'		=> self::castNodeAttributes( $link, 'access' ),
 				'language'		=> $language,
@@ -410,9 +413,8 @@ class Reader
 				'link'			=> self::castNodeAttributes( $link, 'link' ),
 				'rank'			=> self::castNodeAttributes( $link, 'rank', 'int', 10 ),
 				'label'			=> $label,
-				'icon'			=> self::castNodeAttributes( $link, 'icon', 'string' ),
-			);
-			(string) $link;
+				'icon'			=> self::castNodeAttributes( $link, 'icon' ),
+			];
 		}
 		return TRUE;
 	}
@@ -424,16 +426,16 @@ class Reader
 	 *	@param		XmlElement		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 */
-	protected static function decorateObjectWithLog( $object, XmlElement $xml ): bool
+	protected static function decorateObjectWithLog( object $object, XmlElement $xml ): bool
 	{
 		if( !$xml->log )																			//  no log nodes existing
 			return FALSE;
 		foreach( $xml->log as $entry ){																//  iterate version log entries if available
 			if( $entry->hasAttribute( "version" ) ){												//  only if log entry is versioned
-				$object->versionLog[]	= (object) array(											//  append version log entry
+				$object->versionLog[]	= (object) [												//  append version log entry
 					'note'		=> (string) $entry,													//  extract entry note
 					'version'	=> $entry->getAttribute( 'version' ),								//  extract entry version
-				);
+				];
 			}
 		}
 		return TRUE;
@@ -446,28 +448,28 @@ class Reader
 	 *	@param		XmlElement		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 */
-	protected static function decorateObjectWithRelations( $object, XmlElement $xml ): bool
+	protected static function decorateObjectWithRelations( object $object, XmlElement $xml ): bool
 	{
 		if( !$xml->relations )																		//  no relation nodes existing
 			return FALSE;																			//  do nothing
 		if( $xml->relations->needs )																//  if needed modules are defined
 			foreach( $xml->relations->needs as $moduleName )										//  iterate list if needed modules
-				$object->relations->needs[(string) $moduleName]		= (object) array(				//  note relation
+				$object->relations->needs[(string) $moduleName]		= (object) [					//  note relation
 					'relation'	=> 'needs',															//  ... as needed
 					'type'		=> self::castNodeAttributes( $moduleName, 'type' ),					//  ... with relation type
 					'id'		=> (string) $moduleName,											//  ... with module ID
 					'source'	=> self::castNodeAttributes( $moduleName, 'source' ),				//  ... with module source, if set
 					'version'	=> self::castNodeAttributes( $moduleName, 'version' ),				//  ... with version, if set
-				);
+				];
 		if( $xml->relations->supports )																//  if supported modules are defined
 			foreach( $xml->relations->supports as $moduleName )										//  iterate list if supported modules
-				$object->relations->supports[(string) $moduleName]	= (object) array(				//  note relation
+				$object->relations->supports[(string) $moduleName]	= (object) [					//  note relation
 					'relation'	=> 'supports',														//  ... as supported
 					'type'		=> self::castNodeAttributes( $moduleName, 'type' ),					//  ... with relation type
 					'id'		=> (string) $moduleName,											//  ... with module ID
 					'source'	=> self::castNodeAttributes( $moduleName, 'source' ),				//  ... with module source, if set
 					'version'	=> self::castNodeAttributes( $moduleName, 'version' ),				//  ... with version, if set
-				);
+				];
 		return TRUE;
 	}
 
@@ -477,8 +479,9 @@ class Reader
 	 *	@param		object			$object			Data object of module
 	 *	@param		XmlElement		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
+	 *	@throws		Exception
 	 */
-	protected static function decorateObjectWithSql( $object, XmlElement $xml ): bool
+	protected static function decorateObjectWithSql( object $object, XmlElement $xml ): bool
 	{
 		if( !$xml->sql )																			//  no sql nodes existing
 			return FALSE;
@@ -494,12 +497,12 @@ class Reader
 				$key	= $event.'@'.$type;
 				if( $event == "update" )
 					$key	= $event.":".$version.'@'.$type;
-				$object->sql[$key] = (object) array(
+				$object->sql[$key] = (object) [
 					'event'			=> $event,
 					'version'		=> $version,
 					'type'			=> $type,
 					'sql'			=> (string) $sql
-				);
+				];
 			}
 		}
 		return TRUE;

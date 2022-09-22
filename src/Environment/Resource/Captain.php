@@ -5,7 +5,7 @@
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2021 Christian Würker
+ *	@copyright		2007-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -51,7 +51,7 @@ use RangeException;
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2021 Christian Würker
+ *	@copyright		2007-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			code documentation
@@ -100,21 +100,19 @@ class Captain
 	 *	@param		string		$resource		Name of resource (e.G. Page or View)
 	 *	@param		string		$event			Name of hook event (e.G. onBuild or onRenderContent)
 	 *	@param		object		$context		Context object, will be available inside hook as $context
-	 *	@param		array		$payload		Map of hook payload data, will be available inside hook as $payload and $data
-	 *	@return		integer|NULL|FALSE			Number of called hooks for event, FALSE if hook is disabled, NULL if no modules installed or no hooks defined
+	 *	@param		array|NULL	$payload		Map of hook payload data, will be available inside hook as $payload and $data
+	 *	@return		bool|NULL					TRUE if hook is chain-breaking, FALSE if hook is disabled or non-chain-breaking, NULL if no modules installed or no hooks defined
 	 *	@throws		RuntimeException			if given static class method is not existing
 	 *	@throws		RuntimeException			ig method call produces stdout output, for example warnings and notices
 	 *	@throws		RuntimeException			if method call is throwing an exception
 	 *	@todo 		rename $data to $payload
 	 */
-	public function callHook( string $resource, string $event, $context, $payload = array() )
+	public function callHook( string $resource, string $event, object $context, ?array & $payload = [] ): ?bool
 	{
 		if( !$this->env->hasModules() )
 			return NULL;
 		if( array_key_exists( $resource."::".$event, $this->disabledHooks ) )
 			return FALSE;
-//		$this->env->getRuntime()->reach( 'Resource_Module_Library_Local::callHook: '.$event.'@'.$resource.' start' );
-
 		if( array_key_exists( $resource.'::'.$event, $this->openHooks ) )
 			return FALSE;
 
@@ -123,9 +121,9 @@ class Captain
 		if( $this->logCalls )
 			error_log( microtime( TRUE ).' '.$resource.'>'.$event."\n", 3, 'logs/hook_calls.log' );
 
-		$hooks	= array();
+		$hooks	= [];
 		for( $i=0; $i<10; $i++)
-			$hooks[$i]	= array();
+			$hooks[$i]	= [];
 
 		$count			= 0;
 		$result			= NULL;
@@ -154,7 +152,7 @@ class Captain
 				$event		= $hook->event;
 				$function	= $hook->function;
 				try{
-					$callback	= preg_split( "/::/", $function );
+					$callback	= explode("::", $function);
 					if( !preg_match( $regexMethod, $function ) )
 						throw new RuntimeException( 'Format of hook function is invalid or outdated' );
 					if( !class_exists( $callback[0] ) )
@@ -184,12 +182,13 @@ class Captain
 					else
 						throw new RuntimeException( 'Hook '.$module->id.'::'.$resource.'@'.$event.' failed: '.$e->getMessage(), 0, $e );
 				}
+				finally{
+					unset( $this->openHooks[$resource.'::'.$event]);
+				}
 			}
-			if( (bool) $result )
-				return $result;
+			if( TRUE === $result )
+				return TRUE;
 		}
-		unset( $this->openHooks[$resource.'::'.$event]);
-//		$this->env->getRuntime()->reach( 'Resource_Module_Library_Local::callHook: '.$event.'@'.$resource.' done' );
 		return $result;
 	}
 

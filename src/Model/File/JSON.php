@@ -1,7 +1,7 @@
 <?php
 namespace CeusMedia\HydrogenFramework\Model\File;
 
-use CeusMedia\Common\ADT\JSON\Pretty as JsonFormatter;
+use CeusMedia\Common\ADT\JSON\Pretty as JsonPretty;
 use CeusMedia\Common\FS\File\Writer as FileWriter;
 use CeusMedia\Common\FS\File\JSON\Reader as JsonFileReader;
 
@@ -14,7 +14,7 @@ class JSON extends Abstraction
 		if( version_compare( phpversion(), '5.4.0' ) >= 0 )
 			$json		= json_encode( $content, JSON_PRETTY_PRINT );
 		else
-			$json		= JsonFormatter::format( json_encode( $content ) );
+			$json		= JsonPretty::print( json_encode( $content ) );
 		return FileWriter::save( $this->path.$fileName, $json );
 	}
 
@@ -41,7 +41,7 @@ class JSON extends Abstraction
 		if( version_compare( phpversion(), '5.4.0' ) >= 0 )
 			$json		= json_encode( $content, JSON_PRETTY_PRINT );
 		else
-			$json		= JsonFormatter::format( json_encode( $content ) );
+			$json		= JsonPretty::print( json_encode( $content ) );
 		if( $json == $current )
 			return FALSE;
 		return FileWriter::save( $this->path.$fileName, $json );

@@ -4,17 +4,20 @@
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2010-2021 Ceus Media
+ *	@copyright		2010-2022 Ceus Media
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+
 namespace CeusMedia\HydrogenFramework\Environment\Resource;
 
-use CeusMedia\HydrogenFramework\Environment;
 use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
 use CeusMedia\Common\Alg\Text\CamelCase as CamelCase;
+use CeusMedia\HydrogenFramework\Environment;
+use CeusMedia\HydrogenFramework\Logic;
 use DomainException;
 use InvalidArgumentException;
+use ReflectionException;
 use RuntimeException;
 
 /**
@@ -24,17 +27,17 @@ use RuntimeException;
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2010-2021 Ceus Media
+ *	@copyright		2010-2022 Ceus Media
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
 class LogicPool
 {
-	/**	@var			Environment	$env		Environment object */
+	/**	@var			Environment				$env		Environment object */
 	protected $env;
 
-	/**	@var			array						$pool		Map of logic class names or instances */
-	protected $pool		= array();
+	/**	@var			array<string,object>	$pool		Map of logic class names or instances */
+	protected $pool		= [];
 
 	/**
 	 *	Constructor.
@@ -42,9 +45,9 @@ class LogicPool
 	 *	@param		Environment		$env		Environment object
 	 *	@return		void
 	 */
-	public function  __construct( Environment $env )
+	public function __construct( Environment $env )
 	{
-		$this->env		= $env;
+		$this->env	= $env;
 	}
 
 	/**
@@ -52,6 +55,7 @@ class LogicPool
 	 *	@access		public
 	 *	@param		string			$key			Key of logic object
 	 *	@return		object
+	 *	@throws		ReflectionException
 	 */
 	public function __get( string $key )
 	{
@@ -76,7 +80,7 @@ class LogicPool
 	 *	@param		object			$logicObject	Logic object to store in pool
 	 *	@return		void
 	 */
-	public function __set( string $key, $logicObject )
+	public function __set( string $key, object $logicObject )
 	{
 		$this->set( $key, $logicObject );
 	}
@@ -110,16 +114,18 @@ class LogicPool
 	 *	Returns a stored logic object by its pool key
 	 *	@access		public
 	 *	@param		string			$key			Key of logic object
-	 *	@return		object
+	 *	@return		string|object
 	 *	@throws		RuntimeException				if no class or object has been added for given key
 	 *	@throws		DomainException					if class for given key is not existing
+	 *	@throws		ReflectionException
 	 */
 	public function get( string $key )
 	{
 		$className = NULL;
 		if( !$this->has( $key ) ){
 			$className		= $this->getClassNameFromKey( $key );
-			class_exists( $className ) ? $this->add( $key, $className ) : NULL;
+			if( class_exists( $className ) )
+				$this->add( $key, $className );
 		}
 		if( !$this->has( $key ) ){
 			$message	= 'No logic class/object available for key "'.$key.'"';
@@ -131,7 +137,7 @@ class LogicPool
 		if( !$this->isInstantiated( $key ) ){
 			if( !class_exists( $this->pool[$key] ) )
 				throw new DomainException( 'No logic class found for "'.$this->pool[$key].'"' );
-			$this->set( $key, $this->createInstance( $this->pool[$key] ), TRUE );
+			$this->set( $key, $this->createInstance( $this->pool[$key] ) );
 		}
 		return $this->pool[$key];
 	}
@@ -152,7 +158,7 @@ class LogicPool
 		$prefix	= array_shift( $parts );
 		if( $prefix !== 'Logic' )
 			throw new InvalidArgumentException( 'Given class is not a logic class (needs to start with Logic_)' );
-		return CamelCase::encode( implode( ' ', $parts ), TRUE );
+		return CamelCase::encode( implode( ' ', $parts ) );
 	}
 
 	/**
@@ -230,11 +236,12 @@ class LogicPool
 	 *	@access		protected
 	 *	@param		string			$className			Name of class to create instance for
 	 *	@return		object
-	 *	@throws		InvalidArgumentException			if class is not a subclass of CMF_Hydrogen_Logic
+	 *	@throws		InvalidArgumentException			if class is not a subclass of CeusMedia\HydrogenFramework\Logic
+	 *	@throws		ReflectionException
 	 */
-	protected function createInstance( string $className )
+	protected function createInstance( string $className ): object
 	{
-		if( is_subclass_of( $className, 'CeusMedia\HydrogenFramework\Logic' ) )
+		if( is_subclass_of( $className, Logic::class ) )
 			return ObjectFactory::createObject( $className, array( $this->env ) );
 
 		// @todo activate this line after deprecation of old logic classes
@@ -250,7 +257,7 @@ class LogicPool
 	/**
 	 *	Returns class name of registered logic pool key.
 	 *	Logic pool key can be either a shortened class name (without prefix Logic_)
-	 *	or a camelcased shortened class name.
+	 *	or a camel-cased shortened class name.
 	 *	For example, logic pool key for class Logic_Catalog_Bookstore can be
 	 *	Catalog_Bookstore or catalogBookstore.
 	 *	@access		protected

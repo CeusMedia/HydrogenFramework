@@ -2,7 +2,7 @@
 /**
  *	Setup for fake access control list for fully public projects.
  *
- *	Copyright (c) 2010-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2010-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,10 +20,11 @@
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Acl
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2010-2021 Christian Würker (ceusmedia.de)
+ *	@copyright		2010-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+
 namespace CeusMedia\HydrogenFramework\Environment\Resource\Acl;
 
 use CeusMedia\HydrogenFramework\Environment\Resource\Disclosure as DisclosureResource;
@@ -34,7 +35,7 @@ use CeusMedia\HydrogenFramework\Environment\Resource\Disclosure as DisclosureRes
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Acl
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2010-2021 Christian Würker (ceusmedia.de)
+ *	@copyright		2010-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -56,9 +57,9 @@ class AllPublic extends Abstraction
 	/**
 	 *	Return list controller actions or matrix of controllers and actions of role.
 	 *	@access		public
-	 *	@param		string		$controller		Controller to list actions for, otherwise return matrix
-	 *	@param		integer		$roleId			Specified role, otherwise current role
-	 *	@return		array						List of actions or matrix of controllers and actions
+	 *	@param		string|NULL		$controller		Controller to list actions for, otherwise return matrix
+	 *	@param		integer			$roleId			Specified role, otherwise current role
+	 *	@return		array							List of actions or matrix of controllers and actions
 	 */
 	public function index( string $controller = NULL, $roleId = NULL ): array
 	{
@@ -68,11 +69,11 @@ class AllPublic extends Abstraction
 			return $this->controllerActions;
 		if( array_key_exists( $controller, $this->controllerActions ) )
 			return $this->controllerActions[$controller];
-		return array();
+		return [];
 	}
 
 	/**
-	 *	Allowes access to a controller action for a role.
+	 *	Allows access to a controller action for a role.
 	 *	@access		public
 	 *	@param		integer		$roleId			Role ID
 	 *	@param		string		$controller		Name of Controller
@@ -89,21 +90,21 @@ class AllPublic extends Abstraction
 	/**
 	 *	Returns all rights of a role.
 	 *	@access		protected
-	 *	@param		integer		$roleId			Role ID
+	 *	@param		string		$roleId			Role ID
 	 *	@return		array
 	 */
-	protected function getRights( $roleId ): array
+	protected function getRights( string $roleId ): array
 	{
-		return array();
+		return [];
 	}
 
 	/**
 	 *	Returns all rights of a role.
 	 *	@access		protected
-	 *	@param		integer		$roleId			Role ID
+	 *	@param		string		$roleId			Role ID
 	 *	@return		array
 	 */
-	protected function getRole( $roleId )
+	protected function getRole( string $roleId ): array
 	{
 		return [
 			'roleId'		=> 0,
@@ -125,7 +126,7 @@ class AllPublic extends Abstraction
 		$classes	= $disclosure->reflect( 'classes/Controller/' );
 		foreach( $classes as $className => $classData ){
 			$className	= strtolower( str_replace( '_', '/', $className ) );
-			$this->controllerActions[$className]	= array();
+			$this->controllerActions[$className]	= [];
 			foreach( $classData->methods as $methodName => $methodData )
 				$this->controllerActions[$className][]	= $methodName;
 		}

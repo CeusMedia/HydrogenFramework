@@ -17,7 +17,7 @@ class Runtime
 	protected $env;
 
 	/**
-	 *	Constructur.
+	 *	Constructor.
 	 *	@access		public
 	 */
 	public function __construct( Environment $env )
@@ -27,6 +27,12 @@ class Runtime
 		$this->profiler	= new Profiler( $this, TRUE );
 	}
 
+	/**
+	 *	Returns the current time passed since start.
+	 *	@param		int			$base			0:seconds, 3:milliseconds: 6: microseconds
+	 *	@param		int			$precision		Number of decimal places
+	 *	@return		float
+	 */
 	public function get( int $base = 3, int $precision = 3 ): float
 	{
 		return $this->clock->stop( $base, $precision );
@@ -44,6 +50,12 @@ class Runtime
 		return count( $this->clock->getLaps() );
 	}
 
+	/**
+	 *	Returns list of reached goals.
+	 *	@param		int			$base			0:seconds, 3:milliseconds: 6: microseconds
+	 *	@param		int			$precision		Number of decimal places
+	 *	@return		array
+	 */
 	public function getGoals( int $base = 3, int $precision = 3 ): array
 	{
 		$list	= [];
@@ -62,13 +74,25 @@ class Runtime
 
 	//  --  LEGACY  --  //
 
-	public function stop( $base = 3, $round = 3 )
+	/**
+	 *	@param		int		$base
+	 *	@param		int		$round
+	 *	@return		float
+	 */
+	public function stop( int $base = 3, int $round = 3 ): float
 	{
 		$this->markDeprecation( 'stop' );
 		return $this->get( $base, $round );
 	}
 
-	public function stopLap( $base = 3, $round = 3, $label = NULL, $description = NULL )
+	/**
+	 *	@param		int				$base
+	 *	@param		int				$round
+	 *	@param		string|NULL		$label
+	 *	@param		string|NULL		$description
+	 *	@return		int
+	 */
+	public function stopLap( int $base = 3, int $round = 3, ?string $label = NULL, ?string $description = NULL ): int
 	{
 		$this->markDeprecation( 'stopLap' );
 		return $this->reach( $base, $round );
@@ -114,10 +138,10 @@ class Runtime
 				$message	= 'Environment clock $env->getClock()->uspeed() is deprecated.';
 				break;
 			case 'stop':
-				$message	= 'Environment clock $env->getClock()->stop() is deprecated. Use module $env->getRuntime()->get() instead';
+				$message	= 'Environment clock $env->getClock()->stop() is deprecated. Use $env->getRuntime()->get() instead';
 				break;
 			case 'stopLap':
-				$message	= 'Environment clock $env->getClock()->stopLap() is deprecated. Use module $env->getRuntime()->reach() instead';
+				$message	= 'Environment clock $env->getClock()->stopLap() is deprecated. Use $env->getRuntime()->reach() instead';
 				break;
 			default:
 				$message	= 'Environment clock $env->getClock() is deprecated. Use module $env->getRuntime() instead';

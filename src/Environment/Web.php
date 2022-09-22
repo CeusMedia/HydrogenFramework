@@ -1,8 +1,9 @@
-<?php
+<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
+
 /**
  *	Setup for Resource Environment for Hydrogen Applications.
  *
- *	Copyright (c) 2007-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2007-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +21,7 @@
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2021 Christian Würker
+ *	@copyright		2007-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -32,7 +33,7 @@ use CeusMedia\Common\Net\HTTP\Request as HttpRequest;
 use CeusMedia\Common\Net\HTTP\Response as HttpResponse;
 use CeusMedia\Common\Net\HTTP\PartitionSession as HttpPartitionSession;
 use CeusMedia\Common\Net\HTTP\Status as HttpStatus;
-use CeusMedia\Common\UI\HTML\ExceptionßPage as HtmlExceptionPage;
+use CeusMedia\Common\UI\HTML\Exception\Page as HtmlExceptionPage;
 use CeusMedia\Common\UI\HTML\Tag as HtmlTag;
 use CeusMedia\Common\UI\HTML\PageFrame as HtmlPageFrame;
 use CeusMedia\HydrogenFramework\Deprecation;
@@ -52,7 +53,7 @@ use RuntimeException;
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2021 Christian Würker
+ *	@copyright		2007-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			extend from (namespaced) Environment after all modules are migrated to 0.9
@@ -127,6 +128,7 @@ class Web extends Environment
 	/**
 	 *	Constructor, sets up Resource Environment.
 	 *	@access		public
+	 *	@param		array		$options
 	 *	@return		void
 	 */
 	public function __construct( $options = array() )
@@ -319,15 +321,15 @@ class Web extends Environment
 	 *	There is a shorter alias: $this->relocate( 'http://foreign.tld/' );
 	 *
 	 *	@access		public
-	 *	@param		string		$uri				URI to request
-	 *	@param		integer		$status				HTTP status code to send, default: NULL -> 200
+	 *	@param		string|NULL		$uri				URI to request
+	 *	@param		integer|NULL	$status				HTTP status code to send, default: NULL -> 200
 	 *	@param		boolean		$allowForeignHost	Flag: allow redirection outside application base URL, default: no
 	 *	@param		integer		$modeFrom			How to handle FROM parameter from request or for new request, not handled atm
 	 *	@return		void
 	 *	@link		https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#3xx_Redirection HTTP status codes
-	 *	@todo		kriss: implement automatic lookout for "from" request parameter
-	 *	@todo		kriss: implement handling of FROM request parameter, see controller constants
-	 *	@todo		kriss: concept and implement anti-loop {@see http://dev.(ceusmedia.de)/cmKB/?MTI}
+	 *	@todo		implement automatic lookout for "from" request parameter
+	 *	@todo		implement handling of FROM request parameter, see controller constants
+	 *	@todo		concept and implement anti-loop {@see http://dev.(ceusmedia.de)/cmKB/?MTI}
 	 */
 	public function restart( ?string $uri = '', ?int $status = NULL, bool $allowForeignHost = FALSE, int $modeFrom = 0 )
 	{
@@ -413,9 +415,10 @@ class Web extends Environment
 	/**
 	 *	Sets up configuration resource reading main config file and module config files.
 	 *	@access		protected
-	 *	@return		void
+	 *	@return		self
+	 *	@throws		EnvironmentException
 	 */
-	protected function initConfiguration()
+	protected function initConfiguration(): self
 	{
 		parent::initConfiguration();
 
@@ -434,15 +437,16 @@ class Web extends Environment
 			}
 		}
 //		$this->runtime->reach( 'env: config', 'Finished setup of web app configuration.' );
+		return $this;
 	}
 
 	/**
 	 *	Initialize cookie resource instance.
 	 *	@access		protected
-	 *	@return		void
+	 *	@return		self
 	 *	@throws		RuntimeException			if cookie resource has not been initialized before
 	 */
-	protected function initCookie()
+	protected function initCookie(): self
 	{
 		if( !$this->url )
 			throw new RuntimeException( 'URL not detected yet, run detectSelf beforehand' );
@@ -451,14 +455,16 @@ class Web extends Environment
 			parse_url( $this->url, PHP_URL_HOST ),
 			(bool) getEnv( 'HTTPS' )
 		);
+		return $this;
 	}
 
-	protected function initMessenger( $enabled = "auto" )
+	protected function initMessenger( $enabled = "auto" ): self
 	{
 		if( $enabled === "auto" )																	//  auto detect mode
 			$enabled	= preg_match( "/html/", getEnv( 'HTTP_ACCEPT' ) );							//  enabled if HTML is requested
 		$this->messenger	= new MessengerResource( $this, $enabled );
 		$this->runtime->reach( 'env: messenger' );
+		return $this;
 	}
 
 	/**
@@ -466,9 +472,9 @@ class Web extends Environment
 	 *	@access		protected
 	 *	@param		boolean		$pageJavaScripts	Flag: compress JavaScripts, default: TRUE
 	 *	@param		boolean		$packStyleSheets	Flag: compress Stylesheet, default: TRUE
-	 *	@return		void
+	 *	@return		self
 	 */
-	protected function initPage( bool $pageJavaScripts = TRUE, bool $packStyleSheets = TRUE )
+	protected function initPage( bool $pageJavaScripts = TRUE, bool $packStyleSheets = TRUE ): self
 	{
 		$this->page	= new PageResource( $this );
 		$this->page->setPackaging( $pageJavaScripts, $packStyleSheets );
@@ -479,6 +485,7 @@ class Web extends Environment
 		if( is_array( $words ) && isset( $words['main']['title'] ) )
 			$this->page->setTitle( $words['main']['title'] );
 		$this->runtime->reach( 'env: page' );
+		return $this;
 	}
 
 	/**
@@ -487,32 +494,35 @@ class Web extends Environment
 	 *	@access		protected
 	 *	@return		void
 	 */
-	protected function initRequest()
+	protected function initRequest(): self
 	{
 		$this->request		= new HttpRequest();
 		$this->request->fromEnv( FALSE/*$this->has( 'session' )*/ );
 		$this->runtime->reach( 'env: request' );
+		return $this;
 	}
 
 	/**
-	 *	Initialize HTTP respone resource instance.
+	 *	Initialize HTTP response resource instance.
 	 *	@access		protected
-	 *	@return		void
+	 *	@return		self
 	 */
-	protected function initResponse()
+	protected function initResponse(): self
 	{
 		$this->response	= new HttpResponse();
 		$this->runtime->reach( 'env: response' );
+		return $this;
 	}
 
-	protected function initRouter( string $routerClass = NULL )
+	protected function initRouter( string $routerClass = NULL ): self
 	{
 		$classRouter	= $routerClass ? $routerClass : self::$classRouter;
 		$this->router	= ObjectFactory::createObject( $classRouter, array( $this ) );
 		$this->runtime->reach( 'env: router' );
+		return $this;
 	}
 
-	protected function initSession( string $keyPartitionName = NULL, string $keySessionName = NULL )
+	protected function initSession( string $keyPartitionName = NULL, string $keySessionName = NULL ): self
 	{
 		$partitionName	= md5( getCwd() );
 		$sessionName	= 'sid';
@@ -553,6 +563,7 @@ class Web extends Environment
 		if( $this->modules )
 			$this->modules->callHook( 'Session', 'init', $this->session );
 		$this->runtime->reach( 'env: session: init done' );
+		return $this;
 	}
 
 	protected function registerResourceToClose( string $resourceKey )

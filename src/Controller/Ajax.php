@@ -1,7 +1,9 @@
-<?php
+<?php /** @noinspection PhpComposerExtensionStubsInspection */
+
 /**
  *	General (and therefore abstract) AJAX controller.
  */
+
 namespace CeusMedia\HydrogenFramework\Controller;
 
 use CeusMedia\Common\Net\HTTP\Response as HttpResponse;
@@ -47,7 +49,7 @@ abstract class Ajax
 			$this->response		= new HttpResponse();
 		}
 		catch( Exception $e ){
-			$this->respondException( $e, 500 );
+			$this->respondException( $e );
 		}
 		if( $this->env->getMode() & Environment::MODE_LIVE ){
 			if( !method_exists( $this->request, 'isAjax' ) || !$this->request->isAjax() )
@@ -57,7 +59,7 @@ abstract class Ajax
 			$this->__onInit();
 		}
 		catch( Exception $e ){
-			$this->respondException( $e, 500 );
+			$this->respondException( $e );
 		}
 	}
 
@@ -78,13 +80,13 @@ abstract class Ajax
 	 *	Sends response data.
 	 *	Exits afterwards, if enabled (default: yes).
 	 *	@access		public
-	 *	@param		mixed		$data			Data to be responded, will be stringified/serialized
-	 *	@param		integer		$statusCode		HTTP status code of response
-	 *	@param		string		$mimeType		MIME type to send (default: defaultMimeType)
-	 *	@return		integer		Number of sent bytes, if exitAfterwards is disabled (default: no)
+	 *	@param		mixed			$data			Data to be responded, will be stringified/serialized
+	 *	@param		integer			$statusCode		HTTP status code of response
+	 *	@param		string|NULL		$mimeType		MIME type to send (default: defaultMimeType)
+	 *	@return		integer			Number of sent bytes, if exitAfterwards is disabled (default: no)
 	 *	@todo		support other serializations, too
 	 */
-	protected function respondData( $data, int $statusCode = 200, string $mimeType = NULL ): int
+	protected function respondData( $data, int $statusCode = 200, ?string $mimeType = NULL ): int
 	{
 		$response	= array(
 			'status'	=> 'data',
@@ -99,13 +101,13 @@ abstract class Ajax
 	 *	Sends error message.
 	 *	Exits afterwards, if enabled (default: yes).
 	 *	@access		protected
-	 *	@param		string|int	$code			Error code to send
-	 *	@param		string		$message		Error message to send
-	 *	@param		integer		$statusCode		HTTP status code of response
-	 *	@param		string		$mimeType		MIME type to send (default: defaultMimeType)
-	 *	@return		integer		Number of sent bytes, if exitAfterwards is disabled (default: no)
+	 *	@param		string|int		$code			Error code to send
+	 *	@param		string|NULL		$message		Error message to send
+	 *	@param		integer			$statusCode		HTTP status code of response
+	 *	@param		string|NULL		$mimeType		MIME type to send (default: defaultMimeType)
+	 *	@return		integer			Number of sent bytes, if exitAfterwards is disabled (default: no)
 	 */
-	protected function respondError( $code, string $message = NULL, int $statusCode = 412, string $mimeType = NULL ): int
+	protected function respondError( $code, ?string $message = NULL, int $statusCode = 412, ?string $mimeType = NULL ): int
 	{
 		$response	= array(
 			'status'	=> 'error',
@@ -121,12 +123,12 @@ abstract class Ajax
 	 *	Sends caught exception.
 	 *	Exits afterwards, if enabled (default: yes).
 	 *	@access		protected
-	 *	@param		Throwable	$exception		Caught exception
-	 *	@param		integer		$statusCode		HTTP status code of response
-	 *	@param		string		$mimeType		MIME type to send (default: defaultMimeType)
-	 *	@return		integer		Number of sent bytes, if exitAfterwards is disabled (default: no)
+	 *	@param		Throwable		$exception		Caught exception
+	 *	@param		integer			$statusCode		HTTP status code of response
+	 *	@param		string|NULL		$mimeType		MIME type to send (default: defaultMimeType)
+	 *	@return		integer			Number of sent bytes, if exitAfterwards is disabled (default: no)
 	 */
-	protected function respondException( Throwable $exception, int $statusCode = 500, string $mimeType = NULL ): int
+	protected function respondException( Throwable $exception, int $statusCode = 500, ?string $mimeType = NULL ): int
 	{
 		$response	= array(
 			'status'	=> 'exception',
@@ -144,15 +146,15 @@ abstract class Ajax
 	 *	Sends prepared response string.
 	 *	Exits afterwards, if enabled (default: yes).
 	 *	@access		protected
-	 *	@param		string		$content		Stringified/serialized content to send
-	 *	@param		integer		$statusCode		HTTP status code of response
-	 *	@param		string		$mimeType		MIME type to send (default: defaultMimeType)
-	 *	@return		integer		Number of sent bytes, if exitAfterwards is disabled (default: no)
+	 *	@param		string			$content		Stringified/serialized content to send
+	 *	@param		integer|NULL	$statusCode		HTTP status code of response
+	 *	@param		string|NULL		$mimeType		MIME type to send (default: defaultMimeType)
+	 *	@return		integer			Number of sent bytes, if exitAfterwards is disabled (default: no)
 	 */
 	protected function respond( string $content, int $statusCode = NULL, string $mimeType = NULL ): int
 	{
-		$mimeType	= $mimeType ? $mimeType : $this->defaultResponseMimeType;
-		$statusCode	= $statusCode ? $statusCode : 200;
+		$mimeType	= $mimeType ?: $this->defaultResponseMimeType;
+		$statusCode	= $statusCode ?: 200;
 
 		$this->response->addHeaderPair( 'Content-Type', $mimeType );
 		$this->response->setBody( $content );

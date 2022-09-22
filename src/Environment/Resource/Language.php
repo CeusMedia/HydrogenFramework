@@ -2,7 +2,7 @@
 /**
  *	Language Class of Framework Hydrogen.
  *
- *	Copyright (c) 2007-2021 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2007-2022 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,10 +20,11 @@
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2021 Christian Würker
+ *	@copyright		2007-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+
 namespace CeusMedia\HydrogenFramework\Environment\Resource;
 
 use CeusMedia\Common\FS\File\INI\Reader as IniFileReader;
@@ -40,29 +41,29 @@ use DomainException;
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2021 Christian Würker
+ *	@copyright		2007-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
 class Language
 {
-	/**	@var		string								$fileExtension	File extension of language files (default: ini) */
-	static public $fileExtension						= 'ini';
+	/**	@var		string				$fileExtension	File extension of language files (default: ini) */
+	static public $fileExtension		= 'ini';
 
-	/**	@var		array								$data			Array of loaded Language File Definitions */
+	/**	@var		array				$data			Array of loaded Language File Definitions */
 	protected $data;
 
 	/**	@var		Environment			$env			Application Environment Object */
 	protected $env;
 
-	/**	@var		string								$filePath		Path to Language Files */
+	/**	@var		string				$filePath		Path to Language Files */
 	protected $filePath;
 
-	/**	@var		string								$language		Set Language */
+	/**	@var		string				$language		Set Language */
 	protected $language;
 
-	/**	@var		array								$languages		List of allowed Languages */
-	protected $languages								= array();
+	/**	@var		array				$languages		List of allowed Languages */
+	protected $languages				= [];
 
 	/**
 	 *	Constructor.
@@ -84,7 +85,7 @@ class Language
 			throw new RuntimeException( $message );													//  quit with exception
 		}
 		if( $config->get( 'locale.allowed' ) )														//  allowed languages have been set
-			foreach( explode( ',', $config['locale.allowed'] ) as $nr => $language )				//  iterate extracted languages
+			foreach( explode( ',', $config['locale.allowed'] ) as $language )					//  iterate extracted languages
 				$this->languages[]	= trim( $language );											//  save language without surrounding spaces
 		else																						//  otherwise scan locales folder
 			foreach( FolderLister::getFolderList( $this->filePath ) as $folder )				//  iterate found locale folders
@@ -168,7 +169,7 @@ class Language
 			throw new RuntimeException( $message, 221 );
 		if( $force && $this->env->has( 'messenger' ) )
 			$this->env->get( 'messenger' )->noteFailure( $message );
-		return array();
+		return [];
 	}
 
 	public function hasWords( string $topic ): bool
@@ -196,7 +197,7 @@ class Language
 			throw new RuntimeException( $message, 221 );
 		if( $force && $this->env->has( 'messenger' ) )
 			$this->env->get( 'messenger' )->noteFailure( $message );
-		return array();
+		return [];
 	}
 
 	/**
@@ -255,8 +256,8 @@ class Language
 			if( $strict )
 				throw new RuntimeException( $message, 221 );
 			if( $force && $this->env->has( 'messenger' ) )
-				$this->env->get( 'messenger' )->noteFailure( $message );
-			return array();
+				$this->env->getMessenger()->noteFailure( $message );
+			return [];
 		}
 		$this->env->getRuntime()->reach( 'Resource_Language: end' );
 	}
@@ -274,7 +275,7 @@ class Language
 			$language	= strtolower( $language );
 			if( !in_array( $language, $this->languages ) )
 				throw new DomainException( 'Language "'.$language.'" is not supported' );
-			$this->data		= array();
+			$this->data		= [];
 			$this->language	= $language;
 			$this->load( 'main', FALSE );
 		}
