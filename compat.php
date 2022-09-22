@@ -27,7 +27,6 @@ class CMF_Hydrogen_Environment_Exception extends CeusMedia\HydrogenFramework\Env
 class CMF_Hydrogen_Environment_Remote extends CeusMedia\HydrogenFramework\Environment\Remote {}
 class CMF_Hydrogen_Environment_Remote_Messenger extends CeusMedia\HydrogenFramework\Environment\Remote\Messenger {}
 class CMF_Hydrogen_Environment_Resource_Acl_AllPublic extends CeusMedia\HydrogenFramework\Environment\Resource\Acl\AllPublic {}
-class CMF_Hydrogen_Environment_Resource_Acl_Database extends CeusMedia\HydrogenFramework\Environment\Resource\Acl\Database {}
 class CMF_Hydrogen_Environment_Resource_Acl_Server extends CeusMedia\HydrogenFramework\Environment\Resource\Acl\Server {}
 class CMF_Hydrogen_Environment_Resource_CacheDummy extends CeusMedia\HydrogenFramework\Environment\Resource\CacheDummy {}
 class CMF_Hydrogen_Environment_Resource_Captain extends CeusMedia\HydrogenFramework\Environment\Resource\Captain {}
@@ -43,7 +42,6 @@ class CMF_Hydrogen_Environment_Resource_Module_Component_File extends CeusMedia\
 class CMF_Hydrogen_Environment_Resource_Module_Library_Local extends CeusMedia\HydrogenFramework\Environment\Resource\Module\Library\Local {}
 class CMF_Hydrogen_Environment_Resource_Module_Library_Source extends CeusMedia\HydrogenFramework\Environment\Resource\Module\Library\Source {}
 class CMF_Hydrogen_Environment_Resource_Module_Editor extends CeusMedia\HydrogenFramework\Environment\Resource\Module\Editor {}
-class CMF_Hydrogen_Environment_Resource_Module_Handler extends CeusMedia\HydrogenFramework\Environment\Resource\Module\Handler {}
 class CMF_Hydrogen_Environment_Resource_Module_Reader extends CeusMedia\HydrogenFramework\Environment\Resource\Module\Reader {}
 class CMF_Hydrogen_Environment_Resource_Page extends CeusMedia\HydrogenFramework\Environment\Resource\Page {}
 class CMF_Hydrogen_Environment_Resource_Php extends CeusMedia\HydrogenFramework\Environment\Resource\Php {}

@@ -17,6 +17,8 @@
   },
   "require": {
     "php": ">=7.3",
+    "ext-json": "*",
+    "ext-pdo": "*",
     "ceus-media/common": "0.9.x-dev",
     "ceus-media/database": "* | dev-master"
   },
@@ -31,5 +33,47 @@
     },
     "files": ["compat.php"]
   },
-  "minimum-stability": "dev"
-}
+  "minimum-stability": "dev",
+  "scripts": {
+    "install-dev": "composer install --dev --quiet",
+    "update-dev": "composer install --dev",
+    "dev-create-docs": [
+      "@install-dev",
+      "php vendor/ceus-media/doc-creator/doc-creator.php --config-file=tool/config/doc-creator.xml"
+    ],
+    "dev-phpunit": [
+      "@install-dev",
+      "php vendor/bin/phpunit --configuration tool/config/phpunit9.xml --testsuite units"
+    ],
+    "dev-phpstan": [
+      "@install-dev",
+      "vendor/bin/phpstan analyze --memory-limit=4G --verbose"
+    ],
+    "dev-phpstan-clear": [
+      "@install-dev",
+      "vendor/bin/phpstan clear-cache --verbose"
+    ],
+    "dev-phpstan-save": [
+      "@install-dev",
+      "vendor/bin/phpstan analyse --generate-baseline phpstan-baseline.neon --verbose"
+    ],
+    "dev-rector": [
+      "@install-dev",
+      "vendor/bin/rector process --config=tool/config/rector-rules.php --dry-run"
+    ],
+    "dev-rector-fix": [
+      "@install-dev",
+      "vendor/bin/rector process --config=tool/config/rector-rules.php"
+    ],
+    "dev-test-syntax": "php test/syntax.php"
+  },
+  "scripts-descriptions": {
+    "install-dev": "Installs project dependencies for Development stage",
+    "update-dev": "Updates project dependencies for Development stage",
+    "dev-phpstan": "Validate codebase with PHPStan",
+    "dev-phpstan-clear": "Clear PHPStan cache",
+    "dev-phpstan-save": "Store current results in ignore list",
+    "dev-rector": "Shows suggestions of configured Rector rules",
+    "dev-rector-fix": "Apply currently configured Rector rules to codebase",
+    "dev-test-syntax": "Validate code base syntax using PHP linter"
+  }}
