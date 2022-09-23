@@ -70,7 +70,7 @@ class Logic
 	protected function getArrayFromRequestKey( string $key ): array
 	{
 		$request	= $this->env->getRequest();														//  shortcut request object
-		$array		= array();
+		$array		= [];
 		if( is_array( $request->get( $key ) ) )
 			foreach( $request->get( $key ) as $key => $value )
 				$array[$key]	= $value;

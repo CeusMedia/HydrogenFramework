@@ -94,7 +94,7 @@ class PDO extends Connection
 			$options		= $config->getAll( 'module.resource_database.option.' );				//  get connection options
 		}
 		else{																						//  @deprecated	use database module instead
-			$dba		= array();
+			$dba		= [];
 			$dbaKeys	= array( 'driver', 'host', 'port', 'name', 'username', 'password', 'prefix' );	//  list of access configuration pair keys
 			foreach( $dbaKeys as $key )																	//  iterate keys
 				$dba[$key]	= $config->get( 'database.'.$key );											//  realize access configuration setting
@@ -130,7 +130,7 @@ class PDO extends Connection
 		$options	+= $defaultOptions;
 
 		//  --  DATABASE OPTIONS  --  //
-		$driverOptions	= array();																	//  @todo: to be implemented
+		$driverOptions	= [];																	//  @todo: to be implemented
 		foreach( $options as $key => $value ){														//  iterate all database options
 			if( !defined( "PDO::".$key ) )															//  no PDO constant for for option key
 				throw new InvalidArgumentException( 'Unknown constant PDO::'.$key );				//  quit with exception

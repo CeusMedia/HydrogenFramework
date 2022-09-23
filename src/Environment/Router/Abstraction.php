@@ -52,7 +52,7 @@ abstract class Abstraction implements RouterInterface
 		$this->parseFromRequest();
 	}
 
-	public function getAbsoluteUri( string $controller = NULL, string $action = NULL, array $arguments = array(), array $parameters = array(), string $fragmentId = NULL ): string
+	public function getAbsoluteUri( string $controller = NULL, string $action = NULL, array $arguments = [], array $parameters = [], string $fragmentId = NULL ): string
 	{
 		$uri	= $this->getRelativeUri( $controller, $action, $arguments, $parameters, $fragmentId );
 		if( strlen( $uri ) ){
@@ -65,13 +65,13 @@ abstract class Abstraction implements RouterInterface
 		return $uri;
 	}
 
-	public function getRelativeUri( string $controller = NULL, string $action = NULL, array $arguments = array(), array $parameters = array(), string $fragmentId = NULL ): string
+	public function getRelativeUri( string $controller = NULL, string $action = NULL, array $arguments = [], array $parameters = [], string $fragmentId = NULL ): string
 	{
 		$data	= array(
 			'controller'	=> $this->env->getRequest()->get( '__controller' ),
 			'action'		=> $this->env->getRequest()->get( '__action' ),
-			'arguments'		=> array(),
-			'parameters'	=> array(),
+			'arguments'		=> [],
+			'parameters'	=> [],
 		);
 		$uri	= '.';
 		if( !is_null( $controller ) ){

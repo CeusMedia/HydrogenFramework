@@ -41,9 +41,9 @@ interface RouterInterface
 {
 	public function __construct( Environment $env );
 
-	public function getAbsoluteUri( string $controller = NULL, string $action = NULL, array $arguments = array(), array $parameters = array(), string $fragmentId = NULL ): string;
+	public function getAbsoluteUri( string $controller = NULL, string $action = NULL, array $arguments = [], array $parameters = [], string $fragmentId = NULL ): string;
 
-	public function getRelativeUri( string $controller = NULL, string $action = NULL, array $arguments = array(), array $parameters = array(), string $fragmentId = NULL ): string;
+	public function getRelativeUri( string $controller = NULL, string $action = NULL, array $arguments = [], array $parameters = [], string $fragmentId = NULL ): string;
 
 	public function parseFromRequest();
 }

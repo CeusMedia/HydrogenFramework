@@ -78,7 +78,7 @@ class MultiList extends AbstractViewHelper
 		if( $level > 0 && !$this->multiple )
 			$this->multiple	= TRUE;
 
-		$list		= array();
+		$list		= [];
 		$active		= FALSE;
 
 		$active	= FALSE;

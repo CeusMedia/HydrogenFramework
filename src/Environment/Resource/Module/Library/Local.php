@@ -213,7 +213,7 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 					if( is_bool( $currentValue ) )
 						$newValue	= FALSE;
 					else if( is_array( $currentValue ) )
-						$newValue	= array();
+						$newValue	= [];
 					else if( is_string( $currentValue ) )
 						$newValue	= '';
 					else if( is_numeric( $currentValue ) )

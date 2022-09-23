@@ -69,8 +69,8 @@ class SingleAutoTabs extends SingleList
 		$current			= $request->get( '__controller' ).'/'.$request->get( '__action' );
 		$linkMap			= $this->getUserModuleLinks( $userId, $language, TRUE );
 		$active				= $this->getCurrentKey( $linkMap, $current );
-		$linkItemList		= array();
-		$rankedLinkItemList	= array();
+		$linkItemList		= [];
+		$rankedLinkItemList	= [];
 
 		foreach( $linkMap as $link ){
 			if( in_array( $link->path, $this->linksToSkip ) )
@@ -82,7 +82,7 @@ class SingleAutoTabs extends SingleList
 			$anchor	= HtmlTag::create( 'a', $label, array( 'href' => './'.$uri ) );
 			$item	= HtmlTag::create( 'li', $anchor, array( 'class' => $class ) );
 			if( !isset( $rankedLinkItemList[$link->rank] ) )
-				$rankedLinkItemList[$link->rank]	= array();
+				$rankedLinkItemList[$link->rank]	= [];
 			$rankedLinkItemList[$link->rank][]	= $item;
 		}
 		ksort( $rankedLinkItemList );
@@ -111,7 +111,7 @@ class SingleAutoTabs extends SingleList
 	protected function getUserModuleLinks( $userId, string $language, bool $useAcl = TRUE ): array
 	{
 		$acl		= $this->env->getAcl();
-		$linkMap	= array();
+		$linkMap	= [];
 		foreach( $this->env->getModules()->getAll() as $module ){
 			foreach( $module->links as $link ){
 				if( $link->language && $link->language != $language )

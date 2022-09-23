@@ -64,7 +64,7 @@ class Single extends Abstraction implements RouterInterface
 		$parts	= explode( '/', $path );
 		$request->set( '__controller',	array_shift( $parts ) );
 		$request->set( '__action',		array_shift( $parts ) );
-		$arguments	= array();
+		$arguments	= [];
 		while( count( $parts ) ){
 			$part = trim( array_shift( $parts ) );
 			if( strlen( $part ) )

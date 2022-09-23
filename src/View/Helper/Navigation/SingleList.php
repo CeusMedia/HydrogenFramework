@@ -50,7 +50,7 @@ class SingleList extends AbstractViewHelper
 	protected $innerClass			= 'single';
 	protected $innerId				= 'navigation-inner';
 	protected $needsEnv				= FALSE;
-	protected $linksToSkip			= array();
+	protected $linksToSkip			= [];
 	public static $pathRequestKey	= "__path";
 
 	public function __construct( array $linkMap, string $innerClass = NULL, string $innerId = NULL )
@@ -79,8 +79,8 @@ class SingleList extends AbstractViewHelper
 		$path		= $current;
 		if( isset( $_REQUEST[self::$pathRequestKey] ) && $current === NULL )
 			$path	= utf8_decode( $_REQUEST[self::$pathRequestKey] );
-		$matches	= array();																		//  empty array to regular matching
-		$selected	= array();																		//  list of possibly selected links
+		$matches	= [];																		//  empty array to regular matching
+		$selected	= [];																		//  list of possibly selected links
 		foreach( $linkMap as $key => $label ){														//  iterate link map
 			$regExp	= '';																			//  prepare empty regular expression
 			$parts	= explode( '/', $path );														//  split currently requested path into parts
@@ -102,7 +102,7 @@ class SingleList extends AbstractViewHelper
 	{
 		$path	= empty( $_REQUEST[self::$pathRequestKey] ) ? $current : $_REQUEST[self::$pathRequestKey];
 		$active	= $this->getCurrentKey( $this->linkMap, $current );
-		$list	= array();
+		$list	= [];
 		$class	= NULL;
 		foreach( $this->linkMap as $key => $label )
 		{

@@ -57,7 +57,7 @@ class Remote extends Environment
 	 *	@param		array		$options		Map of environment options
 	 *	@return		void
 	 */
-	public function __construct( array $options = array() )
+	public function __construct( array $options = [] )
 	{
 //		self::$defaultPaths	= Environment::$defaultPaths;
 		$this->options	= $options;
@@ -88,9 +88,9 @@ class Remote extends Environment
 	 *	@param		boolean		$keepAppAlive			Not used in remote environment
 	 *	@return		void
 	 */
-	public function close( array $additionalResources = array(), bool $keepAppAlive = FALSE )
+	public function close( array $additionalResources = [], bool $keepAppAlive = FALSE )
 	{
-		parent::close( array(), FALSE );															//  unbind bound resources but keep application alive
+		parent::close( [], FALSE );															//  unbind bound resources but keep application alive
 	}
 
 	public function getMessenger(): Messenger

@@ -50,7 +50,7 @@ class SingleAclList extends SingleList
 		if( !$roleId )
 			return $linkMap;
 
-		$map	= array();
+		$map	= [];
 		foreach( $linkMap as $key => $label ){
 			$key	= strlen( trim( $key ) ) ? $key : 'index';
 			if( $this->env->getAcl()->hasRight( $roleId, str_replace( '/', '_', $key ), 'index' ) )
@@ -71,7 +71,7 @@ class SingleAclList extends SingleList
 		$path		= empty( $_REQUEST['path'] ) ? $current : $_REQUEST['path'];
 		$linkMap	= $this->getFilteredLinkMap( $this->linkMap );
 		$active		= $this->getCurrentKey( $linkMap, $path );
-		$list		= array();
+		$list		= [];
 		foreach( $linkMap as $key => $label ){
 			$key		= str_replace( '_', '/', $key );
 			$class		= $active == $key ? 'active' : NULL;

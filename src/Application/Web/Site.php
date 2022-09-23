@@ -196,7 +196,7 @@ class Site extends Abstraction
 	 *	@return		object		Map of final response and number of sent bytes (members: bytesSent, compression, response)
 	 *	@todo		use UI_OutputBuffer
 	 */
-	protected function respond( string $body, array $headers = array() ): object
+	protected function respond( string $body, array $headers = [] ): object
 	{
 		$response	= $this->env->getResponse();
 		$body		= ob_get_clean().$body;

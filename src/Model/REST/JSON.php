@@ -13,7 +13,7 @@ abstract class JSON extends Abstraction
 	protected $basePath;
 	protected $client;
 
-	public function count( array $conditions = array() ): int
+	public function count( array $conditions = [] ): int
 	{
 		$parameters	= array( 'filters' => $conditions, 'limit' => 1 );
 		return $this->client->get( $this->basePath, $parameters )->data->range->total;
@@ -29,7 +29,7 @@ abstract class JSON extends Abstraction
 		return $this->client->delete( $this->basePath.'/'.$id )->data;
 	}
 
-	public function index( array $conditions = array(), array $orders = array(), array $limit = array() ): array
+	public function index( array $conditions = [], array $orders = [], array $limit = [] ): array
 	{
 		$parameters	= array(
 			'filters'	=> $conditions,

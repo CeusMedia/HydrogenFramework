@@ -62,10 +62,10 @@ class Recursive extends Abstraction implements RouterInterface
 		$path	= preg_replace( '@^(.*)/?$@U', '\\1', trim( $path ) );
 		$parts	= explode( '/', $path );
 		$left	= $parts;
-		$right	= array();
+		$right	= [];
 		if( strlen( trim( $path ) ) ){
 			while( count( $left ) ){
-				$class	= array();
+				$class	= [];
 				foreach( $left as $part )
 					$class[]	= ucfirst( $part );
 				$className	= 'Controller_'.implode( '_', $class );

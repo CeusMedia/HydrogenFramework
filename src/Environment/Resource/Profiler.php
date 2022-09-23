@@ -48,6 +48,6 @@ class Profiler
 	{
 		if( $this->enabled )
 			return $this->clock->getLaps();
-		return array();
+		return [];
 	}
 }

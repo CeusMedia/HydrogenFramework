@@ -65,12 +65,12 @@ class JavaScript
 	protected $revision;
 
 	/**	@var	array				$scripts			List of JavaScript blocks */
-	protected $scripts				= array();
+	protected $scripts				= [];
 
 	/**	@var	array				$scriptsOnReady		List if JavaScripts to run on load if browser is ready */
-	protected $scriptsOnReady		= array();
+	protected $scriptsOnReady		= [];
 
-	protected $urls					= array();
+	protected $urls					= [];
 
 	protected $useCompression		= FALSE;
 
@@ -132,10 +132,10 @@ class JavaScript
 
 		$level	= CaptainResource::interpretLoadLevel( $level );		//  sanitize level supporting old string values
 		if( !array_key_exists( $level, $this->scripts ) )										//  level is not yet defined in scripts list
-			$this->scripts[$level]	= array();													//  create empty scripts list for level
+			$this->scripts[$level]	= [];													//  create empty scripts list for level
 		$key	= strlen( $key ) ? md5( $key ) : 'default';
 		if( !array_key_exists( $key, $this->scripts[$level] ) )
-			$this->scripts[$level][$key]	= array();
+			$this->scripts[$level][$key]	= [];
 		$this->scripts[$level][$key][]	= $script;
 		return $this;
 	}
@@ -153,10 +153,10 @@ class JavaScript
 	{
 		$level	= CaptainResource::interpretLoadLevel( $level );		//  sanitize level supporting old string values
 		if( !array_key_exists( $level, $this->scriptsOnReady ) )								//  level is not yet defined in scripts list
-			$this->scriptsOnReady[$level]	= array();											//  create empty scripts list for level
+			$this->scriptsOnReady[$level]	= [];											//  create empty scripts list for level
 		$key	= strlen( $key ) ? md5( $key ) : 'default';
 		if( !array_key_exists( $key, $this->scriptsOnReady[$level] ) )
-			$this->scriptsOnReady[$level][$key]	= array();
+			$this->scriptsOnReady[$level][$key]	= [];
 		$this->scriptsOnReady[$level][$key][]	= $script;										//  note JavaScript code on runlevel
 		return $this;
 	}
@@ -174,10 +174,10 @@ class JavaScript
 	{
 		$level	= CaptainResource::interpretLoadLevel( $level );		//  sanitize level supporting old string values
 		if( !array_key_exists( $level, $this->urls ) )											//  level is not yet defined in scripts list
-			$this->urls[$level]	= array();														//  create empty scripts list for level
+			$this->urls[$level]	= [];														//  create empty scripts list for level
 		$key	= strlen( $key ) ? md5( $key ) : 'default';
 		if( !array_key_exists( $key, $this->urls[$level] ) )
-			$this->urls[$level][$key]	= array();
+			$this->urls[$level][$key]	= [];
 		$this->urls[$level][$key][]	= $url;														//  note JavaScript code on runlevel
 		return $this;
 	}
@@ -252,7 +252,7 @@ class JavaScript
 	 */
 	public function getPlainUrlList(): array
 	{
-		$list	= array();
+		$list	= [];
 		foreach( $this->urls as $level => $levelUrls )
 			foreach( $levelUrls as $key => $keyedUrls )
 				foreach( $keyedUrls as $url )
@@ -379,7 +379,7 @@ class JavaScript
 	{
 		$fileJs	= $this->getPackageCacheFileName();
 		if( !file_exists( $fileJs ) || $forceFresh ) {
-			$contents	= array();
+			$contents	= [];
 			if( $this->revision )
 				$content	= "/* @revision ".$this->revision." */\n";
 			foreach( $this->getPlainUrlList() as $url ){
@@ -409,7 +409,7 @@ class JavaScript
 	 */
 	protected function renderScripts( bool $compress = FALSE, bool $wrapInTag = FALSE ): string
 	{
-		$list	= array();
+		$list	= [];
 		ksort( $this->scripts );
 		foreach( $this->scripts as $level => $map )
 			foreach( $map as $key => $scripts )
@@ -434,7 +434,7 @@ class JavaScript
 	 */
 	protected function renderScriptsOnReady( bool $compress = FALSE, bool $wrapInTag = FALSE ): string
 	{
-		$list	= array();
+		$list	= [];
 		ksort( $this->scriptsOnReady );
 		foreach( $this->scriptsOnReady as $level => $map ){
 			foreach( $map as $key => $scripts ){
@@ -476,7 +476,7 @@ class JavaScript
 			$links	= HtmlTag::create( 'script', NULL, $attributes );
 		}
 		else{
-			$list	= array();
+			$list	= [];
 			foreach( $this->getPlainUrlList() as $url ){
 				if( $this->revision )
 					$url	.= ( preg_match( '/\?/', $url ) ? '&amp;' : '?' ).$this->revision;

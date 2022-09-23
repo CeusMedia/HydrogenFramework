@@ -50,16 +50,16 @@ class Server extends Abstraction
 	protected function getRights( string $roleId ): array
 	{
 		if( $this->hasFullAccess( $roleId ) )
-			return array();
+			return [];
 		if( $this->hasNoAccess( $roleId ) )
-			return array();
+			return [];
 		if( !isset( $this->rights[$roleId] ) )
 		{
 			$rights	= $this->env->getServer()->getData( 'role', 'getRights', array( $roleId ) );
-			$this->rights[$roleId]	= array();
+			$this->rights[$roleId]	= [];
 			foreach( $rights as $right ){
 				if( !isset( $this->rights[$roleId][$right->controller] ) )
-					$this->rights[$roleId][$right->controller]	= array();
+					$this->rights[$roleId][$right->controller]	= [];
 				$this->rights[$roleId][$right->controller][]	= $right->action;
 			}
 		}

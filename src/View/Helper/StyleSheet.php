@@ -54,8 +54,8 @@ class StyleSheet
 	protected $suffix				= "";
 	protected $revision;
 	/**	@var	array				$styles		List of StyleSheet blocks */
-	protected $styles				= array();
-	protected $urls					= array();
+	protected $styles				= [];
+	protected $urls					= [];
 	protected $useCompression		= FALSE;
 	public $indent					= "    ";
 
@@ -64,8 +64,8 @@ class StyleSheet
 		if( $basePath !== NULL )
 			$this->setBasePath( $basePath );
 		for( $i=0; $i<=9; $i++ ){
-			$this->styles[$i]	= array();
-			$this->urls[$i]		= array();
+			$this->styles[$i]	= [];
+			$this->urls[$i]		= [];
 		}
 	}
 
@@ -91,7 +91,7 @@ class StyleSheet
 	 *	@param		array		$attributes	Optional: Additional style tag attributes
 	 *	@return		self
 	 */
-	public function addUrl( string $url, $level = CaptainResource::LEVEL_MID, array $attributes = array() ): self
+	public function addUrl( string $url, $level = CaptainResource::LEVEL_MID, array $attributes = [] ): self
 	{
 		$level	= CaptainResource::interpretLoadLevel( $level );		//  sanitize level supporting old string values
 		$this->urls[$level][]		= (object) array( 'url' => $url, 'attributes' => $attributes );
@@ -119,7 +119,7 @@ class StyleSheet
 	 */
 	public function getPackageHash(): string
 	{
-		$copy	= array();
+		$copy	= [];
 		foreach( $this->getUrlList() as $url )
 			$copy[]	= $url->url;
 		sort( $copy );
@@ -134,7 +134,7 @@ class StyleSheet
 	 */
 	public function getStyleList(): array
 	{
-		$list	= array();
+		$list	= [];
 		foreach( $this->styles as $level => $map ){
 			foreach( $map as $style ){
 				$list[]	= $style;
@@ -150,7 +150,7 @@ class StyleSheet
 	 */
 	public function getUrlList(): array
 	{
-		$list	= array();
+		$list	= [];
 		foreach( $this->urls as $level => $map ){
 
 			foreach( $map as $url ){
@@ -180,7 +180,7 @@ class StyleSheet
 			'media'		=> 'all',
 		];
 
-		$items		= array();
+		$items		= [];
 		if( $urls ){
 			if( $this->useCompression ){
 				$attributes	= array_merge( $linkAttributes, [
@@ -285,12 +285,12 @@ class StyleSheet
 		$pathRoot	= getEnv( 'DOCUMENT_ROOT' );													//  get server document root path for CSS relocator
 		$pathSelf	= str_replace( $pathRoot, '', dirname( getEnv( 'SCRIPT_FILENAME' ) ) );			//  get path relative to document root for symbolic link map
 
-		$symlinks	= array();																		//  prepare map of symbolic links for CSS relocator
+		$symlinks	= [];																		//  prepare map of symbolic links for CSS relocator
 		foreach( FolderLister::getFolderList( 'themes' ) as $item )									//  iterate theme folders
 			if( is_link( ( $path = $item->getPathname() ) ) )										//  if theme folder is a link
 				$symlinks['/'.$pathSelf.'/themes/'.$item->getFilename()] = realpath( $path );		//  not symbolic link
 
-		$contents	= array();																		//  prepare empty package content list
+		$contents	= [];																		//  prepare empty package content list
 		if( $this->revision )																		//  a revision is set
 			$contents[]	= "/* @revision ".$this->revision." */\n";									//  add revision header to content list
 

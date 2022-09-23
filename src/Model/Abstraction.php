@@ -22,13 +22,13 @@ abstract class Abstraction
 
 	/*  --  ABSTRACT CRUDIC METHODS  --  */
 
-	abstract public function count( array $conditions = array() ): int;
+	abstract public function count( array $conditions = [] ): int;
 
 	abstract public function create( $data );
 
 	abstract public function delete( string $id );
 
-	abstract public function index( array $conditions = array(), array $orders = array(), array $limits = array() ): array;
+	abstract public function index( array $conditions = [], array $orders = [], array $limits = [] ): array;
 
 	abstract public function read( string $id );
 
@@ -59,17 +59,17 @@ abstract class Abstraction
 		return $this->read( $id );
 	}
 
-	public function getAll( array $conditions = array(), array $orders = array(), array $limits = array() ): array
+	public function getAll( array $conditions = [], array $orders = [], array $limits = [] ): array
 	{
 		return $this->index( $conditions, $orders, $limits );
 	}
 
-	public function getAllByIndex( string $indexKey, $indexValue, array $orders = array(), array $limits = array() ): array
+	public function getAllByIndex( string $indexKey, $indexValue, array $orders = [], array $limits = [] ): array
 	{
 		return $this->index( array( $indexKey => $indexValue ), $orders, $limits );
 	}
 
-	public function getAllByIndices( array $indices, array $orders = array(), array $limits = array() ): array
+	public function getAllByIndices( array $indices, array $orders = [], array $limits = [] ): array
 	{
 		return $this->index( $indices, $orders, $limits );
 	}

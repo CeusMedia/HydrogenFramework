@@ -36,7 +36,7 @@ class Hook
 	 *	@return		void			Always returns TRUE to indicate that dispatching hook is done
 	 *	@todo		remove first 2 lines after Env::redirect has been deprecated
 	 */
-	protected static function redirect( WebEnvironment $env, string $controller = 'index', string $action = "index", array $arguments = array(), array $parameters = array() )
+	protected static function redirect( WebEnvironment $env, string $controller = 'index', string $action = "index", array $arguments = [], array $parameters = [] )
 	{
 //		$env->redirect( $controller, $action, $arguments, $parameters );
 //		return TRUE;
@@ -108,7 +108,7 @@ class Hook
 	 *	@param		array			$receivers		List of receiver objects
 	 *	@return		void
 	 */
-	protected static function sendMail( Environment $env, Mail_Abstract $mail, array $receivers = array() )
+	protected static function sendMail( Environment $env, Mail_Abstract $mail, array $receivers = [] )
 	{
 		$language	= $env->getLanguage()->getLanguage();											// @todo apply user language
 		foreach( $receivers as $receiver ){

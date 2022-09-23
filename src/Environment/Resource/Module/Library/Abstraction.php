@@ -42,7 +42,7 @@ use RuntimeException;
  */
 abstract class Abstraction implements LibraryInterface
 {
-	protected $modules			= array();
+	protected $modules			= [];
 
 	protected $scanResult		= array(
 		'source'	=> 'unscanned',
@@ -87,7 +87,7 @@ abstract class Abstraction implements LibraryInterface
 	{
 		if( !$activeOnly )
 			return $this->modules;
-		$modules	= array();
+		$modules	= [];
 		foreach( $this->modules as $module )
 			if( $module->isActive )
 				$modules[$module->id]	= $module;

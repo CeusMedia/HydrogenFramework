@@ -75,13 +75,13 @@ class Captain
 	protected $env;
 
 	/**	@var		array								$disabledHooks	List of disabled hooks */
-	protected $disabledHooks	= array();
+	protected $disabledHooks	= [];
 
 	/**	@var		boolean								$logCalls		Flag: log hook calls */
 	protected $logCalls			= FALSE;
 
 	/**	@var		array								$openHooks		List of hooks open right now */
-	protected $openHooks		= array();
+	protected $openHooks		= [];
 
 	/**
 	 *	Constructor.

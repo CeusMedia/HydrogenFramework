@@ -49,7 +49,7 @@ abstract class Abstraction
 	/**	@var		Environment			$env					Application Environment Object */
 	protected $env;
 
-	public static $modulesNeeded						= array();				//  @todo for PHP 5.3+: make protected and use static:: instead of self:: on use -> now you can set value on App class construction
+	public static $modulesNeeded						= [];				//  @todo for PHP 5.3+: make protected and use static:: instead of self:: on use -> now you can set value on App class construction
 
 	/**
 	 *	Constructor.

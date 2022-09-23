@@ -44,7 +44,7 @@ use ReflectionException;
  */
 abstract class Abstraction extends ApplicationAbstraction
 {
-	protected $components			= array();
+	protected $components			= [];
 
 	/**	@var		WebEnvironment			$env				Application Environment Object */
 	protected $env;
@@ -89,7 +89,7 @@ abstract class Abstraction extends ApplicationAbstraction
 		$instanceId	= $config->get( 'app.setup.instanceId' );
 		$baseUrl	= $config->get( 'app.setup.url' );
 		$baseUrl	.= 'admin/module/installer/view/';
-		$list	= array();
+		$list	= [];
 		foreach( $modules as $moduleId ){
 			$url	= $baseUrl.$moduleId.'?selectInstanceId='.$instanceId;
 			$list[]	= '<li><a href="'.$url.'">'.$moduleId.'</a></li>';
@@ -104,7 +104,7 @@ abstract class Abstraction extends ApplicationAbstraction
 	 *	@param		array		$components
 	 *	@return		self
 	 */
-	protected function setViewComponents( array $components = array() ): self
+	protected function setViewComponents( array $components = [] ): self
 	{
 		foreach( $components as $key => $component ){
 			if( !array_key_exists( $key, $this->components ) )

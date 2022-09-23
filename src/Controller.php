@@ -200,7 +200,7 @@ class Controller
 		return $this;
 	}
 
-	protected function callHook( string $resource, string $event, $context = NULL, $data = array() )
+	protected function callHook( string $resource, string $event, $context = NULL, $data = [] )
 	{
 		$context	= $context ? $context : $this;
 		return $this->env->getCaptain()->callHook( $resource, $event, $context, $data );
@@ -350,7 +350,7 @@ class Controller
 	 *	@param		array		$parameters		Map of additional parameters to set in request
 	 *	@return		void
 	 */
-	protected function redirect( string $controller = 'index', string $action = "index", array $arguments = array(), array $parameters = array() )
+	protected function redirect( string $controller = 'index', string $action = "index", array $arguments = [], array $parameters = [] )
 	{
 		Deprecation::getInstance()
 			->setErrorVersion( '0.8.6.4' )
@@ -469,7 +469,7 @@ class Controller
 			$language->load( $this->controller, FALSE, FALSE );
 		}
 		//  load module configuration
-		$list	= array();
+		$list	= [];
 		if( strlen( static::$moduleId ) && $env->getModules()->has( static::$moduleId ) )
 			foreach( $env->getModules()->get( static::$moduleId )->config as $entry )
 				$list[$entry->key]	= $entry->value;

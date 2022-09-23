@@ -401,7 +401,7 @@ class Editor
 
 	protected function hasXmlNode( $xml, string $nodeName ): bool
 	{
-		$children	= array();
+		$children	= [];
 		foreach( $xml->children() as $child )														//  iterate children
 			$children[]	= $child->getName();
 		return in_array( $nodeName, $children );

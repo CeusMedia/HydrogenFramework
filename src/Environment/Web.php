@@ -131,7 +131,7 @@ class Web extends Environment
 	 *	@param		array		$options
 	 *	@return		void
 	 */
-	public function __construct( $options = array() )
+	public function __construct( $options = [] )
 	{
 		ob_start();
 		try{
@@ -168,7 +168,7 @@ class Web extends Environment
 	 *	@param		boolean		$keepAppAlive			Flag: do not end execution right now if turned on
 	 *	@return		void
 	 */
-	public function close( array $additionalResources = array(), bool $keepAppAlive = FALSE )
+	public function close( array $additionalResources = [], bool $keepAppAlive = FALSE )
 	{
 		$resources	= array(
 			'session',																				//  HTTP session handler
@@ -266,7 +266,7 @@ class Web extends Environment
 	 *	@deprecated	redirecting only works in hooks within dispatching, use restart in controllers
 	 *	@todo		remove in 0.9 and handle todo in Hook::redirect
 	 */
-	public function redirect( string $controller = 'index', string $action = "index", array $arguments = array(), array $parameters = array() )
+	public function redirect( string $controller = 'index', string $action = "index", array $arguments = [], array $parameters = [] )
 	{
 		Deprecation::getInstance()
 			->setErrorVersion( '0.8.6.4' )

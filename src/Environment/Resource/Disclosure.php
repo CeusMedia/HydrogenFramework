@@ -44,7 +44,7 @@ class Disclosure
 		'methodFilter'		=> ReflectionMethod::IS_PUBLIC
 	);
 
-	public function __construct( $options = array() )
+	public function __construct( $options = [] )
 	{
 		Deprecation::getInstance()
 			->setErrorVersion( '0.8.8' )
@@ -53,11 +53,11 @@ class Disclosure
 		$this->options	= array_merge( $this->options, $options );
 	}
 
-	public function reflect( string $path, array $options = array() ): array
+	public function reflect( string $path, array $options = [] ): array
 	{
 		$options	= array_merge( $this->options, $options );
 
-		$classes	= array();
+		$classes	= [];
 		$path		= realpath( $path );
 		$index		= new RecursiveRegexFileFilter( $path, '/^[^_].+\.'.$options['fileExtension'].'$/' );
 		foreach( $index as $entry ){
@@ -71,7 +71,7 @@ class Disclosure
 			$classReflection	= new ReflectionClass( $className );
 			$class	= new stdClass();
 			$class->name			= $className;
-			$class->methods		= array();
+			$class->methods		= [];
 			if( $options['skipAbstract'] )															//  abstract classes shall be skipped
 				if( $classReflection->isAbstract() )												//  class is abstract
 					continue;																		//  skip this class
@@ -98,7 +98,7 @@ class Disclosure
 						continue;																	//  skip this method
 				if( $options['reflectMethod'] )														//  reflecting methods is enabled to
 					$method->reflection	= $methodReflection;										//  store the method reflection object
-				$method->parameters	= array();
+				$method->parameters	= [];
 				$class->methods[$method->name]	= $method;
 
 				if( !$options['readParameters'] )													//  do not read method parameters
