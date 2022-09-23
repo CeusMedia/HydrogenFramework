@@ -15,8 +15,3 @@ parameters:
 			count: 3
 			path: src/Environment/Resource/Acl/Database.php
 
-		-
-			message: "#^Parameter \\$mail of method CeusMedia\\\\HydrogenFramework\\\\Hook\\:\\:sendMail\\(\\) has invalid typehint type Mail_Abstract\\.$#"
-			count: 1
-			path: src/Hook.php
-

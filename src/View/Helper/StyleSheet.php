@@ -1,4 +1,5 @@
-<?php
+<?php /** @noinspection PhpUnused */
+
 /**
  *	Helper to collect and combine StyleSheets.
  *
@@ -26,6 +27,7 @@
  */
 namespace CeusMedia\HydrogenFramework\View\Helper;
 
+use CeusMedia\Common\Exception\IO as IoException;
 use CeusMedia\Common\FS\File\CSS\Combiner as CssCombiner;
 use CeusMedia\Common\FS\File\CSS\Compressor as CssCompressor;
 use CeusMedia\Common\FS\File\CSS\Relocator as CssRelocator;
@@ -72,13 +74,13 @@ class StyleSheet
 	/**
 	 *	Collect a StyleSheet block.
 	 *	@access		public
-	 *	@param		string		$style		StyleSheet block
-	 *	@param		integer		$level		Optional: Load level (1-9 or {top(1),mid(=5),end(9)}, default: 5)
+	 *	@param		string			$style		StyleSheet block
+	 *	@param		integer|NULL	$level		Optional: Load level (1-9 or {top(1),mid(=5),end(9)}, default: 5)
 	 *	@return		self
 	 */
-	public function addStyle( string $style, $level = CaptainResource::LEVEL_MID ): self
+	public function addStyle( string $style, ?int $level = CaptainResource::LEVEL_MID ): self
 	{
-		$level	= CaptainResource::interpretLoadLevel( $level );		//  sanitize level supporting old string values
+		$level = $level ?? CaptainResource::LEVEL_MID;
 		$this->styles[$level][]		= $style;
 		return $this;
 	}
@@ -86,15 +88,15 @@ class StyleSheet
 	/**
 	 *	Add a StyleSheet URL.
 	 *	@access		public
-	 *	@param		string		$url		StyleSheet URL
-	 *	@param		integer		$level		Optional: Load level (1-9 or {top(1),mid(=5),end(9)}, default: 5)
-	 *	@param		array		$attributes	Optional: Additional style tag attributes
+	 *	@param		string			$url		StyleSheet URL
+	 *	@param		integer|NULL	$level		Optional: Load level (1-9 or {top(1),mid(=5),end(9)}, default: 5)
+	 *	@param		array			$attributes	Optional: Additional style tag attributes
 	 *	@return		self
 	 */
-	public function addUrl( string $url, $level = CaptainResource::LEVEL_MID, array $attributes = [] ): self
+	public function addUrl( string $url, ?int $level = CaptainResource::LEVEL_MID, array $attributes = [] ): self
 	{
-		$level	= CaptainResource::interpretLoadLevel( $level );		//  sanitize level supporting old string values
-		$this->urls[$level][]		= (object) array( 'url' => $url, 'attributes' => $attributes );
+		$level = $level ?? CaptainResource::LEVEL_MID;
+		$this->urls[$level][]	= (object) ['url' => $url, 'attributes' => $attributes];
 		return $this;
 	}
 
@@ -135,11 +137,9 @@ class StyleSheet
 	public function getStyleList(): array
 	{
 		$list	= [];
-		foreach( $this->styles as $level => $map ){
-			foreach( $map as $style ){
+		foreach( $this->styles as $map )
+			foreach( $map as $style )
 				$list[]	= $style;
-			}
-		}
 		return $list;
 	}
 
@@ -151,8 +151,7 @@ class StyleSheet
 	public function getUrlList(): array
 	{
 		$list	= [];
-		foreach( $this->urls as $level => $map ){
-
+		foreach( $this->urls as $map ){
 			foreach( $map as $url ){
 				if( !preg_match( "@^[a-z]+://@", $url->url ) )
 					$url->url	= $this->pathBase.$url->url;
@@ -163,13 +162,13 @@ class StyleSheet
 	}
 
 	/**
-	 *	Renders an HTML scrtipt tag with all collected StyleSheet URLs and blocks.
+	 *	Renders an HTML script tag with all collected StyleSheet URLs and blocks.
 	 *	@access		public
-	 *	@param		bool		$indentEndTag	Flag: indent end tag by 2 tabs
 	 *	@param		bool		$forceFresh		Flag: force fresh creation instead of using cache
 	 *	@return		string
+	 *	@throws		IoException
 	 */
-	public function render( bool $indentEndTag = FALSE, bool $forceFresh = FALSE ): string
+	public function render( bool $forceFresh = FALSE ): string
 	{
 		$urls		= $this->getUrlList();
 		$styles		= $this->getStyleList();
@@ -183,10 +182,9 @@ class StyleSheet
 		$items		= [];
 		if( $urls ){
 			if( $this->useCompression ){
-				$attributes	= array_merge( $linkAttributes, [
+				$items[]	= HtmlTag::create( 'link', NULL, array_merge( $linkAttributes, [
 					'href'		=> $this->getPackageFileName( $forceFresh )
-				] );
-				$items[]	= HtmlTag::create( 'link', NULL, $linkAttributes );
+				] ) );
 			}
 			else{
 				foreach( $urls as $url ){
@@ -273,11 +271,12 @@ class StyleSheet
 	 *	@access		protected
 	 *	@param		bool		$forceFresh		Flag: force fresh creation instead of using cache
 	 *	@return		string
+	 *	@throws		IoException
 	 */
 	protected function getPackageFileName( bool $forceFresh = FALSE ): string
 	{
 		$fileCss	= $this->getPackageCacheFileName();												//  calculate CSS package file name for collected CSS files
-		if( file_exists( $fileCss ) && !$forceFresh )												//  CSS package file has been built before and is not to be rebuild
+		if( file_exists( $fileCss ) && !$forceFresh )												//  CSS package file has been built before and is not to be rebuilt
 			return $fileCss;																		//  return CSS package file name
 		$combiner	= new CssCombiner();															//  load CSS combiner for nested CSS files
 		$compressor	= new CssCompressor();															//  load CSS compressor

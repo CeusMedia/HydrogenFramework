@@ -239,8 +239,8 @@ class Controller
 	/**
 	 *	Returns Data for View.
 	 *	@access		protected
-	 *	@param		string		$key			Key of data to return
-	 *	@param		string		$fallback		String to return if no data is set by key
+	 *	@param		string|NULL		$key			Key of data to return
+	 *	@param		string|NULL		$fallback		String to return if no data is set by key
 	 *	@return		mixed
 	 */
 	protected function getData( string $key = NULL, string $fallback = NULL )

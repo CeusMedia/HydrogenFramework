@@ -1,4 +1,5 @@
-<?php
+<?php /** @noinspection PhpUnused */
+
 /**
  *	Helper to collect and combine JavaScripts.
  *	This is a singleton.
@@ -27,18 +28,17 @@
  */
 namespace CeusMedia\HydrogenFramework\View\Helper;
 
+use CeusMedia\Common\Alg\JS\Minifier as JsMinifier;
+use CeusMedia\Common\Exception\IO as IoException;
 use CeusMedia\Common\FS\File\Iterator as FileIterator;
 use CeusMedia\Common\FS\File\Reader as FileReader;
 use CeusMedia\Common\FS\File\Writer as FileWriter;
-use CeusMedia\Common\Net\API\Google\ClosureCompiler;
+use CeusMedia\Common\Net\API\Google\ClosureCompiler as NetClosureCompiler;
 use CeusMedia\Common\Net\Reader as NetReader;
 use CeusMedia\Common\UI\HTML\Tag as HtmlTag;
-use CeusMedia\HydrogenFramework\Deprecation;
 use CeusMedia\HydrogenFramework\Environment;
 use CeusMedia\HydrogenFramework\Environment\Resource\Captain as CaptainResource;
 
-use JSMin;
-use RuntimeException;
 use Throwable;
 
 /**
@@ -80,57 +80,29 @@ class JavaScript
 	 *	Adds a module JavaScript by path name within configured local JavaScript folder.
 	 *	Uses addUrl with configured  local JavaScript folder.
 	 *	@access		public
-	 *	@param		string		$filePath	Path of file within JavaScript folder
-	 *	@param		integer		$level		Optional: Load level (1-9 or {top(1),mid(5),end(9)}, default: 5)
-	 *	@param		string		$key		Optional: script key in case of later removal
+	 *	@param		string			$filePath	Path of file within JavaScript folder
+	 *	@param		integer|NULL	$level		Optional: Load level (1-9, default: 5)
+	 *	@param		string|NULL		$key		Optional: script key in case of later removal
 	 *	@return		self
 	 */
-	public function addModuleFile( string $filePath, $level = CaptainResource::LEVEL_MID, string $key = NULL ): self
+	public function addModuleFile(string $filePath, ?int $level = CaptainResource::LEVEL_MID, string $key = NULL ): self
 	{
 		$path	= $this->env->getConfig()->get( 'path.scripts' );
-		$level	= CaptainResource::interpretLoadLevel( $level );
+		$level = $level ?? CaptainResource::LEVEL_MID;
 		return $this->addUrl( $path.$filePath, $level, $key );
-	}
-
-	/**
-	 *	Adds a module JavaScript by path name within configured local JavaScript folder.
-	 *	Uses addUrl with configured  local JavaScript folder.
-	 *	@access		public
-	 *	@param		string		$script		JavaScript block
-	 *	@param		integer		$level		Optional: Load level (1-9 or {top(1),mid(5),end(9)}, default: 5)
-	 *	@param		string		$key		Optional: script key in case of later removal
-	 *	@return		self
-	 *	@deprecated	use addModuleFile instead
-	 *	@todo		remove in v0.8.8
-	 */
-	public function addModuleScript( $script, $level = CaptainResource::LEVEL_MID, string $key = NULL ): self
-	{
-		Deprecation::getInstance()
-			->setErrorVersion( '0.8.6.3' )
-			->setExceptionVersion( '0.8.7' )
-			->message( 'Please use addModuleFile instead' );
-
-		$path	= $this->env->getConfig()->get( 'path.scripts' );
-		$level	= CaptainResource::interpretLoadLevel( $level );
-		return $this->addUrl( $path.$script, $level, $key );
 	}
 
 	/**
 	 *	Collect a JavaScript block.
 	 *	@access		public
-	 *	@param		string		$script		JavaScript block
-	 *	@param		integer		$level		Optional: Load level (1-9 or {top(1),mid(=5),end(9)}, default: 5)
-	 *	@param		string		$key		Optional: script key in case of later removal
+	 *	@param		string			$script		JavaScript block
+	 *	@param		integer|NULL	$level		Optional: Load level (1-9, default: 5)
+	 *	@param		string|NULL		$key		Optional: script key in case of later removal
 	 *	@return		self
-	 *	@todo		remove support for level "ready", see below
 	 */
-	public function addScript( string $script, $level = CaptainResource::LEVEL_MID, string $key = NULL ): self
+	public function addScript( string $script, ?int $level = CaptainResource::LEVEL_MID, string $key = NULL ): self
 	{
-		/* @todo		remove after all ->addScript( '...', 'ready' ) are replaced by ->addScriptOnReady( '...' ) */
-		if( $level === "ready" )
-			return $this->addScriptOnReady( $script, $level );
-
-		$level	= CaptainResource::interpretLoadLevel( $level );		//  sanitize level supporting old string values
+		$level = $level ?? CaptainResource::LEVEL_MID;
 		if( !array_key_exists( $level, $this->scripts ) )										//  level is not yet defined in scripts list
 			$this->scripts[$level]	= [];													//  create empty scripts list for level
 		$key	= strlen( $key ) ? md5( $key ) : 'default';
@@ -143,15 +115,15 @@ class JavaScript
 	/**
 	 *	Appends JavaScript code to be run after Browser finished rendering (document.ready).
 	 *	@access		public
-	 *	@param		string		$script		JavaScript code to execute on ready
-	 *	@param		integer		$level		Optional: Load level (1-9 or {top(1),mid(=5),end(9)}, default: 5)
-	 *	@param		string		$key		Optional: script key in case of later removal
+	 *	@param		string			$script		JavaScript code to execute on ready
+	 *	@param		integer|NULL	$level		Optional: Load level (1-9, default: 5)
+	 *	@param		string|NULL		$key		Optional: script key in case of later removal
 	 *	@return		self
 	 *	@todo		implement support of a script key (3rd argument)
 	 */
-	public function addScriptOnReady( string $script, $level = CaptainResource::LEVEL_MID, string $key = NULL ): self
+	public function addScriptOnReady( string $script, ?int $level = CaptainResource::LEVEL_MID, string $key = NULL ): self
 	{
-		$level	= CaptainResource::interpretLoadLevel( $level );		//  sanitize level supporting old string values
+		$level = $level ?? CaptainResource::LEVEL_MID;
 		if( !array_key_exists( $level, $this->scriptsOnReady ) )								//  level is not yet defined in scripts list
 			$this->scriptsOnReady[$level]	= [];											//  create empty scripts list for level
 		$key	= strlen( $key ) ? md5( $key ) : 'default';
@@ -164,15 +136,15 @@ class JavaScript
 	/**
 	 *	Add a JavaScript URL.
 	 *	@access		public
-	 *	@param		string		$url		JavaScript URL
-	 *	@param		integer		$level		Optional: Load level (1-9 or {top(1),mid(=5),end(9)}, default: 5)
-	 *	@param		string		$key		Optional: script key in case of later removal
+	 *	@param		string			$url		JavaScript URL
+	 *	@param		integer|NULL	$level		Optional: Load level (1-9, default: 5)
+	 *	@param		string|NULL		$key		Optional: script key in case of later removal
 	 *	@return		self
 	 *	@todo		implement support of a script key (3rd argument)
 	 */
-	public function addUrl( string $url, $level = CaptainResource::LEVEL_MID, string $key = NULL ): self
+	public function addUrl( string $url, ?int $level = CaptainResource::LEVEL_MID, string $key = NULL ): self
 	{
-		$level	= CaptainResource::interpretLoadLevel( $level );		//  sanitize level supporting old string values
+		$level = $level ?? CaptainResource::LEVEL_MID;
 		if( !array_key_exists( $level, $this->urls ) )											//  level is not yet defined in scripts list
 			$this->urls[$level]	= [];														//  create empty scripts list for level
 		$key	= strlen( $key ) ? md5( $key ) : 'default';
@@ -230,22 +202,6 @@ class JavaScript
 	}
 
 	/**
-	 *	Returns a list of collected JavaScripts URLs.
-	 *	@access		public
-	 *	@return		array
-	 *	@deprecated	use getPlainUrlList instead
-	 *	@todo		remove in v0.8.7
-	 */
-	public function getUrlList(): array
-	{
-		Deprecation::getInstance()
-			->setErrorVersion( '0.8.6.3' )
-			->setExceptionVersion( '0.8.7' )
-			->message( 'Please use getPlainUrlList or getStructuredUrlList instead' );
-		return $this->getPlainUrlList();
-	}
-
-	/**
 	 *	Returns a flat list of collected JavaScripts URLs ordered by run level.
 	 *	@access		public
 	 *	@return		array		List of registered script URLS ordered by run level and script key
@@ -253,8 +209,8 @@ class JavaScript
 	public function getPlainUrlList(): array
 	{
 		$list	= [];
-		foreach( $this->urls as $level => $levelUrls )
-			foreach( $levelUrls as $key => $keyedUrls )
+		foreach( $this->urls as $levelUrls )
+			foreach( $levelUrls as $keyedUrls )
 				foreach( $keyedUrls as $url )
 					$list[]	= $url;
 		return $list;
@@ -273,15 +229,15 @@ class JavaScript
 	/**
 	 *	Renders an HTML script tag with all collected JavaScript URLs and blocks.
 	 *	@access		public
-	 *	@param		bool		$indentEndTag	Flag: indent end tag by 2 tabs, default: no
 	 *	@param		bool		$forceFresh		Flag: force fresh creation instead of using cache, default: no
 	 *	@return		string
+	 *	@throws		IoException
 	 */
-	public function render( bool $indentEndTag = FALSE, bool $forceFresh = FALSE ): string
+	public function render( bool $forceFresh = FALSE ): string
 	{
-		$links			= $this->renderUrls( $this->useCompression, TRUE, $forceFresh );
-		$scripts		= $this->renderScripts( $this->useCompression, TRUE );
-		$scriptsOnReady	= $this->renderScriptsOnReady( $this->useCompression, TRUE );
+		$links			= $this->renderUrls( $forceFresh );
+		$scripts		= $this->renderScripts( TRUE );
+		$scriptsOnReady	= $this->renderScriptsOnReady( TRUE );
 		return $links.PHP_EOL.$scriptsOnReady.PHP_EOL.$scripts;
 	}
 
@@ -346,15 +302,15 @@ class JavaScript
 	{
 //		$script	= preg_replace( "@^\s*//.+\n?@", "", $script );
 //		$script	= preg_replace( "@/\*.+\*/\n?@sU", "", $script );
-		if( class_exists( 'JSMin' ) ){
-			try{
-				return JSMin::minify( $script );
-			}
-			catch( Throwable $t ){}
+		try{
+			return JsMinifier::minify( $script );
 		}
-		if( class_exists( 'Net_API_Google_ClosureCompiler' ) ){
-			return Net_API_Google_ClosureCompiler::minify( $script );
+		catch( Throwable $t ){
 		}
+		try{
+			return NetClosureCompiler::minify( $script );
+		}
+		catch( Throwable $t ){}
 		return $script;
 	}
 
@@ -374,6 +330,7 @@ class JavaScript
 	 *	@access		protected
 	 *	@param		bool		$forceFresh		Flag: force fresh creation instead of using cache
 	 *	@return		string
+	 *	@throws        IoException
 	 */
 	protected function getPackageFileName( bool $forceFresh = FALSE ): string
 	{
@@ -381,20 +338,18 @@ class JavaScript
 		if( !file_exists( $fileJs ) || $forceFresh ) {
 			$contents	= [];
 			if( $this->revision )
-				$content	= "/* @revision ".$this->revision." */\n";
+				$contents[]	= "/* @revision ".$this->revision." */";
 			foreach( $this->getPlainUrlList() as $url ){
 				if( preg_match( "/^http/", $url ) )
 					$content	= NetReader::readUrl( $url );
 				else
 					$content	= FileReader::load( $url );
-				if( $content === FALSE )
-					throw new RuntimeException( 'Script file "'.$url.'" not existing' );
 				if( preg_match( "/\.min\.js$/", $url ) )
 					array_unshift( $contents, preg_replace( "@/\*.+\*/\n?@sU", "", $content ) );
 				else
 					$contents[]	= $this->compress( $content );
 			}
-			$content	= implode( "\n\n", $contents );
+			$content	= implode( PHP_EOL.PHP_EOL, $contents );
 			FileWriter::save( $fileJs, $content );
 		}
 		return $fileJs;
@@ -403,43 +358,41 @@ class JavaScript
 	/**
 	 *	Renders block of collected JavaScript code with directive to run if Browser finished loading (using jQuery event document.ready).
 	 *	@access		protected
-	 *	@param		boolean		$compress		Flag: compress code, default: no
 	 *	@param		boolean		$wrapInTag		Flag: wrap code in HTML script tag, default: no
-	 *	@return		string		Combinded JavaScript code to run if Browser is ready
+	 *	@return		string		Combined JavaScript code to run if Browser is ready
 	 */
-	protected function renderScripts( bool $compress = FALSE, bool $wrapInTag = FALSE ): string
+	protected function renderScripts( bool $wrapInTag = FALSE ): string
 	{
 		$list	= [];
 		ksort( $this->scripts );
-		foreach( $this->scripts as $level => $map )
-			foreach( $map as $key => $scripts )
+		foreach( $this->scripts as $levelScripts )
+			foreach( $levelScripts as $scripts )
 				foreach( $scripts as $script )
 					$list[]	= preg_replace( "/;+$/", ";", trim( $script ) );
 		if( !count( $list ) )
 			return '';
 		$content		= join( "\n", $list );
-		if( $compress )
+		if( $this->useCompression )
 			$content	= $this->compress( $content );
-		if( !$wrapInTag )
-			return $content;
-		return HtmlTag::create( 'script', $content, array( 'type' => 'text/javascript' ) );
+		if( $wrapInTag )
+			$content	= HtmlTag::create( 'script', $content, array( 'type' => 'text/javascript' ) );
+		return $content;
 	}
 
 	/**
 	 *	Renders block of collected JavaScript code with directive to run if Browser finished loading (using jQuery event document.ready).
 	 *	@access		protected
-	 *	@param		boolean		$compress		Flag: compress code, default: no
 	 *	@param		boolean		$wrapInTag		Flag: wrap code in HTML script tag, default: no
 	 *	@return		string		Combined JavaScript code to run if Browser is ready
 	 */
-	protected function renderScriptsOnReady( bool $compress = FALSE, bool $wrapInTag = FALSE ): string
+	protected function renderScriptsOnReady( bool $wrapInTag = FALSE ): string
 	{
 		$list	= [];
 		ksort( $this->scriptsOnReady );
-		foreach( $this->scriptsOnReady as $level => $map ){
-			foreach( $map as $key => $scripts ){
+		foreach( $this->scriptsOnReady as $levelScripts ){
+			foreach( $levelScripts as $scripts ){
 				foreach( $scripts as $script ){
-					if( !$compress ){
+					if( !$this->useCompression ){
 						$script		= preg_replace( "/;+$/", ";", trim( $script ) );
 						if( preg_match( "/\r?\n/", $script ) ){
 							$lines	= preg_split( "/\r?\n/", PHP_EOL.$script.PHP_EOL );
@@ -453,14 +406,19 @@ class JavaScript
 		if( !count( $list ) )
 			return '';
 		$content	= PHP_EOL.trim( join( PHP_EOL, $list ) ).PHP_EOL;
-		if( $compress )
+		if( $this->useCompression )
 			$content	= $this->compress( $content );
-		if( !$wrapInTag )
-			return $content;
-		return HtmlTag::create( 'script', $content, array( 'type' => 'text/javascript' ) );
+		if( $wrapInTag )
+			$content	= HtmlTag::create( 'script', $content, array( 'type' => 'text/javascript' ) );
+		return $content;
 	}
 
-	protected function renderUrls( bool $compress = FALSE, bool $wrapInTag = FALSE, bool $forceFresh = FALSE ): string
+	/**
+	 *	@param		bool		$forceFresh
+	 *	@return		string
+	 *	@throws		IoException
+	 */
+	protected function renderUrls(bool $forceFresh = FALSE ): string
 	{
 		if( !count( $this->getPlainUrlList() ) )
 			return '';

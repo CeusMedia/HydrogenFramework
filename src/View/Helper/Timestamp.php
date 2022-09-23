@@ -67,7 +67,7 @@ class Timestamp extends Abstraction
 	{
 		if( !$this->timestamp )
 			return '-';
-		$format	= $format ? $format : self::$formatDate;
+		$format	= $format ?: self::$formatDate;
 		$date	= date( $format, $this->timestamp );
 		if( $html ){
 			$attr	= array( 'class' => 'date' );
@@ -80,7 +80,7 @@ class Timestamp extends Abstraction
 	{
 		if( !$this->timestamp )
 			return $this->stringEmpty;
-		$format	= $format ? $format : self::$formatDatetime;
+		$format	= $format ?: self::$formatDatetime;
 		$date	= date( $format, $this->timestamp );
 		if( $html ){
 			$attr	= array( 'class' => 'datetime' );
@@ -113,7 +113,7 @@ class Timestamp extends Abstraction
 	{
 		if( !$this->timestamp )
 			return '-';
-		$format	= $format ? $format : self::$formatTime;
+		$format	= $format ?: self::$formatTime;
 		$time	= date( $format, $this->timestamp );
 		if( $html ){
 			$attr	= array( 'class' => 'time' );

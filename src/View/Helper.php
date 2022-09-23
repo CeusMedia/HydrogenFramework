@@ -46,7 +46,7 @@ interface Helper
 
 	public function setEnv( Environment $env );
 
-//	@todo 	kriss: see if this pattern (having render method) is realizable for all existing helpers
+//	@todo 	see if this pattern (having render method) is realizable for all existing helpers
 //	public function render();
 //	public function __toString();
 

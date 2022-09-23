@@ -9,6 +9,7 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+
 namespace CeusMedia\HydrogenFramework\Environment\Resource;
 
 use CeusMedia\HydrogenFramework\Environment;
@@ -245,23 +246,7 @@ class Captain
 	 */
 	static public function interpretLoadLevel( $level ): int
 	{
-		if( is_null( $level ) || !strlen( trim( $level ) ) )
-			return 4;
-		if( is_int( $level ) )
-			return min( max( abs( $level ), 0 ), 9 );
-		if( is_bool( $level ) )
-			return $level ? 1 : 4;
-		if( is_string( $level ) && preg_match( '/^[0-9]$/', trim( $level ) ) )
-			return (int) $level;
-		if( !is_string( $level ) )
-			throw new InvalidArgumentException( 'Load level must be integer or string' );
-		if( in_array( $level, array( 'top', 'head', 'start' ) ) )
-			return 1;
-		if( in_array( $level, array( 'mid', 'center', 'normal', 'default' ) ) )
-			return 4;
-		if( in_array( $level, array( 'end', 'tail', 'bottom' ) ) )
-			return 8;
-		throw new RangeException( 'Invalid load level: '.$level );
+		return $level ?? 4;
 	}
 
 

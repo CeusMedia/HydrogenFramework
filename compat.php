@@ -60,9 +60,5 @@ class CMF_Hydrogen_Run_Web extends CeusMedia\HydrogenFramework\Run\Web {}
 class CMF_Hydrogen_View extends CeusMedia\HydrogenFramework\View {}
 class CMF_Hydrogen_View_Helper_Diff extends CeusMedia\HydrogenFramework\View\Helper\Diff {}
 class CMF_Hydrogen_View_Helper_JavaScript extends CeusMedia\HydrogenFramework\View\Helper\JavaScript {}
-class CMF_Hydrogen_View_Helper_Navigation_MultiList extends CeusMedia\HydrogenFramework\View\Helper\Navigation\MultiList {}
-class CMF_Hydrogen_View_Helper_Navigation_SingleAclList extends CeusMedia\HydrogenFramework\View\Helper\Navigation\SingleAclList {}
-class CMF_Hydrogen_View_Helper_Navigation_SingleAutoTabs extends CeusMedia\HydrogenFramework\View\Helper\Navigation\SingleAutoTabs {}
-class CMF_Hydrogen_View_Helper_Navigation_SingleList extends CeusMedia\HydrogenFramework\View\Helper\Navigation\SingleList {}
 class CMF_Hydrogen_View_Helper_StyleSheet extends CeusMedia\HydrogenFramework\View\Helper\StyleSheet {}
 class CMF_Hydrogen_View_Helper_Timestamp extends CeusMedia\HydrogenFramework\View\Helper\Timestamp {}

@@ -24,6 +24,7 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+
 namespace CeusMedia\HydrogenFramework\View\Helper;
 
 use CeusMedia\HydrogenFramework\Environment;
@@ -63,7 +64,7 @@ abstract class Abstraction implements Helper
 	protected function __onSetEnv(){}
 
 	/**
-	 *	@todo 		kriss: enable after helper interface is updated
+	 *	@todo 		enable after helper interface is updated
 	 */
 /*	public function __toString(){
 		return $this->render();
@@ -73,7 +74,7 @@ abstract class Abstraction implements Helper
 	 *	Indicates whether this helper has an environment set.
 	 *	@access		public
 	 *	@return		boolean
-	 *	@todo 		kriss: remove after helper interface is updated
+	 *	@todo 		remove after helper interface is updated
 	 */
 	public function hasEnv(): bool
 	{
@@ -84,7 +85,7 @@ abstract class Abstraction implements Helper
 	 *	Indicates whether this helper needs to have an environment to be set.
 	 *	@access		public
 	 *	@return		boolean
-	 *	@todo 		kriss: remove after helper interface is updated
+	 *	@todo 		remove after helper interface is updated
 	 */
 	public function needsEnv()
 	{
@@ -92,7 +93,7 @@ abstract class Abstraction implements Helper
 	}
 
 	/**
-	 *	@todo 		kriss: enable after helper interface is updated
+	 *	@todo 		enable after helper interface is updated
 	 */
 /*	public function render();*/
 
@@ -101,7 +102,7 @@ abstract class Abstraction implements Helper
 	 *	@access		public
 	 *	@param		Environment	$env			Environment Object
 	 *	@return		void
-	 *	@todo 		kriss: remove after helper interface is updated
+	 *	@todo 		remove after helper interface is updated
 	 */
 	public function setEnv( Environment $env )
 	{
