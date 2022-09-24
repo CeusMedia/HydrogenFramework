@@ -24,10 +24,11 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-namespace CeusMedia\HydrogenFramework\Environment\Console;
 
-use CeusMedia\HydrogenFramework\Environment\Resource\Messenger as MessengerResource;
+namespace CeusMedia\HydrogenFramework\Environment\Resource\Console;
+
 use CeusMedia\Common\CLI;
+use CeusMedia\HydrogenFramework\Environment\Resource\Messenger as MessengerResource;
 
 /**
  *	Fake messenger for console environment.

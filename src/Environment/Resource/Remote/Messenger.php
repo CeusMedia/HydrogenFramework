@@ -25,7 +25,7 @@
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
 
-namespace CeusMedia\HydrogenFramework\Environment\Remote;
+namespace CeusMedia\HydrogenFramework\Environment\Resource\Remote;
 
 use CeusMedia\HydrogenFramework\Environment\Resource\Messenger as MessengerResource;
 
