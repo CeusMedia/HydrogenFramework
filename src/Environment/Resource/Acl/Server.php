@@ -71,10 +71,10 @@ class Server extends Abstraction
 	 *	@abstract
 	 *	@public
 	 *	@param		string|NULL		$controller		Controller to list actions for, otherwise return matrix
-	 *	@param		integer			$roleId			Specified role, otherwise current role
+	 *	@param		string|NULL		$roleId			Specified role, otherwise current role
 	 *	@return		array							List of actions or matrix of controllers and actions
 	 */
-	public function index( string $controller = NULL, $roleId = NULL ): array
+	public function index( string $controller = NULL, string $roleId = NULL ): array
 	{
 		throw new Exception( 'Not implemented yet' );
 	}
@@ -102,10 +102,10 @@ class Server extends Abstraction
 	/**
 	 *	Returns Role.
 	 *	@access		protected
-	 *	@param		integer		$roleId			Role ID
+	 *	@param		string		$roleId			Role ID
 	 *	@return		array|object
 	 */
-	protected function getRole( $roleId )
+	protected function getRole( string $roleId )
 	{
 		if( !$this->roles )
 			foreach( $this->env->getServer()->getData( 'role', 'index' ) as $role )

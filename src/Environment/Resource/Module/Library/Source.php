@@ -28,6 +28,7 @@
 
 namespace CeusMedia\HydrogenFramework\Environment\Resource\Module\Library;
 
+use CeusMedia\Cache\SimpleCacheInvalidArgumentException;
 use CeusMedia\Common\FS\File\Reader as FileReader;
 use CeusMedia\Common\FS\File\RecursiveNameFilter as RecursiveFileIndex;
 use CeusMedia\Common\Net\HTTP\Header\Section;
@@ -64,7 +65,6 @@ class Source extends AbstractLibrary implements LibraryInterface
 	 *	@param		Environment		$env			Environment instance
 	 *	@param		object			$source			Data object defining source by: {id: ..., type: [folder|http], path: ...}
 	 *	@return		void
-	 *	@throws		InvalidArgumentException
 	 */
 	public function __construct( Environment $env, object $source )
 	{
@@ -80,7 +80,6 @@ class Source extends AbstractLibrary implements LibraryInterface
 	 *	@param		boolean		$useCache		Flag: use cache if available
 	 *	@param		boolean		$forceReload	Flag: clear cache beforehand if available
 	 *	@return		object		Data object containing the result source and number of found modules
-	 *	@throws		InvalidArgumentException
 	 */
 	public function scan( bool $useCache = FALSE, bool $forceReload = FALSE ): object
 	{
@@ -151,6 +150,7 @@ class Source extends AbstractLibrary implements LibraryInterface
 					$module->path				= $entry->getPath();
 					$module->source				= $this->source->id;
 					$module->versionAvailable	= $module->version;
+					$module->isActive			= TRUE;
 					if( isset( $module->config['active'] ) )
 						$module->isActive		= $module->config['active']->value;
 					$module->icon	= NULL;
@@ -185,7 +185,7 @@ class Source extends AbstractLibrary implements LibraryInterface
 			throw new RuntimeException( 'Source URL "'.$this->source->path.'" is not existing (Code '.$status.')' );
 		if( $reader->getResponseHeader( 'Content-Type' ) !== 'application/json' )
 			throw new RuntimeException( 'Source did not return JSON data' );
-		$modules	= json_decode( $response->getBody(), JSON_THROW_ON_ERROR );
+		$modules	= json_decode( $response->getBody(), FALSE, 512, JSON_THROW_ON_ERROR );
 		foreach( $modules as $module ){
 			$module->source				= $this->source->id;
 			$module->path				= $this->source->path.str_replace( '_', '/', $module->id );

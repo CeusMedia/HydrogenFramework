@@ -81,7 +81,7 @@ class Console extends Abstraction
 	 *	@todo		implement
 	 *	@throws		RuntimeException	since not implemented yet
 	 */
-	protected function dispatch( $default = NULL )
+	protected function dispatch()
 	{
 		throw new RuntimeException( 'Dispatching is disabled for console applications' );
 	}

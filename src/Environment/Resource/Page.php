@@ -104,8 +104,7 @@ class Page extends HtmlPage
 
 		if( strlen( $title	= $config->get( 'app.name' ) ) )
 			$this->setTitle( $title );
-		if( ( $modules = $this->env->getModules() ) )												//  get module handler resource if existing
-			$modules->callHook( 'Page', 'init', $this );								//  call related module event hooks
+		$this->env->getModules()->callHook( 'Page', 'init', $this );								//  call related module event hooks
 	}
 
 	/**
@@ -293,13 +292,11 @@ class Page extends HtmlPage
 		$this->addBodyClass( 'action-'.$actionKey );
 		$this->addBodyClass( 'site-'.$controllerKey.'-'.$actionKey );
 
-		if( ( $modules = $this->env->getModules() ) ){												//  get module handler resource if existing
-			$data	= [
-				'content'   => $this->getBody(),
-			];
-			$modules->callHook( 'Page', 'build', $this, $data );									//  call related module event hooks
-			$this->setBody( $data['content'] );
-		}
+		$data	= [
+			'content'   => $this->getBody(),
+		];
+		$modules->callHook( 'Page', 'build', $this, $data );									//  call related module event hooks
+		$this->setBody( $data['content'] );
 
 		if( $this->packStyleSheets && $this->env->getRequest()->has( 'flushStyleCache') ){
 			$this->css->primer->clearCache();
@@ -328,8 +325,7 @@ class Page extends HtmlPage
 			foreach( explode( " ", trim( $bodyAttributes['class'] ) ) as $class )
 				$classes[]	= $class;
 		$bodyAttributes['class']	= join( ' ', $classes );
-		if( ( $modules = $this->env->getModules() ) )												//  get module handler resource if existing
-			$modules->callHook( 'App', 'respond', $this );											//  call related module event hooks
+		$this->env->getModules()->callHook( 'App', 'respond', $this );				//  call related module event hooks
 		return parent::build( $bodyAttributes, $htmlAttributes );
 	}
 

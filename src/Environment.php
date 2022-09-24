@@ -42,12 +42,14 @@ use CeusMedia\HydrogenFramework\Environment\Resource\Disclosure as DisclosureRes
 use CeusMedia\HydrogenFramework\Environment\Resource\Language as LanguageResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\Log as LogResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\LogicPool as LogicPoolResource;
+use CeusMedia\HydrogenFramework\Environment\Resource\Messenger as MessengerResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Library\Local as LocalModuleLibraryResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\Php as PhpResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\Runtime as RuntimeResource;
 use CeusMedia\HydrogenFramework\Environment\Remote as RemoteEnvironment;
 
 use ArrayAccess;
+use DomainException;
 use Exception;
 use InvalidArgumentException;
 use RangeException;
@@ -93,7 +95,7 @@ class Environment implements ArrayAccess
 
 	public static $timezone					= NULL;
 
-	/**	@var	string						$path			Absolute folder path of application */
+	/**	@var	string|NULL					$path			Absolute folder path of application */
 	public $path							= NULL;
 
 	/**	@var	PhpResource					$php			Instance of PHP environment collection */
@@ -138,13 +140,16 @@ class Environment implements ArrayAccess
 	/**	@var	integer						$mode			Environment mode (dev,test,live,...) */
 	protected $mode							= 0;
 
+	/** @var	MessengerResource			$messenger		Messenger Object */
+	protected $messenger;
+
 	/**	@var	LocalModuleLibraryResource	$modules		Handler for local modules */
 	protected $modules;
 
 	/**	@var	array						$options		Set options to override static properties */
 	protected $options						= [];
 
-	/**	@var	RuntimeResource				$runtime		Runtime Object */
+	/**	@var	RuntimeResource|NULL				$runtime		Runtime Object */
 	protected $runtime;
 
 	/**	@var	Dictionary					$request		Request Object */
@@ -239,7 +244,7 @@ class Environment implements ArrayAccess
 	 *	@param		string		$key
 	 *	@param		bool		$strict
 	 *	@return		mixed|null
-	 *	@throws		Exception
+	 *	@throws		DomainException		if no resource is registered by by
 	 */
 	public function get( string $key, bool $strict = TRUE )
 	{
@@ -255,7 +260,7 @@ class Environment implements ArrayAccess
 
 		if( $strict ){
 			$message	= 'No environment resource found for key "%1$s"';
-			throw new RuntimeException( sprintf( $message, $key ) );
+			throw new DomainException( sprintf( $message, $key ) );
 		}
 		return NULL;
 	}
@@ -272,7 +277,7 @@ class Environment implements ArrayAccess
 
 	public function getBaseUrl( string $keyConfig = 'app.base.url' ): string
 	{
-		if( $this->config && $this->config->get( $keyConfig ) )
+		if( $this->config->get( $keyConfig ) )
 			return $this->config->get( $keyConfig );
 		$host	= getEnv( 'HTTP_HOST' );
 		if( $host ){
@@ -359,6 +364,16 @@ class Environment implements ArrayAccess
 	}
 
 	/**
+	 *	Returns Messenger Object.
+	 *	@access		public
+	 *	@return		MessengerResource
+	 */
+	public function getMessenger(): ?MessengerResource
+	{
+		return $this->messenger;
+	}
+
+	/**
 	 *	Returns mode of environment.
 	 *	@access		public
 	 *	@return		integer
@@ -400,7 +415,7 @@ class Environment implements ArrayAccess
 	 */
 	public function getPhp(): PhpResource
 	{
-		return $this->php;
+		return $this->get( 'php' );
 	}
 
 	public function getRequest()
@@ -410,7 +425,7 @@ class Environment implements ArrayAccess
 
 	public function getRuntime(): RuntimeResource
 	{
-		return $this->runtime;
+		return $this->get( 'runtime' );
 	}
 
 	public function getSession()
@@ -560,8 +575,7 @@ class Environment implements ArrayAccess
 	protected function initCache(): self
 	{
 		$this->cache	= SimpleCacheFactory::createStorage('Noop' );
-		if( $this->modules )																		//  module support and modules available
-			$this->modules->callHook( 'Env', 'initCache', $this );									//  call related module event hooks
+		$this->modules->callHook( 'Env', 'initCache', $this );						//  call related module event hooks
 		$this->runtime->reach( 'env: initCache', 'Finished setup of cache' );
 		return $this;
 	}
@@ -735,8 +749,6 @@ class Environment implements ArrayAccess
 				}
 			}
 		}
-		if( !$this->captain )																		//  just in case custom env did not init captain
-			$this->initCaptain();																	//  init caption for handling hooks
 		if( !( $this instanceof RemoteEnvironment ) )
 			$this->modules->callHook( 'Env', 'initModules', $this );								//  call related module event hooks
 		$this->config->set( 'module.acl.public', implode( ',', array_unique( $public ) ) );			//  save public link list
@@ -768,12 +780,14 @@ class Environment implements ArrayAccess
 		return $this->get( $offset );
 	}
 
-	public function offsetSet( $offset, $value ){
-		return $this->set( $offset, $value );
+	public function offsetSet( $offset, $value )
+	{
+		$this->set( $offset, $value );
 	}
 
-	public function offsetUnset( $offset ){
-		return $this->remove( $offset );
+	public function offsetUnset( $offset )
+	{
+		$this->remove( $offset );
 	}
 
 	public function remove( string $key ): self

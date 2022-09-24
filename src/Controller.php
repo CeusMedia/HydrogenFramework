@@ -67,7 +67,7 @@ class Controller
 	protected $defaultPath;
 	/**	@var		string								$path			Preferred controller URI path */
 	protected $path;
-	/**	@var		View								$view			View instance for controller */
+	/**	@var		View|NULL							$view			View instance for controller */
 	protected $view;
 	/**	@var		Dictionary							$moduleConfig	Map of module configuration pairs */
 	protected $moduleConfig;
@@ -443,7 +443,7 @@ class Controller
 	 *	Sets Data for View.
 	 *	@access		protected
 	 *	@param		array		$data			Array of Data for View
-	 *	@param		string		$topic			Optionaal: Topic Name of Data
+	 *	@param		string		$topic			Optional: Topic Name of Data
 	 *	@return		self
 	 */
 	protected function setData( array $data, string $topic = '' ): self
@@ -456,10 +456,10 @@ class Controller
 	/**
 	 *	Sets Environment of Controller by copying Framework Member Variables.
 	 *	@access		protected
-	 *	@param		Environment	$env			Framework Resource Environment Object
+	 *	@param		WebEnvironment	$env			Framework Resource Environment Object
 	 *	@return		self
 	 */
-	protected function setEnv( Environment $env ): self
+	protected function setEnv( WebEnvironment $env ): self
 	{
 		$this->env			= $env;
 		$this->controller	= $env->getRequest()->get( '__controller' );

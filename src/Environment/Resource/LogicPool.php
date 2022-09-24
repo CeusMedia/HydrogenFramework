@@ -135,9 +135,11 @@ class LogicPool
 		}
 
 		if( !$this->isInstantiated( $key ) ){
-			if( !class_exists( $this->pool[$key] ) )
-				throw new DomainException( 'No logic class found for "'.$this->pool[$key].'"' );
-			$this->set( $key, $this->createInstance( $this->pool[$key] ) );
+			/** @var string $className */
+			$className	= $this->pool[$key];
+			if( !class_exists( $className ) )
+				throw new DomainException( 'No logic class found for "'.$className.'"' );
+			$this->set( $key, $this->createInstance( $className ) );
 		}
 		return $this->pool[$key];
 	}

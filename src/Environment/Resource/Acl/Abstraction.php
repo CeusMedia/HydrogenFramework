@@ -1,4 +1,5 @@
-<?php
+<?php /** @noinspection PhpUnused */
+
 /**
  *	Abstract access control list resource.
  *
@@ -24,6 +25,7 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+
 namespace CeusMedia\HydrogenFramework\Environment\Resource\Acl;
 
 use CeusMedia\HydrogenFramework\Environment as Environment;
@@ -78,7 +80,7 @@ abstract class Abstraction
 	{
 		if( !$this->env->has( 'session' ) )
 			return FALSE;
-		$roleId	= $this->env->getSession()->get( 'auth_role_id' );
+		$roleId	= $this->env->getSession()->get( 'auth_role_id', '' );
 		$right	= $this->hasRight( $roleId, $controller, $action );
 //		remark( 'Controller: '.$controller.' | Action: '.$action.' | Right: '.$right );
 		return $right > 0;

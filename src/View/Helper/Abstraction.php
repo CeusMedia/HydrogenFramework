@@ -42,33 +42,11 @@ use CeusMedia\HydrogenFramework\View\Helper;
  */
 abstract class Abstraction implements Helper
 {
-	/**	@var		Environment			$env			Environment Object */
-	protected		$env								= NULL;
+	/**	@var	Environment|NULL		$env			Environment Object */
+	protected $env						= NULL;
 
-	/**	@var		boolean								$needsEnv		Flag: needs Environment to be set */
-	protected		$needsEnv							= TRUE;
-
-	protected function getWords( string $section, string $topic ): array
-	{
-		$words	= $this->env->getLanguage()->getWords( $topic );
-		if( $section && array_key_exists( $section, $words ) )
-			return $words[$section];
-		return $words;
-	}
-
-	/**
-	 *	Extendable callback to run after an environment object has been set to this helper.
-	 *	@access		protected
-	 *	@return		void
-	 */
-	protected function __onSetEnv(){}
-
-	/**
-	 *	@todo 		enable after helper interface is updated
-	 */
-/*	public function __toString(){
-		return $this->render();
-	}*/
+	/**	@var	boolean					$needsEnv		Flag: needs Environment to be set */
+	protected $needsEnv					= TRUE;
 
 	/**
 	 *	Indicates whether this helper has an environment set.
@@ -95,7 +73,7 @@ abstract class Abstraction implements Helper
 	/**
 	 *	@todo 		enable after helper interface is updated
 	 */
-/*	public function render();*/
+	/*	public function render();*/
 
 	/**
 	 *	Set environment if needed within this helper.
@@ -110,5 +88,27 @@ abstract class Abstraction implements Helper
 			$this->env	= $env;
 			$this->__onSetEnv();
 		}
+	}
+
+	/**
+	 *	Extendable callback to run after an environment object has been set to this helper.
+	 *	@access		protected
+	 *	@return		void
+	 */
+	protected function __onSetEnv(){}
+
+	/**
+	 *	@todo 		enable after helper interface is updated
+	 */
+/*	public function __toString(){
+		return $this->render();
+	}*/
+
+	protected function getWords( string $section, string $topic ): array
+	{
+		$words	= $this->env->getLanguage()->getWords( $topic );
+		if( $section && array_key_exists( $section, $words ) )
+			return $words[$section];
+		return $words;
 	}
 }

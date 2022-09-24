@@ -24,11 +24,11 @@ use CeusMedia\Common\Alg\Time\Clock as Clock;
  */
 class Profiler
 {
-	/**	@var	Clock		$clock		Inner stopwatch with lap support */
-	protected $clock	= NULL;
+	/**	@var	Clock|NULL	$clock		Inner stopwatch with lap support */
+	protected $clock		= NULL;
 
 	/**	@var	bool		$enabled	... */
-	protected $enabled	= TRUE;
+	protected $enabled		= TRUE;
 
 	public function __construct( bool $enabled = TRUE )
 	{

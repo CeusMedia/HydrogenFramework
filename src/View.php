@@ -59,19 +59,19 @@ class View
 	/**	@var		WebEnvironment	$env			Environment Object */
 	protected $env;
 
-	/**	@var		string						$controller		Name of called Controller */
+	/**	@var		string|NULL					$controller		Name of called Controller */
 	protected $controller	= NULL;
 
-	/**	@var		string						$action			Name of called Action */
+	/**	@var		string|NULL					$action			Name of called Action */
 	protected $action		= NULL;
 
-	/**	@var		Dictionary			$helpers		Map of view helper classes/objects */
+	/**	@var		Dictionary					$helpers		Map of view helper classes/objects */
 	protected $helpers;
 
-	/**	@var		string						$time			Instance of time converter */
+	/**	@var		TimeConverter				$time			Instance of time converter */
 	protected $time;
 
-	/**	@var		string						$html			Instance of HTML library class */
+	/**	@var		HtmlElements				$html			Instance of HTML library class */
 	protected $html;
 
 //	/**	@var		CMM_TEA_Factory				$tea			Instance of TEA (Template Engine Abstraction) Factory (from cmModules) OR empty if TEA is not available */
@@ -83,10 +83,10 @@ class View
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		Environment		$env			Framework Resource Environment Object
+	 *	@param		WebEnvironment		$env			Framework Resource Environment Object
 	 *	@return		void
 	 */
-	public function __construct( Environment $env )
+	public function __construct( WebEnvironment $env )
 	{
 		$env->getRuntime()->reach( 'CMF_View('.get_class( $this ).')::init start' );
 		$this->setEnv( $env );
@@ -257,7 +257,6 @@ class View
 	{
 		$list	= [];
 		$path	= preg_replace( "/\/+$/", "", $path ).'/';											//  correct path
-		$keys	= is_string( $keys ) ? array( $keys ) : $keys;										//  convert single key to list
 		foreach( $keys as $key ){																	//  iterate keys
 			$url		= $path.$key.'.html';														//  build filename
 			$list[$key]	= '';																		//  default: empty block in map
@@ -407,7 +406,6 @@ class View
 				throw new RuntimeException( 'Template file "'.$___templateUri.'" is not existing' );
 		}
 		catch( Exception $e ){
-			HtmlExceptionPage::display( $e );die;
 			$message	= 'Rendering template file "%1$s" failed: %2$s';
 			$message	= sprintf( $message, $filePath, $e->getMessage() );
 			$this->env->getLog()->log( 'error', $message, $this );
@@ -508,16 +506,14 @@ class View
 	/**
 	 *	Sets Environment of Controller by copying Framework Member Variables.
 	 *	@access		protected
-	 *	@param		Environment		$env			Framework Resource Environment Object
+	 *	@param		WebEnvironment		$env			Framework Resource Environment Object
 	 *	@return		self
 	 */
-	protected function setEnv( Environment $env ): self
+	protected function setEnv( WebEnvironment $env ): self
 	{
 		$this->env			= $env;
-		if( $env instanceof WebEnvironment ){
-			$this->controller	= $this->env->getRequest()->get( '__controller' );
-			$this->action		= $this->env->getRequest()->get( '__action' );
-		}
+		$this->controller	= $this->env->getRequest()->get( '__controller' );
+		$this->action		= $this->env->getRequest()->get( '__action' );
 		return $this;
 	}
 
@@ -536,8 +532,11 @@ class View
 	protected function setPageTitle( string $section = 'index', string $key = 'title', array $data = [], int $mode = 1 ): self
 	{
 		$data	= $this->getData();
-		if( isset( $data['words'][$section][$key] ) )
-			$this->env->getPage()->setTitle( $data['words'][$section][$key], $mode );
+		$word	= $data['words'][$section][$key] ?? '';
+		if( 0 !== strlen( trim( $word ) ) ){
+			$modeKey	= [-1 => 'prepend', 0 => 'set', 1 => 'append'][$mode] ?? 'set';
+			$this->env->getPage()->setTitle( $word, $modeKey );
+		}
 		return $this;
 	}
 }

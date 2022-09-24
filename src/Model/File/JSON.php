@@ -43,7 +43,7 @@ class JSON extends Abstraction
 		else
 			$json		= JsonPretty::print( json_encode( $content ) );
 		if( $json == $current )
-			return FALSE;
+			return 0;
 		return FileWriter::save( $this->path.$fileName, $json );
 	}
 }

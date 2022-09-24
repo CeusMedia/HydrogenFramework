@@ -48,21 +48,22 @@ use ReflectionMethod;
  */
 class General
 {
-	protected $env;
-
-	protected $request;
-
 	public $defaultController			= 'index';
 
 	public $defaultAction				= 'index';
 
 	public $defaultArguments			= [];
 
-	protected $history					= [];
 
 	public $checkClassActionArguments	= TRUE;
 
 	public static $prefixController		= "Controller_";
+
+	protected $env;
+
+	protected $request;
+
+	protected $history					= [];
 
 	public function __construct( WebEnvironment $env )
 	{

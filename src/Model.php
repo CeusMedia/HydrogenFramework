@@ -104,11 +104,11 @@ class Model
 	 *	@access		public
 	 *	@param		array			$data			Data to add to Table
 	 *	@param		boolean			$stripTags		Flag: strip HTML Tags from values, default: yes
-	 *	@return		integer
+	 *	@return		string
 	 */
-	public function add( array $data, bool $stripTags = TRUE )
+	public function add( array $data, bool $stripTags = TRUE ): string
 	{
-		$id	= $this->table->insert( $data, $stripTags );
+		$id	= (string) $this->table->insert( $data, $stripTags );
 		$this->cache->set( $this->cacheKey.$id, $this->get( $id ) );
 		return $id;
 	}
@@ -170,7 +170,7 @@ class Model
 	 */
 	public function edit( string $id, array $data, bool $stripTags = TRUE ): int
 	{
-		$this->table->focusPrimary( $id );
+		$this->table->focusPrimary( (int) $id );
 		$result	= 0;
 		if( count( $this->table->get( FALSE ) ) )
 			$result	= $this->table->update( $data, $stripTags );
@@ -205,7 +205,7 @@ class Model
 		$field	= $this->checkField( $field, FALSE, TRUE );
 		$data	= $this->cache->get( $this->cacheKey.$id );
 		if( !$data ){
-			$this->table->focusPrimary( $id );
+			$this->table->focusPrimary( (int) $id );
 			$data	= $this->table->get( TRUE );
 			$this->table->defocus();
 			$this->cache->set( $this->cacheKey.$id, $data );
@@ -295,10 +295,6 @@ class Model
 	 */
 	public function getByIndex( string $key, $value, array $orders = [], array $fields = [], bool $strict = FALSE )
 	{
-		if( is_string( $fields ) )
-			$fields	= strlen( trim( $fields ) ) ? array( trim( $fields ) ) : [];
-		if( !is_array( $fields ) )
-			throw new InvalidArgumentException( 'Fields must be of array or string' );
 		foreach( $fields as $field )
 			$this->checkField( $field, FALSE, TRUE );
 		$this->table->focusIndex( $key, $value );
@@ -320,12 +316,8 @@ class Model
 	 */
 	public function getByIndices( array $indices, array $orders = [], array $fields = [], bool $strict = FALSE )
 	{
-		if( is_string( $fields ) )
-			$fields	= strlen( trim( $fields ) ) ? array( trim( $fields ) ) : [];
-		if( !is_array( $fields ) )
-			throw new InvalidArgumentException( 'Fields must be of array or string' );
 		foreach( $fields as $field )
-			$field	= $this->checkField( $field, FALSE, TRUE );
+			$this->checkField( $field, FALSE, TRUE );
 		$this->checkIndices( $indices, TRUE, TRUE );
 		foreach( $indices as $key => $value )
 			$this->table->focusIndex( $key, $value );
@@ -439,7 +431,7 @@ class Model
 	 */
 	public function remove( string $id ): bool
 	{
-		$this->table->focusPrimary( $id );
+		$this->table->focusPrimary( (int) $id );
 		$result	= FALSE;
 		if( count( $this->table->get( FALSE ) ) ){
 			$this->table->delete();
@@ -455,9 +447,9 @@ class Model
 	 *	@access		public
 	 *	@param		string			$key			Key of Index
 	 *	@param		mixed			$value			Value of Index
-	 *	@return		boolean
+	 *	@return		int				Number of removed entries
 	 */
-	public function removeByIndex( string $key, $value ): bool
+	public function removeByIndex( string $key, $value ): int
 	{
 		$this->table->focusIndex( $key, $value );
 		$number	= 0;
@@ -475,7 +467,6 @@ class Model
 				}
 				$this->cache->remove( $this->cacheKey.$id );
 			}
-			$result	= TRUE;
 		}
 		$this->table->defocus();
 		return $number;
@@ -536,7 +527,7 @@ class Model
 	 *	@param		string			$field			Table Column to check for existence
 	 *	@param		boolean			$mandatory		Force a value, otherwise return NULL or throw exception in strict mode
 	 *	@param		boolean			$strict			Strict mode (default): throw exception instead of returning FALSE or NULL
-	 *	@return		string|NULL		Trimmed Field name if found, NULL otherwise or exception in strict mode
+	 *	@return		string|FALSE|NULL				Trimmed Field name if found, NULL otherwise or exception in strict mode
 	 *	@throws		InvalidArgumentException		in strict mode if field is not a string and strict mode is on
 	 *	@throws		InvalidArgumentException		in strict mode if field is empty but mandatory
 	 *	@throws		InvalidArgumentException		in strict mode if field is not a table column
@@ -590,15 +581,11 @@ class Model
 	 *	@param		mixed			$result			Query result as array or object
 	 *	@param		array			$fields			List of fields or one field
 	 *	@param		boolean			$strict			Flag: throw exception if result is empty
-	 *	@return		string|array|object				Structure depending on result and field list length
+	 *	@return		string|array|object|NULL		Structure depending on result and field list length
 	 *	@throws		InvalidArgumentException		If given fields list is neither a list nor a string
 	 */
 	protected function getFieldsFromResult( $result, array $fields = [], bool $strict = TRUE )
 	{
-		if( is_string( $fields ) )
-			$fields	= strlen( trim( $fields ) ) ? array( trim( $fields ) ) : [];
-		if( !is_array( $fields ) )
-			throw new InvalidArgumentException( 'Fields must be of array or string' );
 		if( !$result ){
 			if( $strict )
 				throw new Exception( 'Result is empty' );

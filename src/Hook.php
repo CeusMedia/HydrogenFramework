@@ -1,11 +1,9 @@
 <?php
+
 namespace CeusMedia\HydrogenFramework;
 
 use CeusMedia\HydrogenFramework\Environment as Environment;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
-use InvalidArgumentException;
-
-use Mail_Abstract;
 
 class Hook
 {
@@ -34,13 +32,9 @@ class Hook
 	 *	@param		array			$arguments		List of arguments to add to URL
 	 *	@param		array			$parameters		Map of additional parameters to set in request
 	 *	@return		void			Always returns TRUE to indicate that dispatching hook is done
-	 *	@todo		remove first 2 lines after Env::redirect has been deprecated
 	 */
 	protected static function redirect( WebEnvironment $env, string $controller = 'index', string $action = "index", array $arguments = [], array $parameters = [] )
 	{
-//		$env->redirect( $controller, $action, $arguments, $parameters );
-//		return TRUE;
-
 		$request	= $env->getRequest();
 		$request->set( '__controller', $controller );
 		$request->set( '__action', $action );
@@ -97,35 +91,5 @@ class Hook
 	protected static function restart( WebEnvironment $env, string $uri, int $status = NULL, bool $allowForeignHost = FALSE, int $modeFrom = 0 )
 	{
 		$env->restart( $uri, $status, $allowForeignHost, $modeFrom );
-	}
-
-	/**
-	 *	Send mail using hook Hook::sendMail.
-	 *	@access		protected
-	 *	@static
-	 *	@param		Environment		$env			Instance of environment
-	 *	@param		Mail_Abstract	$mail			Mail object to handle
-	 *	@param		array			$receivers		List of receiver objects
-	 *	@return		void
-	 */
-	protected static function sendMail( Environment $env, Mail_Abstract $mail, array $receivers = [] )
-	{
-		$language	= $env->getLanguage()->getLanguage();											// @todo apply user language
-		foreach( $receivers as $receiver ){
-			if( is_string( $receiver ) )
- 				$receiver	= (object) array( 'email' => $receiver );
-			if( is_array( $receiver ) )
- 				$receiver	= (object) $receiver;
-			if( !property_exists( $receiver, 'email' ) )
-				throw new InvalidArgumentException( 'Given receiver is missing email address' );
-			$payload	= [
-				'mail'		=> $mail,
-				'receiver'	=> $receiver,
-				'language'	=> $language,
-			];
-			$result	= $env->getCaptain()->callHook( 'Hook', 'sendMail', $env, $payload );
-			if( !( is_int( $result ) && $result > 0 ) )
-				$env->getLogic()->get( 'mail' )->handleMail( $mail, $receiver, $language );
-		}
 	}
 }

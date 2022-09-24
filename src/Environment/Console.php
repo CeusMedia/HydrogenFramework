@@ -4,9 +4,8 @@ namespace CeusMedia\HydrogenFramework\Environment;
 use CeusMedia\Common\ADT\Collection\Dictionary as Dictionary;
 use CeusMedia\Common\CLI\ArgumentParser as ArgumentParser;
 use CeusMedia\HydrogenFramework\Environment;
-use CeusMedia\HydrogenFramework\Environment\Console\Messenger as Messenger;
-use CeusMedia\HydrogenFramework\Environment\Resource\Language as Language;
-
+use CeusMedia\HydrogenFramework\Environment\Resource\Console\Messenger as ConsoleMessenger;
+use CeusMedia\HydrogenFramework\Environment\Resource\Language as LanguageResource;
 use Exception;
 use RuntimeException;
 
@@ -49,10 +48,7 @@ class Console extends Environment
 	/**	@var	ArgumentParser			$request	Console Request Object */
 	protected $request;
 
-	/** @var	Messenger				$messenger	Messenger Object */
-	protected $messenger;
-
-	/** @var	Language				$language	Language Object */
+	/** @var	LanguageResource		$language	Language Object */
 	protected $language;
 
 	/** @var	Dictionary				$session	Session Storage Object */
@@ -90,14 +86,9 @@ class Console extends Environment
 		}
 	}
 
-	public function getLanguage(): Language
+	public function getLanguage(): LanguageResource
 	{
 		return $this->language;
-	}
-
-	public function getMessenger(): Messenger
-	{
-		return $this->messenger;
 	}
 
 	public function getRequest(): ArgumentParser
@@ -132,14 +123,14 @@ class Console extends Environment
 
 	protected function initLanguage(): self
 	{
-		$this->language		= new Language( $this );
+		$this->language		= new LanguageResource( $this );
 		$this->runtime->reach( 'env: language' );
 		return $this;
 	}
 
 	protected function initMessenger(): self
 	{
-		$this->messenger	= new Messenger( $this );
+		$this->messenger	= new ConsoleMessenger( $this );
 		return $this;
 	}
 

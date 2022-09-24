@@ -1,4 +1,5 @@
-<?php
+<?php /** @noinspection PhpUnused */
+
 /**
  *	Handler to call event for registered hooks.
  *
@@ -13,6 +14,7 @@
 namespace CeusMedia\HydrogenFramework\Environment\Resource;
 
 use CeusMedia\HydrogenFramework\Environment;
+use DomainException;
 use Exception;
 use InvalidArgumentException;
 use RuntimeException;
@@ -106,6 +108,7 @@ class Captain
 	 *	@throws		RuntimeException			if given static class method is not existing
 	 *	@throws		RuntimeException			ig method call produces stdout output, for example warnings and notices
 	 *	@throws		RuntimeException			if method call is throwing an exception
+	 *	@throws		DomainException
 	 *	@todo 		rename $data to $payload
 	 */
 	public function callHook( string $resource, string $event, object $context, ?array & $payload = [] ): ?bool
@@ -144,7 +147,7 @@ class Captain
 				);
 			}
 		}
-		foreach( $hooks as $level => $levelHooks ){
+		foreach( $hooks as $levelHooks ){
 			foreach( $levelHooks as $hook ){
 				if( 0 === strlen( $hook->function ) )
 					continue;
@@ -160,7 +163,7 @@ class Captain
 						throw new RuntimeException( 'Hook handling class '.$callback[0].' is not existing' );
 					if( !method_exists( $callback[0], $callback[1] ) )
 						throw new RuntimeException( 'Hook handling function '.$function.' is not existing' );
-					if( !is_callable( $callback[0], $callback[1] ) )
+					if( !is_callable( [$callback[0], $callback[1]] ) )
 						throw new RuntimeException( 'Hook handling function '.$function.' is not callable' );
 
 					$count++;
@@ -194,22 +197,6 @@ class Captain
 	}
 
 	/**
-	 *	Removed hook from disable list.
-	 *	@access		public
-	 *	@param		string		$resource		Name of resource (e.G. Page or View)
-	 *	@param		string		$event			Name of hook event (e.G. onBuild or onRenderContent)
-	 *	@return 	boolean
-	 */
-	public function enableHook( string $resource, string $event ): bool
-	{
-		$key	= $resource."::".$event;
-		if( !array_key_exists( $key, $this->disabledHooks ) )
-			return FALSE;
-		unset( $this->disabledHooks[$key] );
-		return TRUE;
-	}
-
-	/**
 	 *	Adds hook from disable list.
 	 *	@access		public
 	 *	@param		string		$resource		Name of resource (e.G. Page or View)
@@ -226,29 +213,20 @@ class Captain
 	}
 
 	/**
-	 *	Try to understand given load level.
-	 *	Matches given value into a scale between 0 and 9.
-	 *	Contains fallback for older module versions using level as string (top,mid,end) or boolean.
-	 *	Understands:
-	 *	- integer (limited to [0-9])
-	 *	- NULL or empty string as level 4 (mid).
-	 *	- boolean TRUE as level 1 (top).
-	 *	- boolean FALSE as level 4 (mid).
-	 *	- string {top,head,start} as level 1.
-	 *	- string {mid,center,normal,default} as level 4.
-	 *	- string {end,tail,bottom} as level 8.
-	 *	@static
+	 *	Removed hook from disable list.
 	 *	@access		public
-	 *	@param		mixed			$level 			Load level: 0-9 or {top(1),mid(4),end(8)} or {TRUE(1),FALSE(4)} or NULL(4)
-	 *	@return		integer			Level as integer value between 0 and 9
-	 *	@throws		InvalidArgumentException		if level is not if type NULL, boolean, integer or string
-	 *	@throws		RangeException					if given string is not within {top,head,start,mid,center,normal,default,end,tail,bottom}
+	 *	@param		string		$resource		Name of resource (e.G. Page or View)
+	 *	@param		string		$event			Name of hook event (e.G. onBuild or onRenderContent)
+	 *	@return 	boolean
 	 */
-	static public function interpretLoadLevel( $level ): int
+	public function enableHook( string $resource, string $event ): bool
 	{
-		return $level ?? 4;
+		$key	= $resource."::".$event;
+		if( !array_key_exists( $key, $this->disabledHooks ) )
+			return FALSE;
+		unset( $this->disabledHooks[$key] );
+		return TRUE;
 	}
-
 
 	/**
 	 *	Set activity of logging of hook calls.

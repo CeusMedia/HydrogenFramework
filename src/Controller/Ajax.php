@@ -1,4 +1,5 @@
-<?php /** @noinspection PhpComposerExtensionStubsInspection */
+<?php /** @noinspection PhpUnused */
+/** @noinspection PhpComposerExtensionStubsInspection */
 
 /**
  *	General (and therefore abstract) AJAX controller.
