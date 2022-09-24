@@ -4,7 +4,6 @@ use CeusMedia\Common\CLI;
 use CeusMedia\Common\Loader;
 use CeusMedia\HydrogenFramework\Environment;
 
-
 ( include_once dirname( __DIR__, 4 ).'/vendor/autoload.php' ) or die( 'Install packages using composer, first!'.PHP_EOL );
 
 //die("!");

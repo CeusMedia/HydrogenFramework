@@ -136,6 +136,11 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 		return NULL;
 	}
 
+	public function getPath(): string
+	{
+		return $this->modulePath;
+	}
+
 	/**
 	 *	Scan modules of source.
 	 *	Should return a data object containing the result source and number of found modules.

@@ -26,8 +26,6 @@
  */
 namespace CeusMedia\HydrogenFramework\Application;
 
-use CeusMedia\HydrogenFramework\Environment as Environment;
-use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 use CeusMedia\HydrogenFramework\Environment\Console as ConsoleEnvironment;
 use RuntimeException;
 
@@ -43,10 +41,11 @@ use RuntimeException;
  */
 class Console extends Abstraction
 {
-	public function __construct( Environment $env = NULL )
+	/**	@var		string								$classEnvironment		Class Name of Application Environment to build */
+	public static $classEnvironment						= ConsoleEnvironment::class;
+
+	public function __construct( ConsoleEnvironment $env = NULL )
 	{
-		if( self::$classEnvironment === WebEnvironment::class )
-			self::$classEnvironment	= ConsoleEnvironment::class;
 		parent::__construct( $env );
 //		$this->env->set( 'request', new Console_Command_ArgumentParser() );
 	}

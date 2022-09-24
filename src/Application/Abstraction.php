@@ -60,7 +60,7 @@ abstract class Abstraction
 	 */
 	public function __construct( Environment $env = NULL )
 	{
-		$this->env	= $env ?? ObjectFactory::createObject( self::$classEnvironment );
+		$this->env	= $env ?? ObjectFactory::createObject( static::$classEnvironment );
 		if( self::$modulesNeeded )																	//  needed modules are defined
 			$this->checkNeededModules();															//  check for missing modules
 	}

@@ -1,9 +1,14 @@
 <?php
-class Controller_CLI_Demo extends CMF_Hydrogen_Controller
+
+use CeusMedia\Common\CLI;
+use CeusMedia\Common\CLI\Color as ConsoleColor;
+use CeusMedia\HydrogenFramework\Controller\Console as ConsoleController;
+
+class Controller_CLI_Demo extends ConsoleController
 {
 	public function run()
 	{
-		$color		= new CLI_Color();
+		$color		= new ConsoleColor();
 		$request	= $this->env->getRequest();
 		$session	= $this->env->getSession();
 		$language	= $this->env->getLanguage();
@@ -25,7 +30,7 @@ class Controller_CLI_Demo extends CMF_Hydrogen_Controller
 		CLI::out();
 		CLI::out( 'Environment Class: '.get_class( $this->env ) );
 		CLI::out( 'Environment URI:   '.$this->env->uri );
-		CLI::out( 'Modules Path:      '.$modules->path );
+		CLI::out( 'Modules Path:      '.$modules->getPath() );
 		CLI::out( 'Modules Installed: '.join( ', ', array_keys( $modules->getAll() ) ) );
 		CLI::out();
 

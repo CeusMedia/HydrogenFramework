@@ -456,10 +456,10 @@ class Controller
 	/**
 	 *	Sets Environment of Controller by copying Framework Member Variables.
 	 *	@access		protected
-	 *	@param		WebEnvironment	$env			Framework Resource Environment Object
+	 *	@param		Environment	$env			Framework Resource Environment Object
 	 *	@return		self
 	 */
-	protected function setEnv( WebEnvironment $env ): self
+	protected function setEnv( Environment $env ): self
 	{
 		$this->env			= $env;
 		$this->controller	= $env->getRequest()->get( '__controller' );
