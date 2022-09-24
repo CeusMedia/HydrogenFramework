@@ -16,9 +16,10 @@
     "jabber": "cwuerker@ceusmedia.de"
   },
   "require": {
-    "php": ">=7.3",
+    "php": ">=7.4",
     "ext-json": "*",
     "ext-pdo": "*",
+    "ceus-media/cache": "*",
     "ceus-media/common": "0.9.x-dev",
     "ceus-media/database": "* | dev-master"
   },
@@ -43,7 +44,7 @@
     ],
     "dev-phpunit": [
       "@install-dev",
-      "php vendor/bin/phpunit --configuration tool/config/phpunit9.xml --testsuite units"
+      "php vendor/bin/phpunit --configuration phpunit.xml --testsuite units"
     ],
     "dev-phpstan": [
       "@install-dev",
@@ -70,6 +71,7 @@
   "scripts-descriptions": {
     "install-dev": "Installs project dependencies for Development stage",
     "update-dev": "Updates project dependencies for Development stage",
+    "dev-phpunit": "Run unit tests",
     "dev-phpstan": "Validate codebase with PHPStan",
     "dev-phpstan-clear": "Clear PHPStan cache",
     "dev-phpstan-save": "Store current results in ignore list",

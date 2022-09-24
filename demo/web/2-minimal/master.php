@@ -6,7 +6,7 @@ $page->addBody( $content );
 $page->addStylesheet( 'style.css' );
 //$page->addJavaScript( 'javascript.js' );
 
-//  --  gimick: show runtime ticks caught by profiler
+//  --  gimmick: show runtime ticks caught by profiler
 $list	= [];
 $timeTotal	= $env->getRuntime()->get( 6, 0 );
 foreach( $env->getRuntime()->getGoals() as $nr => $tick ){
