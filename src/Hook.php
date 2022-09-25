@@ -2,11 +2,75 @@
 
 namespace CeusMedia\HydrogenFramework;
 
+use CeusMedia\Common\Alg\Obj\MethodFactory;
 use CeusMedia\HydrogenFramework\Environment as Environment;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 
 class Hook
 {
+	/** @var object|NULL $context */
+	protected $context;
+
+	/** @var Environment $env */
+	protected $env;
+
+	/** @var object|NULL $module */
+	protected $module;
+
+	/** @var array $payload */
+	protected $payload		= [];
+
+	public function __construct( Environment $env, ?object $context = NULL )
+	{
+		$this->setEnv( $env );
+		if( NULL !== $context )
+			$this->setContext( $context );
+	}
+
+	public function getPayload() : ?array
+	{
+		return $this->payload;
+	}
+
+	public function setEnv( Environment $env ): self
+	{
+		$this->env	= $env;
+		return $this;
+	}
+
+	public function setContext( object $context ): self
+	{
+		$this->context	= $context;
+		return $this;
+	}
+
+	public function setModule( object $module ): self
+	{
+		$this->module	= $module;
+		return $this;
+	}
+
+	public function setPayload( array $payload ): self
+	{
+		$this->payload	= $payload;
+		return $this;
+	}
+
+	public function fetch( $method )
+	{
+		if (!is_object($this->context))
+			throw new \RuntimeException('No context set');
+		if (!is_object($this->env))
+			throw new \RuntimeException('No environment set');
+		$factory = new MethodFactory();
+		return call_user_func_array( [get_class( $this ), $method], [
+			$this->env,
+			$this->context,
+			$this->module,
+			& $this->payload
+		] );
+	}
+
 	public static function callHook( Environment $env, string $resource, string $event, ?object $context, array & $payload ): ?bool
 	{
 		return $env->getCaptain()->callHook( $resource, $event, $context, $payload );

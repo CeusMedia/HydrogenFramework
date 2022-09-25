@@ -537,7 +537,7 @@ class Environment implements ArrayAccess
 		$type		= AllPublicAclResource::class;
 		if( $this->hasModules() ){																	//  module support and modules available
 			$payload	= ['className' => NULL];
-			$isHandled	= $this->modules->callHook( 'Env', 'initAcl', $this, $payload );			//  call related module event hooks
+			$isHandled	= $this->modules->callHookWithPayload( 'Env', 'initAcl', $this, $payload );			//  call related module event hooks
 			if( $isHandled )
 				$type	= $payload['className'];
 		}

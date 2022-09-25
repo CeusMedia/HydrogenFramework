@@ -132,6 +132,7 @@ class Log
 	 */
 	public function logException( Throwable $exception, $context = NULL ): bool
 	{
+		$context		= $context ?? $this;
 		$isHandled		= FALSE;
 		$data			= [
 			'exception'		=> $exception,

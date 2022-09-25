@@ -79,6 +79,25 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 	 *	@param		string		$resource		Name of resource (e.G. Page or View)
 	 *	@param		string		$event			Name of hook event (e.G. onBuild or onRenderContent)
 	 *	@param		object		$context		Context object, will be available inside hook as $context
+	 *	@return		integer						Number of called hooks for event
+	 *	@throws		RuntimeException			if given static class method is not existing
+	 *	@throws		RuntimeException			ig method call produces stdout output, for example warnings and notices
+	 *	@throws		RuntimeException			if method call is throwing an exception
+	 */
+	public function callHook( string $resource, string $event, object $context ): int
+	{
+		$captain	= $this->env->getCaptain();
+		$payload	= [];
+		$countHooks	= $captain->callHook( $resource, $event, $context, $payload );
+		return (int) $countHooks;
+	}
+
+	/**
+	 *	...
+	 *	@access		public
+	 *	@param		string		$resource		Name of resource (e.G. Page or View)
+	 *	@param		string		$event			Name of hook event (e.G. onBuild or onRenderContent)
+	 *	@param		object		$context		Context object, will be available inside hook as $context
 	 *	@param		array		$payload		Map of hook payload data, will be available inside hook as $payload and $data
 	 *	@return		integer						Number of called hooks for event
 	 *	@throws		RuntimeException			if given static class method is not existing
@@ -87,7 +106,7 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 	 *	@todo 		rename $data to $payload
 	 *	@todo		check if this is needed anymore and remove otherwise
 	 */
-	public function callHook( string $resource, string $event, object $context, array & $payload = [] ): int
+	public function callHookWithPayload( string $resource, string $event, object $context, array & $payload ): int
 	{
 		$captain	= $this->env->getCaptain();
 		$countHooks	= $captain->callHook( $resource, $event, $context, $payload );

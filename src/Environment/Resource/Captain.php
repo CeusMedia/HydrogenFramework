@@ -13,12 +13,11 @@
 
 namespace CeusMedia\HydrogenFramework\Environment\Resource;
 
+use CeusMedia\Common\Alg\Obj\Factory;
 use CeusMedia\HydrogenFramework\Environment;
 use DomainException;
 use Exception;
-use InvalidArgumentException;
 use RuntimeException;
-use RangeException;
 
 /**
  *	The Captain is giving orders, depending on the changes of the situation.
@@ -42,11 +41,11 @@ use RangeException;
  *
  *	and implements this hook in its view class View_Manage_Customer_Project:
  *
- *		public static function ___onRegisterTab( $env, $context, $context, $data ){...}
+ *		public static function ___onRegisterTab( Environment $env, object $context, $context, array % $payload ){...}
  *
  *	The module Manage:Customer calls this event in the render method of its view class View_Manage_Customer:
  *
- *		$env->getModules()->callHook( "CustomerManager", "registerTabs", $view, $data );
+ *		$env->getModules()->callHook( "CustomerManager", "registerTabs", $view, $payload );
  *
  *	So, the module Manage:Customer:Project is able to append its tab to the given view of module
  *  Manage:Customer, which is now able to include the projects tab while showing a customer.
@@ -103,13 +102,12 @@ class Captain
 	 *	@param		string		$resource		Name of resource (e.G. Page or View)
 	 *	@param		string		$event			Name of hook event (e.G. onBuild or onRenderContent)
 	 *	@param		object		$context		Context object, will be available inside hook as $context
-	 *	@param		array|NULL	$payload		Map of hook payload data, will be available inside hook as $payload and $data
+	 *	@param		array|NULL	$payload		Map of hook payload data, will be available inside hook as $payload
 	 *	@return		bool|NULL					TRUE if hook is chain-breaking, FALSE if hook is disabled or non-chain-breaking, NULL if no modules installed or no hooks defined
 	 *	@throws		RuntimeException			if given static class method is not existing
 	 *	@throws		RuntimeException			ig method call produces stdout output, for example warnings and notices
 	 *	@throws		RuntimeException			if method call is throwing an exception
 	 *	@throws		DomainException
-	 *	@todo 		rename $data to $payload
 	 */
 	public function callHook( string $resource, string $event, object $context, ?array & $payload = [] ): ?bool
 	{
@@ -168,8 +166,17 @@ class Captain
 
 					$count++;
 					ob_start();
-					$args	= array( $this->env, &$context, $module, $payload );
-					$result	= call_user_func_array( $callback, $args );
+//					$payload	= $payload ?? [];
+//					$payload	= is_object( $payload ) ? (array) $payload : $payload;
+					
+					$hookObject	= Factory::createObject( $callback[0], [$this->env, $context] );
+					$hookObject->setModule( $hook->module )->setPayload( $payload );
+					$result		= $hookObject->fetch( $callback[1] );
+					$payload	= $hookObject->getPayload();
+
+//					$args	= array( $this->env, &$context, $module, $payload );
+//					$result	= call_user_func_array( $callback, $args );
+
 					$this->env->getRuntime()->reach( '<!--Resource_Module_Library_Local::call-->Hook: '.$event.'@'.$resource.': '.$module->id );
 					$stdout	= ob_get_clean();
 					if( strlen( trim( $stdout ) ) )
