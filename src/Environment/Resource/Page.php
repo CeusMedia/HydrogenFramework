@@ -36,6 +36,7 @@ use CeusMedia\HydrogenFramework\View\Helper\StyleSheet as CssHelper;
 use CeusMedia\HydrogenFramework\View\Helper\JavaScript as JsHelper;
 
 use InvalidArgumentException;
+use RangeException;
 use RuntimeException;
 use stdClass;
 

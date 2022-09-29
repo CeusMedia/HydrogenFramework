@@ -1,4 +1,5 @@
 <?php
+return;
 //  --  CeusMedia:Common is required  --
 if( !class_exists( 'Loader' ) )															//  CeusMedia:Common is not loaded
 	throw new RuntimeException( 'Please install and load "CeusMedia/Common" first' );	//  exit with exception

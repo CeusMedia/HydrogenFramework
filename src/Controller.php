@@ -90,7 +90,7 @@ class Controller
 	 *	@param		boolean								$setupView		Flag: auto create view object for controller (default: TRUE)
 	 *	@return		void
 	 */
-	public function __construct( Environment $env, bool $setupView = TRUE )
+	public function __construct( WebEnvironment $env, bool $setupView = TRUE )
 	{
 		$env->getRuntime()->reach( 'CMF_Controller('.get_class( $this ).')' );
 		static::$moduleId	= trim( static::$moduleId );
@@ -456,10 +456,10 @@ class Controller
 	/**
 	 *	Sets Environment of Controller by copying Framework Member Variables.
 	 *	@access		protected
-	 *	@param		Environment	$env			Framework Resource Environment Object
+	 *	@param		WebEnvironment	$env			Framework Resource Environment Object
 	 *	@return		self
 	 */
-	protected function setEnv( Environment $env ): self
+	protected function setEnv( WebEnvironment $env ): self
 	{
 		$this->env			= $env;
 		$this->controller	= $env->getRequest()->get( '__controller' );
