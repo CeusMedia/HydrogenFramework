@@ -24,6 +24,7 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+
 namespace CeusMedia\HydrogenFramework;
 
 use CeusMedia\Common\ADT\Collection\Dictionary as Dictionary;
@@ -105,9 +106,10 @@ class Controller
 		$this->defaultPath	= strtolower( str_replace( '_', '/', $controllerName ) );				//  to guess default controller URI path
 		$this->path			= $this->defaultPath;													//  and note this as controller path
 
-		$data				= array( 'controllerName' => $controllerName );							//  with cut controller name
-		if( $path = $this->callHook( 'Controller', 'onDetectPath', $this, $data ) )					//  to get preferred controller URI path
-			$this->path		= $path;																//  and set if has been resolved
+		$data				= ['controllerName' => $controllerName, 'path' => ''];					//  with cut controller name
+		$this->callHook( 'Controller', 'onDetectPath', $this, $data );								//  to get preferred controller URI path
+		if( strlen( trim( $data['path'] ) ) !== 0 )
+			$this->path		= $data['path'];														//  and set if has been resolved
 
 //		$arguments		= array_slice( func_get_args(), 1 );										//  collect additional arguments for extended logic classes
 //		Alg_Object_MethodFactory::callObjectMethod( $this, '__onInit', $arguments, TRUE, TRUE );	//  invoke possibly extended init method

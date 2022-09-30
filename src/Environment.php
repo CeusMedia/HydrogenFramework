@@ -134,7 +134,7 @@ class Environment implements ArrayAccess
 	/**	@var	array						$disclosure		Map of classes ready to reflect */
 	protected $disclosure;
 
-	/**	@var	LogicPoolResource                                                                                                                                                                                                              				$logic			Pool for logic class instances */
+	/**	@var	LogicPoolResource			$logic			Pool for logic class instances */
 	protected $logic;
 
 	/**	@var	integer						$mode			Environment mode (dev,test,live,...) */
