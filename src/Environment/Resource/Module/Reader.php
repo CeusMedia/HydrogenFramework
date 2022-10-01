@@ -53,7 +53,7 @@ class Reader
 	 *	@param		string		$filePath		File path to module XML file
 	 *	@param		string		$id				Module ID
 	 *	@return		object						Module data object
-	 *	@throws		Exception
+	 *	@throws		Exception	if XML file could not been loaded and parsed
 	 */
 	public static function load( string $filePath, string $id ): object
 	{

@@ -53,8 +53,7 @@ class Server extends Abstraction
 			return [];
 		if( $this->hasNoAccess( $roleId ) )
 			return [];
-		if( !isset( $this->rights[$roleId] ) )
-		{
+		if( !isset( $this->rights[$roleId] ) ) {
 			$rights	= $this->env->getServer()->getData( 'role', 'getRights', array( $roleId ) );
 			$this->rights[$roleId]	= [];
 			foreach( $rights as $right ){

@@ -36,16 +36,16 @@ use RuntimeException;
 class Logic
 {
 	/**	@var	Environment					$env			Application Environment Object */
-	protected $env;
+	protected Environment $env;
 
 	/**	@var	CaptainResource				$captain		Event handler */
-	protected $captain;
+	protected CaptainResource $captain;
 
 	/**	@var	Dictionary					$config			Configuration collection */
-	protected $config;
+	protected Dictionary $config;
 
 	/**	@var	LocalModuleLibraryResource	$modules		Module library */
-	protected $modules;
+	protected LocalModuleLibraryResource $modules;
 
 	/**
 	 *	Constructor.

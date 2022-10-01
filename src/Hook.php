@@ -8,17 +8,17 @@ use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 
 class Hook
 {
-	/** @var object|NULL $context */
-	protected $context;
-
 	/** @var Environment $env */
-	protected $env;
+	protected Environment $env;
+
+	/** @var object|NULL $context */
+	protected ?object $context;
 
 	/** @var object|NULL $module */
-	protected $module;
+	protected ?object $module;
 
 	/** @var array $payload */
-	protected $payload		= [];
+	protected array $payload		= [];
 
 	public function __construct( Environment $env, ?object $context = NULL )
 	{

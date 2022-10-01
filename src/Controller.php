@@ -35,6 +35,7 @@ use CeusMedia\Common\Net\HTTP\Status as HttpStatus;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 
 use DateTime;
+use DateTimeInterface;
 use RuntimeException;
 
 /**
@@ -48,39 +49,39 @@ use RuntimeException;
  */
 class Controller
 {
-	const RESTART_FROM_IGNORE		= 0;
-	const RESTART_FROM_POP			= 1;
-	const RESTART_FROM_APPLY		= 2;
-	const RESTART_FROM_CARRY		= 4;
-	const RESTART_FROM_SET			= 8;
-	const RESTART_FROM_PUSH			= 16;
+	public const RESTART_FROM_IGNORE		= 0;
+	public const RESTART_FROM_POP			= 1;
+	public const RESTART_FROM_APPLY			= 2;
+	public const RESTART_FROM_CARRY			= 4;
+	public const RESTART_FROM_SET			= 8;
+	public const RESTART_FROM_PUSH			= 16;
 
-	public static $moduleId			= '';
-	public static $prefixModel		= 'Model_';
-	public static $prefixView		= 'View_';
+	public static string $moduleId			= '';
+	public static string $prefixModel		= 'Model_';
+	public static string $prefixView		= 'View_';
 
-	/**	@var		string								$alias			Optional alternative path for restarting */
-	public $alias					= '';
+	/**	@var		string					$alias			Optional alternative path for restarting */
+	public string $alias					= '';
 
-	/**	@var		WebEnvironment						$env			Application Environment Object */
-	protected $env;
-	/**	@var		string								$defaultPath	Default controller URI path */
-	protected $defaultPath;
-	/**	@var		string								$path			Preferred controller URI path */
-	protected $path;
-	/**	@var		View|NULL							$view			View instance for controller */
-	protected $view;
-	/**	@var		Dictionary							$moduleConfig	Map of module configuration pairs */
-	protected $moduleConfig;
+	/**	@var		WebEnvironment			$env			Application Environment Object */
+	protected WebEnvironment $env;
+	/**	@var		string					$defaultPath	Default controller URI path */
+	protected string $defaultPath;
+	/**	@var		string					$path			Preferred controller URI path */
+	protected string $path;
+	/**	@var		View|NULL				$view			View instance for controller */
+	protected ?View $view;
+	/**	@var		Dictionary				$moduleConfig	Map of module configuration pairs */
+	protected Dictionary $moduleConfig;
 
-	/**	@var		string								$controller		Name of called Controller */
-	protected $controller		= "";
-	/**	@var		string								$action			Name of called Action */
-	protected $action			= "";
-	/**	@var		bool								$redirect		Flag for Redirection */
-	var $redirect				= FALSE;
+	/**	@var		string					$controller		Name of called Controller */
+	protected string $controller			= "";
+	/**	@var		string					$action			Name of called Action */
+	protected string $action				= "";
+	/**	@var		bool					$redirect		Flag for Redirection */
+	var bool $redirect						= FALSE;
 
-	protected $logRestarts		= FALSE;
+	protected bool $logRestarts				= FALSE;
 
 	/**
 	 *	Constructor.
@@ -296,8 +297,8 @@ class Controller
 	/**
 	 *	Loads View Class of called Controller.
 	 *	@access		protected
-	 *	@param		string		$section	Section in locale file
-	 *	@param		string		$topic		Locale file key, eg. test/my, default: current controller
+	 *	@param		string|NULL		$section	Section in locale file
+	 *	@param		string|NULL		$topic		Locale file key, eg. test/my, default: current controller
 	 *	@return		array
 	 */
 	protected function getWords( string $section = NULL, string $topic = NULL ): array
@@ -381,7 +382,7 @@ class Controller
 	 *	@param		string		$uri				URI to request, may be external
 	 *	@param		integer		$status				HTTP status code to send, default: NULL -> 200
 	 *	@return		void
-	 *	@todo		kriss: check for better HTTP status
+	 *	@todo		check for better HTTP status
 	 */
 	protected function relocate( string $uri, $status = NULL )
 	{
@@ -396,7 +397,7 @@ class Controller
 	 *	ATTENTION: For browser compatibility local paths should start with "./"
 	 *
 	 *	If seconds parameter is set to TRUE, redirects to a path inside the current controller.
-	 *	Therefore the given URI needs to be a path inside the current controller.
+	 *	Therefore, the given URI needs to be a path inside the current controller.
 	 *	This would look like this: $this->restart( '[ACTION]', TRUE );
 	 *	Of course you can append actions arguments and parameters.
 	 *
@@ -407,16 +408,16 @@ class Controller
 	 *	There is a shorter alias: $this->relocate( 'http://foreign.tld/' );
 	 *
 	 *	@access		protected
-	 *	@param		string		$uri				URI to request
-	 *	@param		boolean		$withinModule		Flag: user path inside current controller
-	 *	@param		integer		$status				HTTP status code to send, default: NULL -> 200
-	 *	@param		boolean		$allowForeignHost	Flag: allow redirection outside application base URL, default: no
-	 *	@param		integer		$modeFrom			How to handle FROM parameter from request or for new request, not handled atm
+	 *	@param		string|NULL		$uri				URI to request
+	 *	@param		boolean			$withinModule		Flag: user path inside current controller
+	 *	@param		integer|NULL	$status				HTTP status code to send, default: NULL -> 200
+	 *	@param		boolean			$allowForeignHost	Flag: allow redirection outside application base URL, default: no
+	 *	@param		integer			$modeFrom			How to handle FROM parameter from request or for new request, not handled atm
 	 *	@return		void
 	 *	@link		https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#3xx_Redirection HTTP status codes
-	 *	@todo		kriss: implement automatic lookout for "from" request parameter
-	 *	@todo		kriss: implement handling of FROM request parameter, see controller constants
-	 *	@todo		kriss: concept and implement anti-loop {@see http://dev.(ceusmedia.de)/cmKB/?MTI}
+	 *	@todo		implement automatic lookout for "from" request parameter
+	 *	@todo		implement handling of FROM request parameter, see controller constants
+	 *	@todo		concept and implement anti-loop {@see http://dev.(ceusmedia.de)/cmKB/?MTI}
 	 */
 	protected function restart( ?string $uri = NULL, bool $withinModule = FALSE, ?int $status = NULL, bool $allowForeignHost = FALSE, int $modeFrom = 0 )
 	{
@@ -432,7 +433,7 @@ class Controller
 		}
 		if( $this->logRestarts )
 			error_log( vsprintf( '%s %s %s %s'."\n", array(
-				date( DateTime::ATOM ),
+				date( DateTimeInterface::ATOM ),
 				$status ? $status : 200,
 				$mode,
 				$uri
@@ -493,9 +494,10 @@ class Controller
 		$class		= self::$prefixView.$name;
 		$this->view	= new View( $this->env );
 		if( class_exists( $class, TRUE ) ){
-			$this->view	= ObjectFactory::createObject( $class, array( &$this->env ) );
-			if( !$this->view instanceof View)
-				throw new RuntimeException( 'View class is not a Hydrogen view', 301 );
+			$object		= ObjectFactory::createObject( $class, array( &$this->env ) );
+			if( !$object instanceof View )
+				throw new RuntimeException( 'View class "'.$name.'" is not a Hydrogen view', 301 );
+			$this->view	= $object;
 			$this->view->addData( 'moduleConfig', $this->moduleConfig );
 		}
 		else if( $force )

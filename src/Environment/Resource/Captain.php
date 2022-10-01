@@ -60,30 +60,30 @@ use RuntimeException;
  */
 class Captain
 {
-	const LEVEL_UNKNOWN		= 0;
-	const LEVEL_TOP			= 1;
-	const LEVEL_START		= 1;
-	const LEVEL_HIGHEST		= 2;
-	const LEVEL_HIGH		= 3;
-	const LEVEL_HIGHER		= 4;
-	const LEVEL_MID			= 5;
-	const LEVEL_LOWER		= 6;
-	const LEVEL_LOW			= 7;
-	const LEVEL_LOWEST		= 8;
-	const LEVEL_BOTTOM		= 9;
-	const LEVEL_END			= 9;
+	public const LEVEL_UNKNOWN		= 0;
+	public const LEVEL_TOP			= 1;
+	public const LEVEL_START		= 1;
+	public const LEVEL_HIGHEST		= 2;
+	public const LEVEL_HIGH			= 3;
+	public const LEVEL_HIGHER		= 4;
+	public const LEVEL_MID			= 5;
+	public const LEVEL_LOWER		= 6;
+	public const LEVEL_LOW			= 7;
+	public const LEVEL_LOWEST		= 8;
+	public const LEVEL_BOTTOM		= 9;
+	public const LEVEL_END			= 9;
 
 	/**	@var		Environment			$env			Environment object */
-	protected $env;
+	protected Environment $env;
 
 	/**	@var		array								$disabledHooks	List of disabled hooks */
-	protected $disabledHooks	= [];
+	protected array $disabledHooks		= [];
 
 	/**	@var		boolean								$logCalls		Flag: log hook calls */
-	protected $logCalls			= FALSE;
+	protected bool $logCalls			= FALSE;
 
 	/**	@var		array								$openHooks		List of hooks open right now */
-	protected $openHooks		= [];
+	protected array $openHooks			= [];
 
 	/**
 	 *	Constructor.

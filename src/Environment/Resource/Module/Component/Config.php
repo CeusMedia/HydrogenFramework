@@ -3,19 +3,19 @@ namespace CeusMedia\HydrogenFramework\Environment\Resource\Module\Component;
 
 class Config
 {
-	public $key;
+	public string $key;
 
 	public $value;
 
-	public $type;
+	public ?string $type;
 
 	public $values;
 
-	public $mandatory;
+	public ?bool $mandatory;
 
-	public $protected;
+	public ?string $protected;
 
-	public $title;
+	public ?string $title;
 
 	public function __construct( $key, $value, $type = NULL, $title = NULL )
 	{

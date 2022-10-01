@@ -43,19 +43,19 @@ use InvalidArgumentException;
  */
 abstract class Abstraction
 {
-	protected $env;
+	protected Environment $env;
 
-	public const ROLE_ACCESS_NONE	= 0;
-	public const ROLE_ACCESS_ACL	= 1;
-	public const ROLE_ACCESS_FULL	= 128;
+	public const ROLE_ACCESS_NONE		= 0;
+	public const ROLE_ACCESS_ACL		= 1;
+	public const ROLE_ACCESS_FULL		= 128;
 
-	protected $controllerActions	= [];
-	protected $rights				= [];
-	protected $roles				= [];
+	protected array $controllerActions	= [];
+	protected array $rights				= [];
+	protected array $roles				= [];
 	/*	@var		$publicLinks				Map of links with public access */
-	protected $linksPublic			= [];
-	protected $linksPublicInside	= [];
-	protected $linksPublicOutside	= [];
+	protected array $linksPublic		= [];
+	protected array $linksPublicInside	= [];
+	protected array $linksPublicOutside	= [];
 
 	/**
 	 *	Constructor.

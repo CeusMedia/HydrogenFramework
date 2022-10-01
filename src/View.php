@@ -34,9 +34,9 @@ use CeusMedia\Common\Alg\Time\Converter as TimeConverter;
 use CeusMedia\Common\UI\HTML\Elements as HtmlElements;
 use CeusMedia\Common\UI\HTML\Exception\Page as HtmlExceptionPage;
 use CeusMedia\Common\UI\Template as TemplateEngine;
-use CeusMedia\HydrogenFramework\Environment as Environment;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 
+use CeusMedia\HydrogenFramework\View\Helper;
 use Exception;
 use InvalidArgumentException;
 use ReflectionException;
@@ -53,32 +53,32 @@ use RuntimeException;
  */
 class View
 {
-	/**	@var		array						$data			Collected Data for View */
-	protected $data			= [];
+	/**	@var		array					$data			Collected Data for View */
+	protected array $data					= [];
 
-	/**	@var		WebEnvironment	$env			Environment Object */
-	protected $env;
+	/**	@var		WebEnvironment			$env			Environment Object */
+	protected WebEnvironment $env;
 
-	/**	@var		string|NULL					$controller		Name of called Controller */
-	protected $controller	= NULL;
+	/**	@var		string|NULL				$controller		Name of called Controller */
+	protected ?string $controller			= NULL;
 
-	/**	@var		string|NULL					$action			Name of called Action */
-	protected $action		= NULL;
+	/**	@var		string|NULL				$action			Name of called Action */
+	protected ?string $action				= NULL;
 
-	/**	@var		Dictionary					$helpers		Map of view helper classes/objects */
-	protected $helpers;
+	/**	@var		Dictionary				$helpers		Map of view helper classes/objects */
+	protected Dictionary $helpers;
 
-	/**	@var		TimeConverter				$time			Instance of time converter */
-	protected $time;
+	/**	@var		TimeConverter			$time			Instance of time converter */
+	protected TimeConverter $time;
 
-	/**	@var		HtmlElements				$html			Instance of HTML library class */
-	protected $html;
+	/**	@var		HtmlElements			$html			Instance of HTML library class */
+	protected HtmlElements $html;
 
-//	/**	@var		CMM_TEA_Factory				$tea			Instance of TEA (Template Engine Abstraction) Factory (from cmModules) OR empty if TEA is not available */
+//	/**	@var		CMM_TEA_Factory			$tea			Instance of TEA (Template Engine Abstraction) Factory (from cmModules) OR empty if TEA is not available */
 //	protected $tea			= NULL;
 
-	/**	@var		string						$pathTemplates	Path to template file, can be set by config::path.templates */
-	protected $pathTemplates	= 'templates/';
+	/**	@var		string					$pathTemplates	Path to template file, can be set by config::path.templates */
+	protected string $pathTemplates			= 'templates/';
 
 	/**
 	 *	Constructor.
@@ -120,7 +120,15 @@ class View
 		$this->__onInit();
 	}
 
-	public function addData( string $key, $value, $topic = NULL ): self
+	/**
+	 *	Sets Data of View.
+	 *	@access		public
+	 *	@param		string			$key
+	 *	@param		mixed			$value
+	 *	@param		string|NULL		$topic			Optional: Topic Name of Data
+	 *	@return		self
+	 */
+	public function addData( string $key, $value, ?string $topic = NULL ): self
 	{
 		return $this->setData( array( $key => $value ), $topic );
 	}
@@ -150,6 +158,11 @@ class View
 		return $pathLocale.$path.$fileKey;
 	}
 
+	/**
+	 *	@param		string|NULL		$key
+	 *	@param		mixed|NULL		$autoSetTo
+	 *	@return		array|mixed
+	 */
 	public function & getData( string $key = NULL, $autoSetTo = NULL )
 	{
 		if( !$key )
@@ -161,7 +174,12 @@ class View
 		throw new InvalidArgumentException( 'No view data by key "'.htmlentities( $key, ENT_QUOTES, 'UTF-8' ).'"' );
 	}
 
-	public function getHelper( string $name, bool $strict = TRUE )
+	/**
+	 *	@param		string $name
+	 *	@param		bool $strict
+	 *	@return		Helper|NULL
+	 */
+	public function getHelper( string $name, bool $strict = TRUE ): ?Helper
 	{
 		if( isset( $this->helpers[$name] ) )
 			return $this->helpers[$name];
@@ -306,7 +324,7 @@ class View
 //		if( $result )
 //			return $this->renderContent( $payload->content );										//  return loaded and rendered content
 
-		//  old solution, extract to module UI_TempateAbstraction
+		//  old solution, extract to module UI_TemplateAbstraction
 		/*  --  LOAD TEMPLATE AND APPLY DATA  --  */
 //		if( $this->env->getPage()->tea )
 //			$content	= $this->realizeTemplateWithTEA( $filePath, $data );
@@ -430,7 +448,7 @@ class View
 //	 *	...
 //	 *	Check if template file is existing MUST be done beforehand.
 //	 *	@param		string		$filePath		Template file path name with templates folder
-//	 *	@param		array		$data			Additional template data, appened to assigned view data
+//	 *	@param		array		$data			Additional template data, appended to assigned view data
 //	 *	@return		string		Template content with applied data
 //	 */
 /*	protected function realizeTemplateWithTEA( string $filePath, array $data = [] ): string
@@ -457,28 +475,33 @@ class View
 	protected function registerHelper( string $name, string $class, array $parameters = [] ): self
 	{
 		$object	= ObjectFactory::createObject( $class, $parameters );
+		if( !$object instanceof Helper )
+			throw new RuntimeException( 'View class "'.$name.'" is not a Hydrogen view', 301 );
 		$this->addHelper( $name, $object );
 		return $this;
 	}
 
 	public function renderContent( string $content, string $dataType = "HTML" ): string
 	{
-		$data	= [
-			'content'	=> $content,
-			'type'		=> $dataType
-		];
-		$this->env->getCaptain()->callHook( 'View', 'onRenderContent', $this, $data );
-		return $data['content'];
+		return static::renderContentStatic( $this->env, $this, $content, $dataType );
 	}
 
-	static public function renderContentStatic( $env, $context, $content, $dataType = "HTML" )
+	/**
+	 *	Applies hook View::onRenderContent to already created content
+	 *	@param		WebEnvironment	$env
+	 *	@param		object			$context
+	 *	@param		string			$content		Already created content to apply hook to
+	 *	@param		string			$dataType
+	 *	@return		string
+	 */
+	public static function renderContentStatic( WebEnvironment $env, object $context, string $content, string $dataType = "HTML" ): string
 	{
-		$data	= [
+		$payload	= [
 			'content'	=> $content,
 			'type'		=> $dataType
 		];
-		$env->getCaptain()->callHook( 'View', 'onRenderContent', $context, $data );
-		return $data['content'];
+		$env->getCaptain()->callHook( 'View', 'onRenderContent', $context, $payload );
+		return $payload['content'];
 	}
 
 	/**

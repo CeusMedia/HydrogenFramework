@@ -53,9 +53,9 @@ use SimpleXMLElement;
  */
 class Editor
 {
-	protected $path;
+	protected string $path;
 
-	protected $nsXml	= 'http://www.w3.org/XML/1998/namespace';
+	protected string $nsXml	= 'http://www.w3.org/XML/1998/namespace';
 
 	/**
 	 *	@param		Environment		$env

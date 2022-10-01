@@ -16,34 +16,36 @@
 	returns the differences in HTML. The tags used are <ins> and <del>,
 	which can easily be styled with CSS.
 */
+
 namespace CeusMedia\HydrogenFramework\View\Helper;
 
 class Diff
 {
 	static public function diff( array $old, array $new ): array
 	{
-		$maxlen	= 0;
+		$maxLen	= 0;
 		$oldMax	= 0;
 		$newMax	= 0;
+		$matrix	= [];
 		foreach( $old as $oldIndex => $oldValue ){
 			$newKeys = array_keys( $new, $oldValue );
 			foreach( $newKeys as $newIndex ){
 				$matrix[$oldIndex][$newIndex] = 1;
 				if( isset( $matrix[$oldIndex - 1][$newIndex - 1] ) )
 					$matrix[$oldIndex][$newIndex] = $matrix[$oldIndex - 1][$newIndex - 1] + 1;
-				if($matrix[$oldIndex][$newIndex] > $maxlen){
-					$maxlen	= $matrix[$oldIndex][$newIndex];
-					$oldMax	= $oldIndex + 1 - $maxlen;
-					$newMax	= $newIndex + 1 - $maxlen;
+				if($matrix[$oldIndex][$newIndex] > $maxLen){
+					$maxLen	= $matrix[$oldIndex][$newIndex];
+					$oldMax	= $oldIndex + 1 - $maxLen;
+					$newMax	= $newIndex + 1 - $maxLen;
 				}
 			}
 		}
-		if( $maxlen == 0 )
+		if( $maxLen == 0 )
 			return array( array( 'd' => $old, 'i' => $new ) );
 		return array_merge(
 			self::diff( array_slice( $old, 0, $oldMax ), array_slice( $new, 0, $newMax ) ),
-			array_slice( $new, $newMax, $maxlen ),
-			self::diff( array_slice( $old, $oldMax + $maxlen ), array_slice( $new, $newMax + $maxlen ) )
+			array_slice( $new, $newMax, $maxLen ),
+			self::diff( array_slice( $old, $oldMax + $maxLen ), array_slice( $new, $newMax + $maxLen ) )
 		);
 	}
 

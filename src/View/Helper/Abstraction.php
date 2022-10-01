@@ -43,10 +43,10 @@ use CeusMedia\HydrogenFramework\View\Helper;
 abstract class Abstraction implements Helper
 {
 	/**	@var	Environment|NULL		$env			Environment Object */
-	protected $env						= NULL;
+	protected ?Environment $env			= NULL;
 
 	/**	@var	boolean					$needsEnv		Flag: needs Environment to be set */
-	protected $needsEnv					= TRUE;
+	protected bool $needsEnv			= TRUE;
 
 	/**
 	 *	Indicates whether this helper has an environment set.
@@ -65,7 +65,7 @@ abstract class Abstraction implements Helper
 	 *	@return		boolean
 	 *	@todo 		remove after helper interface is updated
 	 */
-	public function needsEnv()
+	public function needsEnv(): bool
 	{
 		return $this->needsEnv;
 	}

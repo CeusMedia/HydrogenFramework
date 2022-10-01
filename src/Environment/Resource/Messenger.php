@@ -46,22 +46,22 @@ use ReflectionFunction;
 class Messenger
 {
 	/**	@var		WebEnvironment	$env			Application Environment Object */
-	protected $env;
+	protected WebEnvironment $env;
 
 	/**	@var		boolean			$enabled		Flag: store messages in session */
-	protected $enabled;
+	protected bool $enabled;
 
 	/**	@var		array			$classes		CSS classes of message types */
-	protected $classes	= [
+	protected array $classes	= [
 		'0'	=> 'failure',
 		'1'	=> 'error',
 		'2'	=> 'notice',
 		'3'	=> 'success',
 	];
 
-	protected $keyHeadings	= 'messenger_headings';
+	protected string $keyHeadings	= 'messenger_headings';
 
-	protected $keyMessages	= 'messenger_messages';
+	protected string $keyMessages	= 'messenger_messages';
 
 	/**
 	 *	Constructor.

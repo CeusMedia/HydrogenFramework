@@ -42,7 +42,7 @@ use RuntimeException;
 class Console extends Abstraction
 {
 	/**	@var		string								$classEnvironment		Class Name of Application Environment to build */
-	public static $classEnvironment						= ConsoleEnvironment::class;
+	public static string $classEnvironment				= ConsoleEnvironment::class;
 
 	public function __construct( ConsoleEnvironment $env = NULL )
 	{

@@ -10,23 +10,23 @@ use ErrorException;
 
 class Web
 {
-	public $errorReporting;
+	public ?int $errorReporting;
 
-	public $displayErrors;
+	public ?bool $displayErrors;
 
-	public $catchErrors				= FALSE;
+	public bool $catchErrors				= FALSE;
 
-	public $configFile;
+	public ?string $configFile;
 
-	public $classFileExtension		= 'php5';
+	public string $classFileExtension		= 'php5';
 
-	public $classRouter;
+	public ?string $classRouter;
 
-	public $defaultTimezone;
+	public ?string $defaultTimezone;
 
-	public $paths					= [];
+	public array $paths					= [];
 
-	public $pathVendor				= 'vendor/';
+	public string $pathVendor				= 'vendor/';
 
 	protected $app;
 
@@ -36,19 +36,19 @@ class Web
 			$this->setupErrorHandling();
 			$this->setupEnvironment();
 
-			$app	= new WebApp();												//  create default web site application instance
+			$app	= new WebApp();												//  create default website application instance
 			$app->run();														//  and run it
 		}
-		catch( Exception $t ){													//  an uncatched exception happend
+		catch( Exception $t ){													//  an uncaught exception happened
 			ExceptionPage::display( $t );										//  display report page with call stack
 		}
 	}
 
-	public function handleErrorAsException( $errno, $errstr, $errfile, $errline, ?array $errcontext )
+	public function handleErrorAsException( $errno, string $errMsg, string $errFile, int $errLine, ?array $errContext ): ?bool
 	{
 		if( error_reporting() === 0 )											// error was suppressed with the @-operator
 			return FALSE;
-		throw new ErrorException( $errstr, 0, $errno, $errfile, $errline );
+		throw new ErrorException( $errMsg, 0, $errno, $errFile, $errLine );
 	}
 
 	// --  PRIVATE  --  //
@@ -69,7 +69,7 @@ class Web
 		if( NULL !== $this->classRouter )										//  an alternative router class has been set
 			WebEnvironment::$classRouter  = $this->classRouter;							//  set alternative router class in environment
 
-		if( NULL !== $this->paths && 0 !== count( $this->paths ) )
+		if( 0 !== count( $this->paths ) )
 			WebEnvironment::$defaultPaths	= $this->paths + WebEnvironment::$defaultPaths;
 
 		$classExt	= $this->classFileExtension;
@@ -83,7 +83,7 @@ class Web
 			error_reporting( $this->errorReporting );
 		if( NULL !== $this->displayErrors )
 			ini_set( 'display_errors', $this->displayErrors );
-		if( NULL !== $this->catchErrors && $this->catchErrors )
+		if( $this->catchErrors )
 			set_error_handler( array( $this, 'handleErrorAsException' ) );
 	}
 }

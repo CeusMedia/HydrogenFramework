@@ -31,28 +31,25 @@ use RuntimeException;
 class Console extends Environment
 {
 	/**	@var	string					$host		Detected HTTP host */
-	public $host;
+	public string $host;
 
 	/**	@var	int						$port		Detected HTTP port */
-	public $port;
+	public int $port;
 
 	/**	@var	string					$scheme		Detected  */
-	public $scheme;
+	public string $scheme;
 
-	/**	@var	string					$path		Detected HTTP path */
-	public $path;
+	/**	@var	string|NULL				$path		Detected HTTP path */
+	public ?string $path;
 
 	/**	@var	string					$url		Detected application base URL */
-	public $url;
+	public string $url;
 
 	/**	@var	ArgumentParser			$request	Console Request Object */
-	protected $request;
-
-	/** @var	LanguageResource		$language	Language Object */
-	protected $language;
+	protected ArgumentParser $request;
 
 	/** @var	Dictionary				$session	Session Storage Object */
-	protected $session;
+	protected Dictionary $session;
 
 	/**
 	 *	Constructor, sets up Resource Environment.

@@ -1,9 +1,15 @@
 <?php
+
+use CeusMedia\Common\CLI;
+use CeusMedia\Common\FS;
+use CeusMedia\Common\FS\Folder;
+use CeusMedia\HydrogenFramework\View\Helper\Diff;
+
 class Tool_Migration_Applier
 {
-	protected $modifiers	= array();
+	protected array $modifiers	= [];
 
-	protected $folder;
+	protected Folder $folder;
 
 	public function apply(): object
 	{
@@ -18,7 +24,7 @@ class Tool_Migration_Applier
 		return $this;
 	}
 
-	public function setRootFolder( FS_Folder $folder ): self
+	public function setRootFolder( Folder $folder ): self
 	{
 		$this->folder	= $folder;
 		return $this;
@@ -31,7 +37,7 @@ class Tool_Migration_Applier
 //		remark( "FOLDER: ".$folder->getPathName() );
 		$nrFiles		= 0;
 		$nrFilesChanged	= 0;
-		foreach( $folder->index( FS::TYPE_FILE ) as $fileName => $file ){
+		foreach($folder->index( FS::TYPE_FILE ) as $fileName => $file ){
 			if( preg_match( '/\.php.2$/', $file->getName() ) )
 				unlink( $file->getPathName() );
 			if( !preg_match( '/\.php$/', $file->getName() ) )
@@ -75,27 +81,6 @@ class Tool_Migration_Applier
 
 	private function diff( array $old, array $new ): array
 	{
-		$matrix	= array();
-		$maxlen	= 0;
-		foreach( $old as $oldIndex => $oldValue ){
-			$newKeys	= array_keys( $new, $oldValue );
-			foreach( $newKeys as $newIndex ){
-				$matrix[$oldIndex][$newIndex] = 1;
-				if( isset( $matrix[$oldIndex - 1][$newIndex - 1] ) )
-					$matrix[$oldIndex][$newIndex]	= $matrix[$oldIndex - 1][$newIndex - 1] + 1;
-				if( $matrix[$oldIndex][$newIndex] > $maxlen ){
-					$maxlen	= $matrix[$oldIndex][$newIndex];
-					$oldMax	= $oldIndex + 1 - $maxlen;
-					$newMax	= $newIndex + 1 - $maxlen;
-				}
-			}
-		}
-		if( $maxlen == 0 )
-			return array( array( 'd' => $old, 'i' => $new ) );
-		return array_merge(
-			$this->diff( array_slice( $old, 0, $oldMax ), array_slice( $new, 0, $newMax ) ),
-			array_slice( $new, $newMax, $maxlen ),
-			$this->diff( array_slice( $old, $oldMax + $maxlen ), array_slice( $new, $newMax + $maxlen ) )
-		);
+		return Diff::diff( $old, $new );
 	}
 }

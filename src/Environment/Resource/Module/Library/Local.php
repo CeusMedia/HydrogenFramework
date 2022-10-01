@@ -34,6 +34,7 @@ use CeusMedia\HydrogenFramework\Environment\Resource\Module\Reader as ModuleRead
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\LibraryInterface as LibraryInterface;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Library\Abstraction as AbstractLibrary;
 use Countable;
+use Exception;
 use RuntimeException;
 
 /**
@@ -48,16 +49,20 @@ use RuntimeException;
  */
 class Local extends AbstractLibrary implements Countable, LibraryInterface
 {
-	protected $env;
+	protected Environment $env;
+
 	protected $modulePath;
-	protected $modules			= [];
-	protected $cacheFile;
+
+	protected array $modules			= [];
+
+	protected string $cacheFile;
 
 	/**
 	 *	Constructor.
 	 *	@access		public
 	 *	@param		Environment		$env			Environment instance
 	 *	@return		void
+	 *	@throws		Exception	if XML file could not been loaded and parsed
 	 */
 	public function __construct( Environment $env )
 	{
@@ -167,6 +172,7 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 	 *	@param		boolean		$useCache		Flag: use cache if available
 	 *	@param		boolean		$forceReload	Flag: clear cache beforehand if available
 	 *	@return		object		Data object containing the result source and number of found modules
+	 *	@throws		Exception	if XML file could not been loaded and parsed
 	 */
 	public function scan( bool $useCache = FALSE, bool $forceReload = FALSE ): object
 	{

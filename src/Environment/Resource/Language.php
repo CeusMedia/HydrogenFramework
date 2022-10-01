@@ -47,23 +47,23 @@ use DomainException;
  */
 class Language
 {
-	/**	@var		string				$fileExtension	File extension of language files (default: ini) */
-	static public $fileExtension		= 'ini';
+	/**	@var		string					$fileExtension	File extension of language files (default: ini) */
+	static public string $fileExtension		= 'ini';
 
-	/**	@var		array				$data			Array of loaded Language File Definitions */
-	protected $data;
+	/**	@var		array					$data			Array of loaded Language File Definitions */
+	protected array $data;
 
-	/**	@var		Environment			$env			Application Environment Object */
-	protected $env;
+	/**	@var		Environment				$env			Application Environment Object */
+	protected Environment $env;
 
-	/**	@var		string				$filePath		Path to Language Files */
-	protected $filePath;
+	/**	@var		string					$filePath		Path to Language Files */
+	protected string $filePath;
 
-	/**	@var		string				$language		Set Language */
-	protected $language;
+	/**	@var		string					$language		Set Language */
+	protected string $language;
 
-	/**	@var		array				$languages		List of allowed Languages */
-	protected $languages				= [];
+	/**	@var		array					$languages		List of allowed Languages */
+	protected array $languages				= [];
 
 	/**
 	 *	Constructor.

@@ -8,13 +8,13 @@ use CeusMedia\HydrogenFramework\Environment\Resource\Runtime\Profiler as Profile
 
 class Runtime
 {
-	public $profiler;
+	public Profiler $profiler;
 
 	/**	@var	Clock			$clock */
-	protected $clock;
+	protected Clock $clock;
 
 	/**	@var	Environment		$env */
-	protected $env;
+	protected Environment $env;
 
 	/**
 	 *	Constructor.

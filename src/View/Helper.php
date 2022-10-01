@@ -37,13 +37,18 @@ use CeusMedia\HydrogenFramework\Environment;
  *	@copyright		2010-2022 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
+ *	@todo			rename to HelperInterface, update view helper classes in all modules
  */
 interface Helper
 {
-	public function hasEnv();
+	public function hasEnv(): bool;
 
-	public function needsEnv();
+	public function needsEnv(): bool;
 
+	/**
+	 *	@param		Environment		$env
+	 *	@return		self|void
+	 */
 	public function setEnv( Environment $env );
 
 //	@todo 	see if this pattern (having render method) is realizable for all existing helpers

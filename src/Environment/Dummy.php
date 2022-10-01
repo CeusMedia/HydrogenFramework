@@ -42,7 +42,7 @@ use CeusMedia\Common\ADT\Collection\Dictionary as Dictionary;
  */
 class Dummy extends Environment
 {
-	public $hasDatabase		= FALSE;
+	public bool $hasDatabase		= FALSE;
 
 	public function __construct( array $options = [] )
 	{

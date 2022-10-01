@@ -49,37 +49,46 @@ use RuntimeException;
  */
 class Model
 {
-	/**	@var		Environment				$env			Application Environment Object */
-	protected $env;
-	/**	@var		string					$name			Name of Database Table without Prefix */
-	protected $name							= "";
-	/**	@var		array					$columns		List of Database Table Columns */
-	protected $columns						= [];
-	/**	@var		array					$name			List of foreign Keys of Database Table */
- 	protected $indices						= [];
-	/**	@var		string					$primaryKey		Primary Key of Database Table */
-	protected $primaryKey					= "";
-	/**	@var		DatabaseTableWriter		$table			Database Table Writer Object for reading from and writing to Database Table */
-	protected $table;
-	/**	@var		string					$prefix			Database Table Prefix */
- 	protected $prefix;
-	/**	@var		Dictionary				$cache			Model data cache */
-	protected $cache;
-	/**	@var		integer					$fetchMode		PDO fetch mode */
-	protected $fetchMode;
-	/**	@var		string					$cacheKey		Base key in cache */
-	protected $cacheKey;
+	/**	@var	Environment				$env			Application Environment Object */
+	protected Environment $env;
 
-	public static $cacheClass				= Dictionary::class;
+	/**	@var	string					$name			Name of Database Table without Prefix */
+	protected string $name				= "";
+
+	/**	@var	array					$columns		List of Database Table Columns */
+	protected array $columns			= [];
+
+	/**	@var	array					$name			List of foreign Keys of Database Table */
+ 	protected array $indices			= [];
+
+	/**	@var	string					$primaryKey		Primary Key of Database Table */
+	protected string $primaryKey		= "";
+
+	/**	@var	DatabaseTableWriter		$table			Database Table Writer Object for reading from and writing to Database Table */
+	protected DatabaseTableWriter $table;
+
+	/**	@var	string					$prefix			Database Table Prefix */
+ 	protected string $prefix;
+
+	/**	@var	Dictionary				$cache			Model data cache */
+	protected $cache;
+
+	/**	@var	integer					$fetchMode		PDO fetch mode */
+	protected int $fetchMode;
+
+	/**	@var	string					$cacheKey		Base key in cache */
+	protected string $cacheKey;
+
+	public static string $cacheClass			= Dictionary::class;
 
 	/**
 	 *	Constructor.
 	 *	@access		public
 	 *	@param		Environment		$env			Application Environment Object
-	 *	@param		integer							$id				ID to focus on
+	 *	@param		string|NULL		$id				ID to focus on
 	 *	@return		void
 	 */
-	public function __construct( Environment $env, $id = NULL )
+	public function __construct( Environment $env, ?string $id = NULL )
 	{
 		$this->setEnv( $env );
 		$this->table	= new DatabaseTableWriter(
@@ -131,7 +140,7 @@ class Model
 	 *	@param		string			$value			Value of Index
 	 *	@return		integer			Number of entries within this index
 	 */
-	public function countByIndex( string $key, $value )
+	public function countByIndex( string $key, string $value ): int
 	{
 		$conditions	= array( $key => $value );
 		return $this->table->count( $conditions );
@@ -150,7 +159,7 @@ class Model
 
 	/**
 	 *	Returns number of entries of a large table by map of conditions.
-	 *	Attention: The returned number may be inaccurat, but this is much faster.
+	 *	Attention: The returned number may be inaccurate, but this is much faster.
 	 *	@access		public
 	 *	@param		array			$conditions		Map of conditions
 	 *	@return		integer			Number of entries
@@ -187,7 +196,7 @@ class Model
 	 *	@param		boolean			$stripTags		Flag: strip HTML Tags from values, default: yes
 	 *	@return		integer			Number of changed rows
 	 */
-	public function editByIndices( array $indices, array $data, bool $stripTags = TRUE )
+	public function editByIndices( array $indices, array $data, bool $stripTags = TRUE ): int
 	{
 		$indices	= $this->checkIndices( $indices, TRUE, TRUE );
 		return $this->table->updateByConditions( $data, $indices, $stripTags );
@@ -531,6 +540,7 @@ class Model
 	 *	@throws		InvalidArgumentException		in strict mode if field is not a string and strict mode is on
 	 *	@throws		InvalidArgumentException		in strict mode if field is empty but mandatory
 	 *	@throws		InvalidArgumentException		in strict mode if field is not a table column
+	 *	@todo		remove mandatory and return false on empty and not strict, adjust handling on method calls
 	 */
 	protected function checkField( string $field, bool $mandatory = FALSE, bool $strict = TRUE )
 	{
@@ -541,7 +551,7 @@ class Model
 					return FALSE;
 				throw new InvalidArgumentException( 'Field must have a value' );
 			}
-			return NULL;
+			return FALSE;
 		}
 		if( !in_array( $field, $this->columns ) ){
 			if( !$strict )

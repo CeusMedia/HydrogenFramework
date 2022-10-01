@@ -29,6 +29,7 @@ namespace CeusMedia\HydrogenFramework\Environment;
 
 use CeusMedia\Common\Loader;
 use CeusMedia\HydrogenFramework\Environment;
+use CeusMedia\HydrogenFramework\Environment\Resource\Messenger as MessengerResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\Remote\Messenger;
 
 /**
@@ -46,10 +47,7 @@ use CeusMedia\HydrogenFramework\Environment\Resource\Remote\Messenger;
 class Remote extends Environment
 {
 	/**	@var	boolean		$hasDatabase		Flag: indicates availability of a database connection */
-	public $hasDatabase		= FALSE;
-
-	/** @var	Messenger	$messenger			Fake messenger */
-	protected $messenger;
+	public bool $hasDatabase		= FALSE;
 
 	/**
 	 *	Constructor.

@@ -59,12 +59,12 @@ use RuntimeException;
  */
 class Web extends Environment
 {
-	public static $classRouter			= SingleRouter::class;
+	public static string $classRouter		= SingleRouter::class;
 
-	public static $configKeyBaseHref	= 'app.base.url';
+	public static string $configKeyBaseHref	= 'app.base.url';
 
 	/**	@var	array					$defaultPaths	Map of default paths to extend base configuration */
-	public static $defaultPaths			= [
+	public static array $defaultPaths			= [
 		'config'	=> 'config/',
 		'classes'	=> 'classes/',
 		'contents'	=> 'contents/',
@@ -77,49 +77,45 @@ class Web extends Environment
 	];
 
 	/**	@var	string					$host		Detected HTTP host */
-	public $host;
+	public string $host;
 
 	/**	@var	int						$port		Detected HTTP port */
-	public $port;
+	public int $port;
 
-	/**	@var	string					$path		Detected HTTP path */
-	public $path;
+	/**	@var	string|NULL				$path		Detected HTTP path */
+	public ?string $path;
 
 	/**	@var	string					$root		Detected  */
-	public $root;
+	public string $root;
 
 	/**	@var	string					$scheme		Detected  */
-	public $scheme;
+	public string $scheme;
 
 	/**	@var	string					$uri		Detected  */
-	public $uri;
+	public string $uri;
 
 	/**	@var	string					$url		Detected application base URL */
-	public $url;
+	public string $url;
 
 	/**	@var	HttpRequest				$request	HTTP Request Object */
-	protected $request;
+	private HttpRequest $request;
 
 	/**	@var	HttpResponse			$response	HTTP Response Object */
-	protected $response;
+	protected HttpResponse $response;
 
 	/**	@var	AbstractRouter			$router		Router Object */
-	protected $router;
+	protected AbstractRouter $router;
 
 	/**	@var	HttpPartitionSession	$session	Session Object */
-	protected $session;
+	private HttpPartitionSession $session;
 
 	/**	@var	HttpCookie				$cookie		Cookie Object */
-	protected $cookie;
-
-	/** @var	LanguageResource		$language	Language Object */
-	protected $language;
+	protected HttpCookie $cookie;
 
 	/**	@var	PageResource			$page		Page Object */
-	protected $page;
+	protected PageResource $page;
 
-
-	protected $resourcesToClose			= [];
+	protected array $resourcesToClose	= [];
 
 	/**
 	 *	Constructor, sets up Resource Environment.
@@ -127,7 +123,7 @@ class Web extends Environment
 	 *	@param		array		$options
 	 *	@return		void
 	 */
-	public function __construct( $options = [] )
+	public function __construct( array $options = [] )
 	{
 		ob_start();
 		try{
@@ -416,7 +412,7 @@ class Web extends Environment
 		return $this;
 	}
 
-	protected function initMessenger( $enabled = "auto" ): self
+	protected function initMessenger( ?string $enabled = "auto" ): self
 	{
 		if( $enabled === "auto" )																	//  auto detect mode
 			$enabled	= preg_match( "/html/", getEnv( 'HTTP_ACCEPT' ) );							//  enabled if HTML is requested

@@ -7,7 +7,7 @@ use CeusMedia\HydrogenFramework\Environment\Console as ConsoleEnvironment;
 class Console
 {
 	/** @var ConsoleEnvironment $env */
-	protected $env;
+	protected ConsoleEnvironment $env;
 
 	public function __construct( ConsoleEnvironment $env )
 	{

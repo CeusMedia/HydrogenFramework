@@ -46,9 +46,9 @@ use RuntimeException;
  */
 class Php
 {
-	public $version;
+	public VersionResource $version;
 
-	protected $env;
+	protected Environment $env;
 
 	public function __construct( Environment $env )
 	{

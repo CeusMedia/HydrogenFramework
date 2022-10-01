@@ -6,8 +6,8 @@ use CeusMedia\HydrogenFramework\Environment\Resource\Runtime;
 
 class Profiler
 {
-	protected $enabled;
-	protected $runtime;
+	protected bool $enabled;
+	protected Runtime $runtime;
 
 	public function __construct( Runtime $runtime, bool $enabled = FALSE )
 	{

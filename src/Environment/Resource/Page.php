@@ -134,7 +134,7 @@ class Page extends HtmlPage
 	 */
 	public function addCommonStyle( string $fileName, int $level = Captain::LEVEL_MID, array $attributes = [] ): self
 	{
-		$this->css->common->addUrl( $fileName, $this->interpretLoadLevel( $level ), $attributes );
+		$this->css->common->addUrl( $fileName, self::interpretLoadLevel( $level ), $attributes );
 		return $this;
 	}
 
@@ -148,7 +148,7 @@ class Page extends HtmlPage
 	 */
 	public function addPrimerStyle( string $fileName, int $level = Captain::LEVEL_MID, array $attributes = [] ): self
 	{
-		$this->css->primer->addUrl( $fileName, $this->interpretLoadLevel( $level ), $attributes );
+		$this->css->primer->addUrl( $fileName, self::interpretLoadLevel( $level ), $attributes );
 		return $this;
 	}
 
@@ -162,7 +162,7 @@ class Page extends HtmlPage
 	 */
 	public function addThemeStyle( string $fileName, int $level = Captain::LEVEL_MID, array $attributes = [] ): self
 	{
-		$this->css->theme->addUrl( $fileName, $this->interpretLoadLevel( $level ), $attributes );
+		$this->css->theme->addUrl( $fileName, self::interpretLoadLevel( $level ), $attributes );
 		return $this;
 	}
 
@@ -191,7 +191,7 @@ class Page extends HtmlPage
 			foreach( $module->files->styles as $style ){											//  iterate module style files
 				if( !empty( $style->load ) && $style->load == "auto" ){								//  style file is to be loaded always
 					$source	= !empty( $style->source ) ? $style->source : NULL;						//  get source attribute if possible
-					$level	= $this->interpretLoadLevel( $style->level ?? Captain::LEVEL_MID );		//  get load level (top, mid, end), default: mid
+					$level	= self::interpretLoadLevel( $style->level ?? Captain::LEVEL_MID );		//  get load level (top, mid, end), default: mid
 					if( preg_match( "/^[a-z]+:\/\/.+$/", $style->file ) )					//  style file is absolute URL
 						$this->css->theme->addUrl( $style->file, $level );							//  add style file URL
 					else if( $source == 'primer' )													//  style file is in primer theme
@@ -218,7 +218,7 @@ class Page extends HtmlPage
 			foreach( $module->files->scripts as $script ){											//  iterate module script files
 				if( !empty( $script->load ) && $script->load == "auto" ){							//  script file is to be loaded always
 					$source	= empty( $script->source ) ? 'local' : $script->source;
-					$level	= $this->interpretLoadLevel( $script->level ?? Captain::LEVEL_MID );		//  get load level (top, mid, end, ready), default: mid
+					$level	= self::interpretLoadLevel( $script->level ?? Captain::LEVEL_MID );		//  get load level (top, mid, end, ready), default: mid
 					$top	= !empty( $script->top ) || $level === Captain::LEVEL_TOP;				//  get flag attribute for appending on top
 					if( $source == 'lib' ){															//  script file is in script library
 						if( $top )																	//
@@ -392,7 +392,7 @@ class Page extends HtmlPage
 		$path	= $this->env->getConfig()->get( 'path.scripts' );
 		if( !file_exists( $path.$filePath ) )
 			throw new RuntimeException( 'Local script "'.$filePath.'" not found in folder "'.$path.'"' );
-		$this->js->addUrl( $path.$filePath, $this->interpretLoadLevel( $level ) );
+		$this->js->addUrl( $path.$filePath, self::interpretLoadLevel( $level ) );
 		return $this;
 	}
 
@@ -405,7 +405,7 @@ class Page extends HtmlPage
 	 */
 	public function runScript( string $script, int $level = Captain::LEVEL_MID ): self
 	{
-		$this->js->addScriptOnReady( $script, $this->interpretLoadLevel( $level ) );
+		$this->js->addScriptOnReady( $script, self::interpretLoadLevel( $level ) );
 		return $this;
 	}
 

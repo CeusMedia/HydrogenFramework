@@ -44,8 +44,12 @@ use RuntimeException;
  */
 class PDO extends Connection
 {
-	protected $env;
+	protected Environment $env;
 
+	/**
+	 *	@param			Environment		$env
+	 *	@noinspection	PhpMissingParentConstructorInspection
+	 */
 	public function __construct( Environment $env )
 	{
 		$this->env	= $env;

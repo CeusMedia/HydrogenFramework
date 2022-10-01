@@ -43,10 +43,10 @@ use Exception;
  */
 class Site extends Abstraction
 {
-	public static $checkClassActionArguments	= TRUE;
+	public static bool $checkClassActionArguments	= TRUE;
 
 	/**	@var		string			$content			Collected Content to respond */
-	protected $content				= '';
+	protected string $content				= '';
 
 	protected $dev;
 
