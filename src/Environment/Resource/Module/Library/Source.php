@@ -151,6 +151,7 @@ class Source extends AbstractLibrary implements LibraryInterface
 					$module->path				= $entry->getPath();
 					$module->source				= $this->source->id;
 					$module->versionAvailable	= $module->version;
+					$module->isActive			= TRUE;
 					if( isset( $module->config['active'] ) )
 						$module->isActive		= $module->config['active']->value;
 					$module->icon	= NULL;
@@ -177,7 +178,7 @@ class Source extends AbstractLibrary implements LibraryInterface
 		$host		= parse_url( $this->source->path, PHP_URL_HOST );
 		$path		= parse_url( $this->source->path, PHP_URL_PATH );
 		$reader		= new HttpReader();
-		$headers	= Section::instantiate()->addFieldPair( 'Accept', 'application/json' );
+		$headers	= Section::getInstance()->addFieldPair( 'Accept', 'application/json' );
 		$response	= $reader->get( $host.$path.'?do=list', $headers );
 		$status		= $reader->getCurlInfo( CURLINFO_HTTP_CODE );
 

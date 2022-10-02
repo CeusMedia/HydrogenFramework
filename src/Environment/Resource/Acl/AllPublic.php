@@ -44,12 +44,12 @@ class AllPublic extends Abstraction
 	/**
 	 *	Indicates whether access to a controller action is allowed for a given role.
 	 *	@access		public
-	 *	@param		integer		$roleId			Role ID
+	 *	@param		string		$roleId			Role ID
 	 *	@param		string		$controller		Name of controller
 	 *	@param		string		$action			Name of action
 	 *	@return		integer		Always returns 1 for "access"
 	 */
-	public function hasRight( $roleId, string $controller = 'index', string $action = 'index' ): int
+	public function hasRight( string $roleId, string $controller = 'index', string $action = 'index' ): int
 	{
 		return 1;
 	}
@@ -58,10 +58,10 @@ class AllPublic extends Abstraction
 	 *	Return list controller actions or matrix of controllers and actions of role.
 	 *	@access		public
 	 *	@param		string|NULL		$controller		Controller to list actions for, otherwise return matrix
-	 *	@param		integer			$roleId			Specified role, otherwise current role
+	 *	@param		string|NULL		$roleId			Specified role, otherwise current role
 	 *	@return		array							List of actions or matrix of controllers and actions
 	 */
-	public function index( string $controller = NULL, $roleId = NULL ): array
+	public function index( string $controller = NULL, string $roleId = NULL ): array
 	{
 		if( !$this->controllerActions )
 			$this->scanControllerActions();
@@ -75,12 +75,12 @@ class AllPublic extends Abstraction
 	/**
 	 *	Allows access to a controller action for a role.
 	 *	@access		public
-	 *	@param		integer		$roleId			Role ID
+	 *	@param		string		$roleId			Role ID
 	 *	@param		string		$controller		Name of Controller
 	 *	@param		string		$action			Name of Action
 	 *	@return		integer
 	 */
-	public function setRight( $roleId, string $controller, string $action ): int
+	public function setRight( string $roleId, string $controller, string $action ): int
 	{
 		return 1;
 	}

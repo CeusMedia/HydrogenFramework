@@ -82,7 +82,7 @@ class Remote extends Environment
 	}
 
 	/**
-	 *	Close remote enviroment and keep calling client application alive.
+	 *	Close remote environment and keep calling client application alive.
 	 *	@access		public
 	 *	@param		array		$additionalResources	Not used in remote environment
 	 *	@param		boolean		$keepAppAlive			Not used in remote environment

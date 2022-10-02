@@ -42,11 +42,11 @@ use CeusMedia\HydrogenFramework\View\Helper;
  */
 abstract class Abstraction implements Helper
 {
-	/**	@var		Environment			$env			Environment Object */
-	protected		$env								= NULL;
+	/**	@var		Environment|NULL		$env			Environment Object */
+	protected		$env					= NULL;
 
-	/**	@var		boolean								$needsEnv		Flag: needs Environment to be set */
-	protected		$needsEnv							= TRUE;
+	/**	@var		boolean					$needsEnv		Flag: needs Environment to be set */
+	protected		$needsEnv				= TRUE;
 
 	protected function getWords( string $section, string $topic ): array
 	{

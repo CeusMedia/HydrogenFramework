@@ -256,7 +256,7 @@ class Language
 			if( $strict )
 				throw new RuntimeException( $message, 221 );
 			if( $force && $this->env->has( 'messenger' ) )
-				$this->env->getMessenger()->noteFailure( $message );
+				$this->env->get( 'messenger' )->noteFailure( $message );
 			return [];
 		}
 		$this->env->getRuntime()->reach( 'Resource_Language: end' );

@@ -189,7 +189,7 @@ class Model
 	 */
 	public function editByIndices( array $indices, array $data, bool $stripTags = TRUE )
 	{
-		$indices	= $this->checkIndices( $indices, TRUE, TRUE );
+		$indices	= $this->checkIndices( $indices );
 		return $this->table->updateByConditions( $data, $indices, $stripTags );
 	}
 
@@ -202,7 +202,7 @@ class Model
 	 */
 	public function get( string $id, string $field = '' )
 	{
-		$field	= $this->checkField( $field, FALSE, TRUE );
+		$field	= $this->checkField( $field );
 		$data	= $this->cache->get( $this->cacheKey.$id );
 		if( !$data ){
 			$this->table->focusPrimary( $id );
@@ -270,7 +270,7 @@ class Model
 	 */
 	public function getAllByIndices( array $indices = [], array $orders = [], array $limits = [], array $fields = [], bool $strict = FALSE ): array
 	{
-		$indices	= $this->checkIndices( $indices, TRUE, TRUE );
+		$indices	= $this->checkIndices( $indices );
 		foreach( $indices as $key => $value )
 			$this->table->focusIndex( $key, $value );
 		$data	= $this->table->get( FALSE, $orders, $limits );
@@ -300,7 +300,7 @@ class Model
 		if( !is_array( $fields ) )
 			throw new InvalidArgumentException( 'Fields must be of array or string' );
 		foreach( $fields as $field )
-			$this->checkField( $field, FALSE, TRUE );
+			$this->checkField( $field );
 		$this->table->focusIndex( $key, $value );
 		$data	= $this->table->get( TRUE, $orders );
 		$this->table->defocus();
@@ -325,8 +325,8 @@ class Model
 		if( !is_array( $fields ) )
 			throw new InvalidArgumentException( 'Fields must be of array or string' );
 		foreach( $fields as $field )
-			$field	= $this->checkField( $field, FALSE, TRUE );
-		$this->checkIndices( $indices, TRUE, TRUE );
+			$field	= $this->checkField( $field );
+		$this->checkIndices( $indices );
 		foreach( $indices as $key => $value )
 			$this->table->focusIndex( $key, $value );
 		$result	= $this->table->get( TRUE, $orders );
@@ -455,9 +455,9 @@ class Model
 	 *	@access		public
 	 *	@param		string			$key			Key of Index
 	 *	@param		mixed			$value			Value of Index
-	 *	@return		boolean
+	 *	@return		int
 	 */
-	public function removeByIndex( string $key, $value ): bool
+	public function removeByIndex( string $key, $value ): int
 	{
 		$this->table->focusIndex( $key, $value );
 		$number	= 0;
@@ -489,7 +489,7 @@ class Model
 	 */
 	public function removeByIndices( array $indices ): int
 	{
-		$indices	= $this->checkIndices( $indices, TRUE, TRUE );
+		$indices	= $this->checkIndices( $indices );
 		foreach( $indices as $key => $value )
 			$this->table->focusIndex( $key, $value );
 
@@ -533,55 +533,45 @@ class Model
 	 *	Returns FALSE if empty and mandatory, otherwise NULL.
 	 *	In strict mode exceptions will be thrown if field is not a string, empty but mandatory or not a table column.
 	 *	@access		protected
-	 *	@param		string			$field			Table Column to check for existence
-	 *	@param		boolean			$mandatory		Force a value, otherwise return NULL or throw exception in strict mode
-	 *	@param		boolean			$strict			Strict mode (default): throw exception instead of returning FALSE or NULL
-	 *	@return		string|NULL		Trimmed Field name if found, NULL otherwise or exception in strict mode
-	 *	@throws		InvalidArgumentException		in strict mode if field is not a string and strict mode is on
-	 *	@throws		InvalidArgumentException		in strict mode if field is empty but mandatory
-	 *	@throws		InvalidArgumentException		in strict mode if field is not a table column
+	 *	@param		string				$field		Table Column to check for existence
+	 *	@param		boolean				$strict		Strict mode (default): throw exception instead of returning FALSE or NULL
+	 *	@return		string|FALSE|NULL	Trimmed Field name if found, otherwise NULL if not mandatory, otherwise NULL or exception in strict mode
+	 *	@throws		InvalidArgumentException		if field is empty (in strict mode, only)
+	 *	@throws		InvalidArgumentException		if field is not a valid column (in strict mode, only)
 	 */
-	protected function checkField( string $field, bool $mandatory = FALSE, bool $strict = TRUE )
+	protected function checkField( string $field, bool $strict = TRUE )
 	{
 		$field	= trim( $field );
-		if( !strlen( $field ) ){
-			if( $mandatory ){
-				if( !$strict )
-					return FALSE;
-				throw new InvalidArgumentException( 'Field must have a value' );
-			}
-			return NULL;
-		}
-		if( !in_array( $field, $this->columns ) ){
-			if( !$strict )
-				return FALSE;
-			$message	= 'Field "%s" is not an existing column of table %s';
-			throw new InvalidArgumentException( sprintf( $message, $field, $this->getName() ) );
-		}
-		return $field;
+		if( 0 === strlen( $field ) )
+			throw new InvalidArgumentException( 'Field key cannot be empty' );
+		if( in_array( $field, $this->columns ) )
+			return $field;
+		if( !$strict )
+			return FALSE;
+		$message	= sprintf( 'Field "%s" is not an existing column of table %s', $field, $this->getName() );
+		throw new InvalidArgumentException( $message );
 	}
 
 	/**
 	 *	Indicates whether a given map of indices is valid.
-	 *	Returns map if valid or FALSE if not an array or empty but mandatory.
-	 *	In strict mode exceptions will be thrown if map is not an array or empty but mandatory.
-	 *	FYI: The next logical check - if index keys are valid columns and noted indices - is done by used table reader class.
+	 *	Returns map if valid indices or FALSE at least one requested index is invalid.
+	 *	In strict mode, an exception will be thrown on false indices.
 	 *	@access		protected
 	 *	@param		array 			$indices		Map of Index Keys and Values
-	 *	@param		boolean			$mandatory		Force at least one pair, otherwise return FALSE or throw exception in strict mode
 	 *	@param		boolean			$strict			Strict mode (default): throw exception instead of returning FALSE
 	 *	@return		array|boolean	Map if valid, FALSE otherwise or exceptions in strict mode
-	 *	@throws		InvalidArgumentException		in strict mode if field is empty but mandatory
-	 *	@todo		refactor return type
+	 *	@throws		InvalidArgumentException		if at least one requested index is invalid (in strict mode, only)
 	 */
-	protected function checkIndices( array $indices, bool $mandatory = FALSE, bool $strict = TRUE )
+	protected function checkIndices( array $indices, bool $strict = TRUE )
 	{
-		if( count( $indices ) === 0 && $mandatory ){
-			if( !$strict )
-				return FALSE;
+		if( 0 === count( $indices ) )
 			throw new InvalidArgumentException( 'Index map must have at least one pair' );
-		}
-		return $indices;
+		$diff	= array_diff( $indices, $this->indices );
+		if( 0 === count( $diff ) )
+			return $indices;
+		if( !$strict )
+			return FALSE;
+		throw new InvalidArgumentException( 'Invalid indices: '.join( ', ', $diff ) );
 	}
 
 	/**
@@ -590,42 +580,26 @@ class Model
 	 *	@param		mixed			$result			Query result as array or object
 	 *	@param		array			$fields			List of fields or one field
 	 *	@param		boolean			$strict			Flag: throw exception if result is empty
-	 *	@return		string|array|object				Structure depending on result and field list length
-	 *	@throws		InvalidArgumentException		If given fields list is neither a list nor a string
+	 *	@return		string|array|object|NULL		Structure depending on result and field list length
+	 *	@throws		RuntimeException				if given result set is empty (in strict mode, only)
+	 *	@throws		InvalidArgumentException		if at least one given field is not a table column
+	 *	@throws		DomainException					if one of the fields is not within result
 	 */
 	protected function getFieldsFromResult( $result, array $fields = [], bool $strict = TRUE )
 	{
-		if( is_string( $fields ) )
-			$fields	= strlen( trim( $fields ) ) ? array( trim( $fields ) ) : [];
-		if( !is_array( $fields ) )
-			throw new InvalidArgumentException( 'Fields must be of array or string' );
+		if( 0 === count( $fields ) )
+			return $result;
 		if( !$result ){
 			if( $strict )
-				throw new Exception( 'Result is empty' );
+				throw new RuntimeException( 'Result is empty' );
 			if( count( $fields ) === 1 )
 				return NULL;
 			return [];
 		}
-		if( !count( $fields ) )
-			return $result;
-		foreach( $fields as $field )
-			if( !in_array( $field, $this->columns ) )
-				throw new InvalidArgumentException( 'Field "'.$field.'" is not an existing column' );
+		$invalidFields	= array_diff( $fields, $this->columns );
+		if( 0 !== count( $invalidFields ) )
+			throw new InvalidArgumentException( 'Invalid fields: '.join( ', ', $invalidFields ) );
 
-		if( count( $fields ) === 1 ){
-			$field	= current( $fields );
-			switch( $this->fetchMode ){
-				case PDO::FETCH_CLASS:
-				case PDO::FETCH_OBJ:
-					if( !property_exists( $result, $field ) )
-						throw new DomainException( 'Field "'.$field.'" is not an column of result set' );
-					return $result->$field;
-				default:
-					if( !array_key_exists( $field, $result ) )
-						throw new DomainException( 'Field "'.$field.'" is not an column of result set' );
-					return $result[$field];
-			}
-		}
 		switch( $this->fetchMode ){
 			case PDO::FETCH_CLASS:
 			case PDO::FETCH_OBJ:
@@ -635,7 +609,8 @@ class Model
 						throw new DomainException( 'Field "'.$field.'" is not an column of result set' );
 					$map->$field	= $result->$field;
 				}
-				return $map;
+				/** @noinspection PhpUndefinedVariableInspection */
+				return 1 === count( $fields ) ? $map->$field : $map;
 			default:
 				$list	= [];
 				foreach( $fields as $field ){
@@ -643,7 +618,8 @@ class Model
 						throw new DomainException( 'Field "'.$field.'" is not an column of result set' );
 					$list[$field]	= $result[$field];
 				}
-				return $list;
+				/** @noinspection PhpUndefinedVariableInspection */
+				return 1 === count( $fields ) ? $list[$field] : $list;
 		}
 	}
 

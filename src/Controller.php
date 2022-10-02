@@ -47,12 +47,12 @@ use RuntimeException;
  */
 class Controller
 {
-	const RESTART_FROM_IGNORE		= 0;
-	const RESTART_FROM_POP			= 1;
-	const RESTART_FROM_APPLY		= 2;
-	const RESTART_FROM_CARRY		= 4;
-	const RESTART_FROM_SET			= 8;
-	const RESTART_FROM_PUSH			= 16;
+	public const RESTART_FROM_IGNORE	= 0;
+	public const RESTART_FROM_POP		= 1;
+	public const RESTART_FROM_APPLY		= 2;
+	public const RESTART_FROM_CARRY		= 4;
+	public const RESTART_FROM_SET		= 8;
+	public const RESTART_FROM_PUSH		= 16;
 
 	public static $moduleId			= '';
 	public static $prefixModel		= 'Model_';
@@ -456,10 +456,10 @@ class Controller
 	/**
 	 *	Sets Environment of Controller by copying Framework Member Variables.
 	 *	@access		protected
-	 *	@param		Environment	$env			Framework Resource Environment Object
+	 *	@param		WebEnvironment	$env			Framework Resource Environment Object
 	 *	@return		self
 	 */
-	protected function setEnv( Environment $env ): self
+	protected function setEnv( WebEnvironment $env ): self
 	{
 		$this->env			= $env;
 		$this->controller	= $env->getRequest()->get( '__controller' );

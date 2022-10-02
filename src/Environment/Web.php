@@ -80,7 +80,7 @@ class Web extends Environment
 	/**	@var	string					$host		Detected HTTP host */
 	public $host;
 
-	/**	@var	int						$port		Detected HTTP port */
+	/**	@var	int|string				$port		Detected HTTP port */
 	public $port;
 
 	/**	@var	string					$path		Detected HTTP path */
@@ -492,7 +492,7 @@ class Web extends Environment
 	 *	Initialize HTTP request resource instance.
 	 *	Request data will be imported from given web server environment.
 	 *	@access		protected
-	 *	@return		void
+	 *	@return		self
 	 */
 	protected function initRequest(): self
 	{

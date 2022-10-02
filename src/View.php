@@ -56,22 +56,22 @@ class View
 	/**	@var		array						$data			Collected Data for View */
 	protected $data			= [];
 
-	/**	@var		WebEnvironment	$env			Environment Object */
+	/**	@var		WebEnvironment				$env			Environment Object */
 	protected $env;
 
-	/**	@var		string						$controller		Name of called Controller */
+	/**	@var		string|NULL					$controller		Name of called Controller */
 	protected $controller	= NULL;
 
-	/**	@var		string						$action			Name of called Action */
+	/**	@var		string|NULL					$action			Name of called Action */
 	protected $action		= NULL;
 
-	/**	@var		Dictionary			$helpers		Map of view helper classes/objects */
+	/**	@var		Dictionary					$helpers		Map of view helper classes/objects */
 	protected $helpers;
 
-	/**	@var		string						$time			Instance of time converter */
+	/**	@var		TimeConverter				$time			Instance of time converter */
 	protected $time;
 
-	/**	@var		string						$html			Instance of HTML library class */
+	/**	@var		HtmlElements				$html			Instance of HTML library class */
 	protected $html;
 
 //	/**	@var		CMM_TEA_Factory				$tea			Instance of TEA (Template Engine Abstraction) Factory (from cmModules) OR empty if TEA is not available */
@@ -508,10 +508,10 @@ class View
 	/**
 	 *	Sets Environment of Controller by copying Framework Member Variables.
 	 *	@access		protected
-	 *	@param		Environment		$env			Framework Resource Environment Object
+	 *	@param		WebEnvironment		$env			Framework Resource Environment Object
 	 *	@return		self
 	 */
-	protected function setEnv( Environment $env ): self
+	protected function setEnv( WebEnvironment $env ): self
 	{
 		$this->env			= $env;
 		if( $env instanceof WebEnvironment ){

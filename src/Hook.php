@@ -98,34 +98,4 @@ class Hook
 	{
 		$env->restart( $uri, $status, $allowForeignHost, $modeFrom );
 	}
-
-	/**
-	 *	Send mail using hook Hook::sendMail.
-	 *	@access		protected
-	 *	@static
-	 *	@param		Environment		$env			Instance of environment
-	 *	@param		Mail_Abstract	$mail			Mail object to handle
-	 *	@param		array			$receivers		List of receiver objects
-	 *	@return		void
-	 */
-	protected static function sendMail( Environment $env, Mail_Abstract $mail, array $receivers = [] )
-	{
-		$language	= $env->getLanguage()->getLanguage();											// @todo apply user language
-		foreach( $receivers as $receiver ){
-			if( is_string( $receiver ) )
- 				$receiver	= (object) array( 'email' => $receiver );
-			if( is_array( $receiver ) )
- 				$receiver	= (object) $receiver;
-			if( !property_exists( $receiver, 'email' ) )
-				throw new InvalidArgumentException( 'Given receiver is missing email address' );
-			$payload	= [
-				'mail'		=> $mail,
-				'receiver'	=> $receiver,
-				'language'	=> $language,
-			];
-			$result	= $env->getCaptain()->callHook( 'Hook', 'sendMail', $env, $payload );
-			if( !( is_int( $result ) && $result > 0 ) )
-				$env->getLogic()->get( 'mail' )->handleMail( $mail, $receiver, $language );
-		}
-	}
 }

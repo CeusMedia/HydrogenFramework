@@ -93,7 +93,7 @@ class Environment implements ArrayAccess
 
 	public static $timezone					= NULL;
 
-	/**	@var	string						$path			Absolute folder path of application */
+	/**	@var	string|NULL					$path			Absolute folder path of application */
 	public $path							= NULL;
 
 	/**	@var	PhpResource					$php			Instance of PHP environment collection */
@@ -768,12 +768,14 @@ class Environment implements ArrayAccess
 		return $this->get( $offset );
 	}
 
-	public function offsetSet( $offset, $value ){
-		return $this->set( $offset, $value );
+	public function offsetSet( $offset, $value )
+	{
+		$this->set( $offset, $value );
 	}
 
-	public function offsetUnset( $offset ){
-		return $this->remove( $offset );
+	public function offsetUnset( $offset )
+	{
+		$this->remove( $offset );
 	}
 
 	public function remove( string $key ): self
