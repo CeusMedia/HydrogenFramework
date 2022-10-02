@@ -27,7 +27,7 @@
 
 namespace CeusMedia\HydrogenFramework\Environment\Resource\Remote;
 
-use CeusMedia\HydrogenFramework\Environment\Resource\Messenger as MessengerResource;
+use CeusMedia\HydrogenFramework\Environment\Resource\Messenger as BaseMessenger;
 
 /**
  *	Fake messenger for remote environment.
@@ -38,7 +38,7 @@ use CeusMedia\HydrogenFramework\Environment\Resource\Messenger as MessengerResou
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class Messenger extends MessengerResource
+class Messenger extends BaseMessenger
 {
 	protected function noteMessage( int $type, string $message )
 	{

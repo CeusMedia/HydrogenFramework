@@ -134,8 +134,7 @@ class LogicPool
 			throw new RuntimeException( $message );
 		}
 
-		if( !$this->isInstantiated( $key ) ){
-			/** @var string $className */
+		if( !is_object( $this->pool[$key] ) ){
 			$className	= $this->pool[$key];
 			if( !class_exists( $className ) )
 				throw new DomainException( 'No logic class found for "'.$className.'"' );

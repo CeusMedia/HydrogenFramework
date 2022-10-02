@@ -29,7 +29,7 @@ namespace CeusMedia\HydrogenFramework\Environment;
 
 use CeusMedia\Common\Loader;
 use CeusMedia\HydrogenFramework\Environment;
-use CeusMedia\HydrogenFramework\Environment\Resource\Messenger as MessengerResource;
+use CeusMedia\HydrogenFramework\Environment\Resource\Messenger as BaseMessenger;
 use CeusMedia\HydrogenFramework\Environment\Resource\Remote\Messenger;
 
 /**
@@ -88,16 +88,20 @@ class Remote extends Environment
 	 */
 	public function close( array $additionalResources = [], bool $keepAppAlive = FALSE )
 	{
-		parent::close( [], FALSE );															//  unbind bound resources but keep application alive
+		parent::close( $additionalResources );															//  unbind bound resources but keep application alive
 	}
 
-	public function getMessenger(): Messenger
+	public function getMessenger(): BaseMessenger
 	{
 		return $this->messenger;
 	}
 
-	public function initMessenger()
+	/**
+	 * @return self
+	 */
+	public function initMessenger(): self
 	{
 		$this->messenger	= new Messenger( $this );
+		return $this;
 	}
 }

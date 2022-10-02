@@ -555,10 +555,9 @@ class View
 	protected function setPageTitle( string $section = 'index', string $key = 'title', array $data = [], int $mode = 1 ): self
 	{
 		$data	= $this->getData();
-		$word	= $data['words'][$section][$key] ?? '';
-		if( 0 !== strlen( trim( $word ) ) ){
-			$modeKey	= [-1 => 'prepend', 0 => 'set', 1 => 'append'][$mode] ?? 'set';
-			$this->env->getPage()->setTitle( $word, $modeKey );
+		if( isset( $data['words'][$section][$key] ) ){
+			$modes	= [-1 => 'prepend', 0 => 'set', 1 => 'append'];
+			$this->env->getPage()->setTitle( $data['words'][$section][$key], $modes[$mode] );
 		}
 		return $this;
 	}

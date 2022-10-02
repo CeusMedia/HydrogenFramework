@@ -54,7 +54,7 @@ class Server extends Abstraction
 		if( $this->hasNoAccess( $roleId ) )
 			return [];
 		if( !isset( $this->rights[$roleId] ) ) {
-			$rights	= $this->env->getServer()->getData( 'role', 'getRights', array( $roleId ) );
+			$rights	= $this->env->get( 'server' )->getData( 'role', 'getRights', array( $roleId ) );
 			$this->rights[$roleId]	= [];
 			foreach( $rights as $right ){
 				if( !isset( $this->rights[$roleId][$right->controller] ) )
@@ -93,7 +93,7 @@ class Server extends Abstraction
 		if( $this->hasNoAccess( $roleId ) )
 			return -2;
 		$data	= array( 'controller' => $controller, 'action' => $action );
-		return $this->env->getServer()->postData( 'role', 'setRight', array( $roleId ), $data );
+		return $this->env->get( 'server' )->postData( 'role', 'setRight', array( $roleId ), $data );
 	}
 
 	//  --  PROTECTED  --  //
@@ -107,7 +107,7 @@ class Server extends Abstraction
 	protected function getRole( string $roleId )
 	{
 		if( !$this->roles )
-			foreach( $this->env->getServer()->getData( 'role', 'index' ) as $role )
+			foreach( $this->env->get( 'server' )->getData( 'role', 'index' ) as $role )
 				$this->roles[$role->roleId]	= $role;
 		return $this->roles[$roleId];
 	}

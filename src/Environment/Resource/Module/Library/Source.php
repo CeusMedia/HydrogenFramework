@@ -90,7 +90,7 @@ class Source extends AbstractLibrary implements LibraryInterface
 		if( $useCache ){
 			$cacheKeySource	= 'Sources/'.$this->source->id;
 			if( $forceReload )
-				$cache->remove( $cacheKeySource );
+				$cache->delete( $cacheKeySource );
 			if( $cache->has( $cacheKeySource ) ){
 				$this->modules	= $cache->get( $cacheKeySource );
 				return $this->scanResult = (object) [

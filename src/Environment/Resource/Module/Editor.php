@@ -249,10 +249,10 @@ class Editor
 		$node	= $xml->link[$number];
 		$node->setValue( (string) $label );
 
-		$node->setAttribute( 'path',  trim( $path ) );
-		$node->setAttribute( 'access', strlen( trim( $access ) ) ? trim( $access ) : NULL );
-		$node->setAttribute( 'link', strlen( trim( $link ) ) ? trim( $link ) : NULL );
-		$node->setAttribute( 'rank', strlen( trim( $rank ) ) ? trim( $rank ) : NULL );
+		$node->setAttribute( 'path', trim( $path ) );
+		$node->setAttribute( 'access', 0 !== strlen( trim( $access ) ) ? trim( $access ) : NULL );
+		$node->setAttribute( 'link', 0 !== strlen( trim( $link ) ) ? trim( $link ) : NULL );
+		$node->setAttribute( 'rank', 0 !== strlen( trim( $rank ) ) ? trim( $rank ) : NULL );
 
 		$language	= strlen( trim( $language ) ) ? trim( $language ) : NULL;
 		$node->setAttribute( 'lang', $language, 'xml', $this->nsXml );								//  set language attribute
@@ -380,15 +380,15 @@ class Editor
 	{
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
 		foreach( $xml->sql as $sql ){																//  iterate SQL entries
-			if( $sql->event->getValue() === $event && $sql->type->getValue() === $type ){			//  event and type are matching
-				$matchingVersions	= TRUE;
-				if( $versionFrom ?? FALSE )
-					$matchingVersions	= $sql->from->getValue() === $versionFrom;
-				if( $matchingVersions ){															//  compare versions
-					$sql->remove();																	//  remove XML node
-					$this->saveModuleXml( $moduleId, $xml );										//  save modified module XML
-					return TRUE;
-				}
+			if( NULL === $sql->event || NULL === $sql->type )
+				continue;
+			if( $sql->event->getValue() !== $event || $sql->type->getValue() !== $type )		//  event and type are matching
+				continue;
+			$matchingVersions	= $sql->from->getValue() === $versionFrom;						//  compare versions
+			if( $event !== "update" || ( $event === "update" && $matchingVersions ) ){			//  check versions on update
+				$sql->remove();																	//  remove XML node
+				$this->saveModuleXml( $moduleId, $xml );										//  save modified module XML
+				return TRUE;
 			}
 		}
 		return FALSE;

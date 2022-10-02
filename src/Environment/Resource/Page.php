@@ -293,11 +293,9 @@ class Page extends HtmlPage
 		$this->addBodyClass( 'action-'.$actionKey );
 		$this->addBodyClass( 'site-'.$controllerKey.'-'.$actionKey );
 
-		$data	= [
-			'content'   => $this->getBody(),
-		];
-		$modules->callHookWithPayload( 'Page', 'build', $this, $data );									//  call related module event hooks
-		$this->setBody( $data['content'] );
+		$payload	= ['content' => $this->getBody()];
+		$modules->callHookWithPayload( 'Page', 'build', $this, $payload );									//  call related module event hooks
+		$this->setBody( $payload['content'] );
 
 		if( $this->packStyleSheets && $this->env->getRequest()->has( 'flushStyleCache') ){
 			$this->css->primer->clearCache();
@@ -326,7 +324,7 @@ class Page extends HtmlPage
 			foreach( explode( " ", trim( $bodyAttributes['class'] ) ) as $class )
 				$classes[]	= $class;
 		$bodyAttributes['class']	= join( ' ', $classes );
-		$this->env->getModules()->callHook( 'App', 'respond', $this );				//  call related module event hooks
+		$this->env->getModules()->callHook( 'App', 'respond', $this );						//  call related module event hooks
 		return parent::build( $bodyAttributes, $htmlAttributes );
 	}
 

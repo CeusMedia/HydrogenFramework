@@ -164,7 +164,6 @@ class Captain
 					if( !is_callable( [$callback[0], $callback[1]] ) )
 						throw new RuntimeException( 'Hook handling function '.$function.' is not callable' );
 
-					$count++;
 					ob_start();
 //					$payload	= $payload ?? [];
 //					$payload	= is_object( $payload ) ? (array) $payload : $payload;

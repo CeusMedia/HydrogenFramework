@@ -82,7 +82,7 @@ class Web
 		if( NULL !== $this->errorReporting )
 			error_reporting( $this->errorReporting );
 		if( NULL !== $this->displayErrors )
-			ini_set( 'display_errors', $this->displayErrors );
+			ini_set( 'display_errors', $this->displayErrors ? 'On' : 'Off' );
 		if( $this->catchErrors )
 			set_error_handler( array( $this, 'handleErrorAsException' ) );
 	}

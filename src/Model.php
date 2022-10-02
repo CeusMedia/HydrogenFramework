@@ -96,7 +96,7 @@ class Model
 			$this->prefix.$this->name,
 			$this->columns,
 			$this->primaryKey,
-			$id
+			$id ? (int) $id : NULL
 		);
 		if( $this->fetchMode )
 			$this->table->setFetchMode( $this->fetchMode );
@@ -326,8 +326,8 @@ class Model
 	public function getByIndices( array $indices, array $orders = [], array $fields = [], bool $strict = FALSE )
 	{
 		foreach( $fields as $field )
-			$this->checkField( $field, FALSE, TRUE );
-		$this->checkIndices( $indices, TRUE, TRUE );
+			$this->checkField( $field );
+		$this->checkIndices( $indices );
 		foreach( $indices as $key => $value )
 			$this->table->focusIndex( $key, $value );
 		$result	= $this->table->get( TRUE, $orders );

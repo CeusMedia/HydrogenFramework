@@ -81,7 +81,7 @@ abstract class Abstraction
 		if( !$this->env->has( 'session' ) )
 			return FALSE;
 		$roleId	= $this->env->getSession()->get( 'auth_role_id', '' );
-		$right	= $this->hasRight( $roleId, $controller, $action );
+		$right	= $this->hasRight( (string) $roleId, $controller, $action );
 //		remark( 'Controller: '.$controller.' | Action: '.$action.' | Right: '.$right );
 		return $right > 0;
 	}

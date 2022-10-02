@@ -121,7 +121,7 @@ class Environment implements ArrayAccess
 	/**	@var	Dictionary					$config			Configuration Object */
 	protected Dictionary $config;
 
-	/**	@var	object						$database		Database Connection Object */
+	/**	@var	object|NULL					$database		Database Connection Object */
 	protected $database;
 
 	/**	@var	LanguageResource			$language		Language support object */

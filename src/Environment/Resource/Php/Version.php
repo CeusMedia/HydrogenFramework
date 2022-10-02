@@ -9,8 +9,6 @@ class Version
 
 	public function __construct()
 	{
-		if( FALSE === phpversion() )
-			throw new RuntimeException( 'No PHP version information available' );
 		$this->version	= phpversion();
 	}
 
