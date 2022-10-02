@@ -83,7 +83,7 @@ class Web extends Environment
 	public string $port;
 
 	/**	@var	string|NULL				$path		Detected HTTP path */
-	public ?string $path;
+	public ?string $path				= NULL;
 
 	/**	@var	string					$root		Detected  */
 	public string $root;
@@ -470,7 +470,7 @@ class Web extends Environment
 
 	protected function initRouter( string $routerClass = NULL ): self
 	{
-		$classRouter	= $routerClass ? $routerClass : self::$classRouter;
+		$classRouter	= $routerClass ?: self::$classRouter;
 		$this->router	= ObjectFactory::createObject( $classRouter, array( $this ) );
 		$this->runtime->reach( 'env: router' );
 		return $this;
@@ -497,7 +497,7 @@ class Web extends Environment
 		$outside	= explode( ',', $this->config->get( 'module.acl.outside' ) );					//  get current outside link list
 		foreach( $this->modules->getAll() as $module ){
 			foreach( $module->links as $link ){													//  iterate module links
-				$link->path	= $link->path ? $link->path : 'index/index';
+				$link->path	= $link->path ?: 'index/index';
 				if( $link->access == "inside" ){												//  link is inside public
 					$path	= str_replace( '/', '_', $link->path );								//  get link path
 					if( !in_array( $path, $inside ) )											//  link is not in public link list

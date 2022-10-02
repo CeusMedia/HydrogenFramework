@@ -13,7 +13,7 @@ class File
 	public $level;
 
 	/** @var	string|null			$source */
-	public ?string $source;
+	public ?string $source			= NULL;
 
 	/**
 	 *	@param		string		$file

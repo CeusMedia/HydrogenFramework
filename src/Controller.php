@@ -71,14 +71,14 @@ class Controller
 	/**	@var		string					$path			Preferred controller URI path */
 	protected string $path;
 	/**	@var		View|NULL				$view			View instance for controller */
-	protected ?View $view;
+	protected ?View $view					= NULL;
 	/**	@var		Dictionary				$moduleConfig	Map of module configuration pairs */
 	protected Dictionary $moduleConfig;
 
 	/**	@var		string					$controller		Name of called Controller */
-	protected string $controller			= "";
+	protected string $controller			= '';
 	/**	@var		string					$action			Name of called Action */
-	protected string $action				= "";
+	protected string $action				= '';
 	/**	@var		bool					$redirect		Flag for Redirection */
 	var bool $redirect						= FALSE;
 
@@ -457,14 +457,14 @@ class Controller
 			if( $withinModule ){																	//  redirection is within module
 				$mode	= 'mod';
 				$controller	= $this->env->getRequest()->get( '__controller' );						//  get current controller
-				$controller	= $this->alias ? $this->alias : $controller;							//
+				$controller	= $this->alias ?: $controller;							//
 				$uri		= $controller.( strlen( $uri ) ? '/'.$uri : '' );						//
 			}
 		}
 		if( $this->logRestarts )
 			error_log( vsprintf( '%s %s %s %s'."\n", array(
 				date( DateTimeInterface::ATOM ),
-				$status ? $status : 200,
+				$status ?: 200,
 				$mode,
 				$uri
 			) ), 3, 'logs/restart.log' );

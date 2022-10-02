@@ -762,8 +762,8 @@ class Environment implements ArrayAccess
 
 			foreach( $module->links as $link ){														//  iterate module links
 				if( $link->access == "public" ){													//  link is public
-					$link->path	= $link->path ? $link->path : 'index/index';
-					$path	= str_replace( '/', '_', $link->path );									//  get link path
+					$link->path	= $link->path ?: 'index/index';
+					$path		= str_replace( '/', '_', $link->path );									//  get link path
 					if( !in_array( $path, $public ) )												//  link is not in public link list
 						$public[]	= $path;														//  add link to public link list
 				}

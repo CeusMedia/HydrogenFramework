@@ -10,9 +10,9 @@ use ErrorException;
 
 class Web
 {
-	public ?int $errorReporting;
+	public ?int $errorReporting				= NULL;
 
-	public ?bool $displayErrors;
+	public ?bool $displayErrors				= NULL;
 
 	public bool $catchErrors				= FALSE;
 

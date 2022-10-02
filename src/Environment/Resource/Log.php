@@ -87,7 +87,7 @@ class Log
 	 */
 	public function log( $type, $message, $context = NULL ): bool
 	{
-		$context		= $context ?? $this;
+		$context		??= $this;
 		$isHandled		= FALSE;
 		$data			= [
 			'type'			=> $type,
@@ -133,7 +133,7 @@ class Log
 	 */
 	public function logException( Throwable $exception, $context = NULL ): bool
 	{
-		$context		= $context ?? $this;
+		$context		??= $this;
 		$isHandled		= FALSE;
 		$data			= [
 			'exception'		=> $exception,

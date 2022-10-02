@@ -40,7 +40,7 @@ class Logic
 	protected array $timePrefixes		= [
 		'u'		=> 1,
 		'm'		=> 1000,
-		''		=> 1000000
+		''		=> 1_000_000
 	];
 
 	public string $fileNameLogDev		= 'logs/dev.log';
@@ -104,7 +104,7 @@ class Logic
 		if( $this->config->has( $configKey.'.msleep' ) )
 			return $this->config->get( $configKey.'.msleep' ) * 1000;
 		if( $this->config->has( $configKey.'.sleep' ) )
-			return $this->config->get( $configKey.'.sleep' ) * 1000000;
+			return $this->config->get( $configKey.'.sleep' ) * 1_000_000;
 		throw new InvalidArgumentException( 'No valid key set' );
 	}
 

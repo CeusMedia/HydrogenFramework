@@ -88,7 +88,7 @@ class JavaScript
 	public function addModuleFile(string $filePath, ?int $level = CaptainResource::LEVEL_MID, string $key = NULL ): self
 	{
 		$path	= $this->env->getConfig()->get( 'path.scripts' );
-		$level = $level ?? CaptainResource::LEVEL_MID;
+		$level	??= CaptainResource::LEVEL_MID;
 		return $this->addUrl( $path.$filePath, $level, $key );
 	}
 
@@ -102,7 +102,7 @@ class JavaScript
 	 */
 	public function addScript( string $script, ?int $level = CaptainResource::LEVEL_MID, string $key = NULL ): self
 	{
-		$level = $level ?? CaptainResource::LEVEL_MID;
+		$level	??= CaptainResource::LEVEL_MID;
 		if( !array_key_exists( $level, $this->scripts ) )										//  level is not yet defined in scripts list
 			$this->scripts[$level]	= [];													//  create empty scripts list for level
 		$key	= strlen( $key ) ? md5( $key ) : 'default';
@@ -123,7 +123,7 @@ class JavaScript
 	 */
 	public function addScriptOnReady( string $script, ?int $level = CaptainResource::LEVEL_MID, string $key = NULL ): self
 	{
-		$level = $level ?? CaptainResource::LEVEL_MID;
+		$level	??= CaptainResource::LEVEL_MID;
 		if( !array_key_exists( $level, $this->scriptsOnReady ) )								//  level is not yet defined in scripts list
 			$this->scriptsOnReady[$level]	= [];											//  create empty scripts list for level
 		$key	= strlen( $key ) ? md5( $key ) : 'default';
@@ -144,7 +144,7 @@ class JavaScript
 	 */
 	public function addUrl( string $url, ?int $level = CaptainResource::LEVEL_MID, string $key = NULL ): self
 	{
-		$level = $level ?? CaptainResource::LEVEL_MID;
+		$level	??= CaptainResource::LEVEL_MID;
 		if( !array_key_exists( $level, $this->urls ) )											//  level is not yet defined in scripts list
 			$this->urls[$level]	= [];														//  create empty scripts list for level
 		$key	= strlen( $key ) ? md5( $key ) : 'default';

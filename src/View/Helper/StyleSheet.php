@@ -80,7 +80,7 @@ class StyleSheet
 	 */
 	public function addStyle( string $style, ?int $level = CaptainResource::LEVEL_MID ): self
 	{
-		$level = $level ?? CaptainResource::LEVEL_MID;
+		$level	??= CaptainResource::LEVEL_MID;
 		$this->styles[$level][]		= $style;
 		return $this;
 	}
@@ -95,7 +95,7 @@ class StyleSheet
 	 */
 	public function addUrl( string $url, ?int $level = CaptainResource::LEVEL_MID, array $attributes = [] ): self
 	{
-		$level = $level ?? CaptainResource::LEVEL_MID;
+		$level	??= CaptainResource::LEVEL_MID;
 		$this->urls[$level][]	= (object) ['url' => $url, 'attributes' => $attributes];
 		return $this;
 	}

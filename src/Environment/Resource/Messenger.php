@@ -116,7 +116,7 @@ class Messenger
 		$list		= '';
 		$ids		= [];
 		if( count( $messages ) ){
-			$list	= [];
+			$items	= [];
 			foreach( $messages as $message ){
 				if( $linkResources )																//  realize URLs as links
 					$message['message']	= preg_replace( '/(http.+)("|\'| )/U', '<a href="\\1">\\1</a>\\2', $message['message'] );
@@ -136,6 +136,7 @@ class Messenger
 					$time	= HtmlTag::create( 'span', $time, array( 'class' => 'time' ) );
 					$span	= $time.$span;
 				}
+				// @todo use hook to apply module UI_JS_Messenger
 				if( $this->env->getModules()->has( 'UI_JS_Messenger' ) ){
 					$button		= HtmlTag::create( "div", '<span></span>', array(
 						'class'		=> 'button discard',
@@ -145,9 +146,9 @@ class Messenger
 					 ) );
 					$span	= $span.$button;
 				}
-				$list[] 	= HtmlElements::ListItem( $span, 0, array( 'class' => $class ) );
+				$items[] 	= HtmlElements::ListItem( $span, 0, array( 'class' => $class ) );
 			}
-			$list	= HtmlElements::unorderedList( $list );
+			$list	= HtmlElements::unorderedList( $items );
 			if( $clear )
 				$this->clear();
 		}

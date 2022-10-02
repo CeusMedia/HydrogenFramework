@@ -20,7 +20,7 @@ class Config
 	/** @var	bool				$mandatory */
 	public bool $mandatory			= FALSE;
 
-	public ?string $protected;
+	public ?string $protected		= NULL;
 
 	/** @var	string|NULL			$title */
 	public ?string $title;

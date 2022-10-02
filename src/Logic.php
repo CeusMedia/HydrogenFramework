@@ -76,7 +76,7 @@ class Logic
 	public static function getInstance( Environment $env )
 	{
 		$logicPool	= $env->getLogic();
-		$className	= get_called_class();
+		$className	= static::class;
 		$key		= $logicPool->getKeyFromClassName( $className );
 		if( !$logicPool->has( $key ) )
 			$logicPool->add( $key, $className );

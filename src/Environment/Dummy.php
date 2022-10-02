@@ -47,7 +47,7 @@ class Dummy extends Environment
 	public function __construct( array $options = [] )
 	{
 		$this->options		= $options;
-		$this->path			= isset( $options['pathApp'] ) ? $options['pathApp'] : getCwd().'/';
+		$this->path			= $options['pathApp'] ?? getCwd().'/';
 		$this->initClock();
 		$this->config		= new Dictionary();											//  create empty configuration object
 	}

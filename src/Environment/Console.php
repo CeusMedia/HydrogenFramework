@@ -40,7 +40,7 @@ class Console extends Environment
 	public string $scheme;
 
 	/**	@var	string|NULL				$path		Detected HTTP path */
-	public ?string $path;
+	public ?string $path				= NULL;
 
 	/**	@var	string					$url		Detected application base URL */
 	public string $url;
