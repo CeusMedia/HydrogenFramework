@@ -24,6 +24,7 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+
 namespace CeusMedia\HydrogenFramework\Application;
 
 use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
@@ -65,6 +66,11 @@ abstract class Abstraction
 			$this->checkNeededModules();															//  check for missing modules
 	}
 
+	/**
+	 *	@abstract
+	 *	@access		public
+	 *	@return		void
+	 */
 	abstract public function run();
 
 	//  --  PROTECTED  --  //

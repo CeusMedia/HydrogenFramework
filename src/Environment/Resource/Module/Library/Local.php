@@ -51,7 +51,7 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 {
 	protected Environment $env;
 
-	protected $modulePath;
+	protected string $modulePath;
 
 	protected array $modules			= [];
 
@@ -122,8 +122,9 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 	/**
 	 *	Removes module cache file if enabled in base config.
 	 *	@access		public
+	 *	@return		void
 	 */
-	public function clearCache()
+	public function clearCache(): void
 	{
 		$useCache	= $this->env->getConfig()->get( 'system.cache.modules' );
 		if( $useCache && file_exists( $this->cacheFile ) )
@@ -231,8 +232,9 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 	 *	Changes are made directly to the list of loaded modules.
 	 *	@access		public
 	 *	@param		array		$features		List of module definition features to remove
+	 *	@return		void
 	 */
-	public function stripFeatures( array $features )
+	public function stripFeatures( array $features ): void
 	{
 		if( count( $features ) === 0 )
 			return;

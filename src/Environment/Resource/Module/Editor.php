@@ -30,7 +30,7 @@ namespace CeusMedia\HydrogenFramework\Environment\Resource\Module;
 
 use CeusMedia\Common\FS\File\Writer as FileWriter;
 use CeusMedia\Common\XML\DOM\Formater as XmlFormatter;
-use CeusMedia\Common\XML\Element;
+use CeusMedia\Common\XML\Element as XmlElement;
 use CeusMedia\Common\XML\ElementReader as XmlReader;
 use CeusMedia\HydrogenFramework\Environment;
 use CeusMedia\HydrogenFramework\Deprecation;
@@ -240,7 +240,7 @@ class Editor
 	 *	@return		void
 	 *	@throws		Exception
 	 */
-	public function editLink( string $moduleId, int $number, string $path, ?string $link = NULL, ?string $label = NULL, ?string $access = NULL, ?string $language = NULL, $rank = NULL )
+	public function editLink( string $moduleId, int $number, string $path, ?string $link = NULL, ?string $label = NULL, ?string $access = NULL, ?string $language = NULL, ?int $rank = NULL )
 	{
 		$xml	= $this->loadModuleXml( $moduleId );												//  load module XML
 		if( !isset( $xml->link[$number] ) )
@@ -252,7 +252,7 @@ class Editor
 		$node->setAttribute( 'path', trim( $path ) );
 		$node->setAttribute( 'access', 0 !== strlen( trim( $access ) ) ? trim( $access ) : NULL );
 		$node->setAttribute( 'link', 0 !== strlen( trim( $link ) ) ? trim( $link ) : NULL );
-		$node->setAttribute( 'rank', 0 !== strlen( trim( $rank ) ) ? trim( $rank ) : NULL );
+		$node->setAttribute( 'rank', NULL !== $rank ? (string) $rank : NULL );
 
 		$language	= strlen( trim( $language ) ) ? trim( $language ) : NULL;
 		$node->setAttribute( 'lang', $language, 'xml', $this->nsXml );								//  set language attribute
@@ -396,7 +396,7 @@ class Editor
 
 	//  --  PROTECTED  --  //
 
-	protected function hasXmlNode( $xml, string $nodeName ): bool
+	protected function hasXmlNode( XmlElement $xml, string $nodeName ): bool
 	{
 		$children	= [];
 		foreach( $xml->children() as $child )														//  iterate children
@@ -406,11 +406,11 @@ class Editor
 
 	/**
 	 *	@param		string		$moduleId
-	 *	@return		Element
+	 *	@return		XmlElement
 	 *	@throws		RuntimeException		if no module by given ID is installed
 	 *	@throws		Exception				if reading of module XML file failed
 	 */
-	protected function loadModuleXml( string $moduleId ): Element
+	protected function loadModuleXml( string $moduleId ): XmlElement
 	{
 		$moduleFile	= $this->path.$moduleId.'.xml';
 		if( !file_exists( $moduleFile ) )

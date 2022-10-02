@@ -77,6 +77,7 @@ class Console extends Abstraction
 	/**
 	 *	Executes called command.
 	 *	@access		protected
+	 *	@return		string|NULL
 	 *	@todo		implement
 	 *	@throws		RuntimeException	since not implemented yet
 	 */

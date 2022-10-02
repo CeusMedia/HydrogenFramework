@@ -51,26 +51,26 @@ use stdClass;
  */
 class Page extends HtmlPage
 {
-	/**	@var	Environment		$env				Environment object */
-	public $env;
+	/**	@var	Environment			$env				Environment object */
+	public Environment $env;
 
-	protected $bodyClasses		= [];
+	protected array $bodyClasses	= [];
 
-	protected $packJavaScripts	= FALSE;
+	protected bool $packJavaScripts	= FALSE;
 
-	protected $packStyleSheets	= FALSE;
+	protected bool $packStyleSheets	= FALSE;
 
-	protected $pathPrimer;
+	protected string $pathPrimer;
 
-	protected $pathCommon;
+	protected string $pathCommon;
 
-	protected $pathTheme;
+	protected string $pathTheme;
 
-	/**	@var	JsHelper		$js					JavaScript Collector Helper */
-	public $js;
+	/**	@var	JsHelper			$js					JavaScript Collector Helper */
+	public JsHelper $js;
 
-	/**	@var	stdClass								$css				CSS containers (primer, theme) */
-	public $css;
+	/**	@var	object				$css				CSS containers (primer, theme) */
+	public object $css;
 
 //	/**	@var	CMM_TEA_Factory							$tea				Instance of TEA (Template Engine Abstraction) Factory (from cmModules) OR empty if TEA is not available */
 //	public $tea					= NULL;
@@ -169,7 +169,7 @@ class Page extends HtmlPage
 	/**
 	 *	@todo		apply JS levels after JsHelper is supporting it
 	 */
-	public function applyModules()
+	public function applyModules(): void
 	{
 		$config		= $this->env->getConfig()->getAll( 'module.', TRUE );			//  dictionary of (user modified) module settings
 		$modules	= $this->env->getModules();														//  get module handler resource
@@ -237,7 +237,7 @@ class Page extends HtmlPage
 							$msg	= 'Invalid script URL: '.$script->file;
 							throw new InvalidArgumentException( $msg );
 						}
-						$this->js->addUrl( $script->file, $source );								//  add script file URL
+						$this->js->addUrl( $script->file );											//  add script file URL
 					}
 				}
 			}

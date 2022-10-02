@@ -135,7 +135,14 @@ class Reader
 
 	//  --  PROTECTED  --  //
 
-	protected static function castNodeAttributes( $node, string $attribute, string $type = 'string', $default = NULL )
+	/**
+	 *	@param		XmlElement		$node
+	 *	@param		string			$attribute
+	 *	@param		string			$type
+	 *	@param		mixed			$default
+	 *	@return		array|bool|int|mixed|string|string[]|null
+	 */
+	protected static function castNodeAttributes( XmlElement $node, string $attribute, string $type = 'string', $default = NULL )
 	{
 		if( !$node->hasAttribute( $attribute ) ){
 			switch( $type ){

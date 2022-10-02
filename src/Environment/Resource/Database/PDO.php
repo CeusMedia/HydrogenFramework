@@ -87,6 +87,7 @@ class PDO extends Connection
 	 *
 	 *	@todo		implement lazy mode
 	 *	@todo		0.7: clean deprecated code
+	 *	@return		void
 	 */
 	protected function setUp()
 	{
@@ -153,7 +154,10 @@ class PDO extends Connection
 #			$this->exec( "SET NAMES '".$charset."';" );												//  set character set
 	}
 
-	protected function tearDown()
+	/**
+	 *	@return		void
+	 */
+	protected function tearDown(): void
 	{
 	}
 }

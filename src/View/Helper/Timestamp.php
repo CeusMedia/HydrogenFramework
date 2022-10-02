@@ -44,7 +44,7 @@ use InvalidArgumentException;
  */
 class Timestamp extends Abstraction
 {
-	protected $timestamp			= NULL;
+	protected ?int $timestamp			= NULL;
 
 	protected string $stringEmpty			= "";
 
@@ -57,7 +57,7 @@ class Timestamp extends Abstraction
 	/**
 	 *	@todo 		enable environment after interface and abstract support $env on construction
 	 */
-	public function __construct( /*Environment $env,*/ $timestamp, string $stringEmpty = "---" )
+	public function __construct( /*Environment $env,*/ ?int $timestamp, string $stringEmpty = '-' )
 	{
 		$this->timestamp	= $timestamp;
 		$this->stringEmpty	= $stringEmpty;
@@ -65,34 +65,30 @@ class Timestamp extends Abstraction
 
 	public function toDate( string $format = NULL, bool $html = FALSE ): string
 	{
-		if( !$this->timestamp )
-			return '-';
+		if( NULL === $this->timestamp || 0 === $this->timestamp )
+			return $this->stringEmpty;
 		$format	= $format ?: self::$formatDate;
 		$date	= date( $format, $this->timestamp );
-		if( $html ){
-			$attr	= array( 'class' => 'date' );
-			$date	= HtmlTag::create( 'span', $date, $attr );
-		}
+		if( $html )
+			$date	= HtmlTag::create( 'span', $date, ['class' => 'date'] );
 		return $date;
 	}
 
 	public function toDatetime( string $format = NULL, bool $html = FALSE ): string
 	{
-		if( !$this->timestamp )
+		if( NULL === $this->timestamp || 0 === $this->timestamp )
 			return $this->stringEmpty;
 		$format	= $format ?: self::$formatDatetime;
 		$date	= date( $format, $this->timestamp );
-		if( $html ){
-			$attr	= array( 'class' => 'datetime' );
-			$date	= HtmlTag::create( 'span', $date, $attr );
-		}
+		if( $html )
+			$date	= HtmlTag::create( 'span', $date, ['class' => 'datetime'] );
 		return $date;
 	}
 
 	public function toPhrase( Environment $env, bool $html = FALSE, string $languageTopic = 'main', string $languageSection = 'phrases-time' ): string
 	{
-		if( !$this->timestamp )
-			return '-';
+		if( NULL === $this->timestamp || 0 === $this->timestamp )
+			return $this->stringEmpty;
 
 		$words	= $env->getLanguage()->getWords( $languageTopic );
 		if( !isset( $words[$languageSection] ) )
@@ -111,18 +107,16 @@ class Timestamp extends Abstraction
 
 	public function toTime( string $format = NULL, bool $html = FALSE ): string
 	{
-		if( !$this->timestamp )
-			return '-';
+		if( NULL === $this->timestamp || 0 === $this->timestamp )
+			return $this->stringEmpty;
 		$format	= $format ?: self::$formatTime;
 		$time	= date( $format, $this->timestamp );
-		if( $html ){
-			$attr	= array( 'class' => 'time' );
-			$time	= HtmlTag::create( 'span', $time, $attr );
-		}
+		if( $html )
+			$time	= HtmlTag::create( 'span', $time, ['class' => 'time'] );
 		return $time;
 	}
 
-	public static function statePhrase( $timestamp, Environment $env, bool $html = FALSE, string $languageTopic = 'main', string $languageSection = 'phrases-time' ): string
+	public static function statePhrase( ?int $timestamp, Environment $env, bool $html = FALSE, string $languageTopic = 'main', string $languageSection = 'phrases-time' ): string
 	{
 		$instance	= new self( $timestamp );
 		return $instance->toPhrase( $env, $html, $languageTopic, $languageSection );

@@ -36,6 +36,7 @@ use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 
 use DateTime;
 use DateTimeInterface;
+use Exception;
 use RuntimeException;
 
 /**
@@ -117,15 +118,15 @@ class Controller
 		try{
 			$this->__onInit();																		//  default callback for construction end
 		}
-		catch( \Exception $e ){
-			$payload	= array( 'exception' => $e );
+		catch( Exception $e ){
+			$payload	= ['exception' => $e];
 			$this->callHook( 'App', 'onException', $this, $payload );
 			throw new RuntimeException( $e->getMessage(), $e->getCode(), $e );
 		}
 		$env->getRuntime()->reach( 'CMF_Controller('.get_class( $this ).'): done' );				//  log time of construction
 	}
 
-	public function getView()
+	public function getView(): ?View
 	{
 		return $this->view;
 	}
@@ -178,9 +179,9 @@ class Controller
 	 *	@param		boolean		$log		Flag: Activate logging of restarts (default)
 	 *	@return		self
 	 */
-	public function setLogRestarts( $log = TRUE ): self
+	public function setLogRestarts( bool $log = TRUE ): self
 	{
-		$this->logRestarts	= (bool) $log;
+		$this->logRestarts	= $log;
 		return $this;
 	}
 
@@ -193,20 +194,33 @@ class Controller
 	 *	@access		protected
 	 *	@return		void
 	 */
-	protected function __onInit()
+	protected function __onInit(): void
 	{
 	}
 
+	/**
+	 *	@param		string		$key
+	 *	@param		mixed		$value
+	 *	@param		string|NULL	$topic
+	 *	@return		self
+	 */
 	protected function addData( string $key, $value, string $topic = NULL ): self
 	{
 		$this->view->setData( array( $key => $value ), $topic );
 		return $this;
 	}
 
-	protected function callHook( string $resource, string $event, $context = NULL, $data = [] )
+	/**
+	 *	@param		string		$resource
+	 *	@param		string		$event
+	 *	@param		object|NULL	$context
+	 *	@param		array		$payload
+	 *	@return		bool|NULL
+	 */
+	protected function callHook( string $resource, string $event, ?object $context = NULL, array & $payload ): ?bool
 	{
-		$context	= $context ? $context : $this;
-		return $this->env->getCaptain()->callHook( $resource, $event, $context, $data );
+		$context	= $context ?: $this;
+		return $this->env->getCaptain()->callHook( $resource, $event, $context, $payload );
 	}
 
 	/**
@@ -225,6 +239,11 @@ class Controller
 		}
 	}
 
+	/**
+	 *	@param		mixed|NULL		$input
+	 *	@return		mixed|null
+	 *	@todo		remove if not used, purpose unclear
+	 */
 	protected function compactFilterInput( $input )
 	{
 		if( is_object( $input ) || is_resource( $input ) || is_null( $input ) )						//  input is of invalid type
@@ -310,10 +329,16 @@ class Controller
 		return $this->env->getLanguage()->getSection( $topic, $section );
 	}
 
-	protected function handleJsonResponse( $status, $data, $httpStatusCode = NULL )
+	/**
+	 *	@param		string|bool		$status
+	 *	@param		mixed			$data
+	 *	@param		int|null		$httpStatusCode
+	 *	@return		void
+	 */
+	protected function handleJsonResponse( $status, $data, ?int $httpStatusCode = NULL ): void
 	{
 		$type			= $status;
-		$httpStatusCode	= $httpStatusCode ? $httpStatusCode : 200;
+		$httpStatusCode	= $httpStatusCode ?: 200;
 		if( in_array( $status, array( TRUE, 'data', 'success', 'succeeded' ), TRUE ) )
 			$type	= "data";
 		else if( in_array( $status, array( FALSE, "error", "fail", "failed" ), TRUE ) )
@@ -337,7 +362,12 @@ class Controller
 		exit;
 	}
 
-	protected function handleJsonErrorResponse( $data, $httpStatusCode = NULL )
+	/**
+	 *	@param		mixed			$data
+	 *	@param		int|null		$httpStatusCode
+	 *	@return		void
+	 */
+	protected function handleJsonErrorResponse( $data, ?int $httpStatusCode = NULL ): void
 	{
 		$this->handleJsonResponse( 'error', $data, $httpStatusCode );
 	}

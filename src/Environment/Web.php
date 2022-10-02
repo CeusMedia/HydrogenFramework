@@ -79,8 +79,8 @@ class Web extends Environment
 	/**	@var	string					$host		Detected HTTP host */
 	public string $host;
 
-	/**	@var	int						$port		Detected HTTP port */
-	public int $port;
+	/**	@var	string					$port		Detected HTTP port */
+	public string $port;
 
 	/**	@var	string|NULL				$path		Detected HTTP path */
 	public ?string $path;
@@ -357,9 +357,9 @@ class Web extends Environment
 		$defaultPort	= $this->scheme === 'https' ? 443 : 80;										//  default port depends on HTTP scheme
 		$serverPort		= (int) getEnv( 'SERVER_PORT' );
 		$this->host		= preg_replace( "/:[0-9]{2,5}$/", "", getEnv( 'HTTP_HOST' ) );				//  note requested HTTP host name without port
-		$this->port		= $serverPort === $defaultPort ? '' : $serverPort;							//  note requested HTTP port
+		$this->port		= $serverPort === $defaultPort ? '' : (string) $serverPort;					//  note requested HTTP port
 		$hostWithPort	= $this->host.( $this->port ? ':'.$this->port : '' );						//  append port if different from default port
-		$this->root		= getEnv( 'DOCUMENT_ROOT' );												//  note document root of web server or virtual host
+		$this->root		= getEnv( 'DOCUMENT_ROOT' );											//  note document root of web server or virtual host
 		$this->path		= preg_replace( "@^/$@", "", dirname( getEnv( 'SCRIPT_NAME' ) ) )."/";		//  note requested working path
 		$this->url		= $this->scheme.'://'.$hostWithPort.$this->path;							//  note calculated base application URI
 		$this->uri		= $this->root.$this->path;													//  note calculated absolute base application path
@@ -517,8 +517,9 @@ class Web extends Environment
 		return $this;
 	}
 
-	protected function registerResourceToClose( string $resourceKey )
+	protected function registerResourceToClose( string $resourceKey ): self
 	{
 		$this->resourcesToClose[]	= $resourceKey;
+		return $this;
 	}
 }

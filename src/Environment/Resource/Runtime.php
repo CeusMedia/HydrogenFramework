@@ -98,31 +98,31 @@ class Runtime
 		return $this->reach( $label, $description );
 	}
 
-	public function sleep( $seconds )
+	public function sleep( int $seconds ): void
 	{
 		$this->markDeprecation( 'sleep' );
 		$this->clock->sleep( $seconds );
 	}
 
-	public function speed( $seconds )
+	public function speed( int $seconds ): void
 	{
 		$this->markDeprecation( 'speed' );
 		$this->clock->speed( $seconds );
 	}
 
-	public function usleep( $microseconds )
+	public function usleep( int $microseconds ): void
 	{
 		$this->markDeprecation( 'usleep' );
 		$this->clock->usleep( $microseconds );
 	}
 
-	public function uspeed( $microseconds )
+	public function uspeed( int $microseconds ): void
 	{
 		$this->markDeprecation( 'uspeed' );
 		$this->clock->uspeed( $microseconds );
 	}
 
-	protected function markDeprecation( string $type = NULL )
+	protected function markDeprecation( string $type = NULL ): void
 	{
 		switch( $type ){
 			case 'sleep':

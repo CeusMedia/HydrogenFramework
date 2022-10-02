@@ -16,21 +16,21 @@ class Web
 
 	public bool $catchErrors				= FALSE;
 
-	public ?string $configFile;
+	public ?string $configFile				= NULL;
 
 	public string $classFileExtension		= 'php5';
 
-	public ?string $classRouter;
+	public ?string $classRouter				= NULL;
 
-	public ?string $defaultTimezone;
+	public ?string $defaultTimezone			= NULL;
 
-	public array $paths					= [];
+	public array $paths						= [];
 
 	public string $pathVendor				= 'vendor/';
 
-	protected $app;
+	protected WebApp $app;
 
-	public function go()
+	public function go(): void
 	{
 		try{
 			$this->setupErrorHandling();
@@ -44,7 +44,7 @@ class Web
 		}
 	}
 
-	public function handleErrorAsException( $errno, string $errMsg, string $errFile, int $errLine, ?array $errContext ): ?bool
+	public function handleErrorAsException( int $errno, string $errMsg, string $errFile, int $errLine, ?array $errContext ): ?bool
 	{
 		if( error_reporting() === 0 )											// error was suppressed with the @-operator
 			return FALSE;
@@ -52,7 +52,7 @@ class Web
 	}
 
 	// --  PRIVATE  --  //
-	private function setupEnvironment()
+	private function setupEnvironment(): void
 	{
 	 	$pathVendor	= rtrim( $this->paths['vendor'] ?? 'vendor', '/' ).'/';
 		if( !file_exists( $pathVendor ) )
@@ -77,7 +77,7 @@ class Web
 		Loader::registerNew( $classExt, NULL, $classPath );							//  register autoloader for project classes
 	}
 
-	private function setupErrorHandling()
+	private function setupErrorHandling(): void
 	{
 		if( NULL !== $this->errorReporting )
 			error_reporting( $this->errorReporting );

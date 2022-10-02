@@ -24,6 +24,7 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+
 namespace CeusMedia\HydrogenFramework\Application\Web;
 
 use CeusMedia\Common\Net\HTTP\Header\Field as HttpHeaderField;
@@ -46,9 +47,7 @@ class Site extends Abstraction
 	public static bool $checkClassActionArguments	= TRUE;
 
 	/**	@var		string			$content			Collected Content to respond */
-	protected string $content				= '';
-
-	protected $dev;
+	protected string $content		= '';
 
 	/**
 	 *	General main application method.

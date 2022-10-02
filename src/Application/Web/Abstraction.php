@@ -27,6 +27,7 @@
 
 namespace CeusMedia\HydrogenFramework\Application\Web;
 
+use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
 use CeusMedia\HydrogenFramework\Application\Abstraction as ApplicationAbstraction;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 use CeusMedia\HydrogenFramework\View;
@@ -52,16 +53,18 @@ abstract class Abstraction extends ApplicationAbstraction
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		WebEnvironment|NULL			$env				Framework Environment
+	 *	@param		WebEnvironment|NULL		$env				Framework Environment
 	 *	@return		void
 	 *	@throws		ReflectionException
 	 */
 	public function __construct( WebEnvironment $env = NULL )
 	{
-		parent::__construct( $env );
+		$this->env	= $env ?? ObjectFactory::createObject( static::$classEnvironment );
+		if( self::$modulesNeeded )																	//  needed modules are defined
+			$this->checkNeededModules();															//  check for missing modules
 	}
 
-	protected function logOnComplete()
+	protected function logOnComplete(): void
 	{
 		$captain	= $this->env->getCaptain();
 		$data		= [

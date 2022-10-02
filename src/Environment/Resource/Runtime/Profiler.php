@@ -15,7 +15,7 @@ class Profiler
 		$this->enabled	= $enabled;
 	}
 
-	public function tick( string $message, string $description = NULL )
+	public function tick( string $message, string $description = NULL ): void
 	{
 		$this->markDeprecation( 'tick' );
 		if( $this->enabled )
@@ -33,7 +33,7 @@ class Profiler
 		return $list;
 	}
 
-	protected function markDeprecation( string $type )
+	protected function markDeprecation( string $type ): void
 	{
 		$message	= 'CMF_Hydrogen_Environment_Resource_Runtime_Profiler::get is deprecated. Use $env->getRuntime()->getGoals() instead';
 		if( $type === 'tick' )

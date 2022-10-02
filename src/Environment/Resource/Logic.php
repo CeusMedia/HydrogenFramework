@@ -11,6 +11,7 @@
 
 namespace CeusMedia\HydrogenFramework\Environment\Resource;
 
+use CeusMedia\Common\ADT\Collection\Dictionary;
 use CeusMedia\HydrogenFramework\Environment;
 use InvalidArgumentException;
 
@@ -25,24 +26,24 @@ use InvalidArgumentException;
  */
 class Logic
 {
-	const OS_UNKNOWN			= 0;
-	const OS_LINUX				= 1;
-	const OS_WINDOWS			= 2;
+	public const OS_UNKNOWN			= 0;
+	public const OS_LINUX			= 1;
+	public const OS_WINDOWS			= 2;
 
 	/**	@var	Environment			$env	Environment object */
-	protected $env;
+	protected Environment $env;
 
-	protected $config;
+	protected Dictionary $config;
 
-	protected $os				= self::OS_UNKNOWN;
+	protected int $os				= self::OS_UNKNOWN;
 
-	protected $timePrefixes		= array(
+	protected array $timePrefixes		= [
 		'u'		=> 1,
 		'm'		=> 1000,
 		''		=> 1000000
-	);
+	];
 
-	public $fileNameLogDev		= 'logs/dev.log';
+	public string $fileNameLogDev		= 'logs/dev.log';
 
 
 	/**
@@ -65,7 +66,9 @@ class Logic
 
 	//  --  PROTECTED  --  //
 
-	protected function __onInit(){}
+	protected function __onInit(): void
+	{
+	}
 
 	protected function getArrayFromRequestKey( string $key ): array
 	{
@@ -105,12 +108,12 @@ class Logic
 		throw new InvalidArgumentException( 'No valid key set' );
 	}
 
-	protected function logDev( string $message )
+	protected function logDev( string $message ): void
 	{
 		error_log( $message."\n", 3, $this->fileNameLogDev );
 	}
 
-	protected function microsleep( int $microseconds )
+	protected function microsleep( int $microseconds ): void
 	{
 		$microseconds	= abs( $microseconds );
 		usleep( $microseconds );

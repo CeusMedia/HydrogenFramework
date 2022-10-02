@@ -100,7 +100,10 @@ class Console extends Environment
 
 	//  --  PROTECTED  --  //
 
-	protected function detectSelf()
+	/**
+	 *	@return		void
+	 */
+	protected function detectSelf(): void
 	{
 		$this->url = $this->config->get( 'app.url' );												//  get application URL from config
 		if( !$this->url )																			//  application URL not set

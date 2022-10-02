@@ -77,9 +77,10 @@ class General
 	 *	@access		public
 	 *	@param		string		$controller		Controller, part of request URL
 	 *	@param		string		$action			Controller action, part of request URL
+	 *	@return		bool
 	 *	@throws		RuntimeException			if not rights set
 	 */
-	public function checkAccess( string $controller, string $action )
+	public function checkAccess( string $controller, string $action ): bool
 	{
 		$right1	= $this->env->getAcl()->has( $controller, $action );
 		$right2	= $this->env->getAcl()->has( $controller.'_'.$action );
@@ -89,6 +90,7 @@ class General
 			$message	= 'Access to '.$controller.'/'.$action.' denied.';
 			throw new RuntimeException( $message, 403 );											// break with internal error
 		}
+		return TRUE;
 	}
 
 	/**
@@ -137,21 +139,33 @@ class General
 
 	//  --  PROTECTED  --  //
 
-	protected function checkClass( string $className )
+	/**
+	 *	@param		string		$className
+	 *	@return		bool
+	 */
+	protected function checkClass( string $className ): bool
 	{
 		if( !class_exists( $className ) ){															// class is neither loaded nor loadable
 			$message	= 'Invalid Controller "'.$className.'"';
 			throw new RuntimeException( $message, 201 );											// break with internal error
 		}
+		return TRUE;
 	}
 
-	protected function checkClassAction( string $className, $instance, string $action )
+	/**
+	 *	@param		string		$className
+	 *	@param		object		$instance
+	 *	@param		string		$action
+	 *	@return		bool
+	 */
+	protected function checkClassAction( string $className, object $instance, string $action ): bool
 	{
 		$denied = array( '__construct', '__destruct', 'getView', 'getData' );
 		if( !method_exists( $instance, $action ) || in_array( $action, $denied ) ){					// no action method in controller instance
 			$message	= 'Invalid Action "'.ucfirst( $className ).'::'.$action.'"';
 			throw new RuntimeException( $message, 211 );											// break with internal error
 		}
+		return TRUE;
 	}
 
 	/**
@@ -159,10 +173,10 @@ class General
 	 *	@param		object		$instance
 	 *	@param		string		$action
 	 *	@param		array		$arguments
-	 *	@return		void
+	 *	@return		bool
 	 *	@throws		ReflectionException
 	 */
-	protected function checkClassActionArguments( string $className, object $instance, string $action, array $arguments = [] )
+	protected function checkClassActionArguments( string $className, object $instance, string $action, array $arguments = [] ): bool
 	{
 		$numberArgsAtLeast	= 0;
 		$numberArgsTotal	= 0;
@@ -182,9 +196,10 @@ class General
 			$message	= 'Too much arguments for action "'.ucfirst( $className ).'::'.$action.'"';
 			throw new RuntimeException( $message, 212 );											// break with internal error
 		}
+		return TRUE;
 	}
 
-	protected function checkForLoop()
+	protected function checkForLoop(): bool
 	{
 		$controller	= $this->request->get( '__controller' );
 		$action		= $this->request->get( '__action' );
@@ -196,6 +211,7 @@ class General
 #			break;
 		}
 		$this->history[$controller][$action]++;
+		return TRUE;
 	}
 
 	protected static function getControllerClassFromPath( string $path ): string
@@ -205,7 +221,7 @@ class General
 		return self::$prefixController.$name;														//  return controller class name
 	}
 
-	protected function noteLastCall( Controller $instance )
+	protected function noteLastCall( Controller $instance ): void
 	{
 		$session	= $this->env->getSession();
 		if( $this->request->getMethod() != 'GET' )
@@ -216,7 +232,7 @@ class General
 		$session->set( 'lastAction', $this->request->get( '__action' ) );
 	}
 
-	protected function realizeCall()
+	protected function realizeCall(): void
 	{
 		if( !trim( $this->request->get( '__controller' ) ) )
 			$this->request->set( '__controller', $this->defaultController );

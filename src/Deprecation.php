@@ -85,9 +85,9 @@ class Deprecation extends CommonDeprecation
 	}
 
 	/**
-	 *	@todo		set type hint after CeusMedia::Common updated
+	 *	@return		void
 	 */
-	public static function notify( $message )
+	public static function notify( string $message )
 	{
 		trigger_error( $message.', triggered', E_USER_DEPRECATED );
 	}

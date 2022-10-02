@@ -5,6 +5,7 @@ namespace CeusMedia\HydrogenFramework;
 use CeusMedia\Common\Alg\Obj\MethodFactory;
 use CeusMedia\HydrogenFramework\Environment as Environment;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
+use RuntimeException;
 
 class Hook
 {
@@ -56,12 +57,12 @@ class Hook
 		return $this;
 	}
 
-	public function fetch( $method )
+	public function fetch( string $method ): ?bool
 	{
 		if (!is_object($this->context))
-			throw new \RuntimeException('No context set');
+			throw new RuntimeException('No context set');
 		if (!is_object($this->env))
-			throw new \RuntimeException('No environment set');
+			throw new RuntimeException('No environment set');
 		$factory = new MethodFactory();
 		return call_user_func_array( [get_class( $this ), $method], [
 			$this->env,
@@ -78,9 +79,14 @@ class Hook
 
 	//  --  PROTECTED  --  //
 
-	protected static function getModuleConfig( Environment $env, $module )
+	/**
+	 *	@param		Environment		$env
+	 *	@param		string			$moduleId
+	 *	@return		mixed
+	 */
+	protected static function getModuleConfig( Environment $env, string $moduleId )
 	{
-		return $env->getConfig()->get( 'module.'.strtolower( $module ).'.', TRUE );
+		return $env->getConfig()->get( 'module.'.strtolower( $moduleId ).'.', TRUE );
 	}
 
 	/**

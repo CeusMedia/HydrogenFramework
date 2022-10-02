@@ -29,7 +29,7 @@ use stdClass;
  */
 class Disclosure
 {
-	protected $options	= array(
+	protected array $options	= array(
 		'classPrefix'		=> 'Controller_',
 		'readMethods'		=> TRUE,
 		'readParameters'	=> TRUE,
@@ -44,7 +44,7 @@ class Disclosure
 		'methodFilter'		=> ReflectionMethod::IS_PUBLIC
 	);
 
-	public function __construct( $options = [] )
+	public function __construct( array $options = [] )
 	{
 		Deprecation::getInstance()
 			->setErrorVersion( '0.8.8' )

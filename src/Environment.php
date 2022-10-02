@@ -65,6 +65,7 @@ use RuntimeException;
  *	@copyright		2007-2022 Ceus Media
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
+ *	@implements		ArrayAccess<string, mixed>
  */
 class Environment implements ArrayAccess
 {
@@ -83,16 +84,17 @@ class Environment implements ArrayAccess
 	];
 
 	/**	@var	string						$configFile		File path to base configuration */
-	public static string $configFile				= 'config.ini';
+	public static string $configFile		= 'config.ini';
 
 	/**	@var	array						$defaultPaths	Map of default paths to extend base configuration */
-	public static array $defaultPaths				= [
+	public static array $defaultPaths		= [
 		'classes'	=> 'classes/',
 		'config'	=> 'config/',
 		'logs'		=> 'logs/',
 	];
 
 	public static ?string $timezone			= NULL;
+
 
 	/**	@var	string|NULL					$path			Absolute folder path of application */
 	public ?string $path					= NULL;
@@ -108,6 +110,7 @@ class Environment implements ArrayAccess
 
 	/** @var	string						$version		Framework version */
 	public string $version;
+
 
 	/** @var	AbstractAclResource			$acl			Implementation of access control list */
 	protected AbstractAclResource $acl;
@@ -143,7 +146,7 @@ class Environment implements ArrayAccess
 	protected MessengerResource $messenger;
 
 	/**	@var	LocalModuleLibraryResource	$modules		Handler for local modules */
-	protected LocalModuleLibraryResource $modules;
+	protected LocalModuleLibraryResource	$modules;
 
 	/**	@var	array						$options		Set options to override static properties */
 	protected array $options				= [];
@@ -327,13 +330,22 @@ class Environment implements ArrayAccess
 		return $this->config;
 	}
 
-	public function getDatabase()
+	public function getDatabase(): ?object
 	{
 		return $this->database;
 	}
 
-	public function getDisclosure()
+	/**
+	 * @return array|null
+	 * @throws Exception
+	 * @deprecated
+	 */
+	public function getDisclosure(): ?array
 	{
+		Deprecation::getInstance()
+			->setErrorVersion( '0.8.8' )
+			->setExceptionVersion( '0.9' )
+			->message( 'Environment::getDisclosure is deprecated. Use module Resource_Disclosure instead' );
 		return $this->disclosure;
 	}
 
@@ -417,7 +429,7 @@ class Environment implements ArrayAccess
 		return $this->get( 'php' );
 	}
 
-	public function getRequest()
+	public function getRequest(): Dictionary
 	{
 		return $this->request;
 	}
@@ -427,7 +439,7 @@ class Environment implements ArrayAccess
 		return $this->get( 'runtime' );
 	}
 
-	public function getSession()
+	public function getSession(): Dictionary
 	{
 		return $this->session;
 	}
@@ -451,12 +463,21 @@ class Environment implements ArrayAccess
 
 	/**
 	 *	@todo this is totally outdated - refactor if possible
+	 *	@deprecated
 	 */
-	public function hasAcl()
+	public function hasAcl(): ?string
 	{
+		Deprecation::getInstance()
+			->setErrorVersion( '0.9' )
+			->setExceptionVersion( '0.9.1' )
+			->message( 'Environment::hasAcl is deprecated' );
 		return $this->getConfig()->get( 'module.roles' );
 	}
 
+	/**
+	 *	@param		string		$moduleId
+	 *	@return		bool
+	 */
 	public function hasModule( string $moduleId ): bool
 	{
 		return !$this->hasModules() && $this->modules->has( $moduleId );
@@ -467,7 +488,7 @@ class Environment implements ArrayAccess
 	 */
 	public function hasModules(): bool
 	{
-		return $this->modules !== NULL && 0 !== count( $this->modules );
+		return 0 !== $this->modules->count();
 	}
 
 	/**
@@ -795,7 +816,12 @@ class Environment implements ArrayAccess
 		return $this;
 	}
 
-	public function set( string $key, $object ): self
+	/**
+	 *	@param		string		$key
+	 *	@param		object		$object
+	 *	@return		$this
+	 */
+	public function set( string $key, object $object ): self
 	{
 		if( !is_object( $object ) ){
 			$message	= 'Given resource "%1$s" is not an object';

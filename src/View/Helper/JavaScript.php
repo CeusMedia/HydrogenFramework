@@ -54,7 +54,7 @@ class JavaScript
 {
 	public string $indent				= "\t\t";
 
-	protected static ?self $instance;
+	protected static ?self $instance	= NULL;
 
 	protected Environment $env;
 
