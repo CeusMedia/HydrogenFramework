@@ -42,12 +42,9 @@ use RuntimeException;
  */
 abstract class Abstraction implements LibraryInterface
 {
-	protected $modules			= [];
+	protected array $modules		= [];
 
-	protected $scanResult		= array(
-		'source'	=> 'unscanned',
-		'count'		=> 0,
-	);
+	protected ?object $scanResult;
 
 	/**
 	 *	Return module definition by module ID.
@@ -95,12 +92,17 @@ abstract class Abstraction implements LibraryInterface
 	}
 
 	/**
-	 *	@todo		remove after interface changed not auto-scanning on construction
 	 *	@access		public
 	 *	@return		object
+	 *	@todo		remove after interface changed not auto-scanning on construction
 	 */
-	public function getScanResults()
+	public function getScanResults(): object
 	{
+		if( NULL === $this->scanResult )
+			$this->scanResult = (object) [
+				'source'	=> 'unscanned',
+				'count'		=> 0,
+			];
 		return $this->scanResult;
 	}
 
@@ -110,7 +112,7 @@ abstract class Abstraction implements LibraryInterface
 	 *	Returns false if module is installed and main switch "active" is existing and disabled.
 	 *	Returns true otherwise.
 	 *	@access		public
-	 *	@param		string		$moduleId		ID of module to check for existance (and activity)
+	 *	@param		string		$moduleId		ID of module to check for existence (and activity)
 	 *	@param		boolean		$activeOnly		Flag: exclude deactivated modules (default: yes)
 	 *	@return		boolean
 	 */

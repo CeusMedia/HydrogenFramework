@@ -29,6 +29,7 @@ namespace CeusMedia\HydrogenFramework\Dispatcher;
 
 use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
 use CeusMedia\Common\Alg\Obj\MethodFactory as MethodFactory;
+use CeusMedia\Common\Net\HTTP\Request as HttpRequest;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 use CeusMedia\HydrogenFramework\Controller;
 
@@ -48,21 +49,22 @@ use ReflectionMethod;
  */
 class General
 {
-	protected $env;
+	public static string $prefixController	= "Controller_";
 
-	protected $request;
+	public string $defaultController		= 'index';
 
-	public $defaultController			= 'index';
+	public string $defaultAction			= 'index';
 
-	public $defaultAction				= 'index';
+	public array $defaultArguments			= [];
 
-	public $defaultArguments			= [];
+	public bool $checkClassActionArguments	= TRUE;
 
-	protected $history					= [];
 
-	public $checkClassActionArguments	= TRUE;
+	protected WebEnvironment $env;
 
-	public static $prefixController		= "Controller_";
+	protected HttpRequest $request;
+
+	protected array $history				= [];
 
 	public function __construct( WebEnvironment $env )
 	{

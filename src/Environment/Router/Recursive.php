@@ -43,6 +43,9 @@ use RuntimeException;
  */
 class Recursive extends Abstraction implements RouterInterface
 {
+	/**
+	 *	@return	void
+	 */
 	public function parseFromRequest()
 	{
 		if( !$this->env->has( 'request' ) )

@@ -25,6 +25,7 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+
 namespace CeusMedia\HydrogenFramework\Environment\Resource\Module;
 
 use CeusMedia\Common\FS\File\Writer as FileWriter;
@@ -52,8 +53,9 @@ use SimpleXMLElement;
  */
 class Editor
 {
-	protected $path;
-	protected $nsXml	= 'http://www.w3.org/XML/1998/namespace';
+	protected string $path;
+
+	protected string $nsXml	= 'http://www.w3.org/XML/1998/namespace';
 
 	/**
 	 *	@param		Environment		$env
@@ -62,13 +64,6 @@ class Editor
 	public function __construct( Environment $env )
 	{
 		$this->path		= $env->getConfig()->get( 'path.config' ).'/modules/';
-		if( $env->getConfig()->get( 'path.module.config' ) ){
-			Deprecation::getInstance()
-				->setErrorVersion( '0.8.6.6' )
-				->setExceptionVersion( '0.8.9' )
-				->message( 'Using config path "module.config" is deprecated. Please remove this config pair!' );
-			$this->path	= $env->getConfig()->get( 'path.module.config' );
-		}
 		$this->path		= $env->path.$this->path;
 	}
 
@@ -254,7 +249,7 @@ class Editor
 		$node	= $xml->link[$number];
 		$node->setValue( (string) $label );
 
-		$node->setAttribute( 'path', strlen( trim( $path ) ) );
+		$node->setAttribute( 'path',  trim( $path ) );
 		$node->setAttribute( 'access', strlen( trim( $access ) ) ? trim( $access ) : NULL );
 		$node->setAttribute( 'link', strlen( trim( $link ) ) ? trim( $link ) : NULL );
 		$node->setAttribute( 'rank', strlen( trim( $rank ) ) ? trim( $rank ) : NULL );
@@ -385,9 +380,11 @@ class Editor
 	{
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
 		foreach( $xml->sql as $sql ){																//  iterate SQL entries
-			if( $sql->event === $event && $sql->type === $type ){									//  event and type are matching
-				$matchingVersions	= $sql->from === $versionFrom && $sql->from === $versionFrom;	//  compare versions
-				if( $event !== "update" || ( $event === "update" && $matchingVersions ) ){			//  check versions on update
+			if( $sql->event->getValue() === $event && $sql->type->getValue() === $type ){			//  event and type are matching
+				$matchingVersions	= TRUE;
+				if( $versionFrom ?? FALSE )
+					$matchingVersions	= $sql->from->getValue() === $versionFrom;
+				if( $matchingVersions ){															//  compare versions
 					$sql->remove();																	//  remove XML node
 					$this->saveModuleXml( $moduleId, $xml );										//  save modified module XML
 					return TRUE;
@@ -410,7 +407,8 @@ class Editor
 	/**
 	 *	@param		string		$moduleId
 	 *	@return		Element
-	 *	@throws		Exception
+	 *	@throws		RuntimeException		if no module by given ID is installed
+	 *	@throws		Exception				if reading of module XML file failed
 	 */
 	protected function loadModuleXml( string $moduleId ): Element
 	{

@@ -33,11 +33,11 @@ use RuntimeException;
  */
 class LogicPool
 {
-	/**	@var			Environment				$env		Environment object */
-	protected $env;
+	/**	@var	Environment				$env		Environment object */
+	protected Environment $env;
 
-	/**	@var			array<string,object>	$pool		Map of logic class names or instances */
-	protected $pool		= [];
+	/**	@var	array<string,object>	$pool		Map of logic class names or instances */
+	protected array $pool				= [];
 
 	/**
 	 *	Constructor.
@@ -114,12 +114,12 @@ class LogicPool
 	 *	Returns a stored logic object by its pool key
 	 *	@access		public
 	 *	@param		string			$key			Key of logic object
-	 *	@return		string|object
+	 *	@return		object
 	 *	@throws		RuntimeException				if no class or object has been added for given key
 	 *	@throws		DomainException					if class for given key is not existing
 	 *	@throws		ReflectionException
 	 */
-	public function get( string $key )
+	public function get( string $key ): object
 	{
 		$className = NULL;
 		if( !$this->has( $key ) ){
@@ -135,9 +135,11 @@ class LogicPool
 		}
 
 		if( !$this->isInstantiated( $key ) ){
-			if( !class_exists( $this->pool[$key] ) )
-				throw new DomainException( 'No logic class found for "'.$this->pool[$key].'"' );
-			$this->set( $key, $this->createInstance( $this->pool[$key] ) );
+			/** @var string $className */
+			$className	= $this->pool[$key];
+			if( !class_exists( $className ) )
+				throw new DomainException( 'No logic class found for "'.$className.'"' );
+			$this->set( $key, $this->createInstance( $className ) );
 		}
 		return $this->pool[$key];
 	}

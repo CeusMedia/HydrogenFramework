@@ -47,23 +47,23 @@ use DomainException;
  */
 class Language
 {
-	/**	@var		string				$fileExtension	File extension of language files (default: ini) */
-	static public $fileExtension		= 'ini';
+	/**	@var		string					$fileExtension	File extension of language files (default: ini) */
+	static public string $fileExtension		= 'ini';
 
-	/**	@var		array				$data			Array of loaded Language File Definitions */
-	protected $data;
+	/**	@var		array					$data			Array of loaded Language File Definitions */
+	protected array $data;
 
-	/**	@var		Environment			$env			Application Environment Object */
-	protected $env;
+	/**	@var		Environment				$env			Application Environment Object */
+	protected Environment $env;
 
-	/**	@var		string				$filePath		Path to Language Files */
-	protected $filePath;
+	/**	@var		string					$filePath		Path to Language Files */
+	protected string $filePath;
 
-	/**	@var		string				$language		Set Language */
-	protected $language;
+	/**	@var		string					$language		Set Language */
+	protected string $language;
 
-	/**	@var		array				$languages		List of allowed Languages */
-	protected $languages				= [];
+	/**	@var		array					$languages		List of allowed Languages */
+	protected array $languages				= [];
 
 	/**
 	 *	Constructor.
@@ -229,37 +229,36 @@ class Language
 		$this->env->getRuntime()->reach( 'Resource_Language::load('.$topic.')' );
 		$fileName	= $this->getFilenameOfLanguage( $topic );
 		$reader		= new FileReader($fileName);
+		$data		= [];
 		if( $reader->exists() )	{
-			$data	= FALSE;
 			$string	= $reader->readString();
 			$this->env->getRuntime()->reach( 'Resource_Language::load('.$topic.'): loaded file' );
 			$string	= preg_replace( "/\s;[^\n]+\n+/", "\n", $string );
 			$string	= preg_replace( "/\n;[^\n]+\n/Us", "\n", $string );
 #			$plain	= preg_replace( '/".+"/U', "", $string );
 			if( !preg_match( '/".*;.*"/U', $string ) ){
-				$data	= @parse_ini_string( $string, TRUE, INI_SCANNER_RAW );
-				if( $data !== FALSE )
-					foreach( $data as $section => $pairs )
+				$dataFromString	= @parse_ini_string( $string, TRUE, INI_SCANNER_RAW );
+				if( $dataFromString !== FALSE )
+					foreach( $dataFromString as $section => $pairs )
 						foreach( $pairs as $key => $value )
 							$data[$section][$key]	= preg_replace( '/^"(.*)"\s*$/', '\\1', $value );
 				$this->env->getRuntime()->reach( 'Resource_Language::load: '.$topic.' @mode1' );
 			}
-			if( $data === FALSE ){
+			if( empty( $data ) ){
 				$data	= IniFileReader::loadArray( $fileName, TRUE );
 				$this->env->getRuntime()->reach( 'Resource_Language::load: '.$topic.' @mode2' );
 			}
 			$this->data[$topic]	= $data;
-			return $data;
 		}
 		else{
 			$message	= 'Invalid language file "'.$topic.'" ('.$fileName.')';
 			if( $strict )
 				throw new RuntimeException( $message, 221 );
 			if( $force && $this->env->has( 'messenger' ) )
-				$this->env->get( 'messenger' )->noteFailure( $message );
-			return [];
+				$this->env->getMessenger()->noteFailure( $message );
 		}
 		$this->env->getRuntime()->reach( 'Resource_Language: end' );
+		return $data;
 	}
 
 	/**

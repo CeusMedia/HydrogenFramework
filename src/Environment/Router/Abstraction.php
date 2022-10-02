@@ -41,10 +41,10 @@ use CeusMedia\HydrogenFramework\Environment\RouterInterface;
 abstract class Abstraction implements RouterInterface
 {
 	/**	@var		string		Key of path in request, default: path */
-	static public $pathKey		= "path";
+	public static string $pathKey		= "path";
 
 	/**	@var	Environment		$env		Environment object */
-	protected $env;
+	protected Environment $env;
 
 	public function __construct( Environment $env )
 	{
@@ -61,18 +61,11 @@ abstract class Abstraction implements RouterInterface
 			if( substr( $uri, 0, 2 ) == './' )
 				$uri	= substr( $uri, 2 );
 		}
-		$uri	= $this->env->url.$uri;
-		return $uri;
+		return $this->env->url.$uri;
 	}
 
 	public function getRelativeUri( string $controller = NULL, string $action = NULL, array $arguments = [], array $parameters = [], string $fragmentId = NULL ): string
 	{
-		$data	= array(
-			'controller'	=> $this->env->getRequest()->get( '__controller' ),
-			'action'		=> $this->env->getRequest()->get( '__action' ),
-			'arguments'		=> [],
-			'parameters'	=> [],
-		);
 		$uri	= '.';
 		if( !is_null( $controller ) ){
 			$uri	.= '/'.$controller;
@@ -80,11 +73,10 @@ abstract class Abstraction implements RouterInterface
 				$uri	.= '/'.$action;
 		}
 
-		if( !is_null( $arguments ) && is_array( $arguments )  )
-			foreach( $arguments as $key => $value )
-				$uri	.= '/'.$value;
-		if( !is_null( $parameters ) && is_array( $parameters ) && count( $parameters ) )
-			$uri	.= '?'.http_build_query( $parameters, NULL, '&amp;' );
+		foreach( $arguments as $value )
+			$uri	.= '/'.$value;
+		if( count( $parameters ) )
+			$uri	.= '?'.http_build_query( $parameters, '', '&amp;' );
 		if( $fragmentId )
 			$uri	.= '#'.$fragmentId;
 		return $uri;

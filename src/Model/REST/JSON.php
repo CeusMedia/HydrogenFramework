@@ -6,11 +6,12 @@ use Exception;
 
 abstract class JSON extends Abstraction
 {
-	public static $resourceRouteBasePath	= '';
-	public static $tokenSessionKey			= 'token';
-	public static $clientEnvKey				= 'restClient';
+	public static string $resourceRouteBasePath		= '';
+	public static string $tokenSessionKey			= 'token';
+	public static string $clientEnvKey				= 'restClient';
 
-	protected $basePath;
+	protected string $basePath;
+
 	protected $client;
 
 	public function count( array $conditions = [] ): int
@@ -19,17 +20,17 @@ abstract class JSON extends Abstraction
 		return $this->client->get( $this->basePath, $parameters )->data->range->total;
 	}
 
-	public function create( $data )
+	public function create( $data ): string
 	{
 		return $this->client->post( $this->basePath, $data );
 	}
 
-	public function delete( string $id )
+	public function delete( string $id ): bool
 	{
 		return $this->client->delete( $this->basePath.'/'.$id )->data;
 	}
 
-	public function index( array $conditions = [], array $orders = [], array $limit = [] ): array
+	public function index( array $conditions = [], array $orders = [], array $limits = [] ): array
 	{
 		$parameters	= array(
 			'filters'	=> $conditions,
@@ -43,17 +44,21 @@ abstract class JSON extends Abstraction
 		return $this->client->get( $this->basePath.'/'.$id )->data;
 	}
 
-	public function update( string $id, $data )
+	public function update( string $id, $data ): bool
 	{
 		return $this->client->put( $this->basePath.'/'.$id, $data )->data;
 	}
 
 	//  --  PROTECTED  --  //
 
+	/**
+	 * @return void
+	 * @throws Exception
+	 */
 	protected function __onInit()
 	{
 		if( !strlen( trim( static::$resourceRouteBasePath ) ) ){
-			$msg	= 'No resource route base path definied for model %s';
+			$msg	= 'No resource route base path defined for model %s';
 			throw new Exception( sprintf( $msg, $this->className ) );
 		}
 		$this->client	= $this->env->get( static::$clientEnvKey );

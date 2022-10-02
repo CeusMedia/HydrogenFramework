@@ -1,4 +1,5 @@
-<?php /** @noinspection PhpComposerExtensionStubsInspection */
+<?php /** @noinspection PhpUnused */
+/** @noinspection PhpComposerExtensionStubsInspection */
 
 /**
  *	General (and therefore abstract) AJAX controller.
@@ -6,6 +7,8 @@
 
 namespace CeusMedia\HydrogenFramework\Controller;
 
+use CeusMedia\Common\Net\HTTP\PartitionSession;
+use CeusMedia\Common\Net\HTTP\Request as HttpRequest;
 use CeusMedia\Common\Net\HTTP\Response as HttpResponse;
 use CeusMedia\Common\Net\HTTP\Response\Sender as HttpResponseSender;
 use CeusMedia\HydrogenFramework\Environment as Environment;
@@ -18,21 +21,21 @@ use Throwable;
  */
 abstract class Ajax
 {
-	protected $env;
+	protected WebEnvironment $env;
 
-	protected $request;
+	protected HttpRequest $request;
 
-	protected $response;
+	protected HttpResponse $response;
 
-	protected $session;
+	protected PartitionSession $session;
 
-	protected $defaultResponseMimeType	= 'text/json';
+	protected string $defaultResponseMimeType	= 'text/json';
 
-	protected $compressionMethod		= 'gzip';
+	protected string $compressionMethod			= 'gzip';
 
-	protected $exitAfterwards			= TRUE;
+	protected bool $exitAfterwards				= TRUE;
 
-	protected $sendLengthHeader			= FALSE;
+	protected bool $sendLengthHeader			= FALSE;
 
 	/**
 	 *	Constructor.

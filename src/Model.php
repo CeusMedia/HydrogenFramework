@@ -49,37 +49,46 @@ use RuntimeException;
  */
 class Model
 {
-	/**	@var		Environment				$env			Application Environment Object */
-	protected $env;
-	/**	@var		string					$name			Name of Database Table without Prefix */
-	protected $name							= "";
-	/**	@var		array					$columns		List of Database Table Columns */
-	protected $columns						= [];
-	/**	@var		array					$name			List of foreign Keys of Database Table */
- 	protected $indices						= [];
-	/**	@var		string					$primaryKey		Primary Key of Database Table */
-	protected $primaryKey					= "";
-	/**	@var		DatabaseTableWriter		$table			Database Table Writer Object for reading from and writing to Database Table */
-	protected $table;
-	/**	@var		string					$prefix			Database Table Prefix */
- 	protected $prefix;
-	/**	@var		Dictionary				$cache			Model data cache */
-	protected $cache;
-	/**	@var		integer					$fetchMode		PDO fetch mode */
-	protected $fetchMode;
-	/**	@var		string					$cacheKey		Base key in cache */
-	protected $cacheKey;
+	/**	@var	Environment				$env			Application Environment Object */
+	protected Environment $env;
 
-	public static $cacheClass				= Dictionary::class;
+	/**	@var	string					$name			Name of Database Table without Prefix */
+	protected string $name				= "";
+
+	/**	@var	array					$columns		List of Database Table Columns */
+	protected array $columns			= [];
+
+	/**	@var	array					$name			List of foreign Keys of Database Table */
+ 	protected array $indices			= [];
+
+	/**	@var	string					$primaryKey		Primary Key of Database Table */
+	protected string $primaryKey		= "";
+
+	/**	@var	DatabaseTableWriter		$table			Database Table Writer Object for reading from and writing to Database Table */
+	protected DatabaseTableWriter $table;
+
+	/**	@var	string					$prefix			Database Table Prefix */
+ 	protected string $prefix;
+
+	/**	@var	Dictionary				$cache			Model data cache */
+	protected $cache;
+
+	/**	@var	integer					$fetchMode		PDO fetch mode */
+	protected int $fetchMode;
+
+	/**	@var	string					$cacheKey		Base key in cache */
+	protected string $cacheKey;
+
+	public static string $cacheClass			= Dictionary::class;
 
 	/**
 	 *	Constructor.
 	 *	@access		public
 	 *	@param		Environment		$env			Application Environment Object
-	 *	@param		integer							$id				ID to focus on
+	 *	@param		string|NULL		$id				ID to focus on
 	 *	@return		void
 	 */
-	public function __construct( Environment $env, $id = NULL )
+	public function __construct( Environment $env, ?string $id = NULL )
 	{
 		$this->setEnv( $env );
 		$this->table	= new DatabaseTableWriter(
@@ -104,11 +113,11 @@ class Model
 	 *	@access		public
 	 *	@param		array			$data			Data to add to Table
 	 *	@param		boolean			$stripTags		Flag: strip HTML Tags from values, default: yes
-	 *	@return		integer
+	 *	@return		string
 	 */
-	public function add( array $data, bool $stripTags = TRUE )
+	public function add( array $data, bool $stripTags = TRUE ): string
 	{
-		$id	= $this->table->insert( $data, $stripTags );
+		$id	= (string) $this->table->insert( $data, $stripTags );
 		$this->cache->set( $this->cacheKey.$id, $this->get( $id ) );
 		return $id;
 	}
@@ -131,7 +140,7 @@ class Model
 	 *	@param		string			$value			Value of Index
 	 *	@return		integer			Number of entries within this index
 	 */
-	public function countByIndex( string $key, $value )
+	public function countByIndex( string $key, string $value ): int
 	{
 		$conditions	= array( $key => $value );
 		return $this->table->count( $conditions );
@@ -150,7 +159,7 @@ class Model
 
 	/**
 	 *	Returns number of entries of a large table by map of conditions.
-	 *	Attention: The returned number may be inaccurat, but this is much faster.
+	 *	Attention: The returned number may be inaccurate, but this is much faster.
 	 *	@access		public
 	 *	@param		array			$conditions		Map of conditions
 	 *	@return		integer			Number of entries
@@ -170,7 +179,7 @@ class Model
 	 */
 	public function edit( string $id, array $data, bool $stripTags = TRUE ): int
 	{
-		$this->table->focusPrimary( $id );
+		$this->table->focusPrimary( (int) $id );
 		$result	= 0;
 		if( count( $this->table->get( FALSE ) ) )
 			$result	= $this->table->update( $data, $stripTags );
@@ -187,7 +196,7 @@ class Model
 	 *	@param		boolean			$stripTags		Flag: strip HTML Tags from values, default: yes
 	 *	@return		integer			Number of changed rows
 	 */
-	public function editByIndices( array $indices, array $data, bool $stripTags = TRUE )
+	public function editByIndices( array $indices, array $data, bool $stripTags = TRUE ): int
 	{
 		$indices	= $this->checkIndices( $indices );
 		return $this->table->updateByConditions( $data, $indices, $stripTags );
@@ -205,7 +214,7 @@ class Model
 		$field	= $this->checkField( $field );
 		$data	= $this->cache->get( $this->cacheKey.$id );
 		if( !$data ){
-			$this->table->focusPrimary( $id );
+			$this->table->focusPrimary( (int) $id );
 			$data	= $this->table->get( TRUE );
 			$this->table->defocus();
 			$this->cache->set( $this->cacheKey.$id, $data );
@@ -295,10 +304,6 @@ class Model
 	 */
 	public function getByIndex( string $key, $value, array $orders = [], array $fields = [], bool $strict = FALSE )
 	{
-		if( is_string( $fields ) )
-			$fields	= strlen( trim( $fields ) ) ? array( trim( $fields ) ) : [];
-		if( !is_array( $fields ) )
-			throw new InvalidArgumentException( 'Fields must be of array or string' );
 		foreach( $fields as $field )
 			$this->checkField( $field );
 		$this->table->focusIndex( $key, $value );
@@ -320,13 +325,9 @@ class Model
 	 */
 	public function getByIndices( array $indices, array $orders = [], array $fields = [], bool $strict = FALSE )
 	{
-		if( is_string( $fields ) )
-			$fields	= strlen( trim( $fields ) ) ? array( trim( $fields ) ) : [];
-		if( !is_array( $fields ) )
-			throw new InvalidArgumentException( 'Fields must be of array or string' );
 		foreach( $fields as $field )
-			$field	= $this->checkField( $field );
-		$this->checkIndices( $indices );
+			$this->checkField( $field, FALSE, TRUE );
+		$this->checkIndices( $indices, TRUE, TRUE );
 		foreach( $indices as $key => $value )
 			$this->table->focusIndex( $key, $value );
 		$result	= $this->table->get( TRUE, $orders );
@@ -439,7 +440,7 @@ class Model
 	 */
 	public function remove( string $id ): bool
 	{
-		$this->table->focusPrimary( $id );
+		$this->table->focusPrimary( (int) $id );
 		$result	= FALSE;
 		if( count( $this->table->get( FALSE ) ) ){
 			$this->table->delete();
@@ -455,7 +456,7 @@ class Model
 	 *	@access		public
 	 *	@param		string			$key			Key of Index
 	 *	@param		mixed			$value			Value of Index
-	 *	@return		int
+	 *	@return		int				Number of removed entries
 	 */
 	public function removeByIndex( string $key, $value ): int
 	{
@@ -475,7 +476,6 @@ class Model
 				}
 				$this->cache->remove( $this->cacheKey.$id );
 			}
-			$result	= TRUE;
 		}
 		$this->table->defocus();
 		return $number;

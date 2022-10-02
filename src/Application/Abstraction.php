@@ -43,13 +43,13 @@ use ReflectionException;
  */
 abstract class Abstraction
 {
-	/**	@var		string								$classEnvironment		Class Name of Application Environment to build */
-	public static $classEnvironment						= WebEnvironment::class;
+	/**	@var		string				$classEnvironment		Class Name of Application Environment to build */
+	public static string $classEnvironment						= WebEnvironment::class;
 
 	/**	@var		Environment			$env					Application Environment Object */
-	protected $env;
+	private Environment $env;
 
-	public static $modulesNeeded						= [];				//  @todo for PHP 5.3+: make protected and use static:: instead of self:: on use -> now you can set value on App class construction
+	public static array $modulesNeeded						= [];				//  @todo for PHP 5.3+: make protected and use static:: instead of self:: on use -> now you can set value on App class construction
 
 	/**
 	 *	Constructor.
@@ -60,7 +60,7 @@ abstract class Abstraction
 	 */
 	public function __construct( Environment $env = NULL )
 	{
-		$this->env	= $env ?? ObjectFactory::createObject( self::$classEnvironment );
+		$this->env	= $env ?? ObjectFactory::createObject( static::$classEnvironment );
 		if( self::$modulesNeeded )																	//  needed modules are defined
 			$this->checkNeededModules();															//  check for missing modules
 	}

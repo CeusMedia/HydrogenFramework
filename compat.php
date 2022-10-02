@@ -21,11 +21,11 @@ class CMF_Hydrogen_Deprecation extends CeusMedia\HydrogenFramework\Deprecation {
 class CMF_Hydrogen_Dispatcher_General extends CeusMedia\HydrogenFramework\Dispatcher\General {}
 class CMF_Hydrogen_Environment extends CeusMedia\HydrogenFramework\Environment {}
 class CMF_Hydrogen_Environment_Console extends CeusMedia\HydrogenFramework\Environment\Console {}
-class CMF_Hydrogen_Environment_Console_Messenger extends CeusMedia\HydrogenFramework\Environment\Console\Messenger {}
+class CMF_Hydrogen_Environment_Console_Messenger extends CeusMedia\HydrogenFramework\Environment\Resource\Console\Messenger {}
 class CMF_Hydrogen_Environment_Dummy extends CeusMedia\HydrogenFramework\Environment\Dummy {}
 class CMF_Hydrogen_Environment_Exception extends CeusMedia\HydrogenFramework\Environment\Exception {}
 class CMF_Hydrogen_Environment_Remote extends CeusMedia\HydrogenFramework\Environment\Remote {}
-class CMF_Hydrogen_Environment_Remote_Messenger extends CeusMedia\HydrogenFramework\Environment\Remote\Messenger {}
+class CMF_Hydrogen_Environment_Remote_Messenger extends CeusMedia\HydrogenFramework\Environment\Resource\Remote\Messenger {}
 class CMF_Hydrogen_Environment_Resource_Acl_AllPublic extends CeusMedia\HydrogenFramework\Environment\Resource\Acl\AllPublic {}
 class CMF_Hydrogen_Environment_Resource_Acl_Server extends CeusMedia\HydrogenFramework\Environment\Resource\Acl\Server {}
 class CMF_Hydrogen_Environment_Resource_CacheDummy extends CeusMedia\HydrogenFramework\Environment\Resource\CacheDummy {}

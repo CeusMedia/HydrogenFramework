@@ -34,6 +34,7 @@ use CeusMedia\HydrogenFramework\Environment\Resource\Module\Reader as ModuleRead
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\LibraryInterface as LibraryInterface;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Library\Abstraction as AbstractLibrary;
 use Countable;
+use Exception;
 use RuntimeException;
 
 /**
@@ -48,16 +49,20 @@ use RuntimeException;
  */
 class Local extends AbstractLibrary implements Countable, LibraryInterface
 {
-	protected $env;
+	protected Environment $env;
+
 	protected $modulePath;
-	protected $modules			= [];
-	protected $cacheFile;
+
+	protected array $modules			= [];
+
+	protected string $cacheFile;
 
 	/**
 	 *	Constructor.
 	 *	@access		public
 	 *	@param		Environment		$env			Environment instance
 	 *	@return		void
+	 *	@throws		Exception	if XML file could not been loaded and parsed
 	 */
 	public function __construct( Environment $env )
 	{
@@ -79,6 +84,25 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 	 *	@param		string		$resource		Name of resource (e.G. Page or View)
 	 *	@param		string		$event			Name of hook event (e.G. onBuild or onRenderContent)
 	 *	@param		object		$context		Context object, will be available inside hook as $context
+	 *	@return		integer						Number of called hooks for event
+	 *	@throws		RuntimeException			if given static class method is not existing
+	 *	@throws		RuntimeException			ig method call produces stdout output, for example warnings and notices
+	 *	@throws		RuntimeException			if method call is throwing an exception
+	 */
+	public function callHook( string $resource, string $event, object $context ): int
+	{
+		$captain	= $this->env->getCaptain();
+		$payload	= [];
+		$countHooks	= $captain->callHook( $resource, $event, $context, $payload );
+		return (int) $countHooks;
+	}
+
+	/**
+	 *	...
+	 *	@access		public
+	 *	@param		string		$resource		Name of resource (e.G. Page or View)
+	 *	@param		string		$event			Name of hook event (e.G. onBuild or onRenderContent)
+	 *	@param		object		$context		Context object, will be available inside hook as $context
 	 *	@param		array		$payload		Map of hook payload data, will be available inside hook as $payload and $data
 	 *	@return		integer						Number of called hooks for event
 	 *	@throws		RuntimeException			if given static class method is not existing
@@ -87,7 +111,7 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 	 *	@todo 		rename $data to $payload
 	 *	@todo		check if this is needed anymore and remove otherwise
 	 */
-	public function callHook( string $resource, string $event, object $context, array & $payload = [] ): int
+	public function callHookWithPayload( string $resource, string $event, object $context, array & $payload ): int
 	{
 		$captain	= $this->env->getCaptain();
 		$countHooks	= $captain->callHook( $resource, $event, $context, $payload );
@@ -136,6 +160,11 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 		return NULL;
 	}
 
+	public function getPath(): string
+	{
+		return $this->modulePath;
+	}
+
 	/**
 	 *	Scan modules of source.
 	 *	Should return a data object containing the result source and number of found modules.
@@ -143,6 +172,7 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 	 *	@param		boolean		$useCache		Flag: use cache if available
 	 *	@param		boolean		$forceReload	Flag: clear cache beforehand if available
 	 *	@return		object		Data object containing the result source and number of found modules
+	 *	@throws		Exception	if XML file could not been loaded and parsed
 	 */
 	public function scan( bool $useCache = FALSE, bool $forceReload = FALSE ): object
 	{
@@ -173,7 +203,7 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 			$module->path				= $this->modulePath;										//  assume app path as module path
 			$module->isInstalled		= TRUE;														//  module is installed
 			$module->versionInstalled	= $module->version;											//  set installed version by found module version
-			$module->isActive			= TRUE;
+			$module->isActive			= TRUE;														//  set active by fallback: not configured -> on (active)
 			if( isset( $module->config['active'] ) )												//  module has main switch in config
 				$module->isActive		= $module->config['active']->value;							//  set active by default main switch config value
 

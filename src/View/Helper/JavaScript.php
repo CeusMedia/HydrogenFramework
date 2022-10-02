@@ -52,29 +52,29 @@ use Throwable;
  */
 class JavaScript
 {
-	protected static $instance;
+	public string $indent				= "\t\t";
 
-	protected $env;
+	protected static ?self $instance;
 
-	protected $pathCache			= "cache/";
+	protected Environment $env;
 
-	protected $prefix				= "";
+	protected string $pathCache			= "cache/";
 
-	protected $suffix				= "";
+	protected string $prefix			= "";
 
-	protected $revision;
+	protected string $suffix			= "";
 
-	/**	@var	array				$scripts			List of JavaScript blocks */
-	protected $scripts				= [];
+	protected string $revision;
 
-	/**	@var	array				$scriptsOnReady		List if JavaScripts to run on load if browser is ready */
-	protected $scriptsOnReady		= [];
+	/**	@var	array					$scripts			List of JavaScript blocks */
+	protected array $scripts			= [];
 
-	protected $urls					= [];
+	/**	@var	array					$scriptsOnReady		List if JavaScripts to run on load if browser is ready */
+	protected array $scriptsOnReady		= [];
 
-	protected $useCompression		= FALSE;
+	protected array $urls				= [];
 
-	public $indent					= "\t\t";
+	protected bool $useCompression		= FALSE;
 
 	/**
 	 *	Adds a module JavaScript by path name within configured local JavaScript folder.
@@ -179,9 +179,10 @@ class JavaScript
 	 *	Returns a single instance of this Singleton class.
 	 *	@static
 	 *	@access		public
+	 *	@param		Environment		$env
 	 *	@return		self						Single instance of this Singleton class
 	 */
-	public static function getInstance( $env ): self
+	public static function getInstance( Environment $env ): self
 	{
 		if( !self::$instance )
 			self::$instance	= new self( $env );

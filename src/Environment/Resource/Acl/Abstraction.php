@@ -1,4 +1,5 @@
-<?php
+<?php /** @noinspection PhpUnused */
+
 /**
  *	Abstract access control list resource.
  *
@@ -24,6 +25,7 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+
 namespace CeusMedia\HydrogenFramework\Environment\Resource\Acl;
 
 use CeusMedia\HydrogenFramework\Environment as Environment;
@@ -41,19 +43,19 @@ use InvalidArgumentException;
  */
 abstract class Abstraction
 {
-	protected $env;
+	protected Environment $env;
 
-	public const ROLE_ACCESS_NONE	= 0;
-	public const ROLE_ACCESS_ACL	= 1;
-	public const ROLE_ACCESS_FULL	= 128;
+	public const ROLE_ACCESS_NONE		= 0;
+	public const ROLE_ACCESS_ACL		= 1;
+	public const ROLE_ACCESS_FULL		= 128;
 
-	protected $controllerActions	= [];
-	protected $rights				= [];
-	protected $roles				= [];
+	protected array $controllerActions	= [];
+	protected array $rights				= [];
+	protected array $roles				= [];
 	/*	@var		$publicLinks				Map of links with public access */
-	protected $linksPublic			= [];
-	protected $linksPublicInside	= [];
-	protected $linksPublicOutside	= [];
+	protected array $linksPublic		= [];
+	protected array $linksPublicInside	= [];
+	protected array $linksPublicOutside	= [];
 
 	/**
 	 *	Constructor.
@@ -78,7 +80,7 @@ abstract class Abstraction
 	{
 		if( !$this->env->has( 'session' ) )
 			return FALSE;
-		$roleId	= $this->env->getSession()->get( 'auth_role_id' );
+		$roleId	= $this->env->getSession()->get( 'auth_role_id', '' );
 		$right	= $this->hasRight( $roleId, $controller, $action );
 //		remark( 'Controller: '.$controller.' | Action: '.$action.' | Right: '.$right );
 		return $right > 0;

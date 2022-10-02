@@ -44,10 +44,10 @@ use ReflectionException;
  */
 abstract class Abstraction extends ApplicationAbstraction
 {
-	protected $components			= [];
+	protected array $components			= [];
 
 	/**	@var		WebEnvironment			$env				Application Environment Object */
-	protected $env;
+	protected WebEnvironment $env;
 
 	/**
 	 *	Constructor.

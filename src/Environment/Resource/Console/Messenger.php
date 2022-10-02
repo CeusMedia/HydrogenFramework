@@ -24,10 +24,12 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-namespace CeusMedia\HydrogenFramework\Environment\Console;
 
-use CeusMedia\HydrogenFramework\Environment\Resource\Messenger as MessengerResource;
+namespace CeusMedia\HydrogenFramework\Environment\Resource\Console;
+
 use CeusMedia\Common\CLI;
+use CeusMedia\HydrogenFramework\Environment\Resource\Messenger as MessengerResource;
+use SebastianBergmann\Environment\Console as ConsoleEnvironment;
 
 /**
  *	Fake messenger for console environment.
@@ -40,6 +42,9 @@ use CeusMedia\Common\CLI;
  */
 class Messenger extends MessengerResource
 {
+//	/**	@var	ConsoleEnvironment	$env			Application Environment Object */
+//	protected ConsoleEnvironment $env;
+
 	protected function noteMessage( int $type, string $message )
 	{
 		CLI::out( $message );

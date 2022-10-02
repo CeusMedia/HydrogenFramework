@@ -3,7 +3,7 @@ namespace CeusMedia\HydrogenFramework\Environment\Resource\Module\Component;
 
 class File
 {
-	public $file;
+	public string $file;
 
 	public $load;
 

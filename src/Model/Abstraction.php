@@ -7,12 +7,16 @@ use Exception;
 
 abstract class Abstraction
 {
-	protected $env;
+	protected Environment $env;
 
-	protected $idKey;
+	protected string $idKey;
 
-	protected $className;
+	protected string $className;
 
+	/**
+	 *	@param		Environment		$env
+	 *	@throws		Exception		if not ID key id set
+	 */
 	public function __construct( Environment $env )
 	{
 		$this->env	= $env;
@@ -20,19 +24,35 @@ abstract class Abstraction
 		$this->className	= get_class( $this );
 	}
 
-	/*  --  ABSTRACT CRUDIC METHODS  --  */
+	/*  --  ABSTRACT CRUD METHODS  --  */
 
 	abstract public function count( array $conditions = [] ): int;
 
-	abstract public function create( $data );
+	/**
+	 *	@param		array		$data
+	 *	@return		string
+	 */
+	abstract public function create( array $data ): string;
 
-	abstract public function delete( string $id );
+	/**
+	 *	@param		string		$id
+	 */
+	abstract public function delete( string $id ): bool;
 
 	abstract public function index( array $conditions = [], array $orders = [], array $limits = [] ): array;
 
+	/**
+	 *	@param		string		$id
+	 *	@return		mixed
+	 */
 	abstract public function read( string $id );
 
-	abstract public function update( string $id, $data );
+	/**
+	 *	@param		string		$id
+	 *	@param		array		$data
+	 *	@return		bool
+	 */
+	abstract public function update( string $id, array $data ): bool;
 
 
 	/*  --  ALIAS METHODS FOR COMFORT  --  */
@@ -46,29 +66,63 @@ abstract class Abstraction
 
 	/*  --  ALIAS METHODS FOR COMFORT/COMPAT  --  */
 
-	public function add( /*$id, */$data ){
-		$this->create( /*$id, */$data );
+	/**
+	 *	@param		array		$data
+	 *	@return		string
+	 */
+	public function add( array $data ): string
+	{
+		return $this->create( $data );
 	}
 
-	public function edit( string $id, $data ){
+	/**
+	 *	@param		string		$id
+	 *	@param		array		$data
+	 *	@return		void
+	 */
+	public function edit( string $id, array $data )
+	{
 		$this->update( $id, $data );
 	}
 
+	/**
+	 *	@param		string		$id
+	 *	@return		mixed
+	 */
 	public function get( string $id )
 	{
 		return $this->read( $id );
 	}
 
+	/**
+	 *	@param		array		$conditions
+	 *	@param		array		$orders
+	 *	@param		array		$limits
+	 *	@return		array
+	 */
 	public function getAll( array $conditions = [], array $orders = [], array $limits = [] ): array
 	{
 		return $this->index( $conditions, $orders, $limits );
 	}
 
+	/**
+	 *	@param		string		$indexKey
+	 *	@param		mixed		$indexValue
+	 *	@param		array		$orders
+	 *	@param		array		$limits
+	 *	@return		array
+	 */
 	public function getAllByIndex( string $indexKey, $indexValue, array $orders = [], array $limits = [] ): array
 	{
 		return $this->index( array( $indexKey => $indexValue ), $orders, $limits );
 	}
 
+	/**
+	 *	@param		array		$indices
+	 *	@param		array		$orders
+	 *	@param		array		$limits
+	 *	@return		array
+	 */
 	public function getAllByIndices( array $indices, array $orders = [], array $limits = [] ): array
 	{
 		return $this->index( $indices, $orders, $limits );
@@ -84,11 +138,21 @@ abstract class Abstraction
 		return FALSE;
 	}
 
-	public function remove( string $id )
+	/**
+	 *	@param		string		$id
+	 *	@return		bool
+	 */
+	public function remove( string $id ): bool
 	{
 		return $this->delete( $id );
 	}
 
+	/**
+	 *	@param		string		$indexKey
+	 *	@param		mixed		$indexValue
+	 *	@return		int
+	 *	@throws		DomainException
+	 */
 	public function removeByIndex( string $indexKey, $indexValue ): int
 	{
 		$items	= $this->index( array( $indexKey => $indexValue ) );
@@ -103,6 +167,10 @@ abstract class Abstraction
 		return count( $items );
 	}
 
+	/**
+	 *	@param		array		$indices
+	 *	@return		int
+	 */
 	public function removeByIndices( array $indices ): int
 	{
 		$items	= $this->index( $indices );
@@ -119,6 +187,11 @@ abstract class Abstraction
 
 	//  --  PROTECTED  --  //
 
+	/**
+	 *
+	 *	@return		void
+	 *	@throws		Exception		if not ID key id set
+	 */
 	protected function __onInit()
 	{
 		if( !$this->idKey )

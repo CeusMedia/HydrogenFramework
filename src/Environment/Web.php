@@ -36,7 +36,6 @@ use CeusMedia\Common\Net\HTTP\Status as HttpStatus;
 use CeusMedia\Common\UI\HTML\Exception\Page as HtmlExceptionPage;
 use CeusMedia\Common\UI\HTML\Tag as HtmlTag;
 use CeusMedia\Common\UI\HTML\PageFrame as HtmlPageFrame;
-use CeusMedia\HydrogenFramework\Deprecation;
 use CeusMedia\HydrogenFramework\Environment;
 use CeusMedia\HydrogenFramework\Environment\Exception as EnvironmentException;
 use CeusMedia\HydrogenFramework\Environment\Router\Single as SingleRouter;
@@ -60,12 +59,12 @@ use RuntimeException;
  */
 class Web extends Environment
 {
-	public static $classRouter			= SingleRouter::class;
+	public static string $classRouter		= SingleRouter::class;
 
-	public static $configKeyBaseHref	= 'app.base.url';
+	public static string $configKeyBaseHref	= 'app.base.url';
 
 	/**	@var	array					$defaultPaths	Map of default paths to extend base configuration */
-	public static $defaultPaths			= [
+	public static array $defaultPaths			= [
 		'config'	=> 'config/',
 		'classes'	=> 'classes/',
 		'contents'	=> 'contents/',
@@ -78,52 +77,45 @@ class Web extends Environment
 	];
 
 	/**	@var	string					$host		Detected HTTP host */
-	public $host;
+	public string $host;
 
-	/**	@var	int|string				$port		Detected HTTP port */
-	public $port;
+	/**	@var	int						$port		Detected HTTP port */
+	public int $port;
 
-	/**	@var	string					$path		Detected HTTP path */
-	public $path;
+	/**	@var	string|NULL				$path		Detected HTTP path */
+	public ?string $path;
 
 	/**	@var	string					$root		Detected  */
-	public $root;
+	public string $root;
 
 	/**	@var	string					$scheme		Detected  */
-	public $scheme;
+	public string $scheme;
 
 	/**	@var	string					$uri		Detected  */
-	public $uri;
+	public string $uri;
 
 	/**	@var	string					$url		Detected application base URL */
-	public $url;
+	public string $url;
 
 	/**	@var	HttpRequest				$request	HTTP Request Object */
-	protected $request;
+	private HttpRequest $request;
 
 	/**	@var	HttpResponse			$response	HTTP Response Object */
-	protected $response;
+	protected HttpResponse $response;
 
 	/**	@var	AbstractRouter			$router		Router Object */
-	protected $router;
+	protected AbstractRouter $router;
 
 	/**	@var	HttpPartitionSession	$session	Session Object */
-	protected $session;
+	private HttpPartitionSession $session;
 
 	/**	@var	HttpCookie				$cookie		Cookie Object */
-	protected $cookie;
-
-	/** @var	MessengerResource		$messenger	Messenger Object */
-	protected $messenger;
-
-	/** @var	LanguageResource		$language	Language Object */
-	protected $language;
+	protected HttpCookie $cookie;
 
 	/**	@var	PageResource			$page		Page Object */
-	protected $page;
+	protected PageResource $page;
 
-
-	protected $resourcesToClose			= [];
+	protected array $resourcesToClose	= [];
 
 	/**
 	 *	Constructor, sets up Resource Environment.
@@ -131,7 +123,7 @@ class Web extends Environment
 	 *	@param		array		$options
 	 *	@return		void
 	 */
-	public function __construct( $options = [] )
+	public function __construct( array $options = [] )
 	{
 		ob_start();
 		try{
@@ -194,16 +186,6 @@ class Web extends Environment
 	}
 
 	/**
-	 *	Returns Messenger Object.
-	 *	@access		public
-	 *	@return		MessengerResource
-	 */
-	public function getMessenger(): ?MessengerResource
-	{
-		return $this->messenger;
-	}
-
-	/**
 	 *	Get resource to communicate with chat server.
 	 *	@access		public
 	 *	@return		PageResource
@@ -254,35 +236,6 @@ class Web extends Environment
 	}
 
 	/**
-	 *	Redirects by setting different Controller and Action.
-	 *	Attention: This will *NOT* effect the URL in browser nor need cURL requests to allow forwarding.
-	 *	Attention: This is not recommended, please use restart in favour.
-	 *	@access		public
-	 *	@param		string		$controller		Controller to be called, default: index
-	 *	@param		string		$action			Action to be called, default: index
-	 *	@param		array		$arguments		List of arguments to add to URL
-	 *	@param		array		$parameters		Map of additional parameters to set in request
-	 *	@return		void
-	 *	@deprecated	redirecting only works in hooks within dispatching, use restart in controllers
-	 *	@todo		remove in 0.9 and handle todo in Hook::redirect
-	 */
-	public function redirect( string $controller = 'index', string $action = "index", array $arguments = [], array $parameters = [] )
-	{
-		Deprecation::getInstance()
-			->setErrorVersion( '0.8.6.4' )
-			->setExceptionVersion( '0.8.9' )
-			->message( 'Redirecting is usable for hooks within dispatching, only. Please use restart instead!' );
-
-		$request	= $this->getRequest();
-		$request->set( '__controller', $controller );
-		$request->set( '__action', $action );
-		$request->set( '__arguments', $arguments );
-		foreach( $parameters as $key => $value )
-			if( !empty( $key ) )
-				$request->set( $key, $value );
-	}
-
-	/**
 	 *	Redirects to given URI, allowing URIs external to current application.
 	 *	Attention: This *WILL* effect the URL displayed in browser / need request clients (eG. cURL) to allow forwarding.
 	 *
@@ -292,10 +245,10 @@ class Web extends Environment
 	 *	HTTP status will be 200 or second parameter.
 	 *
 	 *	@access		public
-	 *	@param		string		$uri				URI to request, may be external
-	 *	@param		integer		$status				HTTP status code to send, default: NULL -> 200
+	 *	@param		string			$uri				URI to request, may be external
+	 *	@param		integer|NULL	$status				HTTP status code to send, default: NULL -> 200
 	 *	@return		void
-	 *	@todo		kriss: check for better HTTP status
+	 *	@todo		check for better HTTP status
 	 */
 	public function relocate( string $uri, int $status = NULL )
 	{
@@ -306,11 +259,11 @@ class Web extends Environment
 	 *	Redirects by requesting a URI.
 	 *	Attention: This *WILL* effect the URL displayed in browser / need request clients (eG. cURL) to allow forwarding.
 	 *
-	 *	By default, redirect URIs are are request path within the current application, eg. "./[CONTROLLER]/[ACTION]"
+	 *	By default, redirect URIs are request path within the current application, eg. "./[CONTROLLER]/[ACTION]"
 	 *	ATTENTION: For browser compatibility local paths should start with "./"
 	 *
 	 *	If seconds parameter is set to TRUE, redirects to a path inside the current controller.
-	 *	Therefore the given URI needs to be a path inside the current controller.
+	 *	Therefore, the given URI needs to be a path inside the current controller.
 	 *	This would look like this: $this->restart( '[ACTION]', TRUE );
 	 *	Of course you can append actions arguments and parameters.
 	 *
@@ -323,8 +276,8 @@ class Web extends Environment
 	 *	@access		public
 	 *	@param		string|NULL		$uri				URI to request
 	 *	@param		integer|NULL	$status				HTTP status code to send, default: NULL -> 200
-	 *	@param		boolean		$allowForeignHost	Flag: allow redirection outside application base URL, default: no
-	 *	@param		integer		$modeFrom			How to handle FROM parameter from request or for new request, not handled atm
+	 *	@param		boolean			$allowForeignHost	Flag: allow redirection outside application base URL, default: no
+	 *	@param		integer			$modeFrom			How to handle FROM parameter from request or for new request, not handled atm
 	 *	@return		void
 	 *	@link		https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#3xx_Redirection HTTP status codes
 	 *	@todo		implement automatic lookout for "from" request parameter
@@ -402,8 +355,9 @@ class Web extends Environment
 
 		$this->scheme	= getEnv( "HTTPS" ) ? 'https' : 'http';										//  note used URL scheme
 		$defaultPort	= $this->scheme === 'https' ? 443 : 80;										//  default port depends on HTTP scheme
+		$serverPort		= (int) getEnv( 'SERVER_PORT' );
 		$this->host		= preg_replace( "/:[0-9]{2,5}$/", "", getEnv( 'HTTP_HOST' ) );				//  note requested HTTP host name without port
-		$this->port		= getEnv( 'SERVER_PORT' ) == $defaultPort ? '' : getEnv( 'SERVER_PORT' );	//  note requested HTTP port
+		$this->port		= $serverPort === $defaultPort ? '' : $serverPort;							//  note requested HTTP port
 		$hostWithPort	= $this->host.( $this->port ? ':'.$this->port : '' );						//  append port if different from default port
 		$this->root		= getEnv( 'DOCUMENT_ROOT' );												//  note document root of web server or virtual host
 		$this->path		= preg_replace( "@^/$@", "", dirname( getEnv( 'SCRIPT_NAME' ) ) )."/";		//  note requested working path
@@ -458,7 +412,7 @@ class Web extends Environment
 		return $this;
 	}
 
-	protected function initMessenger( $enabled = "auto" ): self
+	protected function initMessenger( ?string $enabled = "auto" ): self
 	{
 		if( $enabled === "auto" )																	//  auto detect mode
 			$enabled	= preg_match( "/html/", getEnv( 'HTTP_ACCEPT' ) );							//  enabled if HTML is requested
@@ -541,27 +495,24 @@ class Web extends Environment
 		$isInside	= (int) $this->session->get( 'auth_user_id' );
 		$inside		= explode( ',', $this->config->get( 'module.acl.inside' ) );					//  get current inside link list
 		$outside	= explode( ',', $this->config->get( 'module.acl.outside' ) );					//  get current outside link list
-		if( $this->modules ){
-			foreach( $this->modules->getAll() as $module ){
-				foreach( $module->links as $link ){													//  iterate module links
-					$link->path	= $link->path ? $link->path : 'index/index';
-					if( $link->access == "inside" ){												//  link is inside public
-						$path	= str_replace( '/', '_', $link->path );								//  get link path
-						if( !in_array( $path, $inside ) )											//  link is not in public link list
-							$inside[]	= $path;													//  add link to public link list
-					}
-					if( $link->access == "outside" ){												//  link is outside public
-						$path	= str_replace( '/', '_', $link->path );								//  get link path
-						if( !in_array( $path, $inside ) )											//  link is not in public link list
-							$outside[]	= $path;													//  add link to public link list
-					}
+		foreach( $this->modules->getAll() as $module ){
+			foreach( $module->links as $link ){													//  iterate module links
+				$link->path	= $link->path ? $link->path : 'index/index';
+				if( $link->access == "inside" ){												//  link is inside public
+					$path	= str_replace( '/', '_', $link->path );								//  get link path
+					if( !in_array( $path, $inside ) )											//  link is not in public link list
+						$inside[]	= $path;													//  add link to public link list
+				}
+				if( $link->access == "outside" ){												//  link is outside public
+					$path	= str_replace( '/', '_', $link->path );								//  get link path
+					if( !in_array( $path, $inside ) )											//  link is not in public link list
+						$outside[]	= $path;													//  add link to public link list
 				}
 			}
-			$this->config->set( 'module.acl.inside', implode( ',', array_unique( $inside ) ) );		//  save public link list
-			$this->config->set( 'module.acl.outside', implode( ',', array_unique( $outside ) ) );	//  save public link list
 		}
-		if( $this->modules )
-			$this->modules->callHook( 'Session', 'init', $this->session );
+		$this->config->set( 'module.acl.inside', implode( ',', array_unique( $inside ) ) );		//  save public link list
+		$this->config->set( 'module.acl.outside', implode( ',', array_unique( $outside ) ) );	//  save public link list
+		$this->modules->callHook( 'Session', 'init', $this->session );
 		$this->runtime->reach( 'env: session: init done' );
 		return $this;
 	}

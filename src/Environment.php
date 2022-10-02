@@ -36,18 +36,19 @@ use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
 use CeusMedia\HydrogenFramework\Environment\Exception as EnvironmentException;
 use CeusMedia\HydrogenFramework\Environment\Resource\Acl\Abstraction as AbstractAclResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\Acl\AllPublic as AllPublicAclResource;
-use CeusMedia\HydrogenFramework\Environment\Resource\CacheDummy as DummyCacheResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\Captain as CaptainResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\Disclosure as DisclosureResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\Language as LanguageResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\Log as LogResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\LogicPool as LogicPoolResource;
+use CeusMedia\HydrogenFramework\Environment\Resource\Messenger as MessengerResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Library\Local as LocalModuleLibraryResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\Php as PhpResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\Runtime as RuntimeResource;
 use CeusMedia\HydrogenFramework\Environment\Remote as RemoteEnvironment;
 
 use ArrayAccess;
+use DomainException;
 use Exception;
 use InvalidArgumentException;
 use RangeException;
@@ -67,13 +68,13 @@ use RuntimeException;
  */
 class Environment implements ArrayAccess
 {
-	const MODE_UNKNOWN	= 0;
-	const MODE_DEV		= 1;
-	const MODE_TEST		= 2;
-	const MODE_STAGE	= 4;
-	const MODE_LIVE		= 8;
+	public const MODE_UNKNOWN	= 0;
+	public const MODE_DEV		= 1;
+	public const MODE_TEST		= 2;
+	public const MODE_STAGE	= 4;
+	public const MODE_LIVE		= 8;
 
-	const MODES			= [
+	public const MODES			= [
 		self::MODE_UNKNOWN,
 		self::MODE_DEV,
 		self::MODE_TEST,
@@ -82,76 +83,79 @@ class Environment implements ArrayAccess
 	];
 
 	/**	@var	string						$configFile		File path to base configuration */
-	public static $configFile				= 'config.ini';
+	public static string $configFile				= 'config.ini';
 
 	/**	@var	array						$defaultPaths	Map of default paths to extend base configuration */
-	public static $defaultPaths				= [
+	public static array $defaultPaths				= [
 		'classes'	=> 'classes/',
 		'config'	=> 'config/',
 		'logs'		=> 'logs/',
 	];
 
-	public static $timezone					= NULL;
+	public static ?string $timezone			= NULL;
 
 	/**	@var	string|NULL					$path			Absolute folder path of application */
-	public $path							= NULL;
+	public ?string $path					= NULL;
 
 	/**	@var	PhpResource					$php			Instance of PHP environment collection */
-	public $php;
+	public PhpResource $php;
 
 	/**	@var	string						$uri			Application URI (absolute local path) */
-	public $uri;
+	public string $uri;
 
 	/**	@var	string						$url			Application URI */
-	public $url;
+	public string $url;
 
 	/** @var	string						$version		Framework version */
-	public $version;
+	public string $version;
 
 	/** @var	AbstractAclResource			$acl			Implementation of access control list */
-	protected $acl;
+	protected AbstractAclResource $acl;
 
 	/**	@var	SimpleCacheInterface		$cache			Instance of simple cache adapter */
-	protected $cache;
+	protected SimpleCacheInterface $cache;
 
 	/**	@var	CaptainResource				$captain		Instance of captain */
-	protected $captain;
+	protected CaptainResource $captain;
 
 	/**	@var	Dictionary					$config			Configuration Object */
-	protected $config;
+	protected Dictionary $config;
 
 	/**	@var	object						$database		Database Connection Object */
 	protected $database;
 
 	/**	@var	LanguageResource			$language		Language support object */
-	protected $language;
+	protected LanguageResource $language;
 
 	/**	@var	LogResource					$log			Log support object */
-	protected $log;
+	protected LogResource $log;
 
 	/**	@var	array						$disclosure		Map of classes ready to reflect */
 	protected $disclosure;
 
-	/**	@var	LogicPoolResource                                                                                                                                                                                                              				$logic			Pool for logic class instances */
-	protected $logic;
+	/**	@var	LogicPoolResource			$logic			Pool for logic class instances */
+	protected LogicPoolResource $logic;
 
 	/**	@var	integer						$mode			Environment mode (dev,test,live,...) */
-	protected $mode							= 0;
+	protected int $mode						= 0;
+
+	/** @var	MessengerResource			$messenger		Messenger Object */
+	protected MessengerResource $messenger;
 
 	/**	@var	LocalModuleLibraryResource	$modules		Handler for local modules */
-	protected $modules;
+	protected LocalModuleLibraryResource $modules;
 
 	/**	@var	array						$options		Set options to override static properties */
-	protected $options						= [];
+	protected array $options				= [];
 
 	/**	@var	RuntimeResource				$runtime		Runtime Object */
-	protected $runtime;
+	protected RuntimeResource $runtime;
 
 	/**	@var	Dictionary					$request		Request Object */
-	protected $request;
+	private Dictionary $request;
 
 	/**	@var	Dictionary					$session		Session Object */
-	protected $session;
+	private Dictionary $session;
 
 	/**
 	 *	Constructor, sets up Resource Environment.
@@ -239,7 +243,7 @@ class Environment implements ArrayAccess
 	 *	@param		string		$key
 	 *	@param		bool		$strict
 	 *	@return		mixed|null
-	 *	@throws		Exception
+	 *	@throws		DomainException		if no resource is registered by by
 	 */
 	public function get( string $key, bool $strict = TRUE )
 	{
@@ -255,7 +259,7 @@ class Environment implements ArrayAccess
 
 		if( $strict ){
 			$message	= 'No environment resource found for key "%1$s"';
-			throw new RuntimeException( sprintf( $message, $key ) );
+			throw new DomainException( sprintf( $message, $key ) );
 		}
 		return NULL;
 	}
@@ -272,7 +276,7 @@ class Environment implements ArrayAccess
 
 	public function getBaseUrl( string $keyConfig = 'app.base.url' ): string
 	{
-		if( $this->config && $this->config->get( $keyConfig ) )
+		if( $this->config->get( $keyConfig ) )
 			return $this->config->get( $keyConfig );
 		$host	= getEnv( 'HTTP_HOST' );
 		if( $host ){
@@ -359,6 +363,16 @@ class Environment implements ArrayAccess
 	}
 
 	/**
+	 *	Returns Messenger Object.
+	 *	@access		public
+	 *	@return		MessengerResource
+	 */
+	public function getMessenger(): ?MessengerResource
+	{
+		return $this->messenger;
+	}
+
+	/**
 	 *	Returns mode of environment.
 	 *	@access		public
 	 *	@return		integer
@@ -400,7 +414,7 @@ class Environment implements ArrayAccess
 	 */
 	public function getPhp(): PhpResource
 	{
-		return $this->php;
+		return $this->get( 'php' );
 	}
 
 	public function getRequest()
@@ -410,7 +424,7 @@ class Environment implements ArrayAccess
 
 	public function getRuntime(): RuntimeResource
 	{
-		return $this->runtime;
+		return $this->get( 'runtime' );
 	}
 
 	public function getSession()
@@ -522,7 +536,7 @@ class Environment implements ArrayAccess
 		$type		= AllPublicAclResource::class;
 		if( $this->hasModules() ){																	//  module support and modules available
 			$payload	= ['className' => NULL];
-			$isHandled	= $this->modules->callHook( 'Env', 'initAcl', $this, $payload );			//  call related module event hooks
+			$isHandled	= $this->modules->callHookWithPayload( 'Env', 'initAcl', $this, $payload );			//  call related module event hooks
 			if( $isHandled )
 				$type	= $payload['className'];
 		}
@@ -560,8 +574,7 @@ class Environment implements ArrayAccess
 	protected function initCache(): self
 	{
 		$this->cache	= SimpleCacheFactory::createStorage('Noop' );
-		if( $this->modules )																		//  module support and modules available
-			$this->modules->callHook( 'Env', 'initCache', $this );									//  call related module event hooks
+		$this->modules->callHook( 'Env', 'initCache', $this );						//  call related module event hooks
 		$this->runtime->reach( 'env: initCache', 'Finished setup of cache' );
 		return $this;
 	}
@@ -735,8 +748,6 @@ class Environment implements ArrayAccess
 				}
 			}
 		}
-		if( !$this->captain )																		//  just in case custom env did not init captain
-			$this->initCaptain();																	//  init caption for handling hooks
 		if( !( $this instanceof RemoteEnvironment ) )
 			$this->modules->callHook( 'Env', 'initModules', $this );								//  call related module event hooks
 		$this->config->set( 'module.acl.public', implode( ',', array_unique( $public ) ) );			//  save public link list

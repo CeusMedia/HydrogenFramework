@@ -36,6 +36,7 @@ use CeusMedia\HydrogenFramework\View\Helper\StyleSheet as CssHelper;
 use CeusMedia\HydrogenFramework\View\Helper\JavaScript as JsHelper;
 
 use InvalidArgumentException;
+use RangeException;
 use RuntimeException;
 use stdClass;
 
@@ -104,8 +105,7 @@ class Page extends HtmlPage
 
 		if( strlen( $title	= $config->get( 'app.name' ) ) )
 			$this->setTitle( $title );
-		if( ( $modules = $this->env->getModules() ) )												//  get module handler resource if existing
-			$modules->callHook( 'Page', 'init', $this );								//  call related module event hooks
+		$this->env->getModules()->callHook( 'Page', 'init', $this );								//  call related module event hooks
 	}
 
 	/**
@@ -132,9 +132,9 @@ class Page extends HtmlPage
 	 *	@param		array		$attributes		Map of style tag attributes
 	 *	@return		self						Instance for method chaining
 	 */
-	public function addCommonStyle( string $fileName, int $level = 5, array $attributes = [] ): self
+	public function addCommonStyle( string $fileName, int $level = Captain::LEVEL_MID, array $attributes = [] ): self
 	{
-		$this->css->common->addUrl( $fileName, $level, $attributes );
+		$this->css->common->addUrl( $fileName, self::interpretLoadLevel( $level ), $attributes );
 		return $this;
 	}
 
@@ -146,9 +146,9 @@ class Page extends HtmlPage
 	 *	@param		array		$attributes		Map of style tag attributes
 	 *	@return		self						Instance for method chaining
 	 */
-	public function addPrimerStyle( string $fileName, int $level = 5, array $attributes = [] ): self
+	public function addPrimerStyle( string $fileName, int $level = Captain::LEVEL_MID, array $attributes = [] ): self
 	{
-		$this->css->primer->addUrl( $fileName, $level, $attributes );
+		$this->css->primer->addUrl( $fileName, self::interpretLoadLevel( $level ), $attributes );
 		return $this;
 	}
 
@@ -160,9 +160,9 @@ class Page extends HtmlPage
 	 *	@param		array		$attributes		Map of style tag attributes
 	 *	@return		self						Instance for method chaining
 	 */
-	public function addThemeStyle( string $fileName, int $level = 5, array $attributes = [] ): self
+	public function addThemeStyle( string $fileName, int $level = Captain::LEVEL_MID, array $attributes = [] ): self
 	{
-		$this->css->theme->addUrl( $fileName, $level, $attributes );
+		$this->css->theme->addUrl( $fileName, self::interpretLoadLevel( $level ), $attributes );
 		return $this;
 	}
 
@@ -191,7 +191,7 @@ class Page extends HtmlPage
 			foreach( $module->files->styles as $style ){											//  iterate module style files
 				if( !empty( $style->load ) && $style->load == "auto" ){								//  style file is to be loaded always
 					$source	= !empty( $style->source ) ? $style->source : NULL;						//  get source attribute if possible
-					$level	= !empty( $style->level ) ? $style->level : 'mid';						//  get load level (top, mid, end), default: mid
+					$level	= self::interpretLoadLevel( $style->level ?? Captain::LEVEL_MID );		//  get load level (top, mid, end), default: mid
 					if( preg_match( "/^[a-z]+:\/\/.+$/", $style->file ) )					//  style file is absolute URL
 						$this->css->theme->addUrl( $style->file, $level );							//  add style file URL
 					else if( $source == 'primer' )													//  style file is in primer theme
@@ -218,8 +218,8 @@ class Page extends HtmlPage
 			foreach( $module->files->scripts as $script ){											//  iterate module script files
 				if( !empty( $script->load ) && $script->load == "auto" ){							//  script file is to be loaded always
 					$source	= empty( $script->source ) ? 'local' : $script->source;
-					$level	= !empty( $script->level ) ? $script->level : 'mid';					//  get load level (top, mid, end, ready), default: mid
-					$top	= !empty( $script->top ) || $level === "top";							//  get flag attribute for appending on top
+					$level	= self::interpretLoadLevel( $script->level ?? Captain::LEVEL_MID );		//  get load level (top, mid, end, ready), default: mid
+					$top	= !empty( $script->top ) || $level === Captain::LEVEL_TOP;				//  get flag attribute for appending on top
 					if( $source == 'lib' ){															//  script file is in script library
 						if( $top )																	//
 							$this->addJavaScript( $pathScriptsLib.$script->file );					//
@@ -293,13 +293,11 @@ class Page extends HtmlPage
 		$this->addBodyClass( 'action-'.$actionKey );
 		$this->addBodyClass( 'site-'.$controllerKey.'-'.$actionKey );
 
-		if( ( $modules = $this->env->getModules() ) ){												//  get module handler resource if existing
-			$data	= [
-				'content'   => $this->getBody(),
-			];
-			$modules->callHook( 'Page', 'build', $this, $data );									//  call related module event hooks
-			$this->setBody( $data['content'] );
-		}
+		$data	= [
+			'content'   => $this->getBody(),
+		];
+		$modules->callHookWithPayload( 'Page', 'build', $this, $data );									//  call related module event hooks
+		$this->setBody( $data['content'] );
 
 		if( $this->packStyleSheets && $this->env->getRequest()->has( 'flushStyleCache') ){
 			$this->css->primer->clearCache();
@@ -328,8 +326,7 @@ class Page extends HtmlPage
 			foreach( explode( " ", trim( $bodyAttributes['class'] ) ) as $class )
 				$classes[]	= $class;
 		$bodyAttributes['class']	= join( ' ', $classes );
-		if( ( $modules = $this->env->getModules() ) )												//  get module handler resource if existing
-			$modules->callHook( 'App', 'respond', $this );											//  call related module event hooks
+		$this->env->getModules()->callHook( 'App', 'respond', $this );				//  call related module event hooks
 		return parent::build( $bodyAttributes, $htmlAttributes );
 	}
 
@@ -345,6 +342,44 @@ class Page extends HtmlPage
 	}
 
 	/**
+	 *	Try to understand given load level.
+	 *	Matches given value into a scale between 0 and 9.
+	 *	Contains fallback for older module versions using level as string (top,mid,end) or boolean.
+	 *	Understands:
+	 *	- integer (limited to [0-9])
+	 *	- NULL or empty string as level 4 (mid).
+	 *	- boolean TRUE as level 1 (top).
+	 *	- boolean FALSE as level 4 (mid).
+	 *	- string {top,head,start} as level 1.
+	 *	- string {mid,center,normal,default} as level 4.
+	 *	- string {end,tail,bottom} as level 8.
+	 *	@static
+	 *	@access		public
+	 *	@param		mixed			$level 			Load level: 0-9 or {top(1),mid(4),end(8)} or {TRUE(1),FALSE(4)} or NULL(4)
+	 *	@return		integer			Level as integer value between 0 and 9
+	 *	@throws		InvalidArgumentException		if level is not if type NULL, boolean, integer or string
+	 *	@throws		RangeException					if given string is not within {top,head,start,mid,center,normal,default,end,tail,bottom}
+	 */
+	public static function interpretLoadLevel( $level ): int
+	{
+		if( is_null( $level ) || !strlen( trim( $level ) ) )
+			return Captain::LEVEL_MID;
+		if( is_int( $level ) || ( is_string( $level ) && preg_match( '/^[0-9]$/', trim( $level ) ) ) )
+			return min( max( abs( $level ), Captain::LEVEL_TOP), Captain::LEVEL_END );
+		if( is_bool( $level ) )
+			return $level ? Captain::LEVEL_HIGH : Captain::LEVEL_LOW;
+		if( !is_string( $level ) )
+			throw new InvalidArgumentException( 'Load level must be integer or string' );
+		if( in_array( $level, array( 'top', 'head', 'start' ) ) )
+			return Captain::LEVEL_HIGHEST;
+		if( in_array( $level, array( 'mid', 'center', 'normal', 'default' ) ) )
+			return Captain::LEVEL_MID;
+		if( in_array( $level, array( 'end', 'tail', 'bottom' ) ) )
+			return Captain::LEVEL_LOWEST;
+		throw new RangeException( 'Invalid load level: '.$level );
+	}
+
+	/**
 	 *	Notes to load a JavaScript in local script folder.
 	 *	@access		public
 	 *	@param		string		$filePath		Script file path within scripts folder
@@ -352,12 +387,12 @@ class Page extends HtmlPage
 	 *	@return		self						Instance for method chaining
 	 *	@throws		RuntimeException			if script file is not existing
 	 */
-	public function loadLocalScript( string $filePath, int $level = 5 ): self
+	public function loadLocalScript( string $filePath, int $level = Captain::LEVEL_MID ): self
 	{
 		$path	= $this->env->getConfig()->get( 'path.scripts' );
 		if( !file_exists( $path.$filePath ) )
 			throw new RuntimeException( 'Local script "'.$filePath.'" not found in folder "'.$path.'"' );
-		$this->js->addUrl( $path.$filePath, $level );
+		$this->js->addUrl( $path.$filePath, self::interpretLoadLevel( $level ) );
 		return $this;
 	}
 
@@ -368,9 +403,9 @@ class Page extends HtmlPage
 	 *	@param		integer		$level			Run level (load order), default: 5 (mid), less: earlier, more: later
 	 *	@return		self						Instance for method chaining
 	 */
-	public function runScript( string $script, int $level = 5 ): self
+	public function runScript( string $script, int $level = Captain::LEVEL_MID ): self
 	{
-		$this->js->addScriptOnReady( $script, $level );
+		$this->js->addScriptOnReady( $script, self::interpretLoadLevel( $level ) );
 		return $this;
 	}
 

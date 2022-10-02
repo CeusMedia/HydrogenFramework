@@ -8,13 +8,13 @@ use CeusMedia\HydrogenFramework\Environment\Resource\Runtime\Profiler as Profile
 
 class Runtime
 {
-	public $profiler;
+	public Profiler $profiler;
 
 	/**	@var	Clock			$clock */
-	protected $clock;
+	protected Clock $clock;
 
 	/**	@var	Environment		$env */
-	protected $env;
+	protected Environment $env;
 
 	/**
 	 *	Constructor.
@@ -95,7 +95,7 @@ class Runtime
 	public function stopLap( int $base = 3, int $round = 3, ?string $label = NULL, ?string $description = NULL ): int
 	{
 		$this->markDeprecation( 'stopLap' );
-		return $this->reach( $base, $round );
+		return $this->reach( $label, $description );
 	}
 
 	public function sleep( $seconds )

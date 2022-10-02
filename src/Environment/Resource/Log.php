@@ -28,13 +28,13 @@ use DateTime;
  */
 class Log
 {
-	const STRATEGY_APP_DEFAULT		= 'app-default';
-	const STRATEGY_APP_TYPED		= 'app-typed';
-	const STRATEGY_MODULE_HOOKS		= 'module-hooks';
-	const STRATEGY_CUSTOM_HOOKS		= 'custom-hooks';
-	const STRATEGY_CUSTOM_CALLBACK	= 'custom-callback';
+	public const STRATEGY_APP_DEFAULT		= 'app-default';
+	public const STRATEGY_APP_TYPED		= 'app-typed';
+	public const STRATEGY_MODULE_HOOKS		= 'module-hooks';
+	public const STRATEGY_CUSTOM_HOOKS		= 'custom-hooks';
+	public const STRATEGY_CUSTOM_CALLBACK	= 'custom-callback';
 
-	const STRATEGIES				= [
+	public const STRATEGIES				= [
 		self::STRATEGY_APP_DEFAULT,
 		self::STRATEGY_APP_TYPED,
 		self::STRATEGY_MODULE_HOOKS,
@@ -43,25 +43,25 @@ class Log
 	];
 
 	/**	@var	Environment			$env				Environment instance */
-	protected $env;
+	protected Environment $env;
 
 	/**	@var	array				$lastStrategies		List of log strategies that end handling on positive result */
-	protected $lastStrategies	= [
+	protected array $lastStrategies	= [
 		self::STRATEGY_APP_DEFAULT,
 	];
 
 	/**	@var	string				$path				Path to log files */
-	protected $path;
+	protected string $path;
 
 	/**	@var	array				$lastStrategies		List of log strategies to use */
-	protected $strategies		= [
+	protected array $strategies		= [
 		self::STRATEGY_MODULE_HOOKS,
 		self::STRATEGY_APP_DEFAULT,
 	];
 
-	protected $customExceptionCallback;
+	protected ?array $customExceptionCallback;
 
-	protected $customLogCallback;
+	protected ?array $customLogCallback;
 
 	/**
 	 *	...
@@ -87,6 +87,7 @@ class Log
 	 */
 	public function log( $type, $message, $context = NULL ): bool
 	{
+		$context		= $context ?? $this;
 		$isHandled		= FALSE;
 		$data			= [
 			'type'			=> $type,
@@ -132,6 +133,7 @@ class Log
 	 */
 	public function logException( Throwable $exception, $context = NULL ): bool
 	{
+		$context		= $context ?? $this;
 		$isHandled		= FALSE;
 		$data			= [
 			'exception'		=> $exception,

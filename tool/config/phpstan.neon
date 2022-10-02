@@ -4,8 +4,9 @@ includes:
 
 parameters:
 	phpVersion: 70400
-	level: 4
+	level: 6
 	paths:
-		- src/
+		- ../../src/
 	checkMissingIterableValueType: false
 	treatPhpDocTypesAsCertain: false
+	reportUnmatchedIgnoredErrors: true

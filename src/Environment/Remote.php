@@ -24,12 +24,13 @@
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+
 namespace CeusMedia\HydrogenFramework\Environment;
 
-use CeusMedia\HydrogenFramework\Environment;
-use CeusMedia\HydrogenFramework\Environment\Remote\Messenger;
-
 use CeusMedia\Common\Loader;
+use CeusMedia\HydrogenFramework\Environment;
+use CeusMedia\HydrogenFramework\Environment\Resource\Messenger as MessengerResource;
+use CeusMedia\HydrogenFramework\Environment\Resource\Remote\Messenger;
 
 /**
  *	Setup for Resource Environment for Hydrogen Applications.
@@ -46,10 +47,7 @@ use CeusMedia\Common\Loader;
 class Remote extends Environment
 {
 	/**	@var	boolean		$hasDatabase		Flag: indicates availability of a database connection */
-	public $hasDatabase		= FALSE;
-
-	/** @var	Messenger	$messenger		Fake messenger */
-	protected $messenger;
+	public bool $hasDatabase		= FALSE;
 
 	/**
 	 *	Constructor.
@@ -61,8 +59,8 @@ class Remote extends Environment
 	{
 //		self::$defaultPaths	= Environment::$defaultPaths;
 		$this->options	= $options;
-		$this->path		= isset( $options['pathApp'] ) ? $options['pathApp'] : getCwd().'/';
-		$this->uri		= isset( $options['pathApp'] ) ? $options['pathApp'] : getCwd().'/';											//
+		$this->path		= $options['pathApp'] ?? getCwd() . '/';
+		$this->uri		= $options['pathApp'] ?? getCwd() . '/';											//
 
 		Loader::registerNew( 'php5', NULL, $this->path.'classes/' );								//  enable autoloader for remote app classes
 

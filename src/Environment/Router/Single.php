@@ -43,8 +43,9 @@ use RuntimeException;
  */
 class Single extends Abstraction implements RouterInterface
 {
-	protected $isSetUp	= FALSE;
-
+	/**
+	 *	@return	void
+	 */
 	public function parseFromRequest()
 	{
 		if( !$this->env->has( 'request' ) )

@@ -1,5 +1,9 @@
 <?php
-class App extends CMF_Hydrogen_Application_Console
+
+use CeusMedia\Common\CLI;
+use CeusMedia\HydrogenFramework\Application\Console as ConsoleApp;
+
+class App extends ConsoleApp
 {
 	public function run()
 	{
@@ -11,12 +15,13 @@ class App extends CMF_Hydrogen_Application_Console
 
 		$commands	= $request->get( 'commands' );
 		switch( current( $commands ) ){
+			case 'index':
 			default:
 				$controller	= new Controller_CLI_Demo( $this->env );
 				$controller->run();
 		}
 
-		$payload	= (object) array( 'key' => 'value' );
+		$payload	= array( 'key' => 'value' );
 		$captain->callHook( 'Demo', 'demonstrateHook', $this, $payload );
 		CLI::out();
 		CLI::out( 'Hook Payload:      '.json_encode( $payload ) );

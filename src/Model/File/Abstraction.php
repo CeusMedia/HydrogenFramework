@@ -5,7 +5,7 @@ namespace CeusMedia\HydrogenFramework\Model\File;
 
 abstract class Abstraction
 {
-	protected $path;
+	protected string $path;
 
 	/**
 	 *	@todo		enable env to be first argument, after thinking twice
@@ -15,13 +15,35 @@ abstract class Abstraction
 		$this->path	= $path;
 	}
 
-	abstract public function create( string $fileName, $content );
+	/**
+	 *	@param		string		$fileName
+	 *	@param		mixed		$content
+	 *	@return		int
+	 */
+	abstract public function create( string $fileName, $content ): int;
 
-	abstract public function delete( string $fileName );
+	/**
+	 *	@param		string		$fileName
+	 *	@return		bool
+	 */
+	abstract public function delete( string $fileName ): bool;
 
-	abstract public function exists( string $fileName );
+	/**
+	 *	@param		string		$fileName
+	 *	@return		bool
+	 */
+	abstract public function exists( string $fileName ): bool;
 
+	/**
+	 *	@param		string		$fileName
+	 *	@return		mixed
+	 */
 	abstract public function read( string $fileName );
 
-	abstract public function update( string $fileName, $content );
+	/**
+	 *	@param		string		$fileName
+	 *	@param		mixed		$content
+	 *	@return		int
+	 */
+	abstract public function update( string $fileName, $content ): int;
 }

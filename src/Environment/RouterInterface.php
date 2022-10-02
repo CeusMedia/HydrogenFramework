@@ -39,11 +39,33 @@ use CeusMedia\HydrogenFramework\Environment;
  */
 interface RouterInterface
 {
+	/**
+	 *	@param		Environment		$env
+	 */
 	public function __construct( Environment $env );
 
+	/**
+	 *	@param		string|NULL		$controller
+	 *	@param		string|NULL		$action
+	 *	@param		array			$arguments
+	 *	@param		array			$parameters
+	 *	@param		string|NULL		$fragmentId
+	 *	@return		string
+	 */
 	public function getAbsoluteUri( string $controller = NULL, string $action = NULL, array $arguments = [], array $parameters = [], string $fragmentId = NULL ): string;
 
+	/**
+	 *	@param		string|NULL		$controller
+	 *	@param		string|NULL		$action
+	 *	@param		array			$arguments
+	 *	@param		array			$parameters
+	 *	@param		string|NULL		$fragmentId
+	 *	@return		string
+	 */
 	public function getRelativeUri( string $controller = NULL, string $action = NULL, array $arguments = [], array $parameters = [], string $fragmentId = NULL ): string;
 
+	/**
+	 *	@return	void
+	 */
 	public function parseFromRequest();
 }

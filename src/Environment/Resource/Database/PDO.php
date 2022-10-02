@@ -44,8 +44,12 @@ use RuntimeException;
  */
 class PDO extends Connection
 {
-	protected $env;
+	protected Environment $env;
 
+	/**
+	 *	@param			Environment		$env
+	 *	@noinspection	PhpMissingParentConstructorInspection
+	 */
 	public function __construct( Environment $env )
 	{
 		$this->env	= $env;
@@ -73,8 +77,8 @@ class PDO extends Connection
 	 *	Sets up connection to database, if configured with database module or main config (deprecated).
 	 *
 	 *	Attention: If using MySQL and UTF-8 the charset must bet set after connection established.
-	 *	Therefore the option MYSQL_ATTR_INIT_COMMAND is set by default, which hinders lazy connection mode (which is not implemented yet).
-	 *	In future, having lazy mode, the config pair "charset" will be realized by implementing a statement queue, which is run before a lazy connection is used the first time.
+	 *	Therefore, the option MYSQL_ATTR_INIT_COMMAND is set by default, which hinders lazy connection mode (which is not implemented yet).
+	 *	In the future, having lazy mode, the config pair "charset" will be realized by implementing a statement queue, which is run before a lazy connection is used the first time.
 	 *
 	 *	Attention: Using statement log means that EVERY statement send to database will be logged.
 	 *	Applications with heavy database use will slow down and create large log files.
@@ -132,7 +136,7 @@ class PDO extends Connection
 		//  --  DATABASE OPTIONS  --  //
 		$driverOptions	= [];																	//  @todo: to be implemented
 		foreach( $options as $key => $value ){														//  iterate all database options
-			if( !defined( "PDO::".$key ) )															//  no PDO constant for for option key
+			if( !defined( "PDO::".$key ) )															//  no PDO constant for option key
 				throw new InvalidArgumentException( 'Unknown constant PDO::'.$key );				//  quit with exception
 			if( is_string( $value ) && preg_match( "/^[A-Z][A-Z0-9_:]+$/", $value ) )				//  option value is a constant name
 				$value	= constant( $value );														//  replace option value string by constant value

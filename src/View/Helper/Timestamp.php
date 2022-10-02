@@ -46,13 +46,13 @@ class Timestamp extends Abstraction
 {
 	protected $timestamp			= NULL;
 
-	protected $stringEmpty			= "";
+	protected string $stringEmpty			= "";
 
-	public static $formatDatetime	= 'Y-m-d H:i:s';
+	public static string $formatDatetime	= 'Y-m-d H:i:s';
 
-	public static $formatDate		= 'Y-m-d';
+	public static string $formatDate		= 'Y-m-d';
 
-	public static $formatTime		= 'H:i:s';
+	public static string $formatTime		= 'H:i:s';
 
 	/**
 	 *	@todo 		enable environment after interface and abstract support $env on construction

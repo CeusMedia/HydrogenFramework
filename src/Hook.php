@@ -1,14 +1,76 @@
 <?php
+
 namespace CeusMedia\HydrogenFramework;
 
+use CeusMedia\Common\Alg\Obj\MethodFactory;
 use CeusMedia\HydrogenFramework\Environment as Environment;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
-use InvalidArgumentException;
-
-use Mail_Abstract;
 
 class Hook
 {
+	/** @var Environment $env */
+	protected Environment $env;
+
+	/** @var object|NULL $context */
+	protected ?object $context;
+
+	/** @var object|NULL $module */
+	protected ?object $module;
+
+	/** @var array $payload */
+	protected array $payload		= [];
+
+	public function __construct( Environment $env, ?object $context = NULL )
+	{
+		$this->setEnv( $env );
+		if( NULL !== $context )
+			$this->setContext( $context );
+	}
+
+	public function getPayload() : ?array
+	{
+		return $this->payload;
+	}
+
+	public function setEnv( Environment $env ): self
+	{
+		$this->env	= $env;
+		return $this;
+	}
+
+	public function setContext( object $context ): self
+	{
+		$this->context	= $context;
+		return $this;
+	}
+
+	public function setModule( object $module ): self
+	{
+		$this->module	= $module;
+		return $this;
+	}
+
+	public function setPayload( array $payload ): self
+	{
+		$this->payload	= $payload;
+		return $this;
+	}
+
+	public function fetch( $method )
+	{
+		if (!is_object($this->context))
+			throw new \RuntimeException('No context set');
+		if (!is_object($this->env))
+			throw new \RuntimeException('No environment set');
+		$factory = new MethodFactory();
+		return call_user_func_array( [get_class( $this ), $method], [
+			$this->env,
+			$this->context,
+			$this->module,
+			& $this->payload
+		] );
+	}
+
 	public static function callHook( Environment $env, string $resource, string $event, ?object $context, array & $payload ): ?bool
 	{
 		return $env->getCaptain()->callHook( $resource, $event, $context, $payload );
@@ -34,13 +96,9 @@ class Hook
 	 *	@param		array			$arguments		List of arguments to add to URL
 	 *	@param		array			$parameters		Map of additional parameters to set in request
 	 *	@return		void			Always returns TRUE to indicate that dispatching hook is done
-	 *	@todo		remove first 2 lines after Env::redirect has been deprecated
 	 */
 	protected static function redirect( WebEnvironment $env, string $controller = 'index', string $action = "index", array $arguments = [], array $parameters = [] )
 	{
-//		$env->redirect( $controller, $action, $arguments, $parameters );
-//		return TRUE;
-
 		$request	= $env->getRequest();
 		$request->set( '__controller', $controller );
 		$request->set( '__action', $action );
