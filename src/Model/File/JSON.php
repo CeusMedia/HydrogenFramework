@@ -14,12 +14,7 @@ class JSON extends Abstraction
 	 */
 	public function create( string $fileName, $content ): int
 	{
-//		@todo enable this line after abstract file model has env support
-//		if( $this->env->getPhp()->version->isAtLeast( '5.4.0' ) )
-		if( version_compare( phpversion(), '5.4.0' ) >= 0 )
-			$json		= json_encode( $content, JSON_PRETTY_PRINT );
-		else
-			$json		= JsonPretty::print( json_encode( $content ) );
+		$json	= json_encode( $content, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR );
 		return FileWriter::save( $this->path.$fileName, $json );
 	}
 
@@ -58,14 +53,7 @@ class JSON extends Abstraction
 	public function update( string $fileName, $content ): int
 	{
 		$current	= $this->read( $fileName );
-//		@todo enable this line after abstract file model has env support
-//		if( $this->env->getPhp()->version->isAtLeast( '5.4.0' ) )
-		if( version_compare( phpversion(), '5.4.0' ) >= 0 )
-			$json		= json_encode( $content, JSON_PRETTY_PRINT );
-		else
-			$json		= JsonPretty::print( json_encode( $content ) );
-		if( $json == $current )
-			return 0;
+		$json		= json_encode( $content, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR );
 		return FileWriter::save( $this->path.$fileName, $json );
 	}
 }

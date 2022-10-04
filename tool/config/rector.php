@@ -13,6 +13,10 @@ use Rector\Php73\Rector\FuncCall\JsonThrowOnErrorRector;
 use Rector\Php73\Rector\FuncCall\RegexDashEscapeRector;
 use Rector\Set\ValueObject\LevelSetList;
 
+use Rector\Php80\Rector\Class_\ClassPropertyAssignToConstructorPromotionRector;
+use Rector\Php80\Rector\FunctionLike\UnionTypesRector;
+use Rector\Php80\Rector\FunctionLike\MixedTypeRector;
+
 return static function (RectorConfig $rectorConfig): void {
 	$rectorConfig->paths([
 		__DIR__ . '/../../src',
@@ -23,8 +27,9 @@ return static function (RectorConfig $rectorConfig): void {
 
 	// define sets of rules
 	$rectorConfig->sets([
-		LevelSetList::UP_TO_PHP_73,
-		LevelSetList::UP_TO_PHP_74,
+//		LevelSetList::UP_TO_PHP_73,
+//		LevelSetList::UP_TO_PHP_74,
+		LevelSetList::UP_TO_PHP_80,
 	]);
 
 	$skipFolders	= [];
@@ -44,6 +49,11 @@ return static function (RectorConfig $rectorConfig): void {
 		JsonThrowOnErrorRector::class,
 		IsCountableRector::class,
 		RegexDashEscapeRector::class,
+		// Set 8.0
+		ClassPropertyAssignToConstructorPromotionRector::class,
+		UnionTypesRector::class,
+		MixedTypeRector::class,
+
 	];
 	$rectorConfig->skip(array_merge($skipFolders, $skipFiles, $skipRules));
 };
