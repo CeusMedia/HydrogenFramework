@@ -60,11 +60,11 @@ class JavaScript
 
 	protected string $pathCache			= "cache/";
 
-	protected string $prefix			= "";
+	protected string $prefix			= '';
 
-	protected string $suffix			= "";
+	protected string $suffix			= '';
 
-	protected string $revision;
+	protected ?string $revision			= NULL;
 
 	/**	@var	array					$scripts			List of JavaScript blocks */
 	protected array $scripts			= [];

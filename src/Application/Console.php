@@ -44,6 +44,9 @@ class Console extends Abstraction
 	/**	@var		string								$classEnvironment		Class Name of Application Environment to build */
 	public static string $classEnvironment				= ConsoleEnvironment::class;
 
+	/**	@var		ConsoleEnvironment					$env					Application Environment Object */
+	protected ConsoleEnvironment $env;
+
 	public function __construct( ConsoleEnvironment $env = NULL )
 	{
 		parent::__construct( $env );

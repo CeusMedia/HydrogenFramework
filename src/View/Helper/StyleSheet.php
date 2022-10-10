@@ -50,16 +50,16 @@ use CeusMedia\HydrogenFramework\Environment\Resource\Captain as CaptainResource;
  */
 class StyleSheet
 {
-	protected string $pathBase			= "";
-	protected string $pathCache			= "";
-	protected string $prefix			= "";
-	protected string $suffix			= "";
-	protected string $revision;
+	protected string $pathBase			= '';
+	protected string $pathCache			= '';
+	protected string $prefix			= '';
+	protected string $suffix			= '';
+	protected ?string $revision			= NULL;
 	/**	@var	array					$styles		List of StyleSheet blocks */
 	protected array $styles				= [];
 	protected array $urls				= [];
 	protected bool $useCompression		= FALSE;
-	public string $indent				= "    ";
+	public string $indent				= '    ';
 
 	public function __construct( ?string $basePath = NULL )
 	{
