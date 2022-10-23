@@ -14,6 +14,7 @@ use CeusMedia\HydrogenFramework\Deprecation;
 use CeusMedia\Common\FS\File\RecursiveRegexFilter as RecursiveRegexFileFilter;
 use ReflectionClass;
 use ReflectionMethod;
+use SplFileObject;
 use stdClass;
 
 /**
@@ -60,6 +61,7 @@ class Disclosure
 		$classes	= [];
 		$path		= realpath( $path );
 		$index		= new RecursiveRegexFileFilter( $path, '/^[^_].+\.'.$options['fileExtension'].'$/' );
+		/** @var SplFileObject $entry */
 		foreach( $index as $entry ){
 			$fileName	= preg_replace( '@^'.$path.'/@', '', $entry->getPathname() );
 			$fileBase	= preg_replace( '@\.'.$options['fileExtension'].'$@', '', $fileName );

@@ -36,6 +36,7 @@ use CeusMedia\HydrogenFramework\Environment\Resource\Module\Library\Abstraction 
 use Countable;
 use Exception;
 use RuntimeException;
+use SplFileObject;
 
 /**
  *	Handler for local module library.
@@ -196,6 +197,7 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 				'count'		=> 0,
 			);
 		$index	= new FileRegexIndex( $this->modulePath, '/^[a-z0-9_]+\.xml$/i' );
+		/** @var SplFileObject $entry */
 		foreach( $index as $entry ){
 			$moduleId		= preg_replace( '/\.xml$/i', '', $entry->getFilename() );
 			$moduleFile		= $this->modulePath.$moduleId.'.xml';

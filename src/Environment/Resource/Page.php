@@ -26,6 +26,7 @@
  */
 namespace CeusMedia\HydrogenFramework\Environment\Resource;
 
+use CeusMedia\Common\ADT\Collection\Dictionary;
 use CeusMedia\Common\UI\HTML\PageFrame as HtmlPage;
 use CeusMedia\Common\UI\HTML\Tag as HtmlTag;
 use CeusMedia\HydrogenFramework\Environment as Environment;
@@ -171,6 +172,7 @@ class Page extends HtmlPage
 	 */
 	public function applyModules(): void
 	{
+		/** @var Dictionary $config */
 		$config		= $this->env->getConfig()->getAll( 'module.', TRUE );			//  dictionary of (user modified) module settings
 		$modules	= $this->env->getModules();														//  get module handler resource
 		if( 0 === $modules->count() )																//  no active modules found

@@ -1,7 +1,12 @@
 <?php
-class Test_Environment_Resource_LogicPool extends PHPUnit\Framemwork\TestCase{
+namespace CeusMedia\HydrogenFrameworkTest\Environment\Resource;
 
-	public function testA(){
+use PHPUnit\Framework\TestCase;
+
+class LogicPool extends TestCase
+{
+	public function testA(): void
+	{
 		$this->assertTrue( TRUE );
 	}
 }

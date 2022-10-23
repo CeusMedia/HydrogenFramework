@@ -62,7 +62,7 @@ class Remote extends Environment
 		$this->path		= $options['pathApp'] ?? getCwd() . '/';
 		$this->uri		= $options['pathApp'] ?? getCwd() . '/';											//
 
-		Loader::registerNew( 'php5', NULL, $this->path.'classes/' );								//  enable autoloader for remote app classes
+		Loader::registerNew( 'php', NULL, $this->path.'classes/' );								//  enable autoloader for remote app classes
 
 		self::$configFile	= $this->path."/config/config.ini";
 

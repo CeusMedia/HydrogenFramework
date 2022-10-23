@@ -15,6 +15,8 @@ use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
 use CeusMedia\Common\Alg\Text\CamelCase as CamelCase;
 use CeusMedia\HydrogenFramework\Environment;
 use CeusMedia\HydrogenFramework\Logic;
+//use CeusMedia\HydrogenFramework\Logic\Multiple as MultipleLogic;
+//use CeusMedia\HydrogenFramework\Logic\Singleton as SingletonLogic;
 use DomainException;
 use InvalidArgumentException;
 use ReflectionException;
@@ -36,7 +38,7 @@ class LogicPool
 	/**	@var	Environment				$env		Environment object */
 	protected Environment $env;
 
-	/**	@var	array<string,object>	$pool		Map of logic class names or instances */
+	/**	@var	array<string|object>	$pool		Map of logic class names or instances */
 	protected array $pool				= [];
 
 	/**
@@ -248,10 +250,11 @@ class LogicPool
 		// @todo activate this line after deprecation of old logic classes
 //		throw new InvalidArgumentException( 'Given class "'.$className.'" is not a valid logic class' );
 		$arguments	= array( $this->env );
-		if( is_subclass_of( $className, 'CeusMedia\HydrogenFramework\Logic\Singleton' ) )
-			return call_user_func_array( array( $className, 'getInstance' ), $arguments );
-		if( is_subclass_of( $className, 'CeusMedia\HydrogenFramework\Logic\Multiple' ) )
-			return ObjectFactory::createObject( $className, $arguments );
+//		if( is_subclass_of( $className, SingletonLogic::class ) )
+//			if( is_callable( [$className, 'getInstance'] ) )
+//				return call_user_func_array( [$className, 'getInstance'], $arguments );
+//		if( is_subclass_of( $className, MultipleLogic::class ) )
+//			return ObjectFactory::createObject( $className, $arguments );
 		return ObjectFactory::createObject( $className, $arguments );
 	}
 

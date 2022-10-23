@@ -105,16 +105,16 @@ class Console extends Environment
 	 */
 	protected function detectSelf(): void
 	{
-		$this->url = $this->config->get( 'app.url' );												//  get application URL from config
+		$this->url = $this->config->get( 'app.url' );											//  get application URL from config
 		if( !$this->url )																			//  application URL not set
-			$this->url = $this->config->get( 'app.base.url' );										//  get application base URL from config
+			$this->url = $this->config->get( 'app.base.url' );									//  get application base URL from config
 		if( !$this->url )																			//  application base URL not set
 			throw new RuntimeException( 'Please define app.base.url in config.ini, first!' );		//  quit with exception
 
-		$this->scheme	= parse_url( $this->url, PHP_URL_SCHEME );									//  note used URL scheme
-		$this->host		= parse_url( $this->url, PHP_URL_HOST );									//  note requested HTTP host name
-		$this->port		= parse_url( $this->url, PHP_URL_PORT );									//  note requested HTTP port
-		$this->path		= $this->config->get( 'app.base.path' );									//  note absolute working path
+		$this->scheme	= parse_url( $this->url, PHP_URL_SCHEME );						//  note used URL scheme
+		$this->host		= parse_url( $this->url, PHP_URL_HOST );							//  note requested HTTP host name
+		$this->port		= parse_url( $this->url, PHP_URL_PORT );							//  note requested HTTP port
+		$this->path		= $this->config->get( 'app.base.path' );								//  note absolute working path
 	}
 
 //	protected function initConfiguration(){

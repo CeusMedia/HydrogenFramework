@@ -177,6 +177,7 @@ class Captain
 //					$result	= call_user_func_array( $callback, $args );
 
 					$this->env->getRuntime()->reach( '<!--Resource_Module_Library_Local::call-->Hook: '.$event.'@'.$resource.': '.$module->id );
+					/** @var string $stdout */
 					$stdout	= ob_get_clean();
 					if( strlen( trim( $stdout ) ) )
 						if( $this->env->has( 'messenger' ) )

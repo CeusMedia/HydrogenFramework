@@ -191,11 +191,11 @@ class Reader
 		if( !$xml->author )																			//  no author nodes existing
 			return FALSE;
 		foreach( $xml->author as $author ){															//  iterate author nodes
-			$object->authors[]	= (object) array(
+			$object->authors[]	= (object) [
 				'name'	=> (string) $author,
 				'email'	=> self::castNodeAttributes( $author, 'email' ),
 				'site'	=> self::castNodeAttributes( $author, 'site' )
-			);
+			];
 		}
 		return TRUE;
 	}
@@ -212,11 +212,11 @@ class Reader
 		if( !$xml->company )																		//  no company nodes existing
 			return FALSE;
 		foreach( $xml->company as $company ){														//  iterate company nodes
-			$object->companies[]	= (object) array(
+			$object->companies[]	= (object) [
 				'name'		=> (string) $company,
 				'email'		=> self::castNodeAttributes( $company, 'email' ),
 				'site'		=> self::castNodeAttributes( $company, 'site' )
-			);
+			];
 		}
 		return TRUE;
 	}
@@ -262,10 +262,10 @@ class Reader
 	{
 		if( !$xml->deprecation )																	//  deprecation node is not existing
 			return FALSE;
-		$object->deprecation	= (object) array(													//  note deprecation object
+		$object->deprecation	= (object) [														//  note deprecation object
 			'message'			=> (string) $xml->deprecation,										//  ... with message
-			'url'				=> 	self::castNodeAttributes( $xml->deprecation, 'url' ),			//  ... with follow-up URL, if set
-		);
+			'url'				=> self::castNodeAttributes( $xml->deprecation, 'url' ),	//  ... with follow-up URL, if set
+		];
 		return TRUE;
 	}
 
@@ -314,8 +314,10 @@ class Reader
 		$frameworks	= self::castNodeAttributes( $xml, 'frameworks', 'string', 'Hydrogen:<0.9' );
 		if( !strlen( trim( $frameworks ) ) )
 			return FALSE;
+		/** @var array $list */
 		$list		= preg_split( '/\s*(,|\|)\s*/', $frameworks );
 		foreach( $list as $listItem ){
+			/** @var array $parts */
 			$parts	= preg_split( '/\s*(:|@)\s*/', $listItem );
 			if( count( $parts ) < 2 )
 				$parts[1]	= '*';
@@ -338,10 +340,10 @@ class Reader
 		foreach( $xml->hook as $hook ){																//  iterate hook nodes
 			$resource	= self::castNodeAttributes( $hook, 'resource' );
 			$event		= self::castNodeAttributes( $hook, 'event' );
-			$object->hooks[$resource][$event][]	= (object) array(
+			$object->hooks[$resource][$event][]	= (object) [
 				'level'	=> self::castNodeAttributes( $hook, 'level', 'int', 5 ),
 				'hook'	=> trim( (string) $hook, ' ' ),
-			);
+			];
 		}
 		return TRUE;
 	}
@@ -359,7 +361,7 @@ class Reader
 			return FALSE;
 		foreach( $xml->job as $job ){																//  iterate job nodes
 			$callable		= explode( '::', (string) $job, 2 );
-			$object->jobs[]	= (object) array(
+			$object->jobs[]	= (object) [
 				'id'			=> self::castNodeAttributes( $job, 'id' ),
 				'class'			=> $callable[0],
 				'method'		=> $callable[1],
@@ -370,7 +372,7 @@ class Reader
 				'multiple'		=> self::castNodeAttributes( $job, 'multiple', 'bool' ),
 				'deprecated'	=> self::castNodeAttributes( $job, 'deprecated' ),
 				'disabled'		=> self::castNodeAttributes( $job, 'disabled' ),
-			);
+			];
 		}
 		return TRUE;
 	}
@@ -387,11 +389,11 @@ class Reader
 		if( !$xml->license )																		//  no license nodes existing
 			return FALSE;
 		foreach( $xml->license as $license ){														//  iterate license nodes
-			$object->licenses[]	= (object) array(
+			$object->licenses[]	= (object) [
 				'label'			=> (string) $license,
 				'source'		=> self::castNodeAttributes( $license, 'source' ),
 				'title'			=> self::castNodeAttributes( $license, 'title' ),
-			);
+			];
 		}
 		return TRUE;
 	}

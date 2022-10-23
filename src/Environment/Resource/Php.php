@@ -64,7 +64,7 @@ class Php
 	 */
 	public function applyConfig()
 	{
-		$settings	= $this->env->getConfig()->getAll( 'php.', TRUE );			//  get PHP configuration from config file
+		$settings	= $this->env->getConfig()->getAll( 'php.', TRUE );				//  get PHP configuration from config file
 		foreach( $settings as $key => $value ){														//  iterate set PHP configuration pairs
 			try{																					//  try since there could be unknown constants
 				$this->applyConfigPair( $key, $value );												//  apply config pair to PHP configuration
@@ -77,24 +77,26 @@ class Php
 
 	/**
 	 *	...
-	 *	@param		string		$key
-	 *	@param		string		$value
+	 *	@param		string				$key
+	 *	@param		string|int|float	$value
 	 *	@return		void
 	 */
-	public function applyConfigPair( string $key, string $value )
+	public function applyConfigPair( string $key, $value )
 	{
 		if( ini_get( $key ) === FALSE )
 			throw new RangeException( 'Unknown PHP configuration key: '.$key );
-		if( preg_match( '/^([A-Z_]+(\s*,\s*))+$/', $value ) ){								//  value is list of constants
+		if( preg_match( '/^([A-Z_]+(\s*,\s*))+$/', (string) $value ) ){						//  value is list of constants
 			$intVal = 0;																			//  prepare empty integer value
-			foreach( preg_split( '/\s*,\s*/', $value ) as $item ){							//  iterate found constants
+			/** @var array<string> $parts */
+			$parts	= preg_split( '/\s*,\s*/', (string) $value );
+			foreach( $parts as $item ){																//  iterate found constants
 				if( !Constant::has( $item ) )														//  constant is undefined
 					throw new RangeException( 'Unknown global constant: '.$item );			//  quit with exception
 				$intVal	|= Constant::get( $item );													//  otherwise apply constant
 			}
 			$value	= $intVal;																		//  set config value by constants
 		}
-		ini_set( $key, $value );																	//  apply to PHP configuration
+		ini_set( $key, (string) $value );															//  apply to PHP configuration
 	}
 
 	/**

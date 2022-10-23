@@ -9,27 +9,27 @@ class Config
 
 	public string $key;
 
-	/** @var	string|int|float	$value */
+	/** @var	string|int|float|bool	$value */
 	public $value;
 
-	/** @var	string|NULL			$type */
+	/** @var	string|NULL				$type */
 	public ?string $type;
 
 	public ?array $values;
 
-	/** @var	bool				$mandatory */
-	public bool $mandatory			= FALSE;
+	/** @var	bool					$mandatory */
+	public bool $mandatory				= FALSE;
 
-	public ?string $protected		= NULL;
+	public ?string $protected			= NULL;
 
-	/** @var	string|NULL			$title */
+	/** @var	string|NULL				$title */
 	public ?string $title;
 
 	/**
-	 *	@param		string				$key
-	 *	@param		string|int|float	$value
-	 *	@param		string|NULL			$type
-	 *	@param		string|NULL			$title
+	 *	@param		string					$key
+	 *	@param		string|int|float|bool	$value
+	 *	@param		string|NULL				$type
+	 *	@param		string|NULL				$title
 	 */
 	public function __construct( string $key, $value, ?string $type = NULL, ?string $title = NULL )
 	{

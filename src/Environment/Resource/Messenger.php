@@ -109,6 +109,7 @@ class Messenger
 	 *	@param		bool			$clear			Flag: clear stack in session after rendering
 	 *	@param		bool			$linkResources	Flag: try to link resources in message
 	 *	@return		string
+	 *	@noinspection PhpDocMissingThrowsInspection
 	 */
 	public function buildMessages( string $timeFormat = NULL, bool $clear = TRUE, bool $linkResources = FALSE ): string
 	{
@@ -122,7 +123,8 @@ class Messenger
 					$message['message']	= preg_replace( '/(http.+)("|\'| )/U', '<a href="\\1">\\1</a>\\2', $message['message'] );
 
 				/*  (avoid duplicate messages which were collected during several redirects)  */
-				$id	= md5( json_encode( array( $message['type'], $message['message'] ) ) );			//  calculate message ID
+				/** @noinspection PhpUnhandledExceptionInspection */
+				$id	= md5( json_encode( [$message['type'], $message['message']], JSON_THROW_ON_ERROR ) );			//  calculate message ID
 				if( in_array( $id, $ids ) )															//  ID has been calculated before
 					continue;																		//  skip this duplicate message
 				$ids[]	= $id;																		//  note calculated ID

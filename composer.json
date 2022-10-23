@@ -33,7 +33,8 @@
   },
   "autoload": {
     "psr-4": {
-      "CeusMedia\\HydrogenFramework\\": "src/"
+      "CeusMedia\\HydrogenFramework\\": "src/",
+      "CeusMedia\\HydrogenFrameworkTest\\": "test/"
     },
     "files": ["compat.php"]
   },

@@ -18,7 +18,7 @@ class Web
 
 	public ?string $configFile				= NULL;
 
-	public string $classFileExtension		= 'php5';
+	public string $classFileExtension		= 'php';
 
 	public ?string $classRouter				= NULL;
 

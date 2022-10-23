@@ -91,13 +91,15 @@ abstract class Ajax
 	 */
 	protected function respondData( $data, int $statusCode = 200, ?string $mimeType = NULL ): int
 	{
-		$response	= array(
+		$response	= [
 			'status'	=> 'data',
 			'data'		=> $data,
-		);
-		if( ob_get_level() && strlen( trim( $dev = ob_get_clean() ) ) )
+		];
+		$dev	= (string) ob_get_clean();
+		if( ob_get_level() && strlen( trim( $dev ) ) )
 			$response['dev']	= $dev;
-		return $this->respond( json_encode( $response ), $statusCode, $mimeType );
+		$json	= json_encode( $response, JSON_THROW_ON_ERROR );
+		return $this->respond( $json, $statusCode, $mimeType );
 	}
 
 	/**
@@ -112,14 +114,16 @@ abstract class Ajax
 	 */
 	protected function respondError( $code, ?string $message = NULL, int $statusCode = 412, ?string $mimeType = NULL ): int
 	{
-		$response	= array(
+		$response	= [
 			'status'	=> 'error',
 			'code'		=> $code,
 			'message'	=> $message,
-		);
-		if( ob_get_level() && strlen( trim( $dev = ob_get_clean() ) ) )
+		];
+		$dev	= (string) ob_get_clean();
+		if( ob_get_level() && strlen( trim( $dev ) ) )
 			$response['dev']	= $dev;
-		return $this->respond( json_encode( $response ), $statusCode, $mimeType );
+		$json	= json_encode( $response,JSON_THROW_ON_ERROR );
+		return $this->respond( $json, $statusCode, $mimeType );
 	}
 
 	/**
@@ -133,16 +137,18 @@ abstract class Ajax
 	 */
 	protected function respondException( Throwable $exception, int $statusCode = 500, ?string $mimeType = NULL ): int
 	{
-		$response	= array(
+		$response	= [
 			'status'	=> 'exception',
 			'code'		=> $exception->getCode(),
 			'message'	=> $exception->getMessage(),
 			'file'		=> $exception->getFile(),
 			'line'		=> $exception->getLine(),
-		);
-		if( ob_get_level() && strlen( trim( $dev = ob_get_clean() ) ) )
+		];
+		$dev	= (string) ob_get_clean();
+		if( ob_get_level() && strlen( trim( $dev ) ) )
 			$response['dev']	= $dev;
-		return $this->respond( json_encode( $response ), $statusCode, $mimeType );
+		$json	= json_encode( $response, JSON_THROW_ON_ERROR );
+		return $this->respond( $json, $statusCode, $mimeType );
 	}
 
 	/**
@@ -163,11 +169,12 @@ abstract class Ajax
 		$this->response->setBody( $content );
 		$this->response->setStatus( $statusCode );
 
-		if( ob_get_level() && strlen( trim( $dev = ob_get_clean() ) ) )
+		$dev	= (string) ob_get_clean();
+		if( ob_get_level() && strlen( trim( $dev ) ) )
 			$this->response->addHeaderPair( 'X-Ajax-Dev', base64_encode( $dev ) );
 
 		$sender	= new HttpResponseSender( $this->response );
-	    $sender->setCompression( $this->compressionMethod );
-	    return $sender->send( $this->sendLengthHeader, $this->exitAfterwards );
+		$sender->setCompression( $this->compressionMethod );
+		return $sender->send( $this->sendLengthHeader, $this->exitAfterwards );
 	}
 }

@@ -42,6 +42,7 @@ use Psr\SimpleCache\InvalidArgumentException;
 
 use Exception;
 use RuntimeException;
+use SplFileObject;
 
 /**
  *	Handler for module source library.
@@ -129,9 +130,11 @@ class Source extends AbstractLibrary implements LibraryInterface
 		$list	= [];
 		$index	= new RecursiveFileIndex( $this->source->path, 'module.xml' );
 		$this->env->getRuntime()->reach( 'Hydrogen: Environment_Resource_Module_Library_Source::scanFolder: init' );
+		/** @var SplFileObject $entry */
 		foreach( $index as $entry ){
 			if( preg_match( "@/templates$@", $entry->getPath() ) )
 				continue;
+			/** @var string $id */
 			$id		= preg_replace( '@^'.$this->source->path.'@', '', $entry->getPath() );
 			$id		= str_replace( '/', '_', $id );
 
