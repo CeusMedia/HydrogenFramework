@@ -353,14 +353,16 @@ class Web extends Environment
 			}
 		}
 
-		$this->scheme	= getEnv( "HTTPS" ) ? 'https' : 'http';										//  note used URL scheme
+		$this->scheme	= getEnv( "HTTPS" ) ? 'https' : 'http';								//  note used URL scheme
 		$defaultPort	= $this->scheme === 'https' ? 443 : 80;										//  default port depends on HTTP scheme
 		$serverPort		= (int) getEnv( 'SERVER_PORT' );
-		$this->host		= preg_replace( "/:[0-9]{2,5}$/", "", getEnv( 'HTTP_HOST' ) );				//  note requested HTTP host name without port
+		$serverHost		= (string) getEnv( 'HTTP_HOST' );
+		$this->host		= preg_replace( "/:\d{2,5}$/", '', $serverHost );		//  note requested HTTP host name without port
 		$this->port		= $serverPort === $defaultPort ? '' : (string) $serverPort;					//  note requested HTTP port
 		$hostWithPort	= $this->host.( $this->port ? ':'.$this->port : '' );						//  append port if different from default port
-		$this->root		= getEnv( 'DOCUMENT_ROOT' );											//  note document root of web server or virtual host
-		$this->path		= preg_replace( "@^/$@", "", dirname( getEnv( 'SCRIPT_NAME' ) ) )."/";		//  note requested working path
+		$this->root		= (string) getEnv( 'DOCUMENT_ROOT' );									//  note document root of web server or virtual host
+		$path			= dirname( (string) getEnv( 'SCRIPT_NAME' ) );
+		$this->path		= preg_replace( "@^/$@", "", $path )."/";		//  note requested working path
 		$this->url		= $this->scheme.'://'.$hostWithPort.$this->path;							//  note calculated base application URI
 		$this->uri		= $this->root.$this->path;													//  note calculated absolute base application path
 		$this->runtime->reach( 'env: self detection' );
@@ -380,8 +382,9 @@ class Web extends Environment
 //		$configHost	= self::$defaultPaths['config'].getEnv( 'HTTP_HOST' ).'.ini';
 		$configHost	= $this->config->get( 'path.config' ).getEnv( 'HTTP_HOST' ).'.ini';
 		if( file_exists( $configHost ) ){															//  config file for host is existing
-			foreach( parse_ini_file( $configHost, FALSE ) as $key => $value ){						//  read host config pairs
-				if( preg_match( '/^[0-9.]+$/', $value ) )											//  value is integer or float
+			$lines	= (array) parse_ini_file( $configHost, FALSE );					//  read host config pairs
+			foreach( $lines as $key => $value ){													//  iterate pairs
+				if( preg_match( '/^[\d.]+$/', $value ) )									//  value is integer or float
 					$value	= (float) $value;														//  convert value to numeric
 				else if( in_array( strtolower( $value ), array( "yes", "true" ) ) )					//  value *means* yes
 					$value	= TRUE;																	//  change value to boolean TRUE

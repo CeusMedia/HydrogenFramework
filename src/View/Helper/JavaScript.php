@@ -396,7 +396,7 @@ class JavaScript
 					if( !$this->useCompression ){
 						$script		= preg_replace( "/;+$/", ";", trim( $script ) );
 						if( preg_match( "/\r?\n/", $script ) ){
-							$lines	= preg_split( "/\r?\n/", PHP_EOL.$script.PHP_EOL );
+							$lines	= (array) preg_split( "/\r?\n/", PHP_EOL.$script.PHP_EOL );
 							$script	= join( PHP_EOL."\t", $lines );
 						}
 					}

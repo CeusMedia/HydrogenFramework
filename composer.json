@@ -39,8 +39,8 @@
   },
   "minimum-stability": "dev",
   "scripts": {
-    "dev:install": "composer install --dev --quiet",
-    "dev:update": "composer update --dev",
+    "dev:install": "composer install --quiet",
+    "dev:update": "composer update",
     "incomplete:dev:create-docs": [
       "@dev:install",
       "php vendor/ceus-media/doc-creator/doc-creator.php --config-file=tool/config/doc.xml"

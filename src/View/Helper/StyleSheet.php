@@ -281,10 +281,11 @@ class StyleSheet
 		$combiner	= new CssCombiner();															//  load CSS combiner for nested CSS files
 		$compressor	= new CssCompressor();															//  load CSS compressor
 		$relocator	= new CssRelocator();															//  load CSS relocator
-		$pathRoot	= getEnv( 'DOCUMENT_ROOT' );													//  get server document root path for CSS relocator
-		$pathSelf	= str_replace( $pathRoot, '', dirname( getEnv( 'SCRIPT_FILENAME' ) ) );			//  get path relative to document root for symbolic link map
+		$pathRoot	= (string) getEnv( 'DOCUMENT_ROOT' );										//  get server document root path for CSS relocator
+		$pathSelf	= dirname( (string) getEnv( 'SCRIPT_FILENAME' ) );
+		$pathSelf	= str_replace( $pathRoot, '', $pathSelf );								//  get path relative to document root for symbolic link map
 
-		$symlinks	= [];																		//  prepare map of symbolic links for CSS relocator
+		$symlinks	= [];																			//  prepare map of symbolic links for CSS relocator
 		foreach( FolderLister::getFolderList( 'themes' ) as $item )									//  iterate theme folders
 			if( is_link( ( $path = $item->getPathname() ) ) )										//  if theme folder is a link
 				$symlinks['/'.$pathSelf.'/themes/'.$item->getFilename()] = realpath( $path );		//  not symbolic link

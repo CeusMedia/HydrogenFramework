@@ -5,6 +5,7 @@ namespace CeusMedia\HydrogenFramework;
 use CeusMedia\Common\Alg\Obj\MethodFactory;
 use CeusMedia\HydrogenFramework\Environment as Environment;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
+use ReflectionException;
 use RuntimeException;
 
 class Hook
@@ -57,19 +58,23 @@ class Hook
 		return $this;
 	}
 
+	/**
+	 *	@param		string		$method
+	 *	@return		bool|null
+	 *	@throws		ReflectionException
+	 */
 	public function fetch( string $method ): ?bool
 	{
 		if (!is_object($this->context))
 			throw new RuntimeException('No context set');
 		if (!is_object($this->env))
 			throw new RuntimeException('No environment set');
-		$factory = new MethodFactory();
-		return call_user_func_array( [get_class( $this ), $method], [
+		return MethodFactory::staticCallClassMethod( get_class( $this ), $method, [
 			$this->env,
 			$this->context,
 			$this->module,
 			& $this->payload
-		] );
+		]);
 	}
 
 	public static function callHook( Environment $env, string $resource, string $event, ?object $context, array & $payload ): ?bool
@@ -131,7 +136,7 @@ class Hook
 	 *	@return		void
 	 *	@todo		check for better HTTP status
 	 */
-	protected static function relocate( WebEnvironment $env, string $uri, int $status = NULL )
+	protected static function relocate( WebEnvironment $env, string $uri, int $status = NULL ): void
 	{
 		static::restart( $env, $uri, $status, TRUE );
 	}
@@ -158,7 +163,7 @@ class Hook
 	 *	@param		integer			$modeFrom			How to handle FROM parameter from request or for new request, not handled atm
 	 *	@return		void
 	 */
-	protected static function restart( WebEnvironment $env, string $uri, int $status = NULL, bool $allowForeignHost = FALSE, int $modeFrom = 0 )
+	protected static function restart( WebEnvironment $env, string $uri, int $status = NULL, bool $allowForeignHost = FALSE, int $modeFrom = 0 ): void
 	{
 		$env->restart( $uri, $status, $allowForeignHost, $modeFrom );
 	}

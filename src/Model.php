@@ -29,7 +29,7 @@ namespace CeusMedia\HydrogenFramework;
 
 use CeusMedia\Common\ADT\Collection\Dictionary as Dictionary;
 use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
-use CeusMedia\HydrogenFramework\Environment;
+use CeusMedia\Database\PDO\Connection as PdoConnection;
 use CeusMedia\Database\PDO\Table\Writer as DatabaseTableWriter;
 
 use DomainException;
@@ -91,8 +91,11 @@ class Model
 	public function __construct( Environment $env, ?string $id = NULL )
 	{
 		$this->setEnv( $env );
+		$connection	= $this->env->getDatabase();
+		if( !$connection instanceof PdoConnection )
+			throw new RuntimeException( 'Set up database is not a fitting PDO connection' );
 		$this->table	= new DatabaseTableWriter(
-			$this->env->getDatabase(),
+			$connection,
 			$this->prefix.$this->name,
 			$this->columns,
 			$this->primaryKey,
@@ -181,7 +184,7 @@ class Model
 	{
 		$this->table->focusPrimary( (int) $id );
 		$result	= 0;
-		if( count( $this->table->get( FALSE ) ) )
+		if( $this->table->get() !== NULL )
 			$result	= $this->table->update( $data, $stripTags );
 		$this->table->defocus();
 		$this->cache->remove( $this->cacheKey.$id );
@@ -198,6 +201,7 @@ class Model
 	 */
 	public function editByIndices( array $indices, array $data, bool $stripTags = TRUE ): int
 	{
+		/** @var array $indices */
 		$indices	= $this->checkIndices( $indices );
 		return $this->table->updateByConditions( $data, $indices, $stripTags );
 	}
@@ -211,11 +215,12 @@ class Model
 	 */
 	public function get( string $id, string $field = '' )
 	{
+		/** @var string $field */
 		$field	= $this->checkField( $field );
 		$data	= $this->cache->get( $this->cacheKey.$id );
 		if( !$data ){
 			$this->table->focusPrimary( (int) $id );
-			$data	= $this->table->get( TRUE );
+			$data	= $this->table->get();
 			$this->table->defocus();
 			$this->cache->set( $this->cacheKey.$id, $data );
 		}
@@ -259,9 +264,10 @@ class Model
 	public function getAllByIndex( string $key, $value, array $orders = [], array $limits = [], array $fields = [], bool $strict = FALSE ): array
 	{
 		$this->table->focusIndex( $key, $value );
+		/** @var array $data */
 		$data	= $this->table->get( FALSE, $orders, $limits );
 		$this->table->defocus();
-		if( $fields )
+		if( count( $fields ) !== 0 )
 			foreach( $data as $nr => $set )
 				$data[$nr]	= $this->getFieldsFromResult( $set, $fields, $strict );
 		return $data;
@@ -279,9 +285,11 @@ class Model
 	 */
 	public function getAllByIndices( array $indices = [], array $orders = [], array $limits = [], array $fields = [], bool $strict = FALSE ): array
 	{
+		/** @var array $indices */
 		$indices	= $this->checkIndices( $indices );
 		foreach( $indices as $key => $value )
 			$this->table->focusIndex( $key, $value );
+		/** @var array $data */
 		$data	= $this->table->get( FALSE, $orders, $limits );
 		$this->table->defocus();
 		if( $fields )
@@ -442,7 +450,7 @@ class Model
 	{
 		$this->table->focusPrimary( (int) $id );
 		$result	= FALSE;
-		if( count( $this->table->get( FALSE ) ) ){
+		if( $this->table->get() !== NULL ){
 			$this->table->delete();
 			$result	= TRUE;
 		}
@@ -462,6 +470,7 @@ class Model
 	{
 		$this->table->focusIndex( $key, $value );
 		$number	= 0;
+		/** @var array $rows */
 		$rows	= $this->table->get( FALSE );
 		if( count( $rows ) ){
 			$number = $this->table->delete();
@@ -489,11 +498,13 @@ class Model
 	 */
 	public function removeByIndices( array $indices ): int
 	{
+		/** @var array $indices */
 		$indices	= $this->checkIndices( $indices );
 		foreach( $indices as $key => $value )
 			$this->table->focusIndex( $key, $value );
 
 		$number	= 0;
+		/** @var array $rows */
 		$rows	= $this->table->get( FALSE );
 		if( count( $rows ) ){
 			$number	= $this->table->delete();

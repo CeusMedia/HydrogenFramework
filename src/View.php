@@ -143,7 +143,8 @@ class View
 	public function addHelper( string $name, $object, array $parameters = [] ): self
 	{
 		if( is_object( $object ) ){
-			$object->setEnv( $this->env );
+			if( is_callable( [$object, 'setEnv'] ) )
+				$object->setEnv( $this->env );
 			$this->helpers->set( $name, $object );
 		}
 		else
@@ -316,7 +317,7 @@ class View
 		if( isset( $data['this' ] ) )
 			unset( $data['this'] );
 		$data		= array_merge( $this->data, $data );											//
-		$content	= '';
+//		$content	= '';
 
 		//  new solution
 //		$payload	= (object) ['filePath' => $uri, 'data' => $data, 'content' => ''];
@@ -432,7 +433,8 @@ class View
 			else if( $this->env->getMessenger() )
 				$this->env->getMessenger()->noteFailure( $message );
 		}
-		$buffer		= trim( preg_replace( '/^(<br( ?\/)?>)+/s', "", ob_get_clean() ) );			//  get standard output buffer
+		$buffer	= (string) ob_get_clean();
+		$buffer	= trim( preg_replace( '/^(<br( ?\/)?>)+/s', '', $buffer ) );			//  get standard output buffer
 		if( strlen( $buffer ) ){																//  there is something in buffer
 			if( !is_string( $content ) )														//  the view did not return content
 				$content	= $buffer;															//  use buffer as content

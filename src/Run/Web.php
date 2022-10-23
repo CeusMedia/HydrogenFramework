@@ -44,7 +44,7 @@ class Web
 		}
 	}
 
-	public function handleErrorAsException( int $errno, string $errMsg, string $errFile, int $errLine, ?array $errContext ): ?bool
+	public function handleErrorAsException( int $errno, string $errMsg, string $errFile, int $errLine, array $errContext ): ?bool
 	{
 		if( error_reporting() === 0 )											// error was suppressed with the @-operator
 			return FALSE;
@@ -83,7 +83,7 @@ class Web
 			error_reporting( $this->errorReporting );
 		if( NULL !== $this->displayErrors )
 			ini_set( 'display_errors', $this->displayErrors ? 'On' : 'Off' );
-		if( $this->catchErrors )
-			set_error_handler( array( $this, 'handleErrorAsException' ) );
+		if( $this->catchErrors && is_callable( [$this, 'handleErrorAsException'] ) )
+			set_error_handler( [$this, 'handleErrorAsException'] );
 	}
 }
