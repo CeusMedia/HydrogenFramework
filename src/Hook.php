@@ -69,7 +69,13 @@ class Hook
 			throw new RuntimeException('No context set');
 		if (!is_object($this->env))
 			throw new RuntimeException('No environment set');
-		return MethodFactory::staticCallClassMethod( get_class( $this ), $method, [
+		return call_user_func_array( [get_class( $this ), $method], [
+            $this->env,
+            $this->context,
+            $this->module,
+            & $this->payload
+        ]);
+		return MethodFactory::staticCallClassMethod( get_class( $this ), $method, [], [
 			$this->env,
 			$this->context,
 			$this->module,

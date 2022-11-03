@@ -210,13 +210,13 @@ class Model
 	 *	Returns Data of single Line by ID.
 	 *	@access		public
 	 *	@param		string			$id				ID to focus on
-	 *	@param		string			$field			Single Field to return
+	 *	@param		string|NULL		$field			Single Field to return
 	 *	@return		mixed
 	 */
-	public function get( string $id, string $field = '' )
+	public function get( string $id, ?string $field = NULL )
 	{
-		/** @var string $field */
-		$field	= $this->checkField( $field );
+		if( NULL !== $field )
+			$field	= $this->checkField( $field );
 		$data	= $this->cache->get( $this->cacheKey.$id );
 		if( !$data ){
 			$this->table->focusPrimary( (int) $id );
@@ -224,7 +224,7 @@ class Model
 			$this->table->defocus();
 			$this->cache->set( $this->cacheKey.$id, $data );
 		}
-		if( strlen( trim( $field ) ) )
+		if( NULL !== $field )
 			return $this->getFieldsFromResult( $data, array( $field ) );
 		return $data;
 	}
@@ -577,7 +577,7 @@ class Model
 	{
 		if( 0 === count( $indices ) )
 			throw new InvalidArgumentException( 'Index map must have at least one pair' );
-		$diff	= array_diff( $indices, $this->indices );
+		$diff	= array_diff_key( array_keys( $indices ), $this->indices );
 		if( 0 === count( $diff ) )
 			return $indices;
 		if( !$strict )

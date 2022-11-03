@@ -1,9 +1,5 @@
 parameters:
 	ignoreErrors:
-		-
-			message: "#^Parameter \\#1 \\$key of method CeusMedia\\\\Common\\\\Net\\\\HTTP\\\\Reader\\:\\:getCurlInfo\\(\\) expects string\\|null, int given\\.$#"
-			count: 1
-			path: ../../src/Environment/Resource/Module/Library/Source.php
 
 		-
 			message: "#^Property CeusMedia\\\\HydrogenFramework\\\\Model\\\\REST\\\\JSON\\:\\:\\$client has no type specified\\.$#"

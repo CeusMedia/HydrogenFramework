@@ -33,10 +33,10 @@ use CeusMedia\Common\Alg\Text\CamelCase as CamelCase;
 use CeusMedia\Common\Alg\Time\Converter as TimeConverter;
 use CeusMedia\Common\UI\HTML\Elements as HtmlElements;
 use CeusMedia\Common\UI\HTML\Exception\Page as HtmlExceptionPage;
-use CeusMedia\Common\UI\Template as TemplateEngine;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
-
 use CeusMedia\HydrogenFramework\View\Helper;
+use CeusMedia\TemplateEngine\Template as TemplateEngine;
+
 use Exception;
 use InvalidArgumentException;
 use ReflectionException;
@@ -260,7 +260,7 @@ class View
 //			$content	= $template->render();														//  render template
 //		}
 //		else
-			$content	= TemplateEngine::render( $uri, $data );									//  render template with integrated template engine
+			$content	= TemplateEngine::renderFile( $uri, $data );									//  render template with integrated template engine
 
 		return $this->renderContent( $content );												//  apply modules to content
 	}

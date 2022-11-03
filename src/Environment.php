@@ -142,8 +142,8 @@ class Environment implements ArrayAccess
 	/**	@var	integer						$mode			Environment mode (dev,test,live,...) */
 	protected int $mode						= 0;
 
-	/** @var	MessengerResource			$messenger		Messenger Object */
-	protected MessengerResource $messenger;
+	/** @var	MessengerResource|NULL		$messenger		Messenger Object */
+	protected ?MessengerResource $messenger	= NULL;
 
 	/**	@var	LocalModuleLibraryResource	$modules		Handler for local modules */
 	protected LocalModuleLibraryResource	$modules;
