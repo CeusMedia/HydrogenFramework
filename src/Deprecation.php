@@ -69,7 +69,7 @@ class Deprecation extends CommonDeprecation
 	 *	@return		void
 	 *	@throws		Exception				if set exception version reached detected library version
 	 */
-	public function message( string $message ): self
+	public function message( string $message ): void
 	{
 		$trace	= debug_backtrace();
 		$caller = next( $trace );
