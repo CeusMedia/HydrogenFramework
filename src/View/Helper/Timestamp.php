@@ -27,6 +27,7 @@
 namespace CeusMedia\HydrogenFramework\View\Helper;
 
 use CeusMedia\Common\Alg\Time\DurationPhraser as TimeDurationPhraser;
+use CeusMedia\Common\Alg\Time\DurationPhraseRanges as TimeDurationPhrases;
 use CeusMedia\Common\UI\HTML\Tag as HtmlTag;
 use CeusMedia\HydrogenFramework\Environment;
 
@@ -93,7 +94,7 @@ class Timestamp extends Abstraction
 		$words	= $env->getLanguage()->getWords( $languageTopic );
 		if( !isset( $words[$languageSection] ) )
 			throw new InvalidArgumentException( 'Invalid language section "'.$languageSection.'" in topic "'.$languageTopic.'"' );
-		$phraser	= new TimeDurationPhraser( $words[$languageSection] );
+		$phraser	= new TimeDurationPhraser( new TimeDurationPhrases( $words[$languageSection] ) );
 		$phrase		= $phraser->getPhraseFromTimestamp( $this->timestamp );
 
 		if( $html ){

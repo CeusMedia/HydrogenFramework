@@ -558,7 +558,7 @@ class Environment implements ArrayAccess
 		if( $this->hasModules() ){																	//  module support and modules available
 			$payload	= ['className' => NULL];
 			$isHandled	= $this->modules->callHookWithPayload( 'Env', 'initAcl', $this, $payload );			//  call related module event hooks
-			if( $isHandled )
+			if( $isHandled && NULL !== $payload['className'] )
 				$type	= $payload['className'];
 		}
 		$this->acl	= ObjectFactory::createObject( $type, array( $this ) );
