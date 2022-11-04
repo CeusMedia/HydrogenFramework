@@ -66,7 +66,7 @@ class Deprecation extends CommonDeprecation
 	 *	Will throw a deprecation notice if set error version reached detected library version using PHP lower 5.3.
 	 *	@access		public
 	 *	@param		string		$message	Message to show
-	 *	@return		self
+	 *	@return		void
 	 *	@throws		Exception				if set exception version reached detected library version
 	 */
 	public function message( string $message ): self
@@ -81,7 +81,6 @@ class Deprecation extends CommonDeprecation
 		if( version_compare( $this->version, $this->errorVersion ) >= 0 ){
 			self::notify( $message );
 		}
-		return $this;
 	}
 
 	/**
