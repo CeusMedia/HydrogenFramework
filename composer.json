@@ -35,8 +35,7 @@
     "psr-4": {
       "CeusMedia\\HydrogenFramework\\": "src/",
       "CeusMedia\\HydrogenFrameworkTest\\": "test/"
-    },
-    "files": ["compat.php"]
+    }
   },
   "minimum-stability": "dev",
   "scripts": {

@@ -240,6 +240,9 @@ Latest 0.8.x current development branch:
 Latest 0.9.x future development branch:
 ```composer require ceus-media/hydrogen-framework:^dev-0.9-x```
 
+During migration of modules from 0.8.x, you can enable backward compatibility:
+```require_once 'vendor/ceus-media/hydrogen-framework/compat.php';```
+
 ### Module sources
 
 A module source is a library of one or more modules.
