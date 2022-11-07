@@ -127,13 +127,13 @@ class Environment implements ArrayAccess
 	protected Dictionary $config;
 
 	/**	@var	object|NULL					$database		Database Connection Object */
-	protected $database;
+	protected ?object $database				= NULL;
 
 	/**	@var	LanguageResource			$language		Language support object */
 	protected LanguageResource $language;
 
-	/**	@var	LogResource					$log			Log support object */
-	protected LogResource $log;
+	/**	@var	LogResource|NULL			$log			Log support object */
+	protected ?LogResource $log				= NULL;
 
 	/**	@var	array						$disclosure		Map of classes ready to reflect */
 	protected $disclosure;
