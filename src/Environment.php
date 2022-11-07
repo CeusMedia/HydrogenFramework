@@ -362,7 +362,7 @@ class Environment implements ArrayAccess
 		return $this->language;
 	}
 
-	public function getLog(): LogResource
+	public function getLog(): ?LogResource
 	{
 		return $this->log;
 	}
