@@ -1,4 +1,6 @@
-<?php
+<?php /** @noinspection PhpUnused */
+/** @noinspection PhpMultipleClassDeclarationsInspection */
+
 /**
  *	Generic Controller Class of Framework Hydrogen.
  *
@@ -34,9 +36,11 @@ use CeusMedia\Common\Alg\Text\CamelCase as CamelCase;
 use CeusMedia\Common\Net\HTTP\Status as HttpStatus;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 
-use DateTime;
 use DateTimeInterface;
+use DomainException;
 use Exception;
+use JsonException;
+use ReflectionException;
 use RuntimeException;
 
 /**
@@ -92,6 +96,8 @@ class Controller
 	 *	@param		WebEnvironment						$env			Application Environment Object
 	 *	@param		boolean								$setupView		Flag: auto create view object for controller (default: TRUE)
 	 *	@return		void
+	 *	@throws		RuntimeException
+	 *	@throws		ReflectionException
 	 */
 	public function __construct( WebEnvironment $env, bool $setupView = TRUE )
 	{
@@ -136,8 +142,9 @@ class Controller
 	 *	@access		public
 	 *	@return		string
 	 *	@throws		RuntimeException			if no view has been set up
-	 *	@throws		RuntimeException			if
-	 *	@throws		RuntimeException			if
+	 *	@throws		RuntimeException
+	 *	@throws		RuntimeException
+	 *	@throws		ReflectionException
 	 */
 	public function renderView(): string
 	{
@@ -282,12 +289,16 @@ class Controller
 	 *	@param		string		$key		Key for logic class (ex: 'mailGroupMember' for 'Logic_Mail_Group_Member')
 	 *	@return		Logic					Logic instance or logic pool if no key given
 	 *	@throws		RuntimeException		if no logic class could be found for given short logic key
+	 *	@throws		DomainException
+	 *	@throws		ReflectionException
 	 */
 	protected function getLogic( string $key ): Logic
 	{
 //		if( is_null( $key ) || !strlen( trim( $key ) ) )
 //			return $this->env->getLogic();
-		return $this->env->getLogic()->get( $key );
+		/** @var Logic $logic */
+		$logic	= $this->env->getLogic()->get( $key );
+		return $logic;
 	}
 
 	/**
@@ -296,6 +307,7 @@ class Controller
 	 *	@param		string		$key		Key for model class (eG. 'mailGroupMember' for 'Model_Mail_Group_Member')
 	 *	@return		object					Model instance
 	 *	@throws		RuntimeException		if no model class could be found for given short model key
+	 *	@throws		ReflectionException
 	 *	@todo		create model pool environment resource and apply to created shared single instances instead of new instances
 	 *	@todo		change \@return to CMF_Hydrogen_Model after CMF model refactoring
 	 *	@see		duplicate code with CMF_Hydrogen_Logic::getModel
@@ -310,7 +322,9 @@ class Controller
 		}
 		if( !class_exists( $className ) )
 			throw new RuntimeException( 'Model class "'.$className.'" not found' );
-		return ObjectFactory::createObject( $className, array( $this->env ) );
+		/** @var Model $model */
+		$model	= ObjectFactory::createObject( $className, [$this->env] );
+		return $model;
 	}
 
 	/**
@@ -334,6 +348,7 @@ class Controller
 	 *	@param		mixed			$data
 	 *	@param		int|null		$httpStatusCode
 	 *	@return		void
+	 *	@throws		JsonException
 	 */
 	protected function handleJsonResponse( $status, $data, ?int $httpStatusCode = NULL ): void
 	{
@@ -349,7 +364,7 @@ class Controller
 			'data'		=> $data,
 			'timestamp'	=> microtime( TRUE ),
 		);
-		$json	= json_encode( $response, JSON_PRETTY_PRINT );
+		$json	= json_encode( $response, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR );
 		if( headers_sent() ){
 			print( 'Headers already sent.' );
 		}
@@ -366,6 +381,7 @@ class Controller
 	 *	@param		mixed			$data
 	 *	@param		int|null		$httpStatusCode
 	 *	@return		void
+	 *	@throws		JsonException
 	 */
 	protected function handleJsonErrorResponse( $data, ?int $httpStatusCode = NULL ): void
 	{
@@ -382,9 +398,11 @@ class Controller
 	 *	@param		array		$arguments		List of arguments to add to URL
 	 *	@param		array		$parameters		Map of additional parameters to set in request
 	 *	@return		void
+	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	protected function redirect( string $controller = 'index', string $action = "index", array $arguments = [], array $parameters = [] )
 	{
+		/** @noinspection PhpUnhandledExceptionInspection */
 		Deprecation::getInstance()
 			->setErrorVersion( '0.8.6.4' )
 			->setExceptionVersion( '0.8.9' )
@@ -409,12 +427,12 @@ class Controller
 	 *	HTTP status will be 200 or second parameter.
 	 *
 	 *	@access		protected
-	 *	@param		string		$uri				URI to request, may be external
-	 *	@param		integer		$status				HTTP status code to send, default: NULL -> 200
+	 *	@param		string			$uri			URI to request, may be external
+	 *	@param		integer|NULL	$status			HTTP status code to send, default: NULL -> 200
 	 *	@return		void
 	 *	@todo		check for better HTTP status
 	 */
-	protected function relocate( string $uri, $status = NULL )
+	protected function relocate( string $uri, ?int $status = NULL )
 	{
 		$this->restart( $uri, FALSE, $status, TRUE );
 	}
@@ -423,7 +441,7 @@ class Controller
 	 *	Redirects by requesting a URI.
 	 *	Attention: This *WILL* effect the URL displayed in browser / need request clients (eG. cURL) to allow forwarding.
 	 *
-	 *	By default, redirect URIs are are request path within the current application, eg. "./[CONTROLLER]/[ACTION]"
+	 *	By default, redirect URIs are a request path within the current application, eg. "./[CONTROLLER]/[ACTION]"
 	 *	ATTENTION: For browser compatibility local paths should start with "./"
 	 *
 	 *	If seconds parameter is set to TRUE, redirects to a path inside the current controller.
@@ -499,7 +517,7 @@ class Controller
 		$this->action		= $env->getRequest()->get( '__action' );
 		if( $this->env->has( 'language' ) && $this->controller ){
 			$language	= $this->env->getLanguage();
-			$language->load( $this->controller, FALSE, FALSE );
+			$language->load( $this->controller );
 		}
 		//  load module configuration
 		$list	= [];
@@ -517,13 +535,14 @@ class Controller
 	 *	@return		self
 	 *	@throws		RuntimeException			in force mode if view class for controller is not existing
 	 *	@throws		RuntimeException			if view class is not inheriting Hydrogen view class
+	 *	@throws		ReflectionException
 	 */
 	protected function setupView( bool $force = TRUE ): self
 	{
 		$name		= str_replace( ' ', '_', ucwords( str_replace( '/', ' ', $this->controller ) ) );
 		$class		= self::$prefixView.$name;
 		$this->view	= new View( $this->env );
-		if( class_exists( $class, TRUE ) ){
+		if( class_exists( $class ) ){
 			$object		= ObjectFactory::createObject( $class, array( &$this->env ) );
 			if( !$object instanceof View )
 				throw new RuntimeException( 'View class "'.$name.'" is not a Hydrogen view', 301 );

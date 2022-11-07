@@ -1,4 +1,5 @@
-<?php
+<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
+
 /**
  *	Base application class for MVC web application.
  *
@@ -27,7 +28,6 @@
 
 namespace CeusMedia\HydrogenFramework\Application\Web;
 
-use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
 use CeusMedia\HydrogenFramework\Application\Abstraction as ApplicationAbstraction;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 use CeusMedia\HydrogenFramework\View;
@@ -57,11 +57,9 @@ abstract class Abstraction extends ApplicationAbstraction
 	 *	@return		void
 	 *	@throws		ReflectionException
 	 */
-	public function __construct( WebEnvironment $env = NULL )
+	public function __construct( ?WebEnvironment $env = NULL )
 	{
-		$this->env	= $env ?? ObjectFactory::createObject( static::$classEnvironment );
-		if( self::$modulesNeeded )																	//  needed modules are defined
-			$this->checkNeededModules();															//  check for missing modules
+		parent::__construct( $env );
 	}
 
 	protected function logOnComplete(): void

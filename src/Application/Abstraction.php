@@ -1,4 +1,5 @@
-<?php
+<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
+
 /**
  *	Base application class for Hydrogen application.
  *
@@ -47,10 +48,11 @@ abstract class Abstraction
 	/**	@var		string				$classEnvironment		Class Name of Application Environment to build */
 	public static string $classEnvironment						= WebEnvironment::class;
 
+	public static array $modulesNeeded							= [];
+
 	/**	@var		Environment			$env					Application Environment Object */
 	private Environment $env;
 
-	public static array $modulesNeeded						= [];				//  @todo for PHP 5.3+: make protected and use static:: instead of self:: on use -> now you can set value on App class construction
 
 	/**
 	 *	Constructor.
@@ -59,10 +61,14 @@ abstract class Abstraction
 	 *	@return		void
 	 *	@throws		ReflectionException
 	 */
-	public function __construct( Environment $env = NULL )
+	public function __construct( ?Environment $env = NULL )
 	{
-		$this->env	= $env ?? ObjectFactory::createObject( static::$classEnvironment );
-		if( self::$modulesNeeded )																	//  needed modules are defined
+		if( NULL === $env ){
+			/** @var Environment $env */
+			$env	= ObjectFactory::createObject( static::$classEnvironment );
+		}
+		$this->env	= $env;
+		if( static::$modulesNeeded )																	//  needed modules are defined
 			$this->checkNeededModules();															//  check for missing modules
 	}
 
@@ -84,7 +90,7 @@ abstract class Abstraction
 	protected function checkNeededModules()
 	{
 		$modulesGot	= array_keys( $this->env->getModules()->getAll() );								//  get installed modules
-		$missing	= array_diff( self::$modulesNeeded, $modulesGot );								//  find missing modules
+		$missing	= array_diff( static::$modulesNeeded, $modulesGot );							//  find missing modules
 		if( $missing ){																				//  there are missing modules
 			$this->reportMissingModules( $missing );												//  report missing modules to screen
 			exit;																					//  quit execution

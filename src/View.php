@@ -1,4 +1,5 @@
-<?php /** @noinspection PhpUnused */
+<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
+/** @noinspection PhpUnused */
 
 /**
  *	Generic View Class of Framework Hydrogen.
@@ -32,7 +33,6 @@ use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
 use CeusMedia\Common\Alg\Text\CamelCase as CamelCase;
 use CeusMedia\Common\Alg\Time\Converter as TimeConverter;
 use CeusMedia\Common\UI\HTML\Elements as HtmlElements;
-use CeusMedia\Common\UI\HTML\Exception\Page as HtmlExceptionPage;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 use CeusMedia\HydrogenFramework\View\Helper;
 use CeusMedia\TemplateEngine\Template as TemplateEngine;
@@ -252,7 +252,7 @@ class View
 //		if( $result )
 //			return $this->renderContent( $payload->content );										//  return loaded and rendered content
 
-		//  old solution, extract to module UI_TempateAbstraction
+		//  old solution, extract to module UI_TemplateAbstraction
 //		if( 0 && $this->env->getPage()->tea ){														//  template engine abstraction is enabled
 //			$this->env->getPage()->tea->setDefaultType( 'STE' );									//
 //			$template	= $this->env->getPage()->tea->getTemplate( $uri );							//  create template object for content file
@@ -363,7 +363,9 @@ class View
 	 *	@access		protected
 	 *	@return		void
 	 */
-	protected function __onInit(){}
+	protected function __onInit(): void
+	{
+	}
 
 	protected function getTemplateUri( string $controller, string $action ): string
 	{
@@ -403,7 +405,7 @@ class View
 	 *	...
 	 *	Check if template file is existing MUST be done beforehand.
 	 *	@param		string		$filePath		Template file path name with templates folder
-	 *	@param		array		$data			Additional template data, appened to assigned view data
+	 *	@param		array		$data			Additional template data, appended to assigned view data
 	 *	@return		string		Template content with applied data
 	 */
 	protected function realizeTemplate( string $filePath, array $data = [] ): string

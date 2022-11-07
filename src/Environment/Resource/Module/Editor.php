@@ -236,7 +236,7 @@ class Editor
 	 *	@param		string|NULL		$label
 	 *	@param		string|NULL		$access
 	 *	@param		string|NULL		$language
-	 *	@param		$rank
+	 *	@param		int|NULL		$rank
 	 *	@return		void
 	 *	@throws		Exception
 	 */

@@ -76,7 +76,7 @@ class Recursive extends Abstraction implements RouterInterface
 	//				remark( 'Controller Class: '.$className );
 					$controller	= implode( '/', $left );
 					$request->set( '__controller', $controller );
-					if( count( $right ) ){
+					if( 0 !== count( $right ) ){
 						if( method_exists( $className, $right[0] ) ){
 	//						remark( 'Controller Method: '.$right[0] );
 							$request->set( '__action', array_shift( $right ) );
@@ -90,8 +90,9 @@ class Recursive extends Abstraction implements RouterInterface
 				array_unshift( $right, array_pop( $left ) );
 			}
 		}
-		if( !$request->get( '__controller' ) && $right )
-			$request->set( '__arguments', $right );
+		if( !$request->get( '__controller' ) )
+			if( 0 !== count( $right ) )
+				$request->set( '__arguments', $right );
 
 /*		remark( "controller: ".$request->get( '__controller' ) );
 		remark( "action: ".$request->get( '__action' ) );

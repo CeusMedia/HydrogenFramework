@@ -1,11 +1,13 @@
-<?php
+<?php /** @noinspection PhpUnused */
+
+/** @noinspection PhpMultipleClassDeclarationsInspection */
 
 namespace CeusMedia\HydrogenFramework;
 
-use CeusMedia\Common\Alg\Obj\MethodFactory;
+use BadMethodCallException;
+use CeusMedia\Common\ADT\Collection\Dictionary;
 use CeusMedia\HydrogenFramework\Environment as Environment;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
-use ReflectionException;
 use RuntimeException;
 
 class Hook
@@ -61,21 +63,26 @@ class Hook
 	/**
 	 *	@param		string		$method
 	 *	@return		bool|null
-	 *	@throws		ReflectionException
+	 *	@throws		BadMethodCallException		if hok method is not existing or not callable
+	 *	@throws		RuntimeException			if no context or environment set
 	 */
 	public function fetch( string $method ): ?bool
 	{
-		if (!is_object($this->context))
-			throw new RuntimeException('No context set');
-		if (!is_object($this->env))
-			throw new RuntimeException('No environment set');
-		return call_user_func_array( [get_class( $this ), $method], [
-            $this->env,
-            $this->context,
-            $this->module,
-            & $this->payload
-        ]);
-		return MethodFactory::staticCallClassMethod( get_class( $this ), $method, [], [
+		if( !is_object( $this->context ) )
+			throw new RuntimeException( 'No context set' );
+		if( !is_object( $this->env ) )
+			throw new RuntimeException( 'No environment set' );
+
+		if( !method_exists( $this, $method ) )
+			throw new BadMethodCallException( vsprintf('Hook method %s::%s is not existing', [
+				get_class( $this ), $method] ) );
+
+		$call = [get_class( $this ), $method];
+		if( !is_callable( $call ) )
+			throw new BadMethodCallException( vsprintf('Hook method %s::%s is not callable', [
+				get_class( $this ), $method] ) );
+
+		return call_user_func_array( $call, [
 			$this->env,
 			$this->context,
 			$this->module,
@@ -93,11 +100,14 @@ class Hook
 	/**
 	 *	@param		Environment		$env
 	 *	@param		string			$moduleId
-	 *	@return		mixed
+	 *	@return		Dictionary
 	 */
-	protected static function getModuleConfig( Environment $env, string $moduleId )
+	protected static function getModuleConfig( Environment $env, string $moduleId ): Dictionary
 	{
-		return $env->getConfig()->get( 'module.'.strtolower( $moduleId ).'.', TRUE );
+		$prefix			= 'module.'.strtolower( $moduleId ).'.';
+		/** @var Dictionary $moduleConfig */
+		$moduleConfig	= $env->getConfig()->getAll( $prefix, TRUE );
+		return $moduleConfig;
 	}
 
 	/**

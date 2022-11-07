@@ -1,4 +1,5 @@
-<?php /** @noinspection PhpUnused */
+<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
+/** @noinspection PhpUnused */
 
 /**
  *	Generic Model Class of Framework Hydrogen.
@@ -33,9 +34,10 @@ use CeusMedia\Database\PDO\Connection as PdoConnection;
 use CeusMedia\Database\PDO\Table\Writer as DatabaseTableWriter;
 
 use DomainException;
-use Exception;
 use InvalidArgumentException;
 use PDO;
+use RangeException;
+use ReflectionException;
 use RuntimeException;
 
 /**
@@ -87,6 +89,7 @@ class Model
 	 *	@param		Environment		$env			Application Environment Object
 	 *	@param		string|NULL		$id				ID to focus on
 	 *	@return		void
+	 *	@throws		ReflectionException
 	 */
 	public function __construct( Environment $env, ?string $id = NULL )
 	{
@@ -106,9 +109,6 @@ class Model
 		$this->table->setIndices( $this->indices );
 		$this->cache	= ObjectFactory::createObject( self::$cacheClass );
 		$this->cacheKey	= 'db.'.$this->prefix.$this->name.'.';
-
-		if( !empty( $this->env->storage ) )
-			$this->table->setUndoStorage( $this->env->storage );
 	}
 
 	/**
@@ -306,7 +306,7 @@ class Model
 	 *	@param		array			$orders			Map of Orders to include in SQL Query
 	 *	@param		array			$fields			List of fields or one field to return from result
 	 *	@param		boolean			$strict			Flag: throw exception if result is empty (default: FALSE)
-	 *	@return		mixed			Structure depending on fetch type, string if field selected, NULL if field selected and no entries
+	 *	@return		object|array|string|NULL		Structure depending on fetch type, string if field selected, NULL if field selected and no entries
 	 *	@todo		change argument order: move fields to end
 	 *	@throws		InvalidArgumentException			If given fields list is neither a list nor a string
 	 */
@@ -327,7 +327,7 @@ class Model
 	 *	@param		array			$orders			Map of Orders to include in SQL Query
 	 *	@param		array			$fields			List of fields or one field to return from result
 	 *	@param		boolean			$strict			Flag: throw exception if result is empty (default: FALSE)
-	 *	@return		mixed			Structure depending on fetch type, string if field selected, NULL if field selected and no entries
+	 *	@return		object|array|string|NULL		Structure depending on fetch type, string if field selected, NULL if field selected and no entries
 	 *	@throws		InvalidArgumentException			If given fields list is neither a list nor a string
 	 *	@todo  		change default value of argument 'strict' to TRUE
 	 */
@@ -469,23 +469,7 @@ class Model
 	public function removeByIndex( string $key, $value ): int
 	{
 		$this->table->focusIndex( $key, $value );
-		$number	= 0;
-		/** @var array $rows */
-		$rows	= $this->table->get( FALSE );
-		if( count( $rows ) ){
-			$number = $this->table->delete();
-			foreach( $rows as $row ){
-				switch( $this->fetchMode ){
-					case PDO::FETCH_CLASS:
-					case PDO::FETCH_OBJ:
-						$id	= $row->{$this->primaryKey};
-						break;
-					default:
-						$id	= $row[$this->primaryKey];
-				}
-				$this->cache->remove( $this->cacheKey.$id );
-			}
-		}
+		$number	= $this->removeIndexed();
 		$this->table->defocus();
 		return $number;
 	}
@@ -498,28 +482,13 @@ class Model
 	 */
 	public function removeByIndices( array $indices ): int
 	{
+		if( 0 === count( $indices ) )
+			throw new RangeException( 'Indices cannot be empty' );
 		/** @var array $indices */
 		$indices	= $this->checkIndices( $indices );
 		foreach( $indices as $key => $value )
 			$this->table->focusIndex( $key, $value );
-
-		$number	= 0;
-		/** @var array $rows */
-		$rows	= $this->table->get( FALSE );
-		if( count( $rows ) ){
-			$number	= $this->table->delete();
-			foreach( $rows as $row ){
-				switch( $this->fetchMode ){
-					case PDO::FETCH_CLASS:
-					case PDO::FETCH_OBJ:
-						$id	= $row->{$this->primaryKey};
-						break;
-					default:
-						$id	= $row[$this->primaryKey];
-				}
-				$this->cache->remove( $this->cacheKey.$id );
-			}
-		}
+		$number		= $this->removeIndexed();
 		$this->table->defocus();
 		return $number;
 	}
@@ -632,6 +601,35 @@ class Model
 				/** @noinspection PhpUndefinedVariableInspection */
 				return 1 === count( $fields ) ? $list[$field] : $list;
 		}
+	}
+
+	/**
+	 *	Removes entries currently in focus.
+	 *	@return		int
+	 *	@throws		RuntimeException		if no focus has been set before
+	 */
+	protected function removeIndexed(): int
+	{
+		if( 0 === count( $this->table->getFocus() ) )
+			throw new RuntimeException( 'Not focus set' );
+		$number	= 0;
+		/** @var array $rows */
+		$rows	= $this->table->get( FALSE );
+		if( count( $rows ) ){
+			$number	= $this->table->delete();
+			foreach( $rows as $row ){
+				switch( $this->fetchMode ){
+					case PDO::FETCH_CLASS:
+					case PDO::FETCH_OBJ:
+						$id	= $row->{$this->primaryKey};
+						break;
+					default:
+						$id	= $row[$this->primaryKey];
+				}
+				$this->cache->remove( $this->cacheKey.$id );
+			}
+		}
+		return $number;
 	}
 
 	/**

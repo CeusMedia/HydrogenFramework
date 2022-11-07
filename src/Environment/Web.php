@@ -1,4 +1,5 @@
-<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
+<?php /** @noinspection PhpUnused */
+/** @noinspection PhpMultipleClassDeclarationsInspection */
 
 /**
  *	Setup for Resource Environment for Hydrogen Applications.
@@ -41,10 +42,10 @@ use CeusMedia\HydrogenFramework\Environment\Exception as EnvironmentException;
 use CeusMedia\HydrogenFramework\Environment\Router\Single as SingleRouter;
 use CeusMedia\HydrogenFramework\Environment\Router\Abstraction as AbstractRouter;
 use CeusMedia\HydrogenFramework\Environment\Resource\Messenger as MessengerResource;
-use CeusMedia\HydrogenFramework\Environment\Resource\Language as LanguageResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\Page as PageResource;
 
 use Exception;
+use ReflectionException;
 use RuntimeException;
 
 /**
@@ -307,8 +308,8 @@ class Web extends Environment
 		}
 	#	$this->database->close();																	//  close database connection
 	#	$this->session->close();																	//  close session
-		if( $status )																				//  a HTTP status code is to be set
-			HttpStatus::sendHeader( (int) $status );												//  send HTTP status code header
+		if( $status )																				//  an HTTP status code is to be set
+			HttpStatus::sendHeader( $status );														//  send HTTP status code header
 		header( "Location: ".$base.$uri );															//  send HTTP redirect header
 
 		$link	= HtmlTag::create( 'a', $base.$uri, array( 'href' => $base.$uri ) );
@@ -382,7 +383,7 @@ class Web extends Environment
 //		$configHost	= self::$defaultPaths['config'].getEnv( 'HTTP_HOST' ).'.ini';
 		$configHost	= $this->config->get( 'path.config' ).getEnv( 'HTTP_HOST' ).'.ini';
 		if( file_exists( $configHost ) ){															//  config file for host is existing
-			$lines	= (array) parse_ini_file( $configHost, FALSE );					//  read host config pairs
+			$lines	= (array) parse_ini_file( $configHost );										//  read host config pairs
 			foreach( $lines as $key => $value ){													//  iterate pairs
 				if( preg_match( '/^[\d.]+$/', $value ) )									//  value is integer or float
 					$value	= (float) $value;														//  convert value to numeric
@@ -408,17 +409,23 @@ class Web extends Environment
 		if( !$this->url )
 			throw new RuntimeException( 'URL not detected yet, run detectSelf beforehand' );
 		$this->cookie	= new HttpCookie(
-			parse_url( $this->url, PHP_URL_PATH ),
-			parse_url( $this->url, PHP_URL_HOST ),
+			(string) parse_url( $this->url, PHP_URL_PATH ),
+			(string) parse_url( $this->url, PHP_URL_HOST ),
 			(bool) getEnv( 'HTTPS' )
 		);
 		return $this;
 	}
 
-	protected function initMessenger( ?string $enabled = "auto" ): self
+	/**
+	 *	@param		bool|NULL		$enabled		NULL means "autodetect" and defaults to yes, if response shall be HTML
+	 *	@return		self
+	 */
+	protected function initMessenger( ?bool $enabled = NULL ): self
 	{
-		if( $enabled === "auto" )																	//  auto detect mode
-			$enabled	= preg_match( "/html/", getEnv( 'HTTP_ACCEPT' ) );							//  enabled if HTML is requested
+		if( NULL === $enabled ) {																	//  auto detect mode
+			$acceptHeader	= (string)getEnv('HTTP_ACCEPT');
+			$enabled = (bool) preg_match("/html/", $acceptHeader);							//  enabled if HTML is requested
+		}
 		$this->messenger	= new MessengerResource( $this, $enabled );
 		$this->runtime->reach( 'env: messenger' );
 		return $this;
@@ -439,7 +446,7 @@ class Web extends Environment
 		$this->page->applyModules();
 
 		$words		= $this->getLanguage()->getWords( 'main', FALSE );
-		if( is_array( $words ) && isset( $words['main']['title'] ) )
+		if( isset( $words['main']['title'] ) )
 			$this->page->setTitle( $words['main']['title'] );
 		$this->runtime->reach( 'env: page' );
 		return $this;
@@ -454,7 +461,7 @@ class Web extends Environment
 	protected function initRequest(): self
 	{
 		$this->request		= new HttpRequest();
-		$this->request->fromEnv( FALSE/*$this->has( 'session' )*/ );
+		$this->request->fromEnv();
 		$this->runtime->reach( 'env: request' );
 		return $this;
 	}
@@ -471,17 +478,24 @@ class Web extends Environment
 		return $this;
 	}
 
+	/**
+	 *	@param		string|NULL		$routerClass
+	 *	@return		self
+	 *	@throws		ReflectionException
+	 */
 	protected function initRouter( string $routerClass = NULL ): self
 	{
 		$classRouter	= $routerClass ?: self::$classRouter;
-		$this->router	= ObjectFactory::createObject( $classRouter, array( $this ) );
+		/** @var AbstractRouter $router */
+		$router			= ObjectFactory::createObject( $classRouter, array( $this ) );
+		$this->router	= $router;
 		$this->runtime->reach( 'env: router' );
 		return $this;
 	}
 
 	protected function initSession( string $keyPartitionName = NULL, string $keySessionName = NULL ): self
 	{
-		$partitionName	= md5( getCwd() );
+		$partitionName	= md5( (string) getCwd() );
 		$sessionName	= 'sid';
 		if( $keyPartitionName && $this->config->get( $keyPartitionName ) )
 			$partitionName	= $this->config->get( $keyPartitionName );

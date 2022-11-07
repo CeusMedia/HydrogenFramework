@@ -1,4 +1,5 @@
-<?php /** @noinspection PhpUnused */
+<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
+/** @noinspection PhpUnused */
 
 /**
  *	Handler to call event for registered hooks.
@@ -15,8 +16,10 @@ namespace CeusMedia\HydrogenFramework\Environment\Resource;
 
 use CeusMedia\Common\Alg\Obj\Factory;
 use CeusMedia\HydrogenFramework\Environment;
+use CeusMedia\HydrogenFramework\Hook;
 use DomainException;
 use Exception;
+use ReflectionException;
 use RuntimeException;
 
 /**
@@ -27,7 +30,7 @@ use RuntimeException;
  *	The Caption is the event handler on the ship.
  *	On every called event it will call hooks if attached to event.
  *
- *	A hook can be defined by a module configuration and relates to an hook resource and event.
+ *	A hook can be defined by a module configuration and relates to a hook resource and event.
  *	A hook can be called by its resource and event name.
  *	To apply a hook within a context, a context object can be given.
  *
@@ -102,14 +105,15 @@ class Captain
 	 *	@param		string		$resource		Name of resource (e.G. Page or View)
 	 *	@param		string		$event			Name of hook event (e.G. onBuild or onRenderContent)
 	 *	@param		object		$context		Context object, will be available inside hook as $context
-	 *	@param		array|NULL	$payload		Map of hook payload data, will be available inside hook as $payload
+	 *	@param		array		$payload		Map of hook payload data, will be available inside hook as $payload
 	 *	@return		bool|NULL					TRUE if hook is chain-breaking, FALSE if hook is disabled or non-chain-breaking, NULL if no modules installed or no hooks defined
 	 *	@throws		RuntimeException			if given static class method is not existing
 	 *	@throws		RuntimeException			ig method call produces stdout output, for example warnings and notices
 	 *	@throws		RuntimeException			if method call is throwing an exception
 	 *	@throws		DomainException
+	 *	@throws		ReflectionException
 	 */
-	public function callHook( string $resource, string $event, object $context, ?array & $payload = [] ): ?bool
+	public function callHook( string $resource, string $event, object $context, array & $payload = [] ): ?bool
 	{
 		if( !$this->env->hasModules() )
 			return NULL;
@@ -123,84 +127,8 @@ class Captain
 		if( $this->logCalls )
 			error_log( microtime( TRUE ).' '.$resource.'>'.$event."\n", 3, 'logs/hook_calls.log' );
 
-		$hooks	= [];
-		for( $i=0; $i<10; $i++)
-			$hooks[$i]	= [];
-
-		$count			= 0;
-		$result			= NULL;
-		$regexMethod	= "/^([a-z0-9_]+)::([a-z0-9_]+)$/i";
-		foreach( $this->env->getModules()->getAll() as $module ){
-			if( empty( $module->hooks[$resource][$event] ) )
-				continue;
-			if( !is_array( $module->hooks[$resource][$event] ) )
-				$module->hooks[$resource][$event]	= array( $module->hooks[$resource][$event] );
-
-			foreach( $module->hooks[$resource][$event] as $hook ){
-				$hooks[$hook->level][]	= (object) array(
-					'module'	=> $module,
-					'event'		=> $event,
-					'resource'	=> $resource,
-					'function'	=> $hook->hook,
-				);
-			}
-		}
-		foreach( $hooks as $levelHooks ){
-			foreach( $levelHooks as $hook ){
-				if( 0 === strlen( $hook->function ) )
-					continue;
-				$module		= $hook->module;
-				$resource	= $hook->resource;
-				$event		= $hook->event;
-				$function	= $hook->function;
-				try{
-					$callback	= explode("::", $function);
-					if( !preg_match( $regexMethod, $function ) )
-						throw new RuntimeException( 'Format of hook function is invalid or outdated' );
-					if( !class_exists( $callback[0] ) )
-						throw new RuntimeException( 'Hook handling class '.$callback[0].' is not existing' );
-					if( !method_exists( $callback[0], $callback[1] ) )
-						throw new RuntimeException( 'Hook handling function '.$function.' is not existing' );
-					if( !is_callable( [$callback[0], $callback[1]] ) )
-						throw new RuntimeException( 'Hook handling function '.$function.' is not callable' );
-
-					ob_start();
-//					$payload	= $payload ?? [];
-//					$payload	= is_object( $payload ) ? (array) $payload : $payload;
-					
-					$hookObject	= Factory::createObject( $callback[0], [$this->env, $context] );
-					$hookObject->setModule( $hook->module )->setPayload( $payload );
-					$result		= $hookObject->fetch( $callback[1] );
-					$payload	= $hookObject->getPayload();
-
-//					$args	= array( $this->env, &$context, $module, $payload );
-//					$result	= call_user_func_array( $callback, $args );
-
-					$this->env->getRuntime()->reach( '<!--Resource_Module_Library_Local::call-->Hook: '.$event.'@'.$resource.': '.$module->id );
-					/** @var string $stdout */
-					$stdout	= ob_get_clean();
-					if( strlen( trim( $stdout ) ) )
-						if( $this->env->has( 'messenger' ) )
-							$this->env->get( 'messenger' )->noteNotice( 'Call on event '.$event.'@'.$resource.' hooked by module '.$module->id.' reported: '.$stdout );
-						else
-							throw new RuntimeException( $stdout );
-				}
-				catch( Exception $e ){
-					if( $this->env->has( 'messenger' ) ){
-						$this->env->get( 'messenger' )->noteFailure( 'Call on event '.$event.'@'.$resource.' hooked by module '.$module->id.' failed: '.$e->getMessage() );
-						$this->env->getLog()->logException( $e );
-					}
-					else
-						throw new RuntimeException( 'Hook '.$module->id.'::'.$resource.'@'.$event.' failed: '.$e->getMessage(), 0, $e );
-				}
-				finally{
-					unset( $this->openHooks[$resource.'::'.$event]);
-				}
-			}
-			if( TRUE === $result )
-				return TRUE;
-		}
-		return $result;
+		$hooks	= $this->collectHooks( $resource, $event );
+		return $this->fetchCollectedResourceEventHooks($hooks, $context, $payload);
 	}
 
 	/**
@@ -245,5 +173,150 @@ class Captain
 	{
 		$this->logCalls	= $log;
 		return $this;
+	}
+
+	/**
+	 * @param string $resource
+	 * @param string $event
+	 * @return array
+	 */
+	public function collectHooks(string $resource, string $event): array
+	{
+		$hooks = array_fill(0, 9, []);												//  prepare hook list with levels (0-9)
+		foreach ($this->env->getModules()->getAll() as $module) {
+			if (!isset($module->hooks[$resource][$event]))
+				continue;
+
+			//  @todo is this still needed? does: convert hook list of this module to array, if string
+			if (!is_array($module->hooks[$resource][$event]))
+				$module->hooks[$resource][$event] = [$module->hooks[$resource][$event]];
+
+			foreach ($module->hooks[$resource][$event] as $hook) {
+				$hooks[$hook->level][] = (object)[
+					'module' => $module,
+					'event' => $event,
+					'resource' => $resource,
+					'function' => $hook->hook,
+				];
+			}
+		}
+		return $hooks;
+	}
+
+	/**
+	 *	@param		array		$hooks
+	 *	@param		object		$context
+	 *	@param		array|null	$payload
+	 *	@return		bool
+	 *	@throws		RuntimeException
+	 *	@throws		ReflectionException
+	 */
+	protected function fetchCollectedResourceEventHooks( array $hooks, object $context, ?array $payload): bool
+	{
+		$result = NULL;
+		$regexMethod = "/^([a-z0-9_]+)::([a-z0-9_]+)$/i";
+		foreach( $hooks as $levelHooks ){
+			foreach( $levelHooks as $hook ){
+				if( 0 === strlen( $hook->function ) )
+					continue;
+				$module		= $hook->module;
+				$resource	= $hook->resource;
+				$event		= $hook->event;
+				$function	= $hook->function;
+				try {
+					$callback	= explode( "::", $function );
+					if( !preg_match( $regexMethod, $function ) )
+						throw new RuntimeException( 'Format of hook function is invalid or outdated' );
+					if( !class_exists( $callback[0] ) )
+						throw new RuntimeException( 'Hook handling class ' . $callback[0] . ' is not existing' );
+					if( !method_exists( $callback[0], $callback[1] ) )
+						throw new RuntimeException( 'Hook handling function ' . $function . ' is not existing' );
+					if( !is_callable( [$callback[0], $callback[1]] ) )
+						throw new RuntimeException( 'Hook handling function ' . $function . ' is not callable' );
+
+					ob_start();
+//					$payload	= $payload ?? [];
+//					$payload	= is_object( $payload ) ? (array) $payload : $payload;
+
+					/** @var Hook $hookObject */
+					$hookObject	= Factory::createObject( $callback[0], [$this->env, $context] );
+					$hookObject->setModule( $hook->module )->setPayload( $payload );
+					$result		= $hookObject->fetch( $callback[1] );
+					$payload	&= $hookObject->getPayload();
+
+//					$args	= array( $this->env, &$context, $module, $payload );
+//					$result	= call_user_func_array( $callback, $args );
+
+					$this->env->getRuntime()->reach( vsprintf(
+						'<!--Resource_Module_Library_Local::call-->Hook: %s@%s: %s',
+						[$event, $resource, $module->id]
+					) );
+
+					$stdout		= (string) ob_get_clean();
+					$this->handleStdoutOfResourceEventHookCall( $stdout, $resource, $event, $module );
+				} catch (Exception $e) {
+					$this->handleExceptionOfResourceEventHookCall( $e, $resource, $event, $module );
+					if ($this->env->has('messenger')) {
+						$this->env->get('messenger')->noteFailure('Call on event ' . $event . '@' . $resource . ' hooked by module ' . $module->id . ' failed: ' . $e->getMessage());
+						$this->env->getLog()->logException($e);
+					} else
+						throw new RuntimeException('Hook ' . $module->id . '::' . $resource . '@' . $event . ' failed: ' . $e->getMessage(), 0, $e);
+				} finally {
+					unset($this->openHooks[$resource . '::' . $event]);
+				}
+			}
+			if (TRUE === $result)
+				return TRUE;
+		}
+		return FALSE;
+	}
+
+	/**
+	 *	@param		Exception		$e
+	 *	@param		string			$resource
+	 *	@param		string			$event
+	 *	@param		object			$module
+	 *	@return		void
+	 *	@throws		ReflectionException
+	 */
+	protected function handleExceptionOfResourceEventHookCall( Exception $e, string $resource, string $event, object $module ): void
+	{
+		$this->env->getLog()->logException( $e );
+
+//		$message	= 'Hook %1$s::%2$s@%3$s failed: %4$s';
+//		$message	= 'Call on resource event hook %3$s@%2$s, hooked by module %1$s, failed: %4$s';
+		$message	= 'Fetching resource event hook %1$s>>%2$s>>%3$s failed: %4$s';
+		$message	= sprintf( $message, $module->id, $resource, $event, $e->getMessage() );
+		if( !$this->env->has( 'messenger' ) )
+			throw new RuntimeException( $message, 0, $e );
+		$this->env->get( 'messenger' )->noteFailure( $message );
+	}
+
+	/**
+	 *	...
+	 *	@access		protected
+	 *	@param		string		$stdout
+	 *	@param		string		$resource
+	 *	@param		string		$event
+	 *	@param		object		$module
+	 *	@return		void
+	 *	@throws		RuntimeException			if environment has no messenger
+	 *	@throws		ReflectionException
+	 */
+	protected function handleStdoutOfResourceEventHookCall( string $stdout, string $resource, string $event, object $module ): void
+	{
+		if( 0 === strlen( trim( $stdout ) ) )
+			return;
+		$this->env->getLog()->log( 'notice', $stdout, (object) [
+			'resource'	=> $resource,
+			'event'		=> $event,
+			'module'	=> $module
+		] );
+		if( !$this->env->has( 'messenger' ) )
+			throw new RuntimeException( $stdout );
+		$this->env->get( 'messenger' )->noteNotice( vsprintf(
+			'Call on event %2$s@%1$s hooked by module %3$s reported: <xmp>%4$s</xmp>',
+			[$resource, $event, $module->id, $stdout]
+		) );
 	}
 }

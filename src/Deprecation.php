@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
 /*
 */
 /**
@@ -43,7 +43,7 @@ class Deprecation extends CommonDeprecation
 	{
 		$iniFilePath		= dirname( __DIR__ ).'/hydrogen.ini';
 		$iniFileData		= parse_ini_file( $iniFilePath, TRUE );
-		$this->version		= $iniFileData['project']['version'];
+		$this->version		= $iniFileData['project']['version'] ?? '1';
 		$this->phpVersion	= phpversion();
 		$this->errorVersion	= $this->version;
 	}

@@ -67,7 +67,7 @@ class Php
 		$settings	= $this->env->getConfig()->getAll( 'php.', TRUE );				//  get PHP configuration from config file
 		foreach( $settings as $key => $value ){														//  iterate set PHP configuration pairs
 			try{																					//  try since there could be unknown constants
-				$this->applyConfigPair( $key, $value );												//  apply config pair to PHP configuration
+				$this->applyConfigPair( (string) $key, (string) $value );							//  apply config pair to PHP configuration
 			} catch( Exception $e ){																//  detection of PHP configuration key or value failed
 				$message	= sprintf( 'PHP configuration failed: %s', $e->getMessage() );	//  render exception message
 				throw new RuntimeException( $message, 0, $e );								//  quit with exception

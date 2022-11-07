@@ -1,4 +1,5 @@
-<?php
+<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
+
 /**
  *	Application class for an MVC website.
  *
@@ -30,6 +31,7 @@ namespace CeusMedia\HydrogenFramework\Application\Web;
 use CeusMedia\Common\Net\HTTP\Header\Field as HttpHeaderField;
 use CeusMedia\Common\UI\HTML\Exception\Page as HtmlExceptionPage;
 use CeusMedia\HydrogenFramework\Dispatcher\General as GeneralDispatcher;
+use CeusMedia\HydrogenFramework\Environment\Resource\Database\PDO;
 use Exception;
 
 /**
@@ -160,7 +162,7 @@ class Site extends Abstraction
 		$request	= $this->env->getRequest();
 		$content	= $this->control();																//  dispatch and run request
 
-		if( $request->isAjax() || $request->has( '__contentOnly' ) )								//  this is an AJAX request
+		if( $request->isAjax() || $request->has( '__contentOnly' ) )							//  this is an AJAX request
 			return $content;																		//  deliver content only
 
 		$data		 = array(
@@ -175,13 +177,15 @@ class Site extends Abstraction
 
 		if( $this->env->has( 'messenger' ) )
 			$data['messenger']	= $this->env->getMessenger();										//  UI messages for user
-		if( $this->env->has( 'language' ) ){														//  language support is available
+		if( $this->env->has( 'language' ) ){													//  language support is available
 			$data['language']	= $this->env->getLanguage()->getLanguage();							//  note document language
 			$data['words']		= $this->env->getLanguage()->getWords( 'main', FALSE, FALSE );		//  note main UI word pairs
 		}
-		if( $this->env->has( 'database' ) ){														//  database support is available
-			$data['dbQueries']		= (int) $this->env->getDatabase()->numberExecutes;				//  note number of SQL queries executed
-			$data['dbStatements']	= (int) $this->env->getDatabase()->numberStatements;			//  note number of SQL statements sent
+		if( $this->env->has( 'database' ) ){													//  database support is available
+			/** @var PDO $database */
+			$database	= $this->env->getDatabase();
+			$data['dbQueries']		= $database->numberExecutes;									//  note number of SQL queries executed
+			$data['dbStatements']	= $database->numberStatements;									//  note number of SQL statements sent
 		}
 		$this->setViewComponents( $data );															//  set up information resources for main template
 		return $this->view();																		//  render and return main template to constructor

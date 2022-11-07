@@ -70,17 +70,19 @@ class Logic
 
 	/**
 	 *	@param		Environment			$env
-	 *	@return		static
+	 *	@return		self
 	 *	@throws		ReflectionException
 	 */
-	public static function getInstance( Environment $env )
+	public static function getInstance( Environment $env ): self
 	{
 		$logicPool	= $env->getLogic();
 		$className	= static::class;
 		$key		= $logicPool->getKeyFromClassName( $className );
 		if( !$logicPool->has( $key ) )
 			$logicPool->add( $key, $className );
-		return $logicPool->get( $key );
+		/** @var self $instance */
+		$instance	= $logicPool->get( $key );
+		return $instance;
 	}
 
 	//  --  PROTECTED  --  //

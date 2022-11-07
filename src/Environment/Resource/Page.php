@@ -31,8 +31,8 @@ use CeusMedia\Common\UI\HTML\PageFrame as HtmlPage;
 use CeusMedia\Common\UI\HTML\Tag as HtmlTag;
 use CeusMedia\HydrogenFramework\Environment as Environment;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
-use CeusMedia\HydrogenFramework\Environment\Resource\Module\Component\Config as ConfigComponent;
-use CeusMedia\HydrogenFramework\Environment\Resource\Module\Component\File as FileComponent;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Config as ConfigComponent;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\File as FileComponent;
 use CeusMedia\HydrogenFramework\View\Helper\StyleSheet as CssHelper;
 use CeusMedia\HydrogenFramework\View\Helper\JavaScript as JsHelper;
 
@@ -365,7 +365,7 @@ class Page extends HtmlPage
 		if( is_null( $level ) || !strlen( trim( $level ) ) )
 			return Captain::LEVEL_MID;
 		if( is_int( $level ) || ( is_string( $level ) && preg_match( '/^[0-9]$/', trim( $level ) ) ) )
-			return min( max( abs( $level ), Captain::LEVEL_TOP), Captain::LEVEL_END );
+			return (int) min( max( abs( $level ), Captain::LEVEL_TOP), Captain::LEVEL_END );
 		if( is_bool( $level ) )
 			return $level ? Captain::LEVEL_HIGH : Captain::LEVEL_LOW;
 		if( !is_string( $level ) )

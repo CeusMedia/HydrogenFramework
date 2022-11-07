@@ -1,4 +1,5 @@
-<?php
+<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
+
 namespace CeusMedia\HydrogenFramework\Run;
 
 use CeusMedia\Common\Loader;
@@ -83,7 +84,8 @@ class Web
 			error_reporting( $this->errorReporting );
 		if( NULL !== $this->displayErrors )
 			ini_set( 'display_errors', $this->displayErrors ? 'On' : 'Off' );
-		if( $this->catchErrors && is_callable( [$this, 'handleErrorAsException'] ) )
-			set_error_handler( [$this, 'handleErrorAsException'] );
+		$callable	= [$this, 'handleErrorAsException'];
+		if( $this->catchErrors && is_callable( $callable ) )
+			set_error_handler( $callable );
 	}
 }

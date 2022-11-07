@@ -37,8 +37,8 @@ class CMF_Hydrogen_Environment_Resource_Log extends CeusMedia\HydrogenFramework\
 class CMF_Hydrogen_Environment_Resource_Logic extends CeusMedia\HydrogenFramework\Environment\Resource\Logic {}
 class CMF_Hydrogen_Environment_Resource_LogicPool extends CeusMedia\HydrogenFramework\Environment\Resource\LogicPool {}
 class CMF_Hydrogen_Environment_Resource_Messenger extends CeusMedia\HydrogenFramework\Environment\Resource\Messenger {}
-class CMF_Hydrogen_Environment_Resource_Module_Component_Config extends CeusMedia\HydrogenFramework\Environment\Resource\Module\Component\Config {}
-class CMF_Hydrogen_Environment_Resource_Module_Component_File extends CeusMedia\HydrogenFramework\Environment\Resource\Module\Component\File {}
+class CMF_Hydrogen_Environment_Resource_Module_Component_Config extends CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Config {}
+class CMF_Hydrogen_Environment_Resource_Module_Component_File extends CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\File {}
 class CMF_Hydrogen_Environment_Resource_Module_Library_Local extends CeusMedia\HydrogenFramework\Environment\Resource\Module\Library\Local {}
 class CMF_Hydrogen_Environment_Resource_Module_Library_Source extends CeusMedia\HydrogenFramework\Environment\Resource\Module\Library\Source {}
 class CMF_Hydrogen_Environment_Resource_Module_Editor extends CeusMedia\HydrogenFramework\Environment\Resource\Module\Editor {}

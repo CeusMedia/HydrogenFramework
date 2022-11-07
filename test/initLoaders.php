@@ -1,9 +1,10 @@
 <?php
+return;
 use CeusMedia\Common\Loader;
 
-$pathLib	= realpath( dirname( dirname( __FILE__ ) ) );
-$pathSrc	= realpath( dirname( dirname( __FILE__ ) ) . '/src' );
-$pathTest	= realpath( dirname( dirname( __FILE__ ) ) . '/test' );
+$pathLib	= realpath( dirname( __FILE__, 2 ) );
+$pathSrc	= realpath( $pathLib . '/src' );
+$pathTest	= realpath( $pathLib . '/test' );
 
 require_once $pathSrc . '/FS/Autoloader/Psr0.php';
 
@@ -21,7 +22,7 @@ $__config	= parse_ini_file( $pathLib.'/Common.ini', TRUE );
 $loaderTest	= new Loader();													//  get new Loader Instance
 $loaderTest->setExtensions( 'php' );											//  set allowed Extension
 $loaderTest->setPath( dirname( __FILE__ ).DIRECTORY_SEPARATOR );				//  set fixed Library Path
-$loaderTest->setVerbose( FALSE );												//  show autoload attempts
+$loaderTest->setVerbose( 0 );												//  show autoload attempts
 $loaderTest->setPrefix( 'Test_' );												//  set prefix class prefix
 $loaderTest->registerAutoloader();												//  apply this autoloader
 

@@ -1,4 +1,5 @@
-<?php
+<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
+
 /**
  *	General bootstrap of Hydrogen environment.
  *	Will be extended by client channel environment, like Web or Console.
@@ -34,6 +35,7 @@ use CeusMedia\Cache\SimpleCacheFactory;
 use CeusMedia\Common\ADT\Collection\Dictionary as Dictionary;
 use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
 use CeusMedia\HydrogenFramework\Environment\Exception as EnvironmentException;
+use CeusMedia\HydrogenFramework\Environment\Resource\Acl\Abstraction;
 use CeusMedia\HydrogenFramework\Environment\Resource\Acl\Abstraction as AbstractAclResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\Acl\AllPublic as AllPublicAclResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\Captain as CaptainResource;
@@ -173,6 +175,7 @@ class Environment implements ArrayAccess
 	public function __construct( array $options = [], bool $isFinal = TRUE )
 	{
 //		$this->modules->callHook( 'Env', 'constructStart', $this );									//  call module hooks for end of env construction
+		/** @var array $frameworkConfig */
 		$frameworkConfig	= parse_ini_file( dirname( __DIR__ ).'/hydrogen.ini' );
 		$this->version		= $frameworkConfig['version'];
 
@@ -452,9 +455,10 @@ class Environment implements ArrayAccess
 	 */
 	public function has( string $key ): bool
 	{
-		$method	= 'get'.ucFirst( $key );
-		if( is_callable( array( $this, $method ) ) )
-			if( is_object( call_user_func( array( $this, $method ) ) ) )
+		$method		= 'get'.ucFirst( $key );
+		$callable	= [$this, $method];
+		if( is_callable( $callable ) )
+			if( is_object( call_user_func( $callable ) ) )
 				return TRUE;
 		if( $this->$key ?? FALSE )
 			return TRUE;
@@ -520,6 +524,7 @@ class Environment implements ArrayAccess
 
 	protected function detectMode(): self
 	{
+		/** @var array $modes */
 		$modes	= preg_split( '/[_.:;>#@\/-]/', strtolower( $this->config->get( 'app.mode' ) ) );
 		foreach( $modes as $mode ){
 			switch( $mode ){
@@ -561,7 +566,9 @@ class Environment implements ArrayAccess
 			if( $isHandled && NULL !== $payload['className'] )
 				$type	= $payload['className'];
 		}
-		$this->acl	= ObjectFactory::createObject( $type, array( $this ) );
+		/** @var Abstraction $acl */
+		$acl	= ObjectFactory::createObject( $type, array( $this ) );
+		$this->acl	= $acl;
 
 		$linksPublic		= [];
 		$linksPublicOutside	= [];
@@ -634,9 +641,10 @@ class Environment implements ArrayAccess
 			$configFile	= $this->options['configFile'];												//  get config file from options
 		if( !file_exists( $configFile ) ){															//  config file not found
 			$message	= sprintf( 'Config file "%s" not existing', $configFile );
-			throw new EnvironmentException( $message );														//  quit with exception
+			throw new EnvironmentException( $message );												//  quit with exception
 		}
-		$data			= parse_ini_file( $configFile, FALSE );										//  parse configuration file (without section support)
+		/** @var array $data */
+		$data	= parse_ini_file( $configFile, FALSE );										//  parse configuration file (without section support)
 		ksort( $data );
 		$this->config	= new Dictionary( $data );													//  create dictionary from array
 
@@ -752,9 +760,9 @@ class Environment implements ArrayAccess
 			$prefix	= 'module.'.strtolower( $moduleId );											//  build config key prefix of module
 			$this->config->set( $prefix, TRUE );													//  enable module in configuration
 			foreach( $module->config as $key => $value ){											//  iterate module configuration pairs
-				if( is_object( $value) ){															//	@todo remove
+				if( is_object( $value) ){															//  @todo remove
 					@settype( $value->value, $value->type );										//  cast value by set type
-					$this->config->set( $prefix.'.'.$key, $value->value );							//	set configuration pair
+					$this->config->set( $prefix.'.'.$key, $value->value );							//  set configuration pair
 				}
 				else																				//  legacy @todo remove
 					$this->config->set( $prefix.'.'.$key, $value );									//
