@@ -1,4 +1,5 @@
-<?php /** @noinspection PhpComposerExtensionStubsInspection */
+<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
+/** @noinspection PhpComposerExtensionStubsInspection */
 
 /**
  *	Handler for module source library. Can read local folder or HTTP resource.
@@ -28,17 +29,17 @@
 
 namespace CeusMedia\HydrogenFramework\Environment\Resource\Module\Library;
 
-use CeusMedia\Cache\SimpleCacheInvalidArgumentException;
 use CeusMedia\Common\FS\File\Reader as FileReader;
 use CeusMedia\Common\FS\File\RecursiveNameFilter as RecursiveFileIndex;
 use CeusMedia\Common\Net\HTTP\Header\Section;
 use CeusMedia\Common\Net\HTTP\Reader as HttpReader;
 use CeusMedia\Common\Net\Reader as NetReader;
 use CeusMedia\HydrogenFramework\Environment as Environment;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Library\Source\Definition;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\LibraryInterface as LibraryInterface;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Library\Abstraction as AbstractLibrary;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Reader as ModuleReader;
-use Psr\SimpleCache\InvalidArgumentException;
+use JsonException;
 
 use Exception;
 use RuntimeException;
@@ -58,17 +59,17 @@ class Source extends AbstractLibrary implements LibraryInterface
 {
 	protected Environment $env;
 	protected array $modules		= [];
-	protected object $source;
+	protected Definition $source;
 
 	/**
 	 *	Constructor.
 	 *	@access		public
 	 *	@param		Environment		$env			Environment instance
-	 *	@param		object			$source			Data object defining source by: {id: ..., type: [folder|http], path: ...}
+	 *	@param		Definition		$source			Data object defining source by: {id: ..., type: [folder|http], path: ...}
 	 *	@return		void
 	 *	@throws		Exception		if XML file could not been loaded and parsed
 	 */
-	public function __construct( Environment $env, object $source )
+	public function __construct( Environment $env, Definition $source )
 	{
 		$this->env		= $env;
 		$this->source	= $source;
@@ -177,6 +178,10 @@ class Source extends AbstractLibrary implements LibraryInterface
 		return $list;
 	}
 
+	/**
+	 *	@return		array
+	 *	@throws		JsonException
+	 */
 	protected function getModulesFromHttp(): array
 	{
 		$host		= parse_url( $this->source->path, PHP_URL_HOST );

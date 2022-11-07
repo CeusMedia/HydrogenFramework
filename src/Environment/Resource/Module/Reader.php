@@ -1,4 +1,5 @@
-<?php
+<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
+
 /**
  *	Reader for local module XML files.
  *
@@ -29,8 +30,9 @@ namespace CeusMedia\HydrogenFramework\Environment\Resource\Module;
 
 use CeusMedia\Common\XML\Element as XmlElement;
 use CeusMedia\Common\XML\ElementReader as XmlReader;
-use CeusMedia\HydrogenFramework\Environment\Resource\Module\Component\Config as ConfigComponent;
-use CeusMedia\HydrogenFramework\Environment\Resource\Module\Component\File as FileComponent;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Config as ConfigDefinition;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Deprecation as DeprecationDefinition;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\File as FileDefinition;
 
 use Exception;
 use RuntimeException;
@@ -52,59 +54,16 @@ class Reader
 	 *	@access		public
 	 *	@param		string		$filePath		File path to module XML file
 	 *	@param		string		$id				Module ID
-	 *	@return		object						Module data object
+	 *	@return		Definition					Module data object
 	 *	@throws		Exception	if XML file could not been loaded and parsed
 	 */
-	public static function load( string $filePath, string $id ): object
+	public static function load( string $filePath, string $id ): Definition
 	{
 		if( !file_exists( $filePath ) )
 			throw new RuntimeException( 'Module file "'.$filePath.'" is not existing' );
 		$xml	= XmlReader::readFile( $filePath );
-		$object	= (object) [
-			'id'				=> $id,
-			'file'				=> $filePath,
-			'uri'				=> realpath( $filePath ),
-			'path'				=> NULL,
-			'title'				=> (string) $xml->title,
-			'category'			=> (string) $xml->category,
-			'description'		=> (string) $xml->description,
-			'frameworks'		=> [],
-			'version'			=> (string) $xml->version,
-			'versionAvailable'	=> NULL,
-			'versionInstalled'	=> NULL,
-			'versionLog'		=> [],
-			'deprecation'		=> NULL,
-			'isActive'			=> TRUE,
-			'isInstalled'		=> FALSE,
-			'companies'			=> [],
-			'authors'			=> [],
-			'licenses'			=> [],
-			'price'				=> (string) $xml->price,
-			'icon'				=> NULL,
-			'files'				=> (object) [
-				'classes'		=> [],
-				'locales'		=> [],
-				'templates'		=> [],
-				'styles'		=> [],
-				'scripts'		=> [],
-				'images'		=> [],
-				'files'			=> [],
-			],
-			'config'			=> [],
-			'relations'			=> (object) [
-				'needs'			=> [],
-				'supports'		=> [],
-			],
-			'sql'				=> [],
-			'links'				=> [],
-			'hooks'				=> [],
-			'jobs'				=> [],
-			'install'			=> (object) [
-				'type'			=> self::castNodeAttributes( $xml->version, 'install-type', 'int' ),	//  note install type
-				'date'			=> self::castNodeAttributes( $xml->version, 'install-date', 'time' ),	//  note install date
-				'source'		=> self::castNodeAttributes( $xml->version, 'install-source' ),			//  note install source
-			],
-		];
+		$object	= new Definition( $id, (string) $xml->version, $filePath, realpath( $filePath ) ?: NULL );
+		self::decorateObjectWithBasics( $object, $xml );
 		self::decorateObjectWithFrameworks( $object, $xml );
 		self::decorateObjectWithLog( $object, $xml );
 		self::decorateObjectWithFiles( $object, $xml );
@@ -147,17 +106,17 @@ class Reader
 		if( !$node->hasAttribute( $attribute ) ){
 			switch( $type ){
 				case 'array':
-					return !is_null( $default ) ? $default : [];
+					return $default ?? [];
 				case 'string':
-					return !is_null( $default ) ? $default : '';
+					return $default ?? '';
 				case 'bool':
 				case 'boolean':
-					return !is_null( $default ) ? $default : FALSE;
+					return $default ?? FALSE;
 				case 'int':
 				case 'integer':
-					return !is_null( $default ) ? $default : 0;
+					return $default ?? 0;
 				default:
-					return !is_null( $default ) ? $default : NULL;
+					return $default ?? NULL;
 			}
 		}
 		$value	= $node->getAttribute( $attribute );
@@ -182,11 +141,11 @@ class Reader
 	/**
 	 *	Decorates module object by author information, if set.
 	 *	@access		protected
-	 *	@param		object			$object			Data object of module
+	 *	@param		Definition		$object			Data object of module
 	 *	@param		XmlElement		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 */
-	protected static function decorateObjectWithAuthors( object $object, XmlElement $xml ): bool
+	protected static function decorateObjectWithAuthors( Definition $object, XmlElement $xml ): bool
 	{
 		if( !$xml->author )																			//  no author nodes existing
 			return FALSE;
@@ -200,14 +159,26 @@ class Reader
 		return TRUE;
 	}
 
+	protected static function decorateObjectWithBasics( Definition $object, XmlElement $xml ): void
+	{
+		$object->title			= (string) $xml->title;
+		$object->category		= (string) $xml->category;
+		$object->description	= (string) $xml->description;
+		$object->version		= (string) $xml->version;
+		$object->price			= (string) $xml->price;
+		$object->install->type	= self::castNodeAttributes( $xml->version, 'install-type', 'int' );
+		$object->install->type	= self::castNodeAttributes( $xml->version, 'install-date', 'int' );
+		$object->install->type	= self::castNodeAttributes( $xml->version, 'install-source' );
+	}
+
 	/**
 	 *	Decorates module object by company information, if set.
 	 *	@access		protected
-	 *	@param		object			$object			Data object of module
+	 *	@param		Definition		$object			Data object of module
 	 *	@param		XmlElement		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 */
-	protected static function decorateObjectWithCompanies( object $object, XmlElement $xml ): bool
+	protected static function decorateObjectWithCompanies( Definition $object, XmlElement $xml ): bool
 	{
 		if( !$xml->company )																		//  no company nodes existing
 			return FALSE;
@@ -224,11 +195,11 @@ class Reader
 	/**
 	 *	Decorates module object by config information, if set.
 	 *	@access		protected
-	 *	@param		object			$object			Data object of module
+	 *	@param		Definition		$object			Data object of module
 	 *	@param		XmlElement		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 */
-	protected static function decorateObjectWithConfig( object $object, XmlElement $xml ): bool
+	protected static function decorateObjectWithConfig( Definition $object, XmlElement $xml ): bool
 	{
 		if( !$xml->config )																			//  no config nodes existing
 			return FALSE;
@@ -242,7 +213,7 @@ class Reader
 			if( in_array( $type, array( 'boolean', 'bool' ) ) )										//  value is boolean
 				$value	= !in_array( strtolower( $value ), array( 'no', 'false', '0', '' ) );		//  value is not negative
 
-			$item				= new ConfigComponent( trim( $key ), $value, $type , $title );		//  container for config entry
+			$item				= new ConfigDefinition( trim( $key ), $value, $type , $title );		//  container for config entry
 			$item->values		= self::castNodeAttributes( $pair, 'values', 'array' );
 			$item->mandatory	= self::castNodeAttributes( $pair, 'mandatory', 'bool' );
 			$item->protected	= self::castNodeAttributes( $pair, 'protected' );
@@ -254,34 +225,34 @@ class Reader
 	/**
 	 *	Decorates module object by deprecation information, if set.
 	 *	@access		protected
-	 *	@param		object			$object			Data object of module
+	 *	@param		Definition		$object			Data object of module
 	 *	@param		XmlElement		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 */
-	protected static function decorateObjectWithDeprecation( object $object, XmlElement $xml ): bool
+	protected static function decorateObjectWithDeprecation( Definition $object, XmlElement $xml ): bool
 	{
 		if( !$xml->deprecation )																	//  deprecation node is not existing
 			return FALSE;
-		$object->deprecation	= (object) [														//  note deprecation object
-			'message'			=> (string) $xml->deprecation,										//  ... with message
-			'url'				=> self::castNodeAttributes( $xml->deprecation, 'url' ),	//  ... with follow-up URL, if set
-		];
+		$object->deprecation	= new DeprecationDefinition(													//  note deprecation object
+			(string) $xml->deprecation,																//  ... with message
+			self::castNodeAttributes( $xml->deprecation, 'url' )							//  ... with follow-up URL, if set
+		);
 		return TRUE;
 	}
 
 	/**
 	 *	Decorates module object by file information, if set.
 	 *	@access		protected
-	 *	@param		object			$object			Data object of module
+	 *	@param		Definition		$object			Data object of module
 	 *	@param		XmlElement		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 *	@todo		rethink the defined map of paths
 	 */
-	protected static function decorateObjectWithFiles( object $object, XmlElement $xml ): bool
+	protected static function decorateObjectWithFiles( Definition $object, XmlElement $xml ): bool
 	{
 		if( !$xml->files )
 			return FALSE;
-		$map	= array(																			//  ...
+		$map	= [
 			'class'		=> 'classes',
 			'locale'	=> 'locales',
 			'template'	=> 'templates',
@@ -289,10 +260,10 @@ class Reader
 			'script'	=> 'scripts',
 			'image'		=> 'images',
 			'file'		=> 'files',
-		);
+		];
 		foreach( $map as $source => $target ){														//  iterate files
 			foreach( $xml->files->$source as $file ){
-				$item	= new FileComponent( (string) $file );
+				$item	= new FileDefinition( (string) $file );
 //				$item	= (object) array( 'file' => (string) $file );
 				foreach( $file->getAttributes() as $key => $value )
 					$item->$key	= $value;
@@ -305,11 +276,11 @@ class Reader
 	/**
 	 *	Decorates module object by framework support information, if set.
 	 *	@access		protected
-	 *	@param		object			$object			Data object of module
+	 *	@param		Definition		$object			Data object of module
 	 *	@param		XmlElement		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 */
-	protected static function decorateObjectWithFrameworks( object $object, XmlElement $xml ): bool
+	protected static function decorateObjectWithFrameworks( Definition $object, XmlElement $xml ): bool
 	{
 		$frameworks	= self::castNodeAttributes( $xml, 'frameworks', 'string', 'Hydrogen:<0.9' );
 		if( !strlen( trim( $frameworks ) ) )
@@ -329,11 +300,11 @@ class Reader
 	/**
 	 *	Decorates module object by hook information, if set.
 	 *	@access		protected
-	 *	@param		object			$object			Data object of module
+	 *	@param		Definition		$object			Data object of module
 	 *	@param		XmlElement		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 */
-	protected static function decorateObjectWithHooks( object $object, XmlElement $xml ): bool
+	protected static function decorateObjectWithHooks( Definition $object, XmlElement $xml ): bool
 	{
 		if( !$xml->hook )																			//  hook node is not existing
 			return FALSE;
@@ -351,11 +322,11 @@ class Reader
 	/**
 	 *	Decorates module object by job information, if set.
 	 *	@access		protected
-	 *	@param		object			$object			Data object of module
+	 *	@param		Definition		$object			Data object of module
 	 *	@param		XmlElement		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 */
-	protected static function decorateObjectWithJobs( object $object, XmlElement $xml ): bool
+	protected static function decorateObjectWithJobs( Definition $object, XmlElement $xml ): bool
 	{
 		if( !$xml->job )																			//  hook node is not existing
 			return FALSE;
@@ -380,11 +351,11 @@ class Reader
 	/**
 	 *	Decorates module object by license information, if set.
 	 *	@access		protected
-	 *	@param		object			$object			Data object of module
+	 *	@param		Definition		$object			Data object of module
 	 *	@param		XmlElement		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 */
-	protected static function decorateObjectWithLicenses( object $object, XmlElement $xml ): bool
+	protected static function decorateObjectWithLicenses( Definition $object, XmlElement $xml ): bool
 	{
 		if( !$xml->license )																		//  no license nodes existing
 			return FALSE;
@@ -401,11 +372,11 @@ class Reader
 	/**
 	 *	Decorates module object by link information, if set.
 	 *	@access		protected
-	 *	@param		object			$object			Data object of module
+	 *	@param		Definition		$object			Data object of module
 	 *	@param		XmlElement		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 */
-	protected static function decorateObjectWithLinks( object $object, XmlElement $xml ): bool
+	protected static function decorateObjectWithLinks( Definition $object, XmlElement $xml ): bool
 	{
 		if( !$xml->link )																			//  no link nodes existing
 			return FALSE;
@@ -431,11 +402,11 @@ class Reader
 	/**
 	 *	Decorates module object by log information, if set.
 	 *	@access		protected
-	 *	@param		object			$object			Data object of module
+	 *	@param		Definition		$object			Data object of module
 	 *	@param		XmlElement		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 */
-	protected static function decorateObjectWithLog( object $object, XmlElement $xml ): bool
+	protected static function decorateObjectWithLog( Definition $object, XmlElement $xml ): bool
 	{
 		if( !$xml->log )																			//  no log nodes existing
 			return FALSE;
@@ -453,11 +424,11 @@ class Reader
 	/**
 	 *	Decorates module object by relation information, if set.
 	 *	@access		protected
-	 *	@param		object			$object			Data object of module
+	 *	@param		Definition		$object			Data object of module
 	 *	@param		XmlElement		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 */
-	protected static function decorateObjectWithRelations( object $object, XmlElement $xml ): bool
+	protected static function decorateObjectWithRelations( Definition $object, XmlElement $xml ): bool
 	{
 		if( !$xml->relations )																		//  no relation nodes existing
 			return FALSE;																			//  do nothing
@@ -485,12 +456,12 @@ class Reader
 	/**
 	 *	Decorates module object by SQL information, if set.
 	 *	@access		protected
-	 *	@param		object			$object			Data object of module
+	 *	@param		Definition		$object			Data object of module
 	 *	@param		XmlElement		$xml			XML tree object of module created by ::load
 	 *	@return		boolean							TRUE if data object of module has been decorated
 	 *	@throws		Exception
 	 */
-	protected static function decorateObjectWithSql( object $object, XmlElement $xml ): bool
+	protected static function decorateObjectWithSql( Definition $object, XmlElement $xml ): bool
 	{
 		if( !$xml->sql )																			//  no sql nodes existing
 			return FALSE;

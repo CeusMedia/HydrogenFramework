@@ -1,4 +1,5 @@
-<?php
+<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
+
 /**
  *	Handler for local module library.
  *
@@ -35,6 +36,7 @@ use CeusMedia\HydrogenFramework\Environment\Resource\Module\LibraryInterface as 
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Library\Abstraction as AbstractLibrary;
 use Countable;
 use Exception;
+use ReflectionException;
 use RuntimeException;
 use SplFileObject;
 
@@ -109,6 +111,7 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 	 *	@throws		RuntimeException			if given static class method is not existing
 	 *	@throws		RuntimeException			ig method call produces stdout output, for example warnings and notices
 	 *	@throws		RuntimeException			if method call is throwing an exception
+	 *	@throws		ReflectionException
 	 *	@todo 		rename $data to $payload
 	 *	@todo		check if this is needed anymore and remove otherwise
 	 */
