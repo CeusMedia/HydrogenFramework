@@ -94,6 +94,16 @@ class Log
 	}
 
 	/**
+	 *	Returns current list of strategies to be applied on logging.
+	 *	@access		public
+	 *	@return		array<string>
+	 */
+	public function getStrategies(): array
+	{
+		return $this->strategies;
+	}
+
+	/**
 	 *	Logs message by registered hooks or local log file fallback.
 	 *	@access		public
 	 *	@param		string				$type			Message type as string (debug,info,note,warn,error), @see ::TYPE_*

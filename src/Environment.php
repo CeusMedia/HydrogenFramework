@@ -188,6 +188,7 @@ class Environment implements ArrayAccess
 		if( !empty( static::$timezone ) )															//  a timezone has be set externally before
 			date_default_timezone_set( static::$timezone );											//  set this timezone
 
+		$this->initLog();																			//  setup logger
 		$this->initRuntime();																		//  setup runtime clock
 		$this->initConfiguration();																	//  setup configuration
 		$this->initPhp();																			//  setup PHP environment
@@ -196,7 +197,6 @@ class Environment implements ArrayAccess
 		$this->initModules();																		//  setup module support
 		$this->initDatabase();																		//  setup database connection
 		$this->initCache();																			//  setup cache support
-		$this->initLog();																			//  setup logger
 		if( !$isFinal )
 			return;
 		$this->modules->callHook( 'Env', 'constructEnd', $this );									//  call module hooks for end of env construction
@@ -707,6 +707,7 @@ class Environment implements ArrayAccess
 	protected function initLog(): self
 	{
 		$this->log	= new LogResource( $this );
+		$this->log->setStrategies( [LogResource::STRATEGY_APP_DEFAULT] );
 		return $this;
 	}
 
@@ -779,6 +780,8 @@ class Environment implements ArrayAccess
 		}
 		if( !( $this instanceof RemoteEnvironment ) )
 			$this->modules->callHook( 'Env', 'initModules', $this );								//  call related module event hooks
+		$logStrategies	= [LogResource::STRATEGY_MODULE_HOOKS, ...$this->log->getStrategies()];		//  prepend hook based logging strategy
+		$this->log->setStrategies( array_unique( $logStrategies ) );								//  set new logging strategies list
 		$this->config->set( 'module.acl.public', implode( ',', array_unique( $public ) ) );			//  save public link list
 		$this->runtime->reach( 'env: initModules: end', 'Finished setup of modules.' );
 		return $this;
