@@ -188,9 +188,9 @@ class Environment implements ArrayAccess
 		if( !empty( static::$timezone ) )															//  a timezone has be set externally before
 			date_default_timezone_set( static::$timezone );											//  set this timezone
 
-		$this->initLog();																			//  setup logger
 		$this->initRuntime();																		//  setup runtime clock
 		$this->initConfiguration();																	//  setup configuration
+		$this->initLog();																			//  setup logger
 		$this->initPhp();																			//  setup PHP environment
 		$this->initCaptain();																		//  setup captain
 		$this->initLogic();																			//  setup logic pool
