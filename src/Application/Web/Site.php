@@ -30,8 +30,11 @@ namespace CeusMedia\HydrogenFramework\Application\Web;
 
 use CeusMedia\Common\Net\HTTP\Header\Field as HttpHeaderField;
 use CeusMedia\Common\UI\HTML\Exception\Page as HtmlExceptionPage;
+use CeusMedia\HydrogenFramework\ApplicationInterface;
+use CeusMedia\HydrogenFramework\Application\WebAbstraction;
 use CeusMedia\HydrogenFramework\Dispatcher\General as GeneralDispatcher;
 use CeusMedia\HydrogenFramework\Environment\Resource\Database\PDO;
+use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 use Exception;
 
 /**
@@ -44,7 +47,7 @@ use Exception;
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			Code Documentation
  */
-class Site extends Abstraction
+class Site extends WebAbstraction implements ApplicationInterface
 {
 	public static bool $checkClassActionArguments	= TRUE;
 
@@ -56,9 +59,9 @@ class Site extends Abstraction
 	 *	You can copy and modify this method in your application to handle exceptions your way.
 	 *	NOTE: You need to execute $this->respond( $this->main() ) in order to start dispatching, controlling and rendering.
 	 *	@access		public
-	 *	@return		void
+	 *	@return		int|NULL
 	 */
-	public function run()
+	public function run(): ?int
 	{
 		$displayErrors	= $this->env->getConfig()->get( 'system.display.errors' );				//  get error mode from config
 		$displayErrors	= is_null($displayErrors) || $displayErrors;								//  if not set: enable error display by default
@@ -67,9 +70,11 @@ class Site extends Abstraction
 			$this->respond( $this->main() );														//	send rendered result of dispatched controller action
 			$this->logOnComplete();																	//  handle logging after responding
 			$this->env->close();																	//  teardown environment and quit application execution
+			return 0;
 		}
 		catch( Exception $e ){
 			HtmlExceptionPage::display( $e );
+			return 1;
 		}
 	}
 

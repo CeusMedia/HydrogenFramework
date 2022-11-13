@@ -1,4 +1,5 @@
-<?php
+<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
+
 /**
  *	Application class for a console program.
  *
@@ -26,7 +27,11 @@
  */
 namespace CeusMedia\HydrogenFramework\Application;
 
+use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
+use CeusMedia\HydrogenFramework\ApplicationInterface;
+use CeusMedia\HydrogenFramework\Environment;
 use CeusMedia\HydrogenFramework\Environment\Console as ConsoleEnvironment;
+use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 use RuntimeException;
 
 /**
@@ -39,7 +44,7 @@ use RuntimeException;
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			Code Documentation
  */
-class Console extends Abstraction
+abstract class ConsoleAbstraction implements ApplicationInterface
 {
 	/**	@var		string								$classEnvironment		Class Name of Application Environment to build */
 	public static string $classEnvironment				= ConsoleEnvironment::class;
@@ -47,45 +52,55 @@ class Console extends Abstraction
 	/**	@var		ConsoleEnvironment					$env					Application Environment Object */
 	protected ConsoleEnvironment $env;
 
-	public function __construct( ConsoleEnvironment $env = NULL )
+	public static array $modulesNeeded					= [];
+
+	public function __construct( ?Environment $env = NULL )
 	{
-		parent::__construct( $env );
+		if( NULL === $env )
+			$env	= ObjectFactory::createObject( static::$classEnvironment );
+
+		/** @var ConsoleEnvironment $env */
+		$this->env	= $env;
+
+		if( static::$modulesNeeded )																//  needed modules are defined
+			$this->checkNeededModules();															//  check for missing modules
 //		$this->env->set( 'request', new Console_Command_ArgumentParser() );
 	}
 
 	/**
 	 *	General main application method.
-	 *	You can copy and modify this method in your application to handle exceptions your way.
-	 *	NOTE: You need to execute $this->respond( $this->main() ) in order to start dispatching, controlling and rendering.
 	 *	@access		public
-	 *	@return		void
+	 *	@return		int|NULL
 	 */
-	public function run()
-	{
-		throw new RuntimeException( 'Not implemented' );
-/*		error_reporting( E_ALL );
-		try{
-			$this->dispatch();
-			if( $this->messenger->count() )
-				die( "MSG!!!");
-			$this->env->close();																	//  teardown environment and quit application execution
-		}
-		catch( Exception $e ){
-			die( "Error: ".$e->getMessage()."\n" );
-		}*/
-	}
+	abstract public function run(): ?int;
 
 	//  --  PROTECTED  --  //
 
 	/**
-	 *	Executes called command.
+	 *	Finds missing modules if needed modules are defined.
+	 *	Having such, the application will quit with a report.
 	 *	@access		protected
-	 *	@return		string|NULL
-	 *	@todo		implement
-	 *	@throws		RuntimeException	since not implemented yet
+	 *	@return		void
 	 */
-	protected function dispatch()
+	protected function checkNeededModules()
 	{
-		throw new RuntimeException( 'Dispatching is disabled for console applications' );
+		$modulesGot	= array_keys( $this->env->getModules()->getAll() );								//  get installed modules
+		$missing	= array_diff( static::$modulesNeeded, $modulesGot );							//  find missing modules
+		if( $missing ){																				//  there are missing modules
+			$this->reportMissingModules( $missing );												//  report missing modules to screen
+			exit;																					//  quit execution
+		}
+	}
+
+	/**
+	 *	Display report of missing modules.
+	 *	This method can be customized in applications, see CMF_Hydrogen_Application_Web_Abstract.
+	 *	@access		protected
+	 *	@param		array		$modules		List of module IDs
+	 *	@return		void
+	 */
+	protected function reportMissingModules( array $modules )
+	{
+		print( 'Missing modules: '.join( ', ', $modules ) );
 	}
 }

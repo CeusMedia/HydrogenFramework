@@ -42,6 +42,7 @@ use ReflectionException;
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			Code Documentation
+ *	@deprecated		implement interface instead
  */
 abstract class Abstraction
 {
