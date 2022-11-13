@@ -35,6 +35,7 @@ use CeusMedia\Common\ADT\Collection\Dictionary;
 use CeusMedia\HydrogenFramework\Environment as Environment;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition as ModuleDefinition;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
+use DomainException;
 use ReflectionException;
 use ReflectionMethod;
 use RuntimeException;
@@ -79,7 +80,7 @@ class Hook
 	 *	@throws		DomainException
 	 *	@throws		ReflectionException
 	 */
-	public static function callHook( Environment $env, string $resource, string $event, ?object $context = NULL, array & $payload ): ?bool
+	public static function callHook( Environment $env, string $resource, string $event, ?object $context, array & $payload ): ?bool
 	{
 		return $env->getCaptain()->callHook( $resource, $event, $context, $payload );
 	}
@@ -101,6 +102,7 @@ class Hook
 	 *	@return		bool|null
 	 *	@throws		BadMethodCallException		if hook method is not existing or not callable
 	 *	@throws		RuntimeException			if no context or environment set
+	 *	@throws		ReflectionException
 	 */
 	public function fetch( string $method ): ?bool
 	{
@@ -134,14 +136,12 @@ class Hook
 	}
 
 	/**
-	 *	Returns set name of resource (e.G. Page or View).
-	 *	Returns set name of hook event (e.G. onBuild or onRenderContent).
 	 *	Sets context object.
 	 *	@access		public
-	 *	@param		object|NULL
+	 *	@param		object|NULL		$context		Context object
 	 *	@return		self
 	 */
-	public function setContext( object $context ): self
+	public function setContext( ?object $context ): self
 	{
 		$this->context	= $context;
 		return $this;
@@ -150,7 +150,7 @@ class Hook
 	/**
 	 *	Sets environment object.
 	 *	@access		public
-	 *	@param		Environment
+	 *	@param		Environment		$env		Environment object
 	 *	@return		self
 	 */
 	public function setEnv( Environment $env ): self
@@ -160,11 +160,11 @@ class Hook
 	}
 
 	/**
-	 *	Sets definition or related module.
+	 *	Sets definition of related module.
 	 *	@access		public
-	 *	@return		ModuleDefinition
+	 *	@param		ModuleDefinition|NULL	$module		Definition of related module
 	 */
-	public function setModule( object $module ): self
+	public function setModule( ?ModuleDefinition $module ): self
 	{
 		$this->module	= $module;
 		return $this;
@@ -173,10 +173,10 @@ class Hook
 	/**
 	 *	Sets map of hook payload data.
 	 *	@access		public
-	 *	@param		array|NULL		Map of hook payload data
+	 *	@param		array|NULL		$payload		Map of hook payload data
 	 *	@return		self
 	 */
-	public function setPayload( array & $payload ): self
+	public function setPayload( ?array & $payload ): self
 	{
 		$this->payload	= & $payload;
 		return $this;
@@ -188,10 +188,10 @@ class Hook
 	 *	Call hook methods, which are statically defined.
 	 *	Static hook methods were the default way until version 0.9.1.
 	 *	@access		protected
-	 *	@param		$method
+	 *	@param		string		$method		Name of hook method
 	 *	@return		bool|NULL
 	 */
-	protected function fetchStatic( $method ): ?bool
+	protected function fetchStatic( string $method ): ?bool
 	{
 		$call	= [get_class( $this ), $method];
 		if( !is_callable( $call ) )

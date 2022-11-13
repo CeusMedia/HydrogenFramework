@@ -1,4 +1,5 @@
-<?php
+<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
+
 /**
  *	Module definition.
  *
@@ -68,13 +69,18 @@ class Definition
 	public ?string $price				= NULL;
 	public ?string $icon				= NULL;
 	public Files $files;
+
+	/** @var array<Config> $config */
 	public array $config				= [];
+
 	public Relations $relations;
 	public array $sql					= [];
 	public array $links					= [];
 	public array $hooks					= [];
 	public array $jobs					= [];
 	public ?Installation $install		= NULL;
+
+	protected ?Dictionary $configAsDictionary	= NULL;
 
 	/**
 	 *	Constructor.
@@ -101,10 +107,14 @@ class Definition
 	 */
 	public function getConfigAsDictionary(): Dictionary
 	{
-		$dictionary	= new Dictionary();
-		array_walk($this->config, static function( Config $config ) use ($dictionary){
-			$dictionary->set( $config->key, $config->value );
-		} );
-		return $dictionary;
+		if( NULL === $this->configAsDictionary ){
+			$dictionary	= new Dictionary();
+			array_walk($this->config, static function( Config $config ) use ($dictionary){
+				@settype( $config->value, $config->type );
+				$dictionary->set( $config->key, $config->value );
+			} );
+			$this->configAsDictionary	= $dictionary;
+		}
+		return $this->configAsDictionary;
 	}
 }

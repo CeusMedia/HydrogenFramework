@@ -34,6 +34,7 @@ use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
 use CeusMedia\Common\Alg\Obj\MethodFactory as MethodFactory;
 use CeusMedia\Common\Alg\Text\CamelCase as CamelCase;
 use CeusMedia\Common\Net\HTTP\Status as HttpStatus;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition as ModuleDefinition;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 
 use DateTimeInterface;
@@ -520,11 +521,12 @@ class Controller
 			$language->load( $this->controller );
 		}
 		//  load module configuration
-		$list	= [];
-		if( strlen( static::$moduleId ) && $env->getModules()->has( static::$moduleId ) )
-			foreach( $env->getModules()->get( static::$moduleId )->config as $entry )
-				$list[$entry->key]	= $entry->value;
-		$this->moduleConfig	= new Dictionary( $list );
+		$this->moduleConfig	= new Dictionary();
+		if( strlen( static::$moduleId ) && $env->getModules()->has( static::$moduleId ) ){
+			/** @var ModuleDefinition $module */
+			$module	= $env->getModules()->get( static::$moduleId );
+			$this->moduleConfig	= $module->getConfigAsDictionary();
+		}
 		return $this;
 	}
 

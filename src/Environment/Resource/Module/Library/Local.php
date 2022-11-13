@@ -31,6 +31,7 @@ use CeusMedia\Common\FS\File\Reader as FileReader;
 use CeusMedia\Common\FS\File\RegexFilter as FileRegexIndex;
 use CeusMedia\Common\FS\File\Writer as FileWriter;
 use CeusMedia\HydrogenFramework\Environment as Environment;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition as ModuleDefinition;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Reader as ModuleReader;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\LibraryInterface as LibraryInterface;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Library\Abstraction as AbstractLibrary;
@@ -149,11 +150,12 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 	 *	Returns module providing class of given controller, if resolvable.
 	 *	@access		public
 	 *	@param		string			$controller			Name of controller class to get module for
-	 *	@return		object|NULL
+	 *	@return		ModuleDefinition|NULL
 	 */
-	public function getModuleFromControllerClassName( string $controller ): ?object
+	public function getModuleFromControllerClassName( string $controller ): ?ModuleDefinition
 	{
 		$controllerPathName	= "Controller/".str_replace( "_", "/", $controller );
+		/** @var ModuleDefinition $module */
 		foreach( $this->env->getModules()->getAll() as $module ){
 			foreach( $module->files->classes as $file ){
 				$path	= pathinfo( $file->file, PATHINFO_DIRNAME ).'/';
@@ -210,8 +212,9 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 			$module->isInstalled		= TRUE;														//  module is installed
 			$module->versionInstalled	= $module->version;											//  set installed version by found module version
 			$module->isActive			= TRUE;														//  set active by fallback: not configured -> on (active)
-			if( isset( $module->config['active'] ) )												//  module has main switch in config
-				$module->isActive		= $module->config['active']->value;							//  set active by default main switch config value
+			$configDictionary			= $module->getConfigAsDictionary();
+			if( $configDictionary->has( 'active' ) )											//  module has main switch in config
+				$module->isActive		= $configDictionary->get( 'active' );					//  set active by default main switch config value
 
 /*			This snippet from source library is not working in local installation.
 			$icon	= $entry->getPath().'/'.$moduleId;

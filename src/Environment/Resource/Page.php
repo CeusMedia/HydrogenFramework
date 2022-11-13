@@ -1,4 +1,5 @@
-<?php
+<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
+
 /**
  *	XHTML Page Resource of Framework Hydrogen.
  *
@@ -33,6 +34,7 @@ use CeusMedia\HydrogenFramework\Environment as Environment;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Config as ConfigComponent;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\File as FileComponent;
+use CeusMedia\HydrogenFramework\View\Helper\StyleCascade;
 use CeusMedia\HydrogenFramework\View\Helper\StyleSheet as CssHelper;
 use CeusMedia\HydrogenFramework\View\Helper\JavaScript as JsHelper;
 
@@ -70,8 +72,8 @@ class Page extends HtmlPage
 	/**	@var	JsHelper			$js					JavaScript Collector Helper */
 	public JsHelper $js;
 
-	/**	@var	object				$css				CSS containers (primer, theme) */
-	public object $css;
+	/**	@var	StyleCascade		$css				CSS containers (primer, theme) */
+	public StyleCascade $css;
 
 //	/**	@var	CMM_TEA_Factory							$tea				Instance of TEA (Template Engine Abstraction) Factory (from cmModules) OR empty if TEA is not available */
 //	public $tea					= NULL;
@@ -93,14 +95,15 @@ class Page extends HtmlPage
 			$this->pathPrimer	= $pathThemes.$config->get( 'layout.primer' ).'/';
 		$this->pathCommon	= $pathThemes.'common/';
 		$this->pathTheme	= $pathThemes.$config->get( 'layout.theme' ).'/';
-		$this->css			= new stdClass;
-		$this->css->primer	= new CssHelper( $this->pathPrimer.'css/' );
-		$this->css->common	= new CssHelper( $this->pathCommon.'css/' );
-		$this->css->theme	= new CssHelper( $this->pathTheme.'css/' );
-		$this->css->lib		= new CssHelper();
+		$this->css	= new StyleCascade( [
+			'primer'	=> $this->pathPrimer.'css/',
+			'common'	=> $this->pathCommon.'css/',
+			'theme'		=> $this->pathTheme.'css/',
+			'lib'		=> NULL,
+		] );
 		if( $config->get( 'app.revision' ) ){
-			$this->css->primer->setRevision( $config->get( 'app.revision' ) );
-			$this->css->theme->setRevision( $config->get( 'app.revision' ) );
+			$this->css->get( 'primer' )->setRevision( $config->get( 'app.revision' ) );
+			$this->css->get( 'theme' )->setRevision( $config->get( 'app.revision' ) );
 			$this->js->setRevision( $config->get( 'app.revision' ) );
 		}
 
@@ -135,7 +138,7 @@ class Page extends HtmlPage
 	 */
 	public function addCommonStyle( string $fileName, int $level = Captain::LEVEL_MID, array $attributes = [] ): self
 	{
-		$this->css->common->addUrl( $fileName, self::interpretLoadLevel( $level ), $attributes );
+		$this->css->get( 'common' )->addUrl( $fileName, self::interpretLoadLevel( $level ), $attributes );
 		return $this;
 	}
 
@@ -149,7 +152,7 @@ class Page extends HtmlPage
 	 */
 	public function addPrimerStyle( string $fileName, int $level = Captain::LEVEL_MID, array $attributes = [] ): self
 	{
-		$this->css->primer->addUrl( $fileName, self::interpretLoadLevel( $level ), $attributes );
+		$this->css->get( 'primer' )->addUrl( $fileName, self::interpretLoadLevel( $level ), $attributes );
 		return $this;
 	}
 
@@ -163,7 +166,7 @@ class Page extends HtmlPage
 	 */
 	public function addThemeStyle( string $fileName, int $level = Captain::LEVEL_MID, array $attributes = [] ): self
 	{
-		$this->css->theme->addUrl( $fileName, self::interpretLoadLevel( $level ), $attributes );
+		$this->css->get( 'theme' )->addUrl( $fileName, self::interpretLoadLevel( $level ), $attributes );
 		return $this;
 	}
 
@@ -195,7 +198,7 @@ class Page extends HtmlPage
 					$source	= !empty( $style->source ) ? $style->source : NULL;						//  get source attribute if possible
 					$level	= self::interpretLoadLevel( $style->level ?? Captain::LEVEL_MID );		//  get load level (top, mid, end), default: mid
 					if( preg_match( "/^[a-z]+:\/\/.+$/", $style->file ) )					//  style file is absolute URL
-						$this->css->theme->addUrl( $style->file, $level );							//  add style file URL
+						$this->css->get( 'theme' )->addUrl( $style->file, $level );							//  add style file URL
 					else if( $source == 'primer' )													//  style file is in primer theme
 						$this->addPrimerStyle( $style->file, $level );								//  load style file from primer theme folder
 					else if( $source == 'common' )													//  style file is in common theme
@@ -203,17 +206,17 @@ class Page extends HtmlPage
 					else if( $source == 'lib' ){													//  style file is in styles library, which is enabled by configured path
 						if( !strlen( trim( $pathStylesLib ) ) )
 							throw new RuntimeException( 'Path to style library "path.styles.lib" is not configured' );
-						$this->css->lib->addUrl( $pathStylesLib.$style->file, $level );				//  load style file from styles library
+						$this->css->get( 'lib' )->addUrl( $pathStylesLib.$style->file, $level );				//  load style file from styles library
 					}
 					else if( $source == 'scripts-lib' && $pathScriptsLib ){							//  style file is in scripts library, which is enabled by configured path
 						if( !strlen( trim( $pathScriptsLib ) ) )
 							throw new RuntimeException( 'Path to script library "path.scripts.lib" is not configured' );
-						$this->css->primer->addUrl( $pathScriptsLib.$style->file, $level );			//  load style file from scripts library
+						$this->css->get( 'primer' )->addUrl( $pathScriptsLib.$style->file, $level );			//  load style file from scripts library
 					}
 					else if( $source == 'theme' || !$source )										//  style file is in custom theme
 						$this->addThemeStyle( $style->file, $level );								//  load style file from custom theme folder
 					else																			//  style file is in an individual source folder within themes folder
-						$this->css->primer->addUrl( /*$path.$source.'/'.*/$style->file );				//  load style file /*from source folder within themes folder*/
+						$this->css->get( 'primer' )->addUrl( /*$path.$source.'/'.*/$style->file );				//  load style file /*from source folder within themes folder*/
 				}
 			}
 			/** @var FileComponent $script */
@@ -300,17 +303,17 @@ class Page extends HtmlPage
 		$this->setBody( $payload['content'] );
 
 		if( $this->packStyleSheets && $this->env->getRequest()->has( 'flushStyleCache') ){
-			$this->css->primer->clearCache();
-			$this->css->common->clearCache();
-			$this->css->theme->clearCache();
-			$this->css->lib->clearCache();
+			$this->css->get( 'primer' )->clearCache();
+			$this->css->get( 'common' )->clearCache();
+			$this->css->get( 'theme' )->clearCache();
+			$this->css->get( 'lib' )->clearCache();
 		}
 
 		$headStyleBlocks	= [
-			'primer'	=> $this->css->primer->render( $this->packStyleSheets ),
-			'common'	=> $this->css->common->render( $this->packStyleSheets ),
-			'theme'		=> $this->css->theme->render( $this->packStyleSheets ),
-			'lib'		=> $this->css->lib->render( $this->packStyleSheets ),
+			'primer'	=> $this->css->get( 'primer' )->render( $this->packStyleSheets ),
+			'common'	=> $this->css->get( 'common' )->render( $this->packStyleSheets ),
+			'theme'		=> $this->css->get( 'theme' )->render( $this->packStyleSheets ),
+			'lib'		=> $this->css->get( 'lib' )->render( $this->packStyleSheets ),
 		];
 		foreach( $headStyleBlocks as $blocksContent )
 			if( strlen( trim( $blocksContent ) ) !== 0 )
@@ -423,8 +426,8 @@ class Page extends HtmlPage
 	{
 //		$this->env->getMessenger()->noteNotice( '<b>Deprecation: </b>Calling Page::setPackaging is deprecated. Please use module UI:Compressor instead.' );
 #		$this->js->setCompression( $packJavaScripts );
-#		$this->css->primer->setCompression( $packStyleSheets );
-#		$this->css->theme->setCompression( $packStyleSheets );
+#		$this->css->get( 'primer' )->setCompression( $packStyleSheets );
+#		$this->css->get( 'theme' )->setCompression( $packStyleSheets );
 		$this->packJavaScripts	= $packJavaScripts;
 		$this->packStyleSheets	= $packStyleSheets;
 		return $this;

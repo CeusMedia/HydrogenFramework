@@ -44,6 +44,7 @@ use CeusMedia\HydrogenFramework\Environment\Resource\Language as LanguageResourc
 use CeusMedia\HydrogenFramework\Environment\Resource\Log as LogResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\LogicPool as LogicPoolResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\Messenger as MessengerResource;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Config as ModuleConfig;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Library\Local as LocalModuleLibraryResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\Php as PhpResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\Runtime as RuntimeResource;
@@ -253,7 +254,8 @@ class Environment implements ArrayAccess
 	 *	@param		string		$key
 	 *	@param		bool		$strict
 	 *	@return		mixed|null
-	 *	@throws		DomainException		if no resource is registered by by
+	 *	@throws		DomainException		if no resource is registered by given key
+	 * @throws		Exception			if key is 'clock', since replaced by 'runtime'
 	 */
 	public function get( string $key, bool $strict = TRUE )
 	{
@@ -289,10 +291,13 @@ class Environment implements ArrayAccess
 		if( $this->config->get( $keyConfig ) )
 			return $this->config->get( $keyConfig );
 		$host	= getEnv( 'HTTP_HOST' );
-		if( $host ){
-			$path	= dirname( getEnv( 'SCRIPT_NAME' ) ).'/';
-			$scheme	= getEnv( 'HTTPS' ) ? 'https' : 'http';
-			return $scheme.'://'.$host.$path;
+		if( FALSE !== $host ){
+			$scriptName	= getEnv( 'SCRIPT_NAME' );
+			if( FALSE !== $scriptName ){
+				$path		= dirname( $scriptName ).'/';
+				$scheme		= getEnv( 'HTTPS' ) ? 'https' : 'http';
+				return $scheme.'://'.$host.$path;
+			}
 		}
 		return '';
 	}
@@ -765,7 +770,8 @@ class Environment implements ArrayAccess
 			$prefix	= 'module.'.strtolower( $moduleId );											//  build config key prefix of module
 			$this->config->set( $prefix, TRUE );													//  enable module in configuration
 			foreach( $module->config as $key => $value ){											//  iterate module configuration pairs
-				if( is_object( $value) ){															//  @todo remove
+				if( is_object( $value) ){															//  is module config definition object
+					/** @var ModuleConfig $value */
 					@settype( $value->value, $value->type );										//  cast value by set type
 					$this->config->set( $prefix.'.'.$key, $value->value );							//  set configuration pair
 				}

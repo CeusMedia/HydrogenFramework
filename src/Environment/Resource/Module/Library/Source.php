@@ -157,8 +157,9 @@ class Source extends AbstractLibrary implements LibraryInterface
 					$module->source				= $this->source->id;
 					$module->versionAvailable	= $module->version;
 					$module->isActive			= TRUE;
-					if( isset( $module->config['active'] ) )
-						$module->isActive		= $module->config['active']->value;
+					$configDictionary			= $module->getConfigAsDictionary();
+					if( $configDictionary->has( 'active' ) )									//  module has main switch in config
+						$module->isActive		= $configDictionary->get( 'active' );			//  set active by default main switch config value
 					$module->icon	= NULL;
 					if( file_exists( $icon.'.png' ) )
 						$module->icon	= 'data:image/png;base64,'.base64_encode( FileReader::load( $icon.'.png' ) );

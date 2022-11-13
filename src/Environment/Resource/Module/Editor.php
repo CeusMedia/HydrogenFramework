@@ -1,4 +1,5 @@
-<?php /** @noinspection PhpComposerExtensionStubsInspection */
+<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
+/** @noinspection PhpComposerExtensionStubsInspection */
 
 /**
  *	Editor for local module XML files.
@@ -420,15 +421,17 @@ class Editor
 
 	/**
 	 *	@param		string				$moduleId
-	 *	@param		SimpleXMLElement	$xml
+	 *	@param		SimpleXMLElement	$xmlElement
 	 *	@return		int
 	 */
-	protected function saveModuleXml( string $moduleId, SimpleXMLElement $xml ): int
+	protected function saveModuleXml( string $moduleId, SimpleXMLElement $xmlElement ): int
 	{
 		$moduleFile	= $this->path.$moduleId.'.xml';
 		if( !file_exists( $moduleFile ) )
 			throw new RuntimeException( 'Module "'.$moduleId.'" is not installed' );
-		$xml	= XmlFormatter::format( $xml->asXML(), TRUE );
+		/** @var string $xml */
+		$xml	= $xmlElement->asXML();
+		$xml	= XmlFormatter::format( $xml, TRUE );
 		return FileWriter::save( $moduleFile, $xml );
 	}
 }
