@@ -11,6 +11,7 @@ use Rector\Php71\Rector\FuncCall\CountOnNullRector;
 use Rector\Php73\Rector\BooleanOr\IsCountableRector;
 use Rector\Php73\Rector\FuncCall\JsonThrowOnErrorRector;
 use Rector\Php73\Rector\FuncCall\RegexDashEscapeRector;
+use Rector\Php74\Rector\Closure\ClosureToArrowFunctionRector;
 use Rector\Set\ValueObject\LevelSetList;
 
 use Rector\Php80\Rector\Class_\ClassPropertyAssignToConstructorPromotionRector;
@@ -49,6 +50,8 @@ return static function (RectorConfig $rectorConfig): void {
 		JsonThrowOnErrorRector::class,
 		IsCountableRector::class,
 		RegexDashEscapeRector::class,
+		// Set 7.4
+		ClosureToArrowFunctionRector::class,
 		// Set 8.0
 		ClassPropertyAssignToConstructorPromotionRector::class,
 		UnionTypesRector::class,

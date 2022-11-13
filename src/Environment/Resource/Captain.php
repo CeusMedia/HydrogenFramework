@@ -16,6 +16,7 @@ namespace CeusMedia\HydrogenFramework\Environment\Resource;
 
 use CeusMedia\Common\Alg\Obj\Factory;
 use CeusMedia\HydrogenFramework\Environment;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition as ModuleDefinition;
 use CeusMedia\HydrogenFramework\Hook;
 use DomainException;
 use Exception;
@@ -182,6 +183,7 @@ class Captain
 	public function collectHooks(string $resource, string $event): array
 	{
 		$hooks = array_fill(0, 9, []);												//  prepare hook list with levels (0-9)
+		/** @var ModuleDefinition $module */
 		foreach ($this->env->getModules()->getAll() as $module) {
 			if (!isset($module->hooks[$resource][$event]))
 				continue;
@@ -252,6 +254,7 @@ class Captain
 				} catch (Exception $e) {
 					$this->handleExceptionOfResourceEventHookCall( $e, $resource, $event, $module );
 					if ($this->env->has('messenger')) {
+						/** @noinspection PhpUnhandledExceptionInspection */
 						$this->env->get('messenger')->noteFailure('Call on event ' . $event . '@' . $resource . ' hooked by module ' . $module->id . ' failed: ' . $e->getMessage());
 						$this->env->getLog()->logException($e);
 					} else
@@ -267,14 +270,14 @@ class Captain
 	}
 
 	/**
-	 *	@param		Exception		$e
-	 *	@param		string			$resource
-	 *	@param		string			$event
-	 *	@param		object			$module
+	 *	@param		Exception			$e
+	 *	@param		string				$resource
+	 *	@param		string				$event
+	 *	@param		ModuleDefinition	$module
 	 *	@return		void
 	 *	@throws		ReflectionException
 	 */
-	protected function handleExceptionOfResourceEventHookCall( Exception $e, string $resource, string $event, object $module ): void
+	protected function handleExceptionOfResourceEventHookCall( Exception $e, string $resource, string $event, ModuleDefinition $module ): void
 	{
 		$this->env->getLog()->logException( $e );
 
@@ -284,21 +287,22 @@ class Captain
 		$message	= sprintf( $message, $module->id, $resource, $event, $e->getMessage() );
 		if( !$this->env->has( 'messenger' ) )
 			throw new RuntimeException( $message, 0, $e );
+		/** @noinspection PhpUnhandledExceptionInspection */
 		$this->env->get( 'messenger' )->noteFailure( $message );
 	}
 
 	/**
 	 *	...
 	 *	@access		protected
-	 *	@param		string		$stdout
-	 *	@param		string		$resource
-	 *	@param		string		$event
-	 *	@param		object		$module
+	 *	@param		string				$stdout
+	 *	@param		string				$resource
+	 *	@param		string				$event
+	 *	@param		ModuleDefinition	$module
 	 *	@return		void
-	 *	@throws		RuntimeException			if environment has no messenger
+	 *	@throws		RuntimeException	if environment has no messenger
 	 *	@throws		ReflectionException
 	 */
-	protected function handleStdoutOfResourceEventHookCall( string $stdout, string $resource, string $event, object $module ): void
+	protected function handleStdoutOfResourceEventHookCall( string $stdout, string $resource, string $event, ModuleDefinition $module ): void
 	{
 		if( 0 === strlen( trim( $stdout ) ) )
 			return;
@@ -309,6 +313,7 @@ class Captain
 		] );
 		if( !$this->env->has( 'messenger' ) )
 			throw new RuntimeException( $stdout );
+		/** @noinspection PhpUnhandledExceptionInspection */
 		$this->env->get( 'messenger' )->noteNotice( vsprintf(
 			'Call on event %2$s@%1$s hooked by module %3$s reported: <xmp>%4$s</xmp>',
 			[$resource, $event, $module->id, $stdout]

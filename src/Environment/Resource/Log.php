@@ -116,7 +116,7 @@ class Log
 	 */
 	public function log( string $type, $message, $context = NULL ): bool
 	{
-		$context	= NULL === $context ? (object) [] : $context;
+		$context	??= (object) [];
 		$context	= is_string( $context ) ? (object) ['context' => $context] : $context;
 		$data		= $this->collectLogData( $type, (string) $message, $context );
 		return $this->applyStrategyOnCollectedData( $data, $context );
@@ -133,7 +133,7 @@ class Log
 	 */
 	public function logException( Throwable $exception, $context = NULL ): bool
 	{
-		$context	= NULL === $context ? (object) ['context' => NULL] : $context;
+		$context	??= (object) [];
 		$context	= is_string( $context ) ? (object) ['context' => $context] : $context;
 		$data		= $this->collectLogExceptionData( $exception, $context );
 		return $this->applyStrategyOnCollectedExceptionData( $data, $context );

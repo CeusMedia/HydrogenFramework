@@ -84,8 +84,10 @@ class Web
 			error_reporting( $this->errorReporting );
 		if( NULL !== $this->displayErrors )
 			ini_set( 'display_errors', $this->displayErrors ? 'On' : 'Off' );
+		if( !$this->catchErrors )
+			return;
 		$callable	= [$this, 'handleErrorAsException'];
-		if( $this->catchErrors && is_callable( $callable ) )
+		if( is_callable( $callable ) )
 			set_error_handler( $callable );
 	}
 }

@@ -7,6 +7,12 @@ parameters:
 	level: 7
 	paths:
 		- ../../src/
+	excludePaths:
+		- ../../src/Application/Abstraction.php
+		- ../../src/Application/Web/Abstraction.php
+		- ../../src/Environment/Resource/Disclosure.php
+		- ../../vendor/ceus-media/common/src/compat8.php
+		- ../../vendor/ceus-media/common/src/compat9.php
 	checkMissingIterableValueType: false
 	treatPhpDocTypesAsCertain: false
 	reportUnmatchedIgnoredErrors: true

@@ -12,7 +12,8 @@ abstract class JSON extends Abstraction
 
 	protected string $basePath;
 
-	protected $client;
+	/** @var object $client */
+	protected object $client;
 
 	public function count( array $conditions = [] ): int
 	{

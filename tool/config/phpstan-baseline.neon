@@ -1,7 +1,2 @@
 parameters:
 	ignoreErrors:
-
-		-
-			message: "#^Property CeusMedia\\\\HydrogenFramework\\\\Model\\\\REST\\\\JSON\\:\\:\\$client has no type specified\\.$#"
-			count: 1
-			path: ../../src/Model/REST/JSON.php

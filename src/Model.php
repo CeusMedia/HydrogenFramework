@@ -81,7 +81,7 @@ class Model
 	/**	@var	string					$cacheKey		Base key in cache */
 	protected string $cacheKey;
 
-	public static string $cacheClass			= Dictionary::class;
+	public static string $cacheClass	= Dictionary::class;
 
 	/**
 	 *	Constructor.

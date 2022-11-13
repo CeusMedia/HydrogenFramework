@@ -142,7 +142,9 @@ class LogicPool
 				throw new DomainException( 'No logic class found for "'.$className.'"' );
 			$this->set( $key, $this->createInstance( $className ) );
 		}
-		return $this->pool[$key];
+		/** @var object $instance */
+		$instance	= $this->pool[$key];
+		return $instance;
 	}
 
 	/**
