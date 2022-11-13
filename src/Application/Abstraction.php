@@ -51,8 +51,7 @@ abstract class Abstraction
 	public static array $modulesNeeded							= [];
 
 	/**	@var		Environment			$env					Application Environment Object */
-	private Environment $env;
-
+	protected Environment $env;
 
 	/**
 	 *	Constructor.

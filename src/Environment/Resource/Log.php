@@ -133,7 +133,7 @@ class Log
 	 */
 	public function logException( Throwable $exception, $context = NULL ): bool
 	{
-		$context	= NULL === $context ? (object) [] : $context;
+		$context	= NULL === $context ? (object) ['context' => NULL] : $context;
 		$context	= is_string( $context ) ? (object) ['context' => $context] : $context;
 		$data		= $this->collectLogExceptionData( $exception, $context );
 		return $this->applyStrategyOnCollectedExceptionData( $data, $context );

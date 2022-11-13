@@ -197,6 +197,10 @@ class Environment implements ArrayAccess
 		$this->initModules();																		//  setup module support
 		$this->initDatabase();																		//  setup database connection
 		$this->initCache();																			//  setup cache support
+
+		$logStrategies	= [LogResource::STRATEGY_MODULE_HOOKS, ...$this->log->getStrategies()];		//  prepend hook based logging strategy
+		$this->log->setStrategies( array_unique( $logStrategies ) );								//  set new logging strategies list
+
 		if( !$isFinal )
 			return;
 		$this->modules->callHook( 'Env', 'constructEnd', $this );									//  call module hooks for end of env construction
@@ -780,8 +784,6 @@ class Environment implements ArrayAccess
 		}
 		if( !( $this instanceof RemoteEnvironment ) )
 			$this->modules->callHook( 'Env', 'initModules', $this );								//  call related module event hooks
-		$logStrategies	= [LogResource::STRATEGY_MODULE_HOOKS, ...$this->log->getStrategies()];		//  prepend hook based logging strategy
-		$this->log->setStrategies( array_unique( $logStrategies ) );								//  set new logging strategies list
 		$this->config->set( 'module.acl.public', implode( ',', array_unique( $public ) ) );			//  save public link list
 		$this->runtime->reach( 'env: initModules: end', 'Finished setup of modules.' );
 		return $this;

@@ -62,7 +62,7 @@ class Reader
 		if( !file_exists( $filePath ) )
 			throw new RuntimeException( 'Module file "'.$filePath.'" is not existing' );
 		$xml	= XmlReader::readFile( $filePath );
-		$object	= new Definition( $id, (string) $xml->version, $filePath, realpath( $filePath ) ?: NULL );
+		$object	= new Definition( $id, (string) $xml->version, $filePath );
 		self::decorateObjectWithBasics( $object, $xml );
 		self::decorateObjectWithFrameworks( $object, $xml );
 		self::decorateObjectWithLog( $object, $xml );

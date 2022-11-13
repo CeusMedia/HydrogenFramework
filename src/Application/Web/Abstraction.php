@@ -47,9 +47,6 @@ abstract class Abstraction extends ApplicationAbstraction
 {
 	protected array $components			= [];
 
-	/**	@var		WebEnvironment			$env				Application Environment Object */
-	protected WebEnvironment $env;
-
 	/**
 	 *	Constructor.
 	 *	@access		public
@@ -125,10 +122,12 @@ abstract class Abstraction extends ApplicationAbstraction
 		$payload	= ['templateFile' => ''];
 		$this->env->getCaptain()->callHook( 'App', 'getMasterTemplate', $this, $payload );
 		$masterTemplate	= $payload['templateFile'];
+
 		switch( $masterTemplate ){
 			case '':
 			case 'default':
 			case 'inherit':
+				$templateFile	= 'master.php';
 				break;
 			case 'theme':
 				$pathTheme		= $this->env->getPage()->getThemePath();
@@ -137,6 +136,7 @@ abstract class Abstraction extends ApplicationAbstraction
 			default:
 				$templateFile	= $masterTemplate;
 		}
+
 		$view	= new View( $this->env );
 		return $view->loadTemplateFile( $templateFile, $this->components );
 	}

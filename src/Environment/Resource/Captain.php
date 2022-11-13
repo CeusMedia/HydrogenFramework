@@ -117,18 +117,17 @@ class Captain
 	{
 		if( !$this->env->hasModules() )
 			return NULL;
-		if( array_key_exists( $resource."::".$event, $this->disabledHooks ) )
+		if( array_key_exists( $resource."::".$event, $this->disabledHooks ) )					//  skip disabled hook 
 			return FALSE;
-		if( array_key_exists( $resource.'::'.$event, $this->openHooks ) )
+		if( array_key_exists( $resource.'::'.$event, $this->openHooks ) )						//  avoid recursion
 			return FALSE;
 
 		$this->openHooks[$resource.'::'.$event]	= microtime( TRUE );
-
 		if( $this->logCalls )
 			error_log( microtime( TRUE ).' '.$resource.'>'.$event."\n", 3, 'logs/hook_calls.log' );
 
 		$hooks	= $this->collectHooks( $resource, $event );
-		return $this->fetchCollectedResourceEventHooks($hooks, $context, $payload);
+		return $this->fetchCollectedResourceEventHooks( $hooks, $context, $payload );
 	}
 
 	/**
@@ -200,18 +199,20 @@ class Captain
 				];
 			}
 		}
-		return $hooks;
+		return array_filter( array_map( static function( $levelHooks ){
+			return 0 !== count( $levelHooks ) ? $levelHooks : NULL;
+		}, $hooks ) );
 	}
 
 	/**
 	 *	@param		array		$hooks
 	 *	@param		object		$context
-	 *	@param		array|null	$payload
+	 *	@param		array		$payload
 	 *	@return		bool
 	 *	@throws		RuntimeException
 	 *	@throws		ReflectionException
 	 */
-	protected function fetchCollectedResourceEventHooks( array $hooks, object $context, ?array $payload): bool
+	protected function fetchCollectedResourceEventHooks( array $hooks, object $context, array & $payload): bool
 	{
 		$result = NULL;
 		$regexMethod = "/^([a-z0-9_]+)::([a-z0-9_]+)$/i";
@@ -235,17 +236,11 @@ class Captain
 						throw new RuntimeException( 'Hook handling function ' . $function . ' is not callable' );
 
 					ob_start();
-//					$payload	= $payload ?? [];
-//					$payload	= is_object( $payload ) ? (array) $payload : $payload;
 
 					/** @var Hook $hookObject */
 					$hookObject	= Factory::createObject( $callback[0], [$this->env, $context] );
 					$hookObject->setModule( $hook->module )->setPayload( $payload );
 					$result		= $hookObject->fetch( $callback[1] );
-					$payload	&= $hookObject->getPayload();
-
-//					$args	= array( $this->env, &$context, $module, $payload );
-//					$result	= call_user_func_array( $callback, $args );
 
 					$this->env->getRuntime()->reach( vsprintf(
 						'<!--Resource_Module_Library_Local::call-->Hook: %s@%s: %s',

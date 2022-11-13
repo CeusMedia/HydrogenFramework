@@ -27,6 +27,8 @@
 
 namespace CeusMedia\HydrogenFramework\Environment\Resource\Module;
 
+use CeusMedia\Common\ADT\Collection\Dictionary;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Config;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Deprecation;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Files;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Installation;
@@ -74,14 +76,35 @@ class Definition
 	public array $jobs					= [];
 	public ?Installation $install		= NULL;
 
+	/**
+	 *	Constructor.
+	 *	@param		string			$id			Module ID
+	 *	@param		string			$version	Version of module
+	 *	@param		string			$file		Path to XML file holding the module definition
+	 *	@param		string|NULL		$uri		Path to module (=folder of module file)
+	 */
 	public function __construct( string $id, string $version, string $file, ?string $uri = NULL )
 	{
 		$this->id			= $id;
 		$this->file			= $file;
-		$this->uri			= $uri;
+		$this->uri			= $uri ?? ( realpath( $file ) ?: NULL );
 		$this->version		= $version;
 		$this->files		= new Files();
 		$this->relations	= new Relations();
 		$this->install		= new Installation();
+	}
+
+	/**
+	 *	Returns set config objects as dictionary.
+	 *	@access		public
+	 *	@return		Dictionary
+	 */
+	public function getConfigAsDictionary(): Dictionary
+	{
+		$dictionary	= new Dictionary();
+		array_walk($this->config, static function( Config $config ) use ($dictionary){
+			$dictionary->set( $config->key, $config->value );
+		} );
+		return $dictionary;
 	}
 }
