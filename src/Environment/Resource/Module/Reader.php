@@ -436,19 +436,19 @@ class Reader
 			foreach( $xml->relations->needs as $moduleName )										//  iterate list if needed modules
 				$object->relations->needs[(string) $moduleName]		= (object) [					//  note relation
 					'relation'	=> 'needs',															//  ... as needed
-					'type'		=> self::castNodeAttributes( $moduleName, 'type' ),					//  ... with relation type
+					'type'		=> self::castNodeAttributes( $moduleName, 'type' ),		//  ... with relation type
 					'id'		=> (string) $moduleName,											//  ... with module ID
-					'source'	=> self::castNodeAttributes( $moduleName, 'source' ),				//  ... with module source, if set
-					'version'	=> self::castNodeAttributes( $moduleName, 'version' ),				//  ... with version, if set
+					'source'	=> self::castNodeAttributes( $moduleName, 'source' ),		//  ... with module source, if set
+					'version'	=> self::castNodeAttributes( $moduleName, 'version' ),		//  ... with version, if set
 				];
 		if( $xml->relations->supports )																//  if supported modules are defined
 			foreach( $xml->relations->supports as $moduleName )										//  iterate list if supported modules
 				$object->relations->supports[(string) $moduleName]	= (object) [					//  note relation
 					'relation'	=> 'supports',														//  ... as supported
-					'type'		=> self::castNodeAttributes( $moduleName, 'type' ),					//  ... with relation type
+					'type'		=> self::castNodeAttributes( $moduleName, 'type' ),		//  ... with relation type
 					'id'		=> (string) $moduleName,											//  ... with module ID
-					'source'	=> self::castNodeAttributes( $moduleName, 'source' ),				//  ... with module source, if set
-					'version'	=> self::castNodeAttributes( $moduleName, 'version' ),				//  ... with version, if set
+					'source'	=> self::castNodeAttributes( $moduleName, 'source' ),		//  ... with module source, if set
+					'version'	=> self::castNodeAttributes( $moduleName, 'version' ),		//  ... with version, if set
 				];
 		return TRUE;
 	}
@@ -468,7 +468,7 @@ class Reader
 		foreach( $xml->sql as $sql ){																//  iterate sql nodes
 			$event		= self::castNodeAttributes( $sql, 'on' );
 			$to			= self::castNodeAttributes( $sql, 'version-to' );
-			$version	= self::castNodeAttributes( $sql, 'version', 'string', $to );				//  @todo: remove fallback
+			$version	= self::castNodeAttributes( $sql, 'version', 'string', $to );	//  @todo: remove fallback
 			$type		= self::castNodeAttributes( $sql, 'type', 'string', '*' );
 			if( $event === 'update' && !$version )
 				throw new Exception( 'SQL type "update" needs attribute "version"' );

@@ -26,6 +26,7 @@
  */
 namespace CeusMedia\HydrogenFramework\Environment\Resource\Module\Library;
 
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition as ModuleDefinition;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\LibraryInterface;
 
 use RangeException;
@@ -54,11 +55,11 @@ abstract class Abstraction implements LibraryInterface
 	 *	@param		string		$moduleId		ID of module to get definition for
 	 *	@param		boolean		$activeOnly		Flag: exclude deactivated modules (default: yes)
 	 *	@param		boolean		$strict			Flag: throw exception if not installed (default: yes)
-	 *	@return		object|NULL
+	 *	@return		ModuleDefinition|NULL
 	 *	@throws		RangeException				if module is not installed (using strict mode)
 	 *	@throws		RuntimeException			if module is not active (using strict mode and activeOnly)
 	 */
-	public function get( string $moduleId, bool $activeOnly = TRUE, bool $strict = TRUE ): ?object
+	public function get( string $moduleId, bool $activeOnly = TRUE, bool $strict = TRUE ): ?ModuleDefinition
 	{
 		$moduleId	= $this->sanitizeId( $moduleId );
 		if( !array_key_exists( $moduleId, $this->modules ) ){										//  module is not installed

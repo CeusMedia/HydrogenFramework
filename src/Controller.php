@@ -66,25 +66,25 @@ class Controller
 	public static string $prefixModel		= 'Model_';
 	public static string $prefixView		= 'View_';
 
-	/**	@var		string					$alias			Optional alternative path for restarting */
+	/**	@var	string						$alias			Optional alternative path for restarting */
 	public string $alias					= '';
 
-	/**	@var		WebEnvironment			$env			Application Environment Object */
+	/**	@var	WebEnvironment				$env			Application Environment Object */
 	protected WebEnvironment $env;
-	/**	@var		string					$defaultPath	Default controller URI path */
+	/**	@var	string						$defaultPath	Default controller URI path */
 	protected string $defaultPath;
-	/**	@var		string					$path			Preferred controller URI path */
+	/**	@var	string						$path			Preferred controller URI path */
 	protected string $path;
-	/**	@var		View|NULL				$view			View instance for controller */
+	/**	@var	View|NULL					$view			View instance for controller */
 	protected ?View $view					= NULL;
-	/**	@var		Dictionary				$moduleConfig	Map of module configuration pairs */
+	/**	@var	Dictionary					$moduleConfig	Map of module configuration pairs */
 	protected Dictionary $moduleConfig;
 
-	/**	@var		string					$controller		Name of called Controller */
+	/**	@var	string						$controller		Name of called Controller */
 	protected string $controller			= '';
-	/**	@var		string					$action			Name of called Action */
+	/**	@var	string						$action			Name of called Action */
 	protected string $action				= '';
-	/**	@var		bool					$redirect		Flag for Redirection */
+	/**	@var	bool						$redirect		Flag for Redirection */
 	var bool $redirect						= FALSE;
 
 	protected bool $logRestarts				= FALSE;

@@ -90,7 +90,7 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 	 *	@param		object		$context		Context object, will be available inside hook as $context
 	 *	@return		integer						Number of called hooks for event
 	 *	@throws		RuntimeException			if given static class method is not existing
-	 *	@throws		RuntimeException			ig method call produces stdout output, for example warnings and notices
+	 *	@throws		RuntimeException			if method call produces stdout output, for example warnings and notices
 	 *	@throws		RuntimeException			if method call is throwing an exception
 	 */
 	public function callHook( string $resource, string $event, object $context ): int

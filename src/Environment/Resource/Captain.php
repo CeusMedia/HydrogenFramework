@@ -176,28 +176,30 @@ class Captain
 	}
 
 	/**
-	 * @param string $resource
-	 * @param string $event
-	 * @return array
+	 *	...
+	 *	@access		public
+	 *	@param		string		$resource
+	 *	@param		string		$event
+	 *	@return		array
 	 */
-	public function collectHooks(string $resource, string $event): array
+	public function collectHooks( string $resource, string $event ): array
 	{
-		$hooks = array_fill(0, 9, []);												//  prepare hook list with levels (0-9)
+		$hooks = array_fill( 0, 9, [] );											//  prepare hook list with levels (0-9)
 		/** @var ModuleDefinition $module */
-		foreach ($this->env->getModules()->getAll() as $module) {
-			if (!isset($module->hooks[$resource][$event]))
+		foreach( $this->env->getModules()->getAll() as $module ){
+			if( !isset( $module->hooks[$resource][$event] ) )
 				continue;
 
 			//  @todo is this still needed? does: convert hook list of this module to array, if string
-			if (!is_array($module->hooks[$resource][$event]))
+			if( !is_array( $module->hooks[$resource][$event] ) )
 				$module->hooks[$resource][$event] = [$module->hooks[$resource][$event]];
 
-			foreach ($module->hooks[$resource][$event] as $hook) {
-				$hooks[$hook->level][] = (object)[
-					'module' => $module,
-					'event' => $event,
-					'resource' => $resource,
-					'function' => $hook->hook,
+			foreach( $module->hooks[$resource][$event] as $hook ){
+				$hooks[$hook->level][] = (object) [
+					'module'	=> $module,
+					'event'		=> $event,
+					'resource'	=> $resource,
+					'function'	=> $hook->hook,
 				];
 			}
 		}
@@ -216,7 +218,7 @@ class Captain
 	 */
 	protected function fetchCollectedResourceEventHooks( array $hooks, object $context, array & $payload): bool
 	{
-		$result = NULL;
+ 		$result = NULL;
 		$regexMethod = "/^([a-z0-9_]+)::([a-z0-9_]+)$/i";
 		foreach( $hooks as $levelHooks ){
 			foreach( $levelHooks as $hook ){

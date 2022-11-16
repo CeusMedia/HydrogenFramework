@@ -119,6 +119,7 @@ class AllPublic extends Abstraction
 	 *	Scan controller classes for actions using disclosure.
 	 *	@access		protected
 	 *	@return		void
+	 *	@deprecated	use module Resource_Disclosure instead
 	 */
 	protected function scanControllerActions()
 	{

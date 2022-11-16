@@ -33,6 +33,7 @@ use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
 use CeusMedia\Common\Alg\Text\CamelCase as CamelCase;
 use CeusMedia\Common\Alg\Time\Converter as TimeConverter;
 use CeusMedia\Common\UI\HTML\Elements as HtmlElements;
+use CeusMedia\HydrogenFramework\Environment as Environment;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 use CeusMedia\HydrogenFramework\View\Helper;
 use CeusMedia\TemplateEngine\Template as TemplateEngine;
@@ -53,32 +54,32 @@ use RuntimeException;
  */
 class View
 {
-	/**	@var		array					$data			Collected Data for View */
-	protected array $data					= [];
+	/**	@var	array					$data			Collected Data for View */
+	protected array $data				= [];
 
-	/**	@var		WebEnvironment			$env			Environment Object */
+	/**	@var	WebEnvironment			$env			Environment Object */
 	protected WebEnvironment $env;
 
-	/**	@var		string|NULL				$controller		Name of called Controller */
-	protected ?string $controller			= NULL;
+	/**	@var	string|NULL				$controller		Name of called Controller */
+	protected ?string $controller		= NULL;
 
-	/**	@var		string|NULL				$action			Name of called Action */
-	protected ?string $action				= NULL;
+	/**	@var	string|NULL				$action			Name of called Action */
+	protected ?string $action			= NULL;
 
-	/**	@var		Dictionary				$helpers		Map of view helper classes/objects */
+	/**	@var	Dictionary				$helpers		Map of view helper classes/objects */
 	protected Dictionary $helpers;
 
-	/**	@var		TimeConverter			$time			Instance of time converter */
+	/**	@var	TimeConverter			$time			Instance of time converter */
 	protected TimeConverter $time;
 
-	/**	@var		HtmlElements			$html			Instance of HTML library class */
+	/**	@var	HtmlElements			$html			Instance of HTML library class */
 	protected HtmlElements $html;
 
-//	/**	@var		CMM_TEA_Factory			$tea			Instance of TEA (Template Engine Abstraction) Factory (from cmModules) OR empty if TEA is not available */
-//	protected $tea			= NULL;
+//	/**	@var	CMM_TEA_Factory			$tea			Instance of TEA (Template Engine Abstraction) Factory (from cmModules) OR empty if TEA is not available */
+//	protected $tea						= NULL;
 
-	/**	@var		string					$pathTemplates	Path to template file, can be set by config::path.templates */
-	protected string $pathTemplates			= 'templates/';
+	/**	@var	string					$pathTemplates	Path to template file, can be set by config::path.templates */
+	protected string $pathTemplates		= 'templates/';
 
 	/**
 	 *	Constructor.
@@ -341,16 +342,16 @@ class View
 	 *	@access		public
 	 *	@param		array		$keys		List of file keys (without .html extension)
 	 *	@param		string		$path		Path to files within locales, like "html/controller/action/"
-	 *	@return		array		Prefixed map of collected file contents mapped by prefixed IDs
+	 *	@return		array<string,string>	Prefixed map of collected file contents mapped by prefixed IDs
 	 */
 	public function populateTexts( array $keys, string $path, array $data = [], string $prefix = "text" ): array
 	{
-		$list	= [];																			//  prepare empty list
+		$list	= [];																				//  prepare empty list
 		$files	= $this->loadContentFiles( $path, $keys, $data );									//  try to load files
 		foreach( $files as $key => $value ){														//  iterate file contents
-			$id	= preg_replace( "/[^a-z]/i", " ", $key );											//  replace not allowed characters
+			$id	= preg_replace( "/[^a-z]/i", " ", $key );						//  replace not allowed characters
 			$id	= $prefix ? $prefix." ".$id : $id;													//  prepend prefix to ID if set
-			$id	= CamelCase::convert( $id, FALSE );										//  build camel-cased ID
+			$id	= CamelCase::convert( $id, FALSE );									//  build camel-cased ID
 			$list[$id]	= $value;																	//  append content to map
 		}
 		return $list;																				//  return map of collected files

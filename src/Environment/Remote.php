@@ -27,8 +27,10 @@
 
 namespace CeusMedia\HydrogenFramework\Environment;
 
+use CeusMedia\Common\ADT\Collection\Dictionary;
 use CeusMedia\Common\Loader;
 use CeusMedia\HydrogenFramework\Environment;
+use CeusMedia\HydrogenFramework\Environment\Exception as EnvironmentException;
 use CeusMedia\HydrogenFramework\Environment\Resource\Messenger as BaseMessenger;
 use CeusMedia\HydrogenFramework\Environment\Resource\Remote\Messenger;
 
@@ -49,14 +51,22 @@ class Remote extends Environment
 	/**	@var	boolean		$hasDatabase		Flag: indicates availability of a database connection */
 	public bool $hasDatabase		= FALSE;
 
+	/**	@var	Dictionary					$request		Request Object */
+	private Dictionary $request;
+
+	/**	@var	Dictionary					$session		Session Object */
+	private Dictionary $session;
+
 	/**
 	 *	Constructor.
 	 *	@access		public
 	 *	@param		array		$options		Map of environment options
 	 *	@return		void
+	 *	@throws		EnvironmentException
 	 */
 	public function __construct( array $options = [] )
 	{
+		parent::__construct( $options, FALSE );
 //		self::$defaultPaths	= Environment::$defaultPaths;
 		$this->options	= $options;
 		$this->path		= $options['pathApp'] ?? getCwd() . '/';
@@ -66,14 +76,10 @@ class Remote extends Environment
 
 		self::$configFile	= $this->path."/config/config.ini";
 
-		$this->initRuntime();																		//  setup clock
+		$this->initRequest();
+		$this->initSession();
 		$this->initMessenger();																		//  setup user interface messenger
-		$this->initConfiguration();																	//  setup configuration
-		$this->initModules();																		//  setup module support
-		$this->initDatabase();																		//  setup database connection
-		$this->initCache();																			//  setup cache support
 		$this->initLanguage();
-		$this->initLogic();
 
 		$this->hasDatabase	= (bool) $this->database;													//  note if database is available
 		$this->__onInit();
@@ -97,11 +103,49 @@ class Remote extends Environment
 	}
 
 	/**
+	 *	Returns Request Object.
+	 *	@access		public
+	 *	@return		Dictionary
+	 */
+	public function getRequest(): Dictionary
+	{
+		return $this->request;
+	}
+
+	/**
+	 *	Returns Session Object.
+	 *	@access		public
+	 *	@return		Dictionary
+	 */
+	public function getSession(): Dictionary
+	{
+		return $this->session;
+	}
+
+	/**
 	 * @return self
 	 */
-	public function initMessenger(): self
+	protected function initMessenger(): self
 	{
 		$this->messenger	= new Messenger( $this );
+		return $this;
+	}
+
+	/**
+	 * @return self
+	 */
+	protected function initRequest(): self
+	{
+		$this->request	= new Dictionary();
+		return $this;
+	}
+
+	/**
+	 * @return self
+	 */
+	protected function initSession(): self
+	{
+		$this->session	= new Dictionary();
 		return $this;
 	}
 }
