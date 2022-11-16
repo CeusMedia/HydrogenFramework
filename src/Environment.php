@@ -493,7 +493,7 @@ class Environment implements ArrayAccess
 	 */
 	public function hasModule( string $moduleId ): bool
 	{
-		return !$this->hasModules() && $this->modules->has( $moduleId );
+		return $this->hasModules() && $this->modules->has( $moduleId );
 	}
 
 	/**
