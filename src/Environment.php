@@ -753,7 +753,7 @@ class Environment implements ArrayAccess
 		}
 
 		$this->modules	= new LocalModuleLibraryResource( $this );
-		$this->modules->stripFeatures( array(
+		$this->modules->stripFeatures( [
 			'sql',
 			'versionLog',
 			'companies',
@@ -764,7 +764,7 @@ class Environment implements ArrayAccess
 			'uri',
 			'category',
 			'description',
-		) );
+		] );
 
 		foreach( $this->modules->getAll() as $moduleId => $module ){								//  iterate all local app modules
 			$prefix	= 'module.'.strtolower( $moduleId );											//  build config key prefix of module

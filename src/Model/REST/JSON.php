@@ -33,10 +33,10 @@ abstract class JSON extends Abstraction
 
 	public function index( array $conditions = [], array $orders = [], array $limits = [] ): array
 	{
-		$parameters	= array(
+		$parameters	= [
 			'filters'	=> $conditions,
 			'orders'	=> $orders
-		);
+		];
 		return $this->client->get( $this->basePath, $parameters )->data->items;
 	}
 

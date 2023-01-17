@@ -73,10 +73,10 @@ class Tool_Migration_Applier
 			$nrFiles		+= $stats->nrFiles;
 			$nrFilesChanged	+= $stats->nrFilesChanged;
 		}
-		return (object) array(
+		return (object) [
 			'nrFiles'			=> $nrFiles,
 			'nrFilesChanged'	=> $nrFilesChanged,
-		);
+		];
 	}
 
 	private function diff( array $old, array $new ): array

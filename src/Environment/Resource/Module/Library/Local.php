@@ -197,10 +197,10 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 		}
 
 		if( !file_exists( $this->modulePath ) )
-			return $this->scanResult = (object) array(
+			return $this->scanResult = (object) [
 				'source' 	=> 'none',
 				'count'		=> 0,
-			);
+			];
 		$index	= new FileRegexIndex( $this->modulePath, '/^[a-z0-9_]+\.xml$/i' );
 		/** @var SplFileObject $entry */
 		foreach( $index as $entry ){

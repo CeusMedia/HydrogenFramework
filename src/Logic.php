@@ -70,7 +70,7 @@ class Logic
 
 	/**
 	 *	@param		Environment			$env
-	 *	@return		self
+	 *	@return		static
 	 *	@throws		ReflectionException
 	 */
 	public static function getInstance( Environment $env ): self

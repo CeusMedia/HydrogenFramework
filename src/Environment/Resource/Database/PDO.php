@@ -124,14 +124,14 @@ class PDO extends Connection
 		if( isset( $dba['password'] ) && strlen( $dba['password'] ) > 0 )
 			$dsn->setPassword( $dba['password'] );
 
-		$defaultOptions	= array(
+		$defaultOptions	= [
 			'ATTR_PERSISTENT'				=> TRUE,
 			'ATTR_ERRMODE'					=> "PDO::ERRMODE_EXCEPTION",
 			'ATTR_DEFAULT_FETCH_MODE'		=> "PDO::FETCH_OBJ",
 			'ATTR_CASE'						=> "PDO::CASE_NATURAL",
 			'MYSQL_ATTR_USE_BUFFERED_QUERY'	=> TRUE,
 			'MYSQL_ATTR_INIT_COMMAND'		=> "SET NAMES 'utf8';",
-		);
+		];
 		$options	+= $defaultOptions;
 
 		//  --  DATABASE OPTIONS  --  //

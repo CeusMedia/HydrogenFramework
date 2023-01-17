@@ -163,13 +163,13 @@ class Web extends Environment
 	 */
 	public function close( array $additionalResources = [], bool $keepAppAlive = FALSE )
 	{
-		$resources	= array(
+		$resources	= [
 			'session',																				//  HTTP session handler
 			'request',																				//  HTTP request handler
 			'response',																				//  HTTP response handler
 			'messenger',																			//  application message handler
 			'language',																				//  language handler
-		);
+		];
 		parent::close( $resources );																//  close environment and application execution
 	}
 

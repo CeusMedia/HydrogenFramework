@@ -427,11 +427,11 @@ class JavaScript
 			$fileJs	= $this->getPackageFileName( $forceFresh );
 			if( $this->revision )
 				$fileJs	.= '?'.$this->revision;
-			$attributes	= array(
+			$attributes	= [
 				'type'		=> 'text/javascript',
 	//			'language'	=> 'JavaScript',
 				'src'		=> $fileJs
-			);
+			];
 			$links	= HtmlTag::create( 'script', NULL, $attributes );
 		}
 		else{
@@ -439,11 +439,11 @@ class JavaScript
 			foreach( $this->getPlainUrlList() as $url ){
 				if( $this->revision )
 					$url	.= ( preg_match( '/\?/', $url ) ? '&amp;' : '?' ).$this->revision;
-				$attributes	= array(
+				$attributes	= [
 					'type'		=> 'text/javascript',
 		//			'language'	=> 'JavaScript',
 					'src'		=> $url
-				);
+				];
 				$list[]	= HtmlTag::create( 'script', NULL, $attributes );
 			}
 			$links	= implode( "\n".$this->indent, $list  );

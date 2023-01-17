@@ -30,7 +30,7 @@ use stdClass;
  */
 class Disclosure
 {
-	protected array $options	= array(
+	protected array $options	= [
 		'classPrefix'		=> 'Controller_',
 		'readMethods'		=> TRUE,
 		'readParameters'	=> TRUE,
@@ -43,7 +43,7 @@ class Disclosure
 		'skipInherited'		=> TRUE,
 		'skipFramework'		=> TRUE,
 		'methodFilter'		=> ReflectionMethod::IS_PUBLIC
-	);
+	];
 
 	public function __construct( array $options = [] )
 	{
