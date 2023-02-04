@@ -60,7 +60,7 @@ class Language
 	protected string $filePath;
 
 	/**	@var		string					$language		Set Language */
-	protected string $language;
+	protected string $language				= '';
 
 	/**	@var		array					$languages		List of allowed Languages */
 	protected array $languages				= [];
@@ -108,7 +108,7 @@ class Language
 			if( $session->get( 'language' ) )
 				$language	= $session->get( 'language' );
 		}
-		$this->setLanguage( $language );
+		$this->setLanguage( $language ?? '' );
 //		@todo remove: title is not longer existing in environment
 //		$words	= $this->getWords( 'main', FALSE );
 //		if( !empty( $words['main']['title'] ) )

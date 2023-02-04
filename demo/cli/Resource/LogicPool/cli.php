@@ -1,17 +1,28 @@
 <?php
-if( !@include_once dirname( dirname( dirname( dirname( __DIR__ ) ) ) ).'/vendor/autoload.php' )
+use CeusMedia\Common\CLI;
+use CeusMedia\Common\Loader;
+use CeusMedia\HydrogenFramework\Application\ConsoleAbstraction as ConsoleApp;
+use CeusMedia\HydrogenFramework\Environment;
+use CeusMedia\HydrogenFramework\Environment\Resource\Language as LanguageResource;
+
+if( !@include_once dirname( __DIR__, 4 ).'/vendor/autoload.php' )
     die( 'You need to "composer install" first.' );
 if( !CLI::checkIsCLi( FALSE ) )
 	die( 'Access denied: Execution via CLI, only.' );
 
-new UI_DevOutput;
+chdir( __DIR__ );
 
-//CMF_Hydrogen_Environment::$configFile	= 'config.ini';
-CMF_Hydrogen_Environment::$configPath	= '';
-CMF_Hydrogen_Environment_Resource_Language::$fileExtension	= 'locale';
+new CeusMedia\Common\UI\DevOutput;
 
-class DemoApp extends CMF_Hydrogen_Application_Console{
-	public function run(){
+//Environment::$configFile	= 'config.ini';
+Environment::$defaultPaths['config']	= '';
+LanguageResource::$fileExtension	= 'locale';
+
+
+class DemoApp extends ConsoleApp
+{
+	public function run(): ?int
+	{
 		$logicPool	= $this->env->getLogic();
 
 		CLI::out();
@@ -24,6 +35,7 @@ class DemoApp extends CMF_Hydrogen_Application_Console{
 
 		CLI::out( 'Logic class "'.$logicClassName.'" would be stored in logic pool by key "'.$logicPoolKey.'"' );
 		CLI::out();
+		return 0;
 	}
 }
 

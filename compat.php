@@ -4,6 +4,7 @@ interface CMF_Hydrogen_Environment_Router_Interface extends CeusMedia\HydrogenFr
 interface CMF_Hydrogen_Environment_Resource_Module_Library_Interface extends CeusMedia\HydrogenFramework\Environment\Resource\Module\LibraryInterface {}
 interface CMF_Hydrogen_View_Helper extends CeusMedia\HydrogenFramework\View\Helper {}
 
+abstract class CMF_Hydrogen_Application_Console extends CeusMedia\HydrogenFramework\Application\ConsoleAbstraction {}
 abstract class CMF_Hydrogen_Application_Web_Abstract extends CeusMedia\HydrogenFramework\Application\Web\Abstraction {}
 abstract class CMF_Hydrogen_Application_Abstract extends CeusMedia\HydrogenFramework\Application\Abstraction {}
 abstract class CMF_Hydrogen_Environment_Resource_Acl_Abstract extends CeusMedia\HydrogenFramework\Environment\Resource\Acl\Abstraction {}
@@ -14,7 +15,6 @@ abstract class CMF_Hydrogen_Model_File_Abstract extends CeusMedia\HydrogenFramew
 abstract class CMF_Hydrogen_View_Helper_Abstract extends CeusMedia\HydrogenFramework\View\Helper\Abstraction {}
 
 class CMF_Hydrogen_Application_Web_Site extends CeusMedia\HydrogenFramework\Application\Web\Site {}
-class CMF_Hydrogen_Application_Console extends CeusMedia\HydrogenFramework\Application\Console {}
 class CMF_Hydrogen_Controller extends CeusMedia\HydrogenFramework\Controller {}
 class CMF_Hydrogen_Controller_Ajax extends CeusMedia\HydrogenFramework\Controller\Ajax {}
 class CMF_Hydrogen_Deprecation extends CeusMedia\HydrogenFramework\Deprecation {}

@@ -1,11 +1,11 @@
 <?php
 
 use CeusMedia\Common\CLI;
-use CeusMedia\HydrogenFramework\Application\Console as ConsoleApp;
+use CeusMedia\HydrogenFramework\Application\ConsoleAbstraction as ConsoleApp;
 
 class App extends ConsoleApp
 {
-	public function run()
+	public function run(): ?int
 	{
 		$request	= $this->env->getRequest();
 		$session	= $this->env->getSession();
@@ -27,5 +27,6 @@ class App extends ConsoleApp
 		CLI::out( 'Hook Payload:      '.json_encode( $payload ) );
 		CLI::out( 'Session Data:      '.json_encode( $session->getAll() ) );
 		CLI::out();
+		return 0;
 	}
 }

@@ -51,7 +51,7 @@
       "php vendor/bin/phpunit --configuration tool/config/phpunit9.xml --testsuite units"
     ],
     "dev:phpstan": [
-      "vendor/bin/phpstan analyze --configuration=tool/config/phpstan.neon --memory-limit=4G --xdebug --verbose"
+      "vendor/bin/phpstan analyze --configuration=tool/config/phpstan.neon --memory-limit=1G --xdebug --verbose"
     ],
     "dev:phpstan-clear": [
       "@dev:install-quiet",

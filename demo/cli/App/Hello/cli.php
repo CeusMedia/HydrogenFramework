@@ -6,6 +6,8 @@ use CeusMedia\HydrogenFramework\Environment;
 
 ( include_once dirname( __DIR__, 4 ).'/vendor/autoload.php' ) or die( 'Install packages using composer, first!'.PHP_EOL );
 
+chdir( __DIR__ );
+
 //die("!");
 
 //if( !@include_once dirname( dirname( dirname( dirname( __DIR__ ) ) ) ).'/vendor/autoload.php' )

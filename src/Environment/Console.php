@@ -44,7 +44,7 @@ class Console extends Environment
 	public ?string $path				= NULL;
 
 	/**	@var	string					$url		Detected application base URL */
-	public string $url;
+	public string $url					= '';
 
 	/**	@var	ArgumentParser			$request	Console Request Object */
 	protected ArgumentParser $request;
@@ -106,9 +106,9 @@ class Console extends Environment
 	 */
 	protected function detectSelf(): void
 	{
-		$this->url = $this->config->get( 'app.url' );											//  get application URL from config
+		$this->url = $this->config->get( 'app.url', '' );											//  get application URL from config
 		if( !$this->url )																			//  application URL not set
-			$this->url = $this->config->get( 'app.base.url' );									//  get application base URL from config
+			$this->url = $this->config->get( 'app.base.url', '' );									//  get application base URL from config
 		if( in_array( $this->url,[NULL, FALSE, ''] ) )												//  application base URL not set
 			throw new RuntimeException( 'Please define app.base.url in config.ini, first!' );		//  quit with exception
 
