@@ -4,7 +4,7 @@
 /**
  *	Generic Controller Class of Framework Hydrogen.
  *
- *	Copyright (c) 2007-2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2007-2023 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2022 Christian Würker (ceusmedia.de)
+ *	@copyright		2007-2023 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -49,7 +49,7 @@ use RuntimeException;
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2007-2022 Christian Würker (ceusmedia.de)
+ *	@copyright		2007-2023 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -71,22 +71,29 @@ class Controller
 
 	/**	@var	WebEnvironment				$env			Application Environment Object */
 	protected WebEnvironment $env;
-	/**	@var	string						$defaultPath	Default controller URI path */
-	protected string $defaultPath;
-	/**	@var	string						$path			Preferred controller URI path */
-	protected string $path;
+
 	/**	@var	View|NULL					$view			View instance for controller */
 	protected ?View $view					= NULL;
+
 	/**	@var	Dictionary					$moduleConfig	Map of module configuration pairs */
 	protected Dictionary $moduleConfig;
 
+	/**	@var	string						$defaultPath	Default controller URI path */
+	protected string $defaultPath;
+
+	/**	@var	string						$path			Preferred controller URI path */
+	protected string $path;
+
 	/**	@var	string						$controller		Name of called Controller */
 	protected string $controller			= '';
+
 	/**	@var	string						$action			Name of called Action */
 	protected string $action				= '';
-	/**	@var	bool						$redirect		Flag for Redirection */
-	var bool $redirect						= FALSE;
 
+	/**	@var	bool						$redirect		Flag for Redirection */
+	protected bool $redirect				= FALSE;
+
+	/**	@var	bool						$logRestarts	Flag: Log redirections */
 	protected bool $logRestarts				= FALSE;
 
 	/**
