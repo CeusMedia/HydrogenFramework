@@ -66,6 +66,9 @@ class Controller
 	public static string $prefixModel		= 'Model_';
 	public static string $prefixView		= 'View_';
 
+	/**	@var	bool						$redirect		Flag for Redirection */
+	public bool $redirect					= FALSE;
+
 	/**	@var	string						$alias			Optional alternative path for restarting */
 	public string $alias					= '';
 
@@ -89,9 +92,6 @@ class Controller
 
 	/**	@var	string						$action			Name of called Action */
 	protected string $action				= '';
-
-	/**	@var	bool						$redirect		Flag for Redirection */
-	protected bool $redirect				= FALSE;
 
 	/**	@var	bool						$logRestarts	Flag: Log redirections */
 	protected bool $logRestarts				= FALSE;
