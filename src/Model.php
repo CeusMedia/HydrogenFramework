@@ -36,8 +36,9 @@ use CeusMedia\Database\PDO\Table\Writer as DatabaseTableWriter;
 use DomainException;
 use InvalidArgumentException;
 use PDO;
+use Psr\SimpleCache\CacheInterface as SimpleCacheInterface;
+use Psr\SimpleCache\InvalidArgumentException as SimpleCacheInvalidArgumentException;
 use RangeException;
-use ReflectionException;
 use RuntimeException;
 
 /**
@@ -72,8 +73,8 @@ class Model
 	/**	@var	string					$prefix			Database Table Prefix */
  	protected string $prefix;
 
-	/**	@var	Dictionary				$cache			Model data cache */
-	protected $cache;
+	/**	@var    SimpleCacheInterface|NULL    $cache			Model data cache */
+	protected ?SimpleCacheInterface     $cache          = NULL;
 
 	/**	@var	integer					$fetchMode		PDO fetch mode */
 	protected int $fetchMode;
@@ -89,7 +90,6 @@ class Model
 	 *	@param		Environment		$env			Application Environment Object
 	 *	@param		string|NULL		$id				ID to focus on
 	 *	@return		void
-	 *	@throws		ReflectionException
 	 */
 	public function __construct( Environment $env, ?string $id = NULL )
 	{
@@ -107,7 +107,7 @@ class Model
 		if( $this->fetchMode )
 			$this->table->setFetchMode( $this->fetchMode );
 		$this->table->setIndices( $this->indices );
-		$this->cache	= ObjectFactory::createObject( self::$cacheClass );
+//		$this->cache	= ObjectFactory::createObject( self::$cacheClass );
 		$this->cacheKey	= 'db.'.$this->prefix.$this->name.'.';
 	}
 
@@ -117,11 +117,13 @@ class Model
 	 *	@param		array			$data			Data to add to Table
 	 *	@param		boolean			$stripTags		Flag: strip HTML Tags from values, default: yes
 	 *	@return		string
+     *  @throws		SimpleCacheInvalidArgumentException
 	 */
 	public function add( array $data, bool $stripTags = TRUE ): string
 	{
 		$id	= (string) $this->table->insert( $data, $stripTags );
-		$this->cache->set( $this->cacheKey.$id, $this->get( $id ) );
+        if( NULL !== $this->cache )
+            $this->cache->set( $this->cacheKey.$id, $this->get( $id ) );
 		return $id;
 	}
 
@@ -179,6 +181,7 @@ class Model
 	 *	@param		array			$data			Data to edit
 	 *	@param		boolean			$stripTags		Flag: strip HTML Tags from values, default: yes
 	 *	@return		integer			Number of changed rows
+     *  @throws	SimpleCacheInvalidArgumentException
 	 */
 	public function edit( string $id, array $data, bool $stripTags = TRUE ): int
 	{
@@ -187,7 +190,8 @@ class Model
 		if( $this->table->get() !== NULL )
 			$result	= $this->table->update( $data, $stripTags );
 		$this->table->defocus();
-		$this->cache->remove( $this->cacheKey.$id );
+	    if( NULL !== $this->cache )
+			$this->cache->delete( $this->cacheKey.$id );
 		return $result;
 	}
 
@@ -212,12 +216,13 @@ class Model
 	 *	@param		string			$id				ID to focus on
 	 *	@param		string|NULL		$field			Single Field to return
 	 *	@return		mixed
+     *  @throws	SimpleCacheInvalidArgumentException
 	 */
 	public function get( string $id, ?string $field = NULL )
 	{
 		if( NULL !== $field )
 			$field	= $this->checkField( $field );
-		$data	= $this->cache->get( $this->cacheKey.$id );
+		$data	= NULL !== $this->cache && $this->cache->get( $this->cacheKey.$id );
 		if( !$data ){
 			$this->table->focusPrimary( (int) $id );
 			$data	= $this->table->get();
@@ -409,10 +414,11 @@ class Model
 	 *	Indicates whether a table row is existing by ID.
 	 *	@param		string			$id				ID to focus on
 	 *	@return		boolean
+     *  @throws		SimpleCacheInvalidArgumentException
 	 */
 	public function has( string $id ): bool
 	{
-		if( $this->cache->has( $this->cacheKey.$id ) )
+		if( NULL !== $this->cache && $this->cache->has( $this->cacheKey.$id ) )
 			return TRUE;
 		return (bool) $this->get( $id );
 	}
@@ -445,6 +451,7 @@ class Model
 	 *	@access		public
 	 *	@param		string			$id				ID to focus on
 	 *	@return		boolean
+     *  @throws		SimpleCacheInvalidArgumentException
 	 */
 	public function remove( string $id ): bool
 	{
@@ -455,7 +462,8 @@ class Model
 			$result	= TRUE;
 		}
 		$this->table->defocus();
-		$this->cache->remove( $this->cacheKey.$id );
+        if( NULL !== $this->cache )
+            $this->cache->delete( $this->cacheKey.$id );
 		return $result;
 	}
 
@@ -465,6 +473,7 @@ class Model
 	 *	@param		string			$key			Key of Index
 	 *	@param		mixed			$value			Value of Index
 	 *	@return		int				Number of removed entries
+     *  @throws		SimpleCacheInvalidArgumentException
 	 */
 	public function removeByIndex( string $key, $value ): int
 	{
@@ -479,6 +488,7 @@ class Model
 	 *	@access		public
 	 *	@param		array			$indices		Map of Index Keys and Values
 	 *	@return		integer			Number of removed entries
+     *  @throws		SimpleCacheInvalidArgumentException
 	 */
 	public function removeByIndices( array $indices ): int
 	{
@@ -607,6 +617,7 @@ class Model
 	 *	Removes entries currently in focus.
 	 *	@return		int
 	 *	@throws		RuntimeException		if no focus has been set before
+     *  @throws		SimpleCacheInvalidArgumentException
 	 */
 	protected function removeIndexed(): int
 	{
@@ -626,7 +637,8 @@ class Model
 					default:
 						$id	= $row[$this->primaryKey];
 				}
-				$this->cache->remove( $this->cacheKey.$id );
+                if( NULL !== $this->cache )
+                    $this->cache->delete( $this->cacheKey.$id );
 			}
 		}
 		return $number;

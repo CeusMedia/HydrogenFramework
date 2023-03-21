@@ -808,23 +808,27 @@ class Environment implements ArrayAccess
 		return $this;
 	}
 
+    #[\ReturnTypeWillChange]
 	public function offsetExists( $offset ): bool
 	{
 //		return property_exists( $this, $key );														//  PHP 5.3
 		return isset( $this->$offset );																//  PHP 5.2
 	}
 
-	public function offsetGet( $offset )
+    #[\ReturnTypeWillChange]
+    public function offsetGet( $offset )
 	{
 		return $this->get( $offset );
 	}
 
-	public function offsetSet( $offset, $value )
+    #[\ReturnTypeWillChange]
+    public function offsetSet( $offset, $value )
 	{
 		$this->set( $offset, $value );
 	}
 
-	public function offsetUnset( $offset )
+    #[\ReturnTypeWillChange]
+    public function offsetUnset( $offset )
 	{
 		$this->remove( $offset );
 	}
