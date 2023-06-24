@@ -56,10 +56,10 @@ class Recursive extends Abstraction implements RouterInterface
 		if( FALSE !== getEnv( 'REDIRECT_URL' ) && $request->has( '__path' ) )
 			self::$pathKey	= '__path';
 
-		$path	= $request->get( self::$pathKey );
+		$path	= $request->get( self::$pathKey, '' );
 		if( $this->env instanceof WebEnvironment )
 			if( $request instanceof HttpRequest )
-				$path	= $request->getFromSource( self::$pathKey, 'get' );
+				$path	= $request->getFromSource( self::$pathKey, 'get' ) ?? '';
 
 		$path	= urldecode( $path );
 		$path	= preg_replace( '@^(.*)/?$@U', '\\1', trim( $path ) );

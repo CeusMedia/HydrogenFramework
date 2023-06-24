@@ -236,8 +236,8 @@ class Captain
 						throw new RuntimeException( 'Hook handling class ' . $callback[0] . ' is not existing' );
 					if( !method_exists( $callback[0], $callback[1] ) )
 						throw new RuntimeException( 'Hook handling function ' . $function . ' is not existing' );
-					if( !is_callable( [$callback[0], $callback[1]] ) )
-						throw new RuntimeException( 'Hook handling function ' . $function . ' is not callable' );
+//					if( !is_callable( [$callback[0], $callback[1]] ) )
+//						throw new RuntimeException( 'Hook handling function ' . $function . ' is not callable' );
 
 					ob_start();
 

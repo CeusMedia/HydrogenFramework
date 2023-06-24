@@ -744,7 +744,7 @@ class Environment implements ArrayAccess
 	{
 		$this->runtime->reach( 'env: initModules: start', 'Started setup of modules.' );
 		$public	= [];
-		if( strlen( trim( $this->config->get( 'module.acl.public' ) ) ) ){
+		if( strlen( trim( $this->config->get( 'module.acl.public', '' ) ) ) ){
 			Deprecation::getInstance()
 				->setErrorVersion( '0.8.7.2' )
 				->setExceptionVersion( '0.8.9' )

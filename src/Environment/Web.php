@@ -510,8 +510,8 @@ class Web extends Environment
 
 		// @todo check if this old workaround public URL paths extended by module is still needed and remove
 		$isInside	= (int) $this->session->get( 'auth_user_id' );
-		$inside		= explode( ',', $this->config->get( 'module.acl.inside' ) );					//  get current inside link list
-		$outside	= explode( ',', $this->config->get( 'module.acl.outside' ) );					//  get current outside link list
+		$inside		= explode( ',', $this->config->get( 'module.acl.inside', '' ) );					//  get current inside link list
+		$outside	= explode( ',', $this->config->get( 'module.acl.outside', '' ) );					//  get current outside link list
 		foreach( $this->modules->getAll() as $module ){
 			foreach( $module->links as $link ){													//  iterate module links
 				$link->path	= $link->path ?: 'index/index';

@@ -228,7 +228,7 @@ class Language
 			throw new InvalidArgumentException( "Topic cannot be empty" );
 		$this->env->getRuntime()->reach( 'Resource_Language::load('.$topic.')' );
 		$fileName	= $this->getFilenameOfLanguage( $topic );
-		$reader		= new FileReader($fileName);
+		$reader		= new FileReader( $fileName, FALSE );
 		$data		= [];
 		if( $reader->exists() )	{
 			$string	= $reader->readString();

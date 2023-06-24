@@ -154,7 +154,7 @@ class View
 
 	public function getContentUri( string $fileKey, string $path = NULL ): string
 	{
-		$path		= preg_replace( '/^(.+)(\/)*$/U', '\\1/', $path );
+		$path		= preg_replace( '/^(.+)(\/)*$/U', '\\1/', $path ?? '' );
 		$pathLocale	= $this->env->getLanguage()->getLanguagePath();
 		return $pathLocale.$path.$fileKey;
 	}

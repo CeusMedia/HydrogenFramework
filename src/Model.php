@@ -95,6 +95,9 @@ class Model
 	{
 		$this->setEnv( $env );
 		$connection	= $this->env->getDatabase();
+		if( method_exists( $connection, 'getConnection' ) )
+			$connection	= $connection->getConnection();
+
 		if( !$connection instanceof PdoConnection )
 			throw new RuntimeException( 'Set up database is not a fitting PDO connection' );
 		$this->table	= new DatabaseTableWriter(
@@ -122,8 +125,7 @@ class Model
 	public function add( array $data, bool $stripTags = TRUE ): string
 	{
 		$id	= (string) $this->table->insert( $data, $stripTags );
-        if( NULL !== $this->cache )
-            $this->cache->set( $this->cacheKey.$id, $this->get( $id ) );
+		$this->cache?->set( $this->cacheKey.$id, $this->get( $id ) );
 		return $id;
 	}
 
@@ -187,11 +189,10 @@ class Model
 	{
 		$this->table->focusPrimary( (int) $id );
 		$result	= 0;
-		if( $this->table->get() !== NULL )
+		if( NULL !== $this->table->get() )
 			$result	= $this->table->update( $data, $stripTags );
 		$this->table->defocus();
-	    if( NULL !== $this->cache )
-			$this->cache->delete( $this->cacheKey.$id );
+		$this->cache?->delete( $this->cacheKey.$id );
 		return $result;
 	}
 
@@ -222,12 +223,12 @@ class Model
 	{
 		if( NULL !== $field )
 			$field	= $this->checkField( $field );
-		$data	= NULL !== $this->cache && $this->cache->get( $this->cacheKey.$id );
+		$data	= $this->cache?->get( $this->cacheKey.$id );
 		if( !$data ){
 			$this->table->focusPrimary( (int) $id );
 			$data	= $this->table->get();
 			$this->table->defocus();
-			$this->cache->set( $this->cacheKey.$id, $data );
+			$this->cache?->set( $this->cacheKey.$id, $data );
 		}
 		if( NULL !== $field )
 			return $this->getFieldsFromResult( $data, array( $field ) );
@@ -418,7 +419,7 @@ class Model
 	 */
 	public function has( string $id ): bool
 	{
-		if( NULL !== $this->cache && $this->cache->has( $this->cacheKey.$id ) )
+		if( $this->cache?->has( $this->cacheKey.$id ) )
 			return TRUE;
 		return (bool) $this->get( $id );
 	}
@@ -457,13 +458,12 @@ class Model
 	{
 		$this->table->focusPrimary( (int) $id );
 		$result	= FALSE;
-		if( $this->table->get() !== NULL ){
+		if( NULL !== $this->table->get() ){
 			$this->table->delete();
 			$result	= TRUE;
 		}
 		$this->table->defocus();
-        if( NULL !== $this->cache )
-            $this->cache->delete( $this->cacheKey.$id );
+		$this->cache?->delete( $this->cacheKey.$id );
 		return $result;
 	}
 
@@ -473,7 +473,7 @@ class Model
 	 *	@param		string			$key			Key of Index
 	 *	@param		mixed			$value			Value of Index
 	 *	@return		int				Number of removed entries
-     *  @throws		SimpleCacheInvalidArgumentException
+	 *  @throws		SimpleCacheInvalidArgumentException
 	 */
 	public function removeByIndex( string $key, $value ): int
 	{
@@ -488,7 +488,7 @@ class Model
 	 *	@access		public
 	 *	@param		array			$indices		Map of Index Keys and Values
 	 *	@return		integer			Number of removed entries
-     *  @throws		SimpleCacheInvalidArgumentException
+	 *  @throws		SimpleCacheInvalidArgumentException
 	 */
 	public function removeByIndices( array $indices ): int
 	{
@@ -617,7 +617,7 @@ class Model
 	 *	Removes entries currently in focus.
 	 *	@return		int
 	 *	@throws		RuntimeException		if no focus has been set before
-     *  @throws		SimpleCacheInvalidArgumentException
+	 *  @throws		SimpleCacheInvalidArgumentException
 	 */
 	protected function removeIndexed(): int
 	{
@@ -637,8 +637,7 @@ class Model
 					default:
 						$id	= $row[$this->primaryKey];
 				}
-                if( NULL !== $this->cache )
-                    $this->cache->delete( $this->cacheKey.$id );
+				$this->cache?->delete( $this->cacheKey.$id );
 			}
 		}
 		return $number;

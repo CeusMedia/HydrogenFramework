@@ -234,9 +234,9 @@ class General
 
 	protected function realizeCall(): void
 	{
-		if( !trim( $this->request->get( '__controller' ) ) )
+		if( !trim( $this->request->get( '__controller', '' ) ) )
 			$this->request->set( '__controller', $this->defaultController );
-		if( !trim( $this->request->get( '__action' ) ) )
+		if( !trim( $this->request->get( '__action', '' ) ) )
 			$this->request->set( '__action', $this->defaultAction );
 		if( !$this->request->get( '__arguments' ) )
 			$this->request->set( '__arguments', $this->defaultArguments );
