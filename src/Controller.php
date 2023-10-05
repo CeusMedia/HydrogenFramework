@@ -231,10 +231,10 @@ class Controller
 	 *	@param		object|NULL	$context
 	 *	@param		array		$payload
 	 *	@return		bool|NULL
+	 *	@throws		ReflectionException
 	 */
-	protected function callHook( string $resource, string $event, ?object $context = NULL, array & $payload ): ?bool
+	protected function callHook( string $resource, string $event, ?object $context, array & $payload ): ?bool
 	{
-		$context	= $context ?: $this;
 		return $this->env->getCaptain()->callHook( $resource, $event, $context, $payload );
 	}
 

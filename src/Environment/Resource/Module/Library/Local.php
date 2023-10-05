@@ -110,10 +110,9 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 	 *	@param		array		$payload		Map of hook payload data, will be available inside hook as $payload and $data
 	 *	@return		integer						Number of called hooks for event
 	 *	@throws		RuntimeException			if given static class method is not existing
-	 *	@throws		RuntimeException			ig method call produces stdout output, for example warnings and notices
+	 *	@throws		RuntimeException			if method call produces stdout output, for example warnings and notices
 	 *	@throws		RuntimeException			if method call is throwing an exception
 	 *	@throws		ReflectionException
-	 *	@todo 		rename $data to $payload
 	 *	@todo		check if this is needed anymore and remove otherwise
 	 */
 	public function callHookWithPayload( string $resource, string $event, object $context, array & $payload ): int

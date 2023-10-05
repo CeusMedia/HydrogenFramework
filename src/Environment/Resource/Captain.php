@@ -109,7 +109,7 @@ class Captain
 	 *	@param		array		$payload		Map of hook payload data, will be available inside hook as $payload
 	 *	@return		bool|NULL					TRUE if hook is chain-breaking, FALSE if hook is disabled or non-chain-breaking, NULL if no modules installed or no hooks defined
 	 *	@throws		RuntimeException			if given static class method is not existing
-	 *	@throws		RuntimeException			ig method call produces stdout output, for example warnings and notices
+	 *	@throws		RuntimeException			if method call produces stdout output, for example warnings and notices
 	 *	@throws		RuntimeException			if method call is throwing an exception
 	 *	@throws		DomainException
 	 *	@throws		ReflectionException
@@ -213,7 +213,9 @@ class Captain
 	 *	@param		object		$context
 	 *	@param		array		$payload
 	 *	@return		bool
-	 *	@throws		RuntimeException
+	 *	@throws		RuntimeException		if given static class method is not existing
+	 *	@throws		RuntimeException		if method call produces stdout output, for example warnings and notices
+	 *	@throws		RuntimeException		if method call is throwing an exception
 	 *	@throws		ReflectionException
 	 */
 	protected function fetchCollectedResourceEventHooks( array $hooks, object $context, array & $payload): bool
