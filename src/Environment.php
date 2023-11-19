@@ -534,7 +534,7 @@ class Environment implements ArrayAccess
 	protected function detectMode(): self
 	{
 		/** @var array $modes */
-		$modes	= preg_split( '/[_.:;>#@\/-]/', strtolower( $this->config->get( 'app.mode' ) ) );
+		$modes	= preg_split( '/[_.:;>#@\/-]/', strtolower( $this->config->get( 'app.mode' ) ?? '' ) );
 		foreach( $modes as $mode ){
 			switch( $mode ){
 				case 'dev':
