@@ -32,6 +32,8 @@ use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 
 use RuntimeException;
 
+use function ucfirst;
+
 /**
  *	...
  *	@category		Library

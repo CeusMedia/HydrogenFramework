@@ -37,6 +37,8 @@ use ReflectionException;
 use RuntimeException;
 use ReflectionMethod;
 
+use function ucfirst;
+
 /**
  *	Generic Main Class of Framework Hydrogen
  *	@category		Library

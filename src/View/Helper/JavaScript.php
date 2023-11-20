@@ -105,7 +105,7 @@ class JavaScript
 		$level	??= CaptainResource::LEVEL_MID;
 		if( !array_key_exists( $level, $this->scripts ) )										//  level is not yet defined in scripts list
 			$this->scripts[$level]	= [];													//  create empty scripts list for level
-		$key	= strlen( $key ) ? md5( $key ) : 'default';
+		$key	= strlen( $key ?? '' ) ? md5( $key ) : 'default';
 		if( !array_key_exists( $key, $this->scripts[$level] ) )
 			$this->scripts[$level][$key]	= [];
 		$this->scripts[$level][$key][]	= $script;
