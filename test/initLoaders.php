@@ -26,7 +26,7 @@ $loaderTest->setVerbose( 0 );												//  show autoload attempts
 $loaderTest->setPrefix( 'Test_' );												//  set prefix class prefix
 $loaderTest->registerAutoloader();												//  apply this autoloader
 
-Test_Case::$config = $__config;
+//Test_Case::$config = $__config;
 class_exists( 'UI_DevOutput' );
 return;
 

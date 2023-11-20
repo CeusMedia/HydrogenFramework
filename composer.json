@@ -16,9 +16,11 @@
     "jabber": "cwuerker@ceusmedia.de"
   },
   "require": {
-    "php": "^8",
+    "php": "^8.1",
+    "ext-curl": "*",
     "ext-json": "*",
     "ext-pdo": "*",
+    "ext-simplexml": "*",
     "ceus-media/cache": "^0.5 | 0.5.x-dev",
     "ceus-media/common": "^1.0 | 1.0.x-dev | ^0.9 | 0.9.x-dev",
     "ceus-media/database": "^0.6 | 0.6.x-dev",
@@ -27,7 +29,7 @@
   },
   "require-dev": {
     "ceus-media/doc-creator": "*",
-    "phpunit/phpunit": "^9",
+    "phpunit/phpunit": "^9 | ^10",
     "phpstan/phpstan": "^1",
     "phpstan/phpstan-strict-rules": "^1",
     "php-parallel-lint/php-parallel-lint": "^1.3 | dev-master",
@@ -52,7 +54,7 @@
       "php vendor/bin/phpunit --configuration tool/config/phpunit9.xml --testsuite units"
     ],
     "dev:phpstan": [
-      "vendor/bin/phpstan analyze --configuration=tool/config/phpstan.neon --memory-limit=1G --xdebug --verbose"
+      "vendor/bin/phpstan analyze --configuration=tool/config/phpstan.neon --memory-limit=1G --verbose"
     ],
     "dev:phpstan-clear": [
       "@dev:install-quiet",
