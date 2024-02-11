@@ -47,9 +47,9 @@ interface Helper
 
 	/**
 	 *	@param		Environment		$env
-	 *	@return		self|void
+	 *	@return		self
 	 */
-	public function setEnv( Environment $env );
+	public function setEnv( Environment $env ): self;
 
 //	@todo 	see if this pattern (having render method) is realizable for all existing helpers
 //	public function render();

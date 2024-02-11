@@ -235,7 +235,7 @@ class Hook
 	 *	@param		array			$parameters		Map of additional parameters to set in request
 	 *	@return		void			Always returns TRUE to indicate that dispatching hook is done
 	 */
-	protected static function redirect( WebEnvironment $env, string $controller = 'index', string $action = "index", array $arguments = [], array $parameters = [] )
+	protected static function redirect( WebEnvironment $env, string $controller = 'index', string $action = "index", array $arguments = [], array $parameters = [] ): void
 	{
 		$request	= $env->getRequest();
 		$request->set( '__controller', $controller );
@@ -272,7 +272,7 @@ class Hook
 	 *	Redirects by requesting a URI.
 	 *	Attention: This *WILL* effect the URL displayed in browser / need request clients (eG. cURL) to allow forwarding.
 	 *
-	 *	By default, redirect URIs are request path within the current application, eg. "./[CONTROLLER]/[ACTION]"
+	 *	By default, redirect URIs are request path within the current application, e.g. "./[CONTROLLER]/[ACTION]"
 	 *	ATTENTION: For browser compatibility local paths should start with "./"
 	 *
 	 *	If second parameter is set to a valid HTTP status code, the code and its HTTP status text will be set for response.

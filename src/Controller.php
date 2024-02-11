@@ -219,9 +219,9 @@ class Controller
 	 *	@param		string|NULL	$topic
 	 *	@return		self
 	 */
-	protected function addData( string $key, $value, string $topic = NULL ): self
+	protected function addData( string $key, mixed $value, string $topic = NULL ): self
 	{
-		$this->view->setData( array( $key => $value ), $topic );
+		$this->view->setData( [$key => $value], $topic );
 		return $this;
 	}
 
@@ -240,13 +240,13 @@ class Controller
 
 	/**
 	 *	Checks if current request came via AJAX.
-	 *	Otherwise returns application main page as HTML by redirection.
+	 *	Otherwise, returns application main page as HTML by redirection.
 	 *	Also notes a failure message in UI messenger.
 	 *	@access		public
 	 *	@return		void
 	 *	@todo		locale support (use main.ini section msg etc.)
 	 */
-	protected function checkAjaxRequest()
+	protected function checkAjaxRequest(): void
 	{
 		if( !$this->env->getRequest()->isAjax() ){
 			$this->env->getMessenger()->noteFailure( 'Invalid AJAX/AJAJ access attempt.' );
@@ -259,7 +259,7 @@ class Controller
 	 *	@return		mixed|null
 	 *	@todo		remove if not used, purpose unclear
 	 */
-	protected function compactFilterInput( $input )
+	protected function compactFilterInput( mixed $input ): mixed
 	{
 		if( is_object( $input ) || is_resource( $input ) || is_null( $input ) )						//  input is of invalid type
 			return NULL;																			//  break with empty result
@@ -280,7 +280,7 @@ class Controller
 	 *	@param		string|NULL		$fallback		String to return if no data is set by key
 	 *	@return		mixed
 	 */
-	protected function getData( string $key = NULL, string $fallback = NULL )
+	protected function getData( string $key = NULL, string $fallback = NULL ): mixed
 	{
 		return $this->view->getData( $key, $fallback );
 	}
@@ -313,14 +313,14 @@ class Controller
 	 *	Tries to find model class for short model key and returns instance.
 	 *	@access		protected
 	 *	@param		string		$key		Key for model class (eG. 'mailGroupMember' for 'Model_Mail_Group_Member')
-	 *	@return		object					Model instance
+	 *	@return		Model					Model instance
 	 *	@throws		RuntimeException		if no model class could be found for given short model key
 	 *	@throws		ReflectionException
 	 *	@todo		create model pool environment resource and apply to created shared single instances instead of new instances
 	 *	@todo		change \@return to CMF_Hydrogen_Model after CMF model refactoring
 	 *	@see		duplicate code with CMF_Hydrogen_Logic::getModel
 	 */
-	protected function getModel( string $key )
+	protected function getModel( string $key ): Model
 	{
 		if( preg_match( '/^[A-Z][A-Za-z0-9_]+$/', $key ) )
 			$className	= self::$prefixModel.$key;
@@ -358,20 +358,20 @@ class Controller
 	 *	@return		void
 	 *	@throws		JsonException
 	 */
-	protected function handleJsonResponse( $status, $data, ?int $httpStatusCode = NULL ): void
+	protected function handleJsonResponse(string|bool $status, mixed $data, ?int $httpStatusCode = NULL ): void
 	{
 		$type			= $status;
 		$httpStatusCode	= $httpStatusCode ?: 200;
-		if( in_array( $status, array( TRUE, 'data', 'success', 'succeeded' ), TRUE ) )
+		if( in_array( $status, [TRUE, 'data', 'success', 'succeeded'], TRUE ) )
 			$type	= "data";
-		else if( in_array( $status, array( FALSE, "error", "fail", "failed" ), TRUE ) )
+		else if( in_array( $status, [FALSE, 'error', 'fail', 'failed'], TRUE ) )
 			$type	= "error";
-		$response	= (object) array(
+		$response	= (object) [
 			'code'		=> $httpStatusCode,
 			'status'	=> $type,
 			'data'		=> $data,
 			'timestamp'	=> microtime( TRUE ),
-		);
+		];
 		$json	= json_encode( $response, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR );
 		if( headers_sent() ){
 			print( 'Headers already sent.' );
@@ -391,7 +391,7 @@ class Controller
 	 *	@return		void
 	 *	@throws		JsonException
 	 */
-	protected function handleJsonErrorResponse( $data, ?int $httpStatusCode = NULL ): void
+	protected function handleJsonErrorResponse( mixed $data, ?int $httpStatusCode = NULL ): void
 	{
 		$this->handleJsonResponse( 'error', $data, $httpStatusCode );
 	}
@@ -408,7 +408,7 @@ class Controller
 	 *	@return		void
 	 * @noinspection PhpDocMissingThrowsInspection
 	 */
-	protected function redirect( string $controller = 'index', string $action = "index", array $arguments = [], array $parameters = [] )
+	protected function redirect( string $controller = 'index', string $action = "index", array $arguments = [], array $parameters = [] ): void
 	{
 		/** @noinspection PhpUnhandledExceptionInspection */
 		Deprecation::getInstance()
@@ -440,7 +440,7 @@ class Controller
 	 *	@return		void
 	 *	@todo		check for better HTTP status
 	 */
-	protected function relocate( string $uri, ?int $status = NULL )
+	protected function relocate( string $uri, ?int $status = NULL ): void
 	{
 		$this->restart( $uri, FALSE, $status, TRUE );
 	}
@@ -449,7 +449,7 @@ class Controller
 	 *	Redirects by requesting a URI.
 	 *	Attention: This *WILL* effect the URL displayed in browser / need request clients (eG. cURL) to allow forwarding.
 	 *
-	 *	By default, redirect URIs are a request path within the current application, eg. "./[CONTROLLER]/[ACTION]"
+	 *	By default, redirect URIs are a request path within the current application, e.g. "./[CONTROLLER]/[ACTION]"
 	 *	ATTENTION: For browser compatibility local paths should start with "./"
 	 *
 	 *	If seconds parameter is set to TRUE, redirects to a path inside the current controller.
@@ -475,25 +475,25 @@ class Controller
 	 *	@todo		implement handling of FROM request parameter, see controller constants
 	 *	@todo		concept and implement anti-loop {@see http://dev.(ceusmedia.de)/cmKB/?MTI}
 	 */
-	protected function restart( ?string $uri = NULL, bool $withinModule = FALSE, ?int $status = NULL, bool $allowForeignHost = FALSE, int $modeFrom = 0 )
+	protected function restart( ?string $uri = NULL, bool $withinModule = FALSE, ?int $status = NULL, bool $allowForeignHost = FALSE, int $modeFrom = 0 ): void
 	{
 		$mode	= 'ext';
-		if( !preg_match( "/^http/", $uri ) ){														//  URI is not starting with HTTP scheme
+		if( !str_starts_with( $uri ?? '', 'http' ) ){														//  URI is not starting with HTTP scheme
 			$mode	= 'int';
 			if( $withinModule ){																	//  redirection is within module
 				$mode	= 'mod';
-				$controller	= $this->env->getRequest()->get( '__controller' );						//  get current controller
+				$controller	= $this->env->getRequest()->get( '__controller', '' );				//  get current controller
 				$controller	= $this->alias ?: $controller;							//
-				$uri		= $controller.( strlen( $uri ) ? '/'.$uri : '' );						//
+				$uri		= $controller.( strlen( $uri ?? '' ) ? '/'.$uri : '' );						//
 			}
 		}
 		if( $this->logRestarts )
-			error_log( vsprintf( '%s %s %s %s'."\n", array(
+			error_log( vsprintf( '%s %s %s %s'."\n", [
 				date( DateTimeInterface::ATOM ),
 				$status ?: 200,
 				$mode,
 				$uri
-			) ), 3, 'logs/restart.log' );
+			] ), 3, 'logs/restart.log' );
 		$this->env->restart( $uri, $status, $allowForeignHost, $modeFrom );
 	}
 
@@ -507,8 +507,7 @@ class Controller
 	 */
 	protected function setData( array $data, string $topic = '' ): self
 	{
-		if( $this->view )
-			$this->view->setData( $data, $topic );
+		$this->view?->setData($data, $topic);
 		return $this;
 	}
 
@@ -552,7 +551,7 @@ class Controller
 		$class		= self::$prefixView.$name;
 		$this->view	= new View( $this->env );
 		if( class_exists( $class ) ){
-			$object		= ObjectFactory::createObject( $class, array( &$this->env ) );
+			$object		= ObjectFactory::createObject( $class, [&$this->env] );
 			if( !$object instanceof View )
 				throw new RuntimeException( 'View class "'.$name.'" is not a Hydrogen view', 301 );
 			$this->view	= $object;

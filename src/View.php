@@ -85,6 +85,7 @@ class View
 	 *	@access		public
 	 *	@param		WebEnvironment		$env			Framework Resource Environment Object
 	 *	@return		void
+	 *	@throws		ReflectionException
 	 */
 	public function __construct( WebEnvironment $env )
 	{
@@ -228,6 +229,14 @@ class View
 		return file_exists( $uri );
 	}
 
+	/**
+	 *	@param		string		$controller
+	 *	@param		string		$action
+	 *	@param		array		$data
+	 *	@param		string		$extension
+	 *	@return		string
+	 *	@throws		ReflectionException
+	 */
 	public function loadContent( string $controller, string $action, array $data = [], string $extension = '.html' ): string
 	{
 		$fileKey	= 'html/'.$controller.'/'.$action.$extension;
@@ -235,7 +244,11 @@ class View
 	}
 
 	/**
-	 *	@todo	remove use of TemplateEngine (aka. UI_Template)
+	 *	@param		string			$fileKey
+	 *	@param		array			$data
+	 *	@param		string|NULL		$path
+	 *	@return		string
+	 *	@throws		ReflectionException
 	 */
 	public function loadContentFile( string $fileKey, array $data = [], ?string $path = NULL ): string
 	{
@@ -271,6 +284,7 @@ class View
 	 *	@param		string		$path		Path to files within locales, like "html/controller/action/"
 	 *	@param		array		$keys		List of file keys (without .html extension)
 	 *	@return		array		Map of collected file contents
+	 *	@throws		ReflectionException
 	 */
 	public function loadContentFiles( string $path, array $keys, array $data = [] ): array
 	{
@@ -295,6 +309,7 @@ class View
 	 *	@param		array		$data				Additional Array of View Data
 	 *	@param		boolean		$renderContent		Flag: inject content blocks of modules
 	 *	@return		string
+	 *	@throws		ReflectionException
 	 */
 	public function loadTemplate( string $controller, string $action, array $data = [], bool $renderContent = TRUE ): string
 	{
@@ -305,6 +320,13 @@ class View
 		return $this->loadTemplateFile( $fileKey, $data, $renderContent );
 	}
 
+	/**
+	 *	@param		string		$fileName
+	 *	@param		array		$data
+	 *	@param		bool		$renderContent
+	 *	@return		string
+	 *	@throws		ReflectionException
+	 */
 	public function loadTemplateFile( string $fileName, array $data = [], bool $renderContent = TRUE ): string
 	{
 		$filePath	= $this->getTemplateUriFromFile( $fileName );
@@ -342,6 +364,7 @@ class View
 	 *	@param		array		$keys		List of file keys (without .html extension)
 	 *	@param		string		$path		Path to files within locales, like "html/controller/action/"
 	 *	@return		array<string,string>	Prefixed map of collected file contents mapped by prefixed IDs
+	 *	@throws		ReflectionException
 	 */
 	public function populateTexts( array $keys, string $path, array $data = [], string $prefix = "text" ): array
 	{
@@ -392,7 +415,7 @@ class View
 	 *	@param		string|NULL		$topic		Locale file key, eg. test/my, default: current controller
 	 *	@return		array|object
 	 */
-	protected function getWords( ?string $section = NULL, ?string $topic = NULL )
+	protected function getWords( ?string $section = NULL, ?string $topic = NULL ): object|array
 	{
 		if( empty( $topic ) /*&& $this->env->getLanguage()->hasWords( $this->controller ) */)
 			$topic = $this->controller;
@@ -407,6 +430,7 @@ class View
 	 *	@param		string		$filePath		Template file path name with templates folder
 	 *	@param		array		$data			Additional template data, appended to assigned view data
 	 *	@return		string		Template content with applied data
+	 *	@throws		ReflectionException
 	 */
 	protected function realizeTemplate( string $filePath, array $data = [] ): string
 	{
@@ -432,8 +456,7 @@ class View
 			$this->env->getLog()->log( 'error', $message, $this );
 			if( !$this->env->getLog()->logException( $e, $this ) )
 				throw new RuntimeException( $message, 0, $e  );
-			else if( $this->env->getMessenger() )
-				$this->env->getMessenger()->noteFailure( $message );
+			$this->env->getMessenger()?->noteFailure( $message );
 		}
 		$buffer	= (string) ob_get_clean();
 		$buffer	= trim( preg_replace( '/^(<br( ?\/)?>)+/s', '', $buffer ) );			//  get standard output buffer
@@ -485,6 +508,12 @@ class View
 		return $this;
 	}
 
+	/**
+	 *	@param		string		$content
+	 *	@param		string		$dataType
+	 *	@return		string
+	 *	@throws		ReflectionException
+	 */
 	public function renderContent( string $content, string $dataType = "HTML" ): string
 	{
 		return static::renderContentStatic( $this->env, $this, $content, $dataType );
@@ -497,6 +526,7 @@ class View
 	 *	@param		string			$content		Already created content to apply hook to
 	 *	@param		string			$dataType
 	 *	@return		string
+	 *	@throws		ReflectionException
 	 */
 	public static function renderContentStatic( WebEnvironment $env, object $context, string $content, string $dataType = "HTML" ): string
 	{

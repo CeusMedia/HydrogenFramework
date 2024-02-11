@@ -1,4 +1,5 @@
-<?php /** @noinspection PhpUnused */
+<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
+/** @noinspection PhpUnused */
 
 /**
  *	Basic logic class. Can be extended and uses as business logic layer class.
@@ -103,6 +104,14 @@ class Logic
 	{
 	}
 
+	/**
+	 *	@param		string			$resource
+	 *	@param		string			$event
+	 *	@param		object|NULL		$context
+	 *	@param		array|NULL		$payload
+	 *	@return		bool|NULL
+	 *	@throws		ReflectionException
+	 */
 	protected function callHook( string $resource, string $event, ?object $context = NULL, array & $payload = NULL ): ?bool
 	{
 		$context	= $context ?: $this;

@@ -21,7 +21,7 @@ namespace CeusMedia\HydrogenFramework\View\Helper;
 
 class Diff
 {
-	static public function diff( array $old, array $new ): array
+	public static function diff( array $old, array $new ): array
 	{
 		$maxLen	= 0;
 		$oldMax	= 0;

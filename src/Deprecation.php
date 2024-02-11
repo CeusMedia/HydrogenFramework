@@ -11,7 +11,7 @@
 namespace CeusMedia\HydrogenFramework;
 
 use CeusMedia\Common\Deprecation as CommonDeprecation;
-use Exception;
+use CeusMedia\Common\Exception\Deprecation as DeprecationException;
 
 /**
  *	Indicator for deprecated methods.
@@ -61,13 +61,13 @@ class Deprecation extends CommonDeprecation
 
 	/**
 	 *	Show message as exception or deprecation error, depending on set versions and PHP version.
-	 *	Will throw an exception if set exception version reached detected library version.
+	 *	Will throw a deprecation exception if set exception version reached detected library version.
 	 *	Will throw a deprecation error if set error version reached detected library version using PHP 5.3+.
 	 *	Will throw a deprecation notice if set error version reached detected library version using PHP lower 5.3.
 	 *	@access		public
 	 *	@param		string		$message	Message to show
 	 *	@return		void
-	 *	@throws		Exception				if set exception version reached detected library version
+	 *	@throws		DeprecationException	if set exception version reached detected library version
 	 */
 	public function message( string $message ): void
 	{
@@ -77,16 +77,17 @@ class Deprecation extends CommonDeprecation
 			$message .= ', invoked in '.$caller['file'].' on line '.$caller['line'];
 		if( $this->exceptionVersion )
 			if( version_compare( $this->version, $this->exceptionVersion ) >= 0 )
-				throw new Exception( 'Deprecated: '.$message );
+				throw new DeprecationException( $message );
 		if( version_compare( $this->version, $this->errorVersion ) >= 0 ){
 			self::notify( $message );
 		}
 	}
 
 	/**
+	 *	@param		string		$message
 	 *	@return		void
 	 */
-	public static function notify( string $message )
+	public static function notify( string $message ): void
 	{
 		trigger_error( $message.', triggered', E_USER_DEPRECATED );
 	}

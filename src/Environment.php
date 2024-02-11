@@ -1,4 +1,5 @@
-<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
+<?php /** @noinspection PhpUnused */
+/** @noinspection PhpMultipleClassDeclarationsInspection */
 
 /**
  *	General bootstrap of Hydrogen environment.
@@ -56,6 +57,7 @@ use Exception;
 use InvalidArgumentException;
 use RangeException;
 use ReflectionException;
+use ReturnTypeWillChange;
 use RuntimeException;
 
 /**
@@ -227,9 +229,9 @@ class Environment implements ArrayAccess
 	 *	@param		boolean		$keepAppAlive			Flag: do not end execution right now if turned on
 	 *	@return		void
 	 */
-	public function close( array $additionalResources = [], bool $keepAppAlive = FALSE )
+	public function close( array $additionalResources = [], bool $keepAppAlive = FALSE ): void
 	{
-		$resources	= array(																		//  list of resource handler member names, namely of ...
+		$resources	= [																				//  list of resource handler member names, namely of ...
 			'config',																				//  ... base application configuration handler
 			'runtime',																				//  ... internal runtime handler
 			'cache',																				//  ... cache handler
@@ -237,7 +239,7 @@ class Environment implements ArrayAccess
 			'logic',																				//  ... logic handler
 			'modules',																				//  ... module handler
 			'acl',																					//  ... cache handler
-		);
+		];
 		$resources	= array_merge( $resources, array_values( $additionalResources ) );
 		foreach( array_reverse( $resources ) as $resource ){										//  iterate resources backwards
 			if( isset( $this->$resource ) ){														//  resource is set
@@ -253,11 +255,11 @@ class Environment implements ArrayAccess
 	/**
 	 *	@param		string		$key
 	 *	@param		bool		$strict
-	 *	@return		mixed|null
+	 *	@return		object|NULL
 	 *	@throws		DomainException		if no resource is registered by given key
 	 * @throws		Exception			if key is 'clock', since replaced by 'runtime'
 	 */
-	public function get( string $key, bool $strict = TRUE )
+	public function get( string $key, bool $strict = TRUE ): object|NULL
 	{
 		if( isset( $this->$key ) )
 			return $this->$key;
@@ -389,7 +391,7 @@ class Environment implements ArrayAccess
 	/**
 	 *	Returns Messenger Object.
 	 *	@access		public
-	 *	@return		MessengerResource
+	 *	@return		MessengerResource|NULL
 	 */
 	public function getMessenger(): ?MessengerResource
 	{
@@ -435,9 +437,11 @@ class Environment implements ArrayAccess
 	 *	Returns PHP configuration and version management.
 	 *	@access		public
 	 *	@return		PhpResource
+	 *	@noinspection	PhpDocMissingThrowsInspection
 	 */
 	public function getPhp(): PhpResource
 	{
+		/** @noinspection PhpUnhandledExceptionInspection */
 		return $this->get( 'php' );
 	}
 
@@ -446,8 +450,13 @@ class Environment implements ArrayAccess
 		return $this->request;
 	}
 
+	/**
+	 *	@return		RuntimeResource
+	 *	@noinspection	PhpDocMissingThrowsInspection
+	 */
 	public function getRuntime(): RuntimeResource
 	{
+		/** @noinspection PhpUnhandledExceptionInspection */
 		return $this->get( 'runtime' );
 	}
 
@@ -459,7 +468,7 @@ class Environment implements ArrayAccess
 	/**
 	 *	Indicates whether a resource is an available object by its access method key.
 	 *	@access		public
-	 *	@param		string		$key		Resource access method key, ie. session, language, request
+	 *	@param		string		$key		Resource access method key, i.e. session, language, request
 	 *	@return		boolean
 	 */
 	public function has( string $key ): bool
@@ -525,7 +534,7 @@ class Environment implements ArrayAccess
 	 *	@access		protected
 	 *	@return		void
 	 */
-	protected function __onInit()
+	protected function __onInit(): void
 	{
 		if( $this->hasModules() )																	//  module support and modules available
 			$this->modules->callHook( 'Env', 'init', $this );										//  call related module event hooks
@@ -567,7 +576,6 @@ class Environment implements ArrayAccess
 	 */
 	protected function initAcl(): self
 	{
-		$config		= $this->getConfig();
 		$type		= AllPublicAclResource::class;
 		if( $this->hasModules() ){																	//  module support and modules available
 			$payload	= ['className' => NULL];
@@ -608,6 +616,11 @@ class Environment implements ArrayAccess
 		return $this;
 	}
 
+	/**
+	 *	@return		self
+	 *	@throws		ReflectionException
+	 *	@throws		\Psr\SimpleCache\InvalidArgumentException
+	 */
 	protected function initCache(): self
 	{
 		$this->cache	= SimpleCacheFactory::createStorage('Noop' );
@@ -653,7 +666,7 @@ class Environment implements ArrayAccess
 			throw new EnvironmentException( $message );												//  quit with exception
 		}
 		/** @var array $data */
-		$data	= parse_ini_file( $configFile, FALSE );										//  parse configuration file (without section support)
+		$data	= parse_ini_file( $configFile );													//  parse configuration file (without section support)
 		ksort( $data );
 		$this->config	= new Dictionary( $data );													//  create dictionary from array
 
@@ -678,6 +691,7 @@ class Environment implements ArrayAccess
 	 *	@access		protected
 	 *	@return		self
 	 *	@todo		implement database connection pool/manager
+	 *	@throws		ReflectionException
 	 */
 	protected function initDatabase(): self
 	{
@@ -808,27 +822,32 @@ class Environment implements ArrayAccess
 		return $this;
 	}
 
-    #[\ReturnTypeWillChange]
+    #[ReturnTypeWillChange]
 	public function offsetExists( $offset ): bool
 	{
 //		return property_exists( $this, $key );														//  PHP 5.3
 		return isset( $this->$offset );																//  PHP 5.2
 	}
 
-    #[\ReturnTypeWillChange]
-    public function offsetGet( $offset )
+	/**
+	 *	@param		string		$offset
+	 *	@return		object|NULL
+	 *	@throws		Exception
+	 */
+    #[ReturnTypeWillChange]
+    public function offsetGet( $offset ): object|NULL
 	{
 		return $this->get( $offset );
 	}
 
-    #[\ReturnTypeWillChange]
-    public function offsetSet( $offset, $value )
+    #[ReturnTypeWillChange]
+    public function offsetSet( $offset, $value ): void
 	{
 		$this->set( $offset, $value );
 	}
 
-    #[\ReturnTypeWillChange]
-    public function offsetUnset( $offset )
+    #[ReturnTypeWillChange]
+    public function offsetUnset( $offset ): void
 	{
 		$this->remove( $offset );
 	}

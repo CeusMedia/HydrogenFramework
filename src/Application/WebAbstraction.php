@@ -29,7 +29,6 @@
 namespace CeusMedia\HydrogenFramework\Application;
 
 use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
-use CeusMedia\HydrogenFramework\Application\Abstraction as ApplicationAbstraction;
 use CeusMedia\HydrogenFramework\ApplicationInterface;
 use CeusMedia\HydrogenFramework\Environment;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
@@ -93,7 +92,7 @@ abstract class WebAbstraction implements ApplicationInterface
 	 *	@access		protected
 	 *	@return		void
 	 */
-	protected function checkNeededModules()
+	protected function checkNeededModules(): void
 	{
 		$modulesGot	= array_keys( $this->env->getModules()->getAll() );								//  get installed modules
 		$missing	= array_diff( static::$modulesNeeded, $modulesGot );							//  find missing modules
@@ -103,6 +102,10 @@ abstract class WebAbstraction implements ApplicationInterface
 		}
 	}
 
+	/**
+	 *	@return		void
+	 *	@throws		ReflectionException
+	 */
 	protected function logOnComplete(): void
 	{
 		$captain	= $this->env->getCaptain();
@@ -122,7 +125,7 @@ abstract class WebAbstraction implements ApplicationInterface
 	 *	@param		array		$modules		List of module IDs
 	 *	@return		void
 	 */
-	protected function reportMissingModules( array $modules )
+	protected function reportMissingModules( array $modules ): void
 	{
 		$config	= $this->env->getConfig();
 		if( !$config->get( 'app.setup.url' ) )
@@ -160,6 +163,7 @@ abstract class WebAbstraction implements ApplicationInterface
 	 *	@access		protected
 	 *	@param		string		$templateFile		Master template file, default: master.php
 	 *	@return		string
+	 *	@throws		ReflectionException
 	 */
 	protected function view( string $templateFile = "master.php" ): string
 	{

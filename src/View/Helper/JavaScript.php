@@ -1,4 +1,5 @@
-<?php /** @noinspection PhpUnused */
+<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
+/** @noinspection PhpUnused */
 
 /**
  *	Helper to collect and combine JavaScripts.
@@ -341,7 +342,7 @@ class JavaScript
 			if( $this->revision )
 				$contents[]	= "/* @revision ".$this->revision." */";
 			foreach( $this->getPlainUrlList() as $url ){
-				if( preg_match( "/^http/", $url ) )
+				if( str_starts_with( $url, 'http' ) )
 					$content	= NetReader::readUrl( $url );
 				else
 					$content	= FileReader::load( $url );

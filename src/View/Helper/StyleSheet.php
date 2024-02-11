@@ -1,4 +1,5 @@
-<?php /** @noinspection PhpUnused */
+<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
+/** @noinspection PhpUnused */
 
 /**
  *	Helper to collect and combine StyleSheets.
@@ -103,15 +104,16 @@ class StyleSheet
 	/**
 	 *	Removes all combined styles in file cache.
 	 *	@access		public
-	 *	@return		void
+	 *	@return		self
 	 */
-	public function clearCache()
+	public function clearCache(): self
 	{
 		$prefix = preg_replace( "/^([a-z0-9]+)/", "\\1", $this->prefix );
 		$index	= new RegexFileFilter( $this->pathCache, '/^'.$prefix.'\w+\.css$/' );
 		foreach( $index as $file ){
 			unlink( $file->getPathname() );
 		}
+		return $this;
 	}
 
 	/**
@@ -295,7 +297,7 @@ class StyleSheet
 			$contents[]	= "/* @revision ".$this->revision." */\n";									//  add revision header to content list
 
 		foreach( $this->getUrlList() as $url ){														//  iterate collected URLs
-			if( preg_match( "/^http/", $url->url ) ){												//  CSS resource is global (using HTTP)
+			if( str_starts_with( $url->url, 'http' ) ){												//  CSS resource is global (using HTTP)
 				$contents[]	= NetReader::readUrl( $url->url );										//  read global CSS content and append to content list
 				continue;																			//  skip to next without relocation etc.
 			}

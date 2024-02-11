@@ -104,11 +104,12 @@ abstract class Abstraction implements Helper
 	 *	@return		void
 	 *	@todo 		remove after helper interface is updated
 	 */
-	public function setEnv( Environment $env )
+	public function setEnv( Environment $env ): self
 	{
 		if( $this->needsEnv ){
 			$this->env	= $env;
 			$this->__onSetEnv();
 		}
+		return $this;
 	}
 }

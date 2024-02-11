@@ -31,8 +31,7 @@ use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
 use CeusMedia\HydrogenFramework\ApplicationInterface;
 use CeusMedia\HydrogenFramework\Environment;
 use CeusMedia\HydrogenFramework\Environment\Console as ConsoleEnvironment;
-use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
-use RuntimeException;
+use ReflectionException;
 
 /**
  *	Application class for a console program.
@@ -54,6 +53,10 @@ abstract class ConsoleAbstraction implements ApplicationInterface
 
 	public static array $modulesNeeded					= [];
 
+	/**
+	 *	@param		Environment|null $env
+	 *	@throws		ReflectionException
+	 */
 	public function __construct( ?Environment $env = NULL )
 	{
 		if( NULL === $env )
@@ -82,7 +85,7 @@ abstract class ConsoleAbstraction implements ApplicationInterface
 	 *	@access		protected
 	 *	@return		void
 	 */
-	protected function checkNeededModules()
+	protected function checkNeededModules(): void
 	{
 		$modulesGot	= array_keys( $this->env->getModules()->getAll() );								//  get installed modules
 		$missing	= array_diff( static::$modulesNeeded, $modulesGot );							//  find missing modules
@@ -99,7 +102,7 @@ abstract class ConsoleAbstraction implements ApplicationInterface
 	 *	@param		array		$modules		List of module IDs
 	 *	@return		void
 	 */
-	protected function reportMissingModules( array $modules )
+	protected function reportMissingModules( array $modules ): void
 	{
 		print( 'Missing modules: '.join( ', ', $modules ) );
 	}

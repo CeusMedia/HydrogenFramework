@@ -1,4 +1,5 @@
-<?php /** @noinspection PhpUnused */
+<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
+/** @noinspection PhpUnused */
 /** @noinspection PhpComposerExtensionStubsInspection */
 
 /**
@@ -14,6 +15,7 @@ use CeusMedia\Common\Net\HTTP\Response\Sender as HttpResponseSender;
 use CeusMedia\HydrogenFramework\Environment as Environment;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 use Exception;
+use JsonException;
 use Throwable;
 
 /**
@@ -42,6 +44,7 @@ abstract class Ajax
 	 *	@access		public
 	 *	@param		WebEnvironment		$env		Environment object
 	 *	@return		void
+	 *	@throws		JsonException
 	 */
 	public function __construct( WebEnvironment $env )
 	{
@@ -88,8 +91,9 @@ abstract class Ajax
 	 *	@param		string|NULL		$mimeType		MIME type to send (default: defaultMimeType)
 	 *	@return		integer			Number of sent bytes, if exitAfterwards is disabled (default: no)
 	 *	@todo		support other serializations, too
+	 *	@throws		JsonException
 	 */
-	protected function respondData( $data, int $statusCode = 200, ?string $mimeType = NULL ): int
+	protected function respondData( mixed $data, int $statusCode = 200, ?string $mimeType = NULL ): int
 	{
 		$response	= [
 			'status'	=> 'data',
@@ -111,8 +115,9 @@ abstract class Ajax
 	 *	@param		integer			$statusCode		HTTP status code of response
 	 *	@param		string|NULL		$mimeType		MIME type to send (default: defaultMimeType)
 	 *	@return		integer			Number of sent bytes, if exitAfterwards is disabled (default: no)
+	 *	@throws		JsonException
 	 */
-	protected function respondError( $code, ?string $message = NULL, int $statusCode = 412, ?string $mimeType = NULL ): int
+	protected function respondError( string|int $code, ?string $message = NULL, int $statusCode = 412, ?string $mimeType = NULL ): int
 	{
 		$response	= [
 			'status'	=> 'error',
@@ -128,12 +133,13 @@ abstract class Ajax
 
 	/**
 	 *	Sends caught exception.
-	 *	Exits afterwards, if enabled (default: yes).
+	 *	Exits afterward, if enabled (default: yes).
 	 *	@access		protected
 	 *	@param		Throwable		$exception		Caught exception
 	 *	@param		integer			$statusCode		HTTP status code of response
 	 *	@param		string|NULL		$mimeType		MIME type to send (default: defaultMimeType)
 	 *	@return		integer			Number of sent bytes, if exitAfterwards is disabled (default: no)
+	 *	@throws		JsonException
 	 */
 	protected function respondException( Throwable $exception, int $statusCode = 500, ?string $mimeType = NULL ): int
 	{
@@ -153,7 +159,7 @@ abstract class Ajax
 
 	/**
 	 *	Sends prepared response string.
-	 *	Exits afterwards, if enabled (default: yes).
+	 *	Exits afterward, if enabled (default: yes).
 	 *	@access		protected
 	 *	@param		string			$content		Stringified/serialized content to send
 	 *	@param		integer|NULL	$statusCode		HTTP status code of response
