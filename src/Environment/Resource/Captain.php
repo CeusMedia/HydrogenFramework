@@ -255,11 +255,10 @@ class Captain
 
 					$stdout		= (string) ob_get_clean();
 					$this->handleStdoutOfResourceEventHookCall( $stdout, $resource, $event, $module );
-				} catch (Exception $e) {
+				} catch( Exception $e ){
 					$this->handleExceptionOfResourceEventHookCall( $e, $resource, $event, $module );
-					if ($this->env->has('messenger')) {
-						/** @noinspection PhpUnhandledExceptionInspection */
-						$this->env->get('messenger')->noteFailure('Call on event ' . $event . '@' . $resource . ' hooked by module ' . $module->id . ' failed: ' . $e->getMessage());
+					if( $this->env->has( 'messenger' ) ){
+						$this->env->getMessenger()->noteFailure('Call on event ' . $event . '@' . $resource . ' hooked by module ' . $module->id . ' failed: ' . $e->getMessage());
 						$this->env->getLog()->logException($e);
 					} else
 						throw new RuntimeException('Hook ' . $module->id . '::' . $resource . '@' . $event . ' failed: ' . $e->getMessage(), 0, $e);
@@ -292,7 +291,7 @@ class Captain
 		if( !$this->env->has( 'messenger' ) )
 			throw new RuntimeException( $message, 0, $e );
 		/** @noinspection PhpUnhandledExceptionInspection */
-		$this->env->get( 'messenger' )->noteFailure( $message );
+		$this->env->getMessenger()->noteFailure( $message );
 	}
 
 	/**
@@ -317,8 +316,7 @@ class Captain
 		] );
 		if( !$this->env->has( 'messenger' ) )
 			throw new RuntimeException( $stdout );
-		/** @noinspection PhpUnhandledExceptionInspection */
-		$this->env->get( 'messenger' )->noteNotice( vsprintf(
+		$this->env->getMessenger()->noteNotice( vsprintf(
 			'Call on event %2$s@%1$s hooked by module %3$s reported: <xmp>%4$s</xmp>',
 			[$resource, $event, $module->id, $stdout]
 		) );

@@ -84,6 +84,24 @@ class Console extends Environment
 		}
 	}
 
+	/**
+	 *	Tries to unbind registered environment handler objects.
+	 *	@access		public
+	 *	@param		array		$additionalResources	List of resource member names to be unbound, too
+	 *	@param		boolean		$keepAppAlive			Flag: do not end execution right now if turned on
+	 *	@return		void
+	 */
+	public function close( array $additionalResources = [], bool $keepAppAlive = FALSE ): void
+	{
+		parent::close( array_merge( [																//  delegate closing with these resources, too
+			'request',																				//  CLI request handler
+//			'response',																				//  CLI response handler
+			'session',																				//  CLI session handler
+			'messenger',																			//  application message handler
+			'language',																				//  language handler
+		], array_values( $additionalResources ) ), $keepAppAlive );									//  add additional resources and carry exit flag
+	}
+
 	public function getLanguage(): LanguageResource
 	{
 		return $this->language;

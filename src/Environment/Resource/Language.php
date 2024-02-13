@@ -168,7 +168,7 @@ class Language
 		if( $strict )
 			throw new RuntimeException( $message, 221 );
 		if( $force && $this->env->has( 'messenger' ) )
-			$this->env->get( 'messenger' )->noteFailure( $message );
+			$this->env->getMessenger()->noteFailure( $message );
 		return [];
 	}
 
@@ -196,7 +196,7 @@ class Language
 		if( $strict )
 			throw new RuntimeException( $message, 221 );
 		if( $force && $this->env->has( 'messenger' ) )
-			$this->env->get( 'messenger' )->noteFailure( $message );
+			$this->env->getMessenger()->noteFailure( $message );
 		return [];
 	}
 

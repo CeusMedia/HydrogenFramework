@@ -18,9 +18,9 @@ abstract class Abstraction
 	/**
 	 *	@param		string		$fileName
 	 *	@param		mixed		$content
-	 *	@return		int
+	 *	@return		int|FALSE
 	 */
-	abstract public function create( string $fileName, $content ): int;
+	abstract public function create( string $fileName, mixed $content ): int|FALSE;
 
 	/**
 	 *	@param		string		$fileName
@@ -43,7 +43,7 @@ abstract class Abstraction
 	/**
 	 *	@param		string		$fileName
 	 *	@param		mixed		$content
-	 *	@return		int
+	 *	@return		int|FALSE
 	 */
-	abstract public function update( string $fileName, $content ): int;
+	abstract public function update( string $fileName, mixed $content ): int|FALSE;
 }

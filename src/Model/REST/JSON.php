@@ -72,7 +72,8 @@ abstract class JSON extends Abstraction
 		$this->basePath	= static::$resourceRouteBasePath;
 		if( static::$tokenSessionKey ){
 			$token	= $this->env->getSession()->get( static::$tokenSessionKey );
-			$this->client->setAuthToken( $token );
+			if( method_exists( $this->client, 'setAuthToken' ) )
+				$this->client->setAuthToken( $token );
 		}
 	}
 }

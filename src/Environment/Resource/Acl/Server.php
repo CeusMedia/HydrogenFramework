@@ -54,6 +54,7 @@ class Server extends Abstraction
 		if( $this->hasNoAccess( $roleId ) )
 			return [];
 		if( !isset( $this->rights[$roleId] ) ) {
+			/** @phpstan-ignore-next-line */
 			$rights	= $this->env->get( 'server' )->getData( 'role', 'getRights', array( $roleId ) );
 			$this->rights[$roleId]	= [];
 			foreach( $rights as $right ){
@@ -93,6 +94,7 @@ class Server extends Abstraction
 		if( $this->hasNoAccess( $roleId ) )
 			return -2;
 		$data	= array( 'controller' => $controller, 'action' => $action );
+		/** @phpstan-ignore-next-line */
 		return $this->env->get( 'server' )->postData( 'role', 'setRight', array( $roleId ), $data );
 	}
 
@@ -104,9 +106,10 @@ class Server extends Abstraction
 	 *	@param		string		$roleId			Role ID
 	 *	@return		array|object
 	 */
-	protected function getRole( string $roleId )
+	protected function getRole( string $roleId ): object|array
 	{
 		if( !$this->roles )
+			/** @phpstan-ignore-next-line */
 			foreach( $this->env->get( 'server' )->getData( 'role', 'index' ) as $role )
 				$this->roles[$role->roleId]	= $role;
 		return $this->roles[$roleId];

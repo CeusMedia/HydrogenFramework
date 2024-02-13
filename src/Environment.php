@@ -231,7 +231,7 @@ class Environment implements ArrayAccess
 	 */
 	public function close( array $additionalResources = [], bool $keepAppAlive = FALSE ): void
 	{
-		$resources	= [																				//  list of resource handler member names, namely of ...
+		$coreResources	= [																				//  list of resource handler member names, namely of ...
 			'config',																				//  ... base application configuration handler
 			'runtime',																				//  ... internal runtime handler
 			'cache',																				//  ... cache handler
@@ -240,7 +240,7 @@ class Environment implements ArrayAccess
 			'modules',																				//  ... module handler
 			'acl',																					//  ... cache handler
 		];
-		$resources	= array_merge( $resources, array_values( $additionalResources ) );
+		$resources	= array_merge( $coreResources, array_values( $additionalResources ) );			//  extend resources by additional ones
 		foreach( array_reverse( $resources ) as $resource ){										//  iterate resources backwards
 			if( isset( $this->$resource ) ){														//  resource is set
 				if( isset( $this->runtime ) )														//  if runtime resource is still set ...
@@ -442,7 +442,9 @@ class Environment implements ArrayAccess
 	public function getPhp(): PhpResource
 	{
 		/** @noinspection PhpUnhandledExceptionInspection */
-		return $this->get( 'php' );
+		/** @var PhpResource $resource */
+		$resource	= $this->get( 'php' );
+		return $resource;
 	}
 
 	public function getRequest(): Dictionary
@@ -457,7 +459,9 @@ class Environment implements ArrayAccess
 	public function getRuntime(): RuntimeResource
 	{
 		/** @noinspection PhpUnhandledExceptionInspection */
-		return $this->get( 'runtime' );
+		/** @var RuntimeResource $resource */
+		$resource	= $this->get( 'runtime' );
+		return $resource;
 	}
 
 	public function getSession(): Dictionary

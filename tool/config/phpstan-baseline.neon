@@ -1,2 +1,6 @@
 parameters:
 	ignoreErrors:
+		-
+			message: "#^Parameter \\#1 \\$callback of function set_error_handler expects \\(callable\\(int, string, string, int\\)\\: bool\\)\\|null, array\\{\\$this\\(CeusMedia\\\\HydrogenFramework\\\\Run\\\\Web\\), 'handleErrorAsExcept…'\\} given\\.$#"
+			count: 1
+			path: ../../src/Run/Web.php

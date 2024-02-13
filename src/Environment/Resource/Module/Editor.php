@@ -422,9 +422,9 @@ class Editor
 	/**
 	 *	@param		string				$moduleId
 	 *	@param		SimpleXMLElement	$xmlElement
-	 *	@return		int
+	 *	@return		int|FALSE
 	 */
-	protected function saveModuleXml( string $moduleId, SimpleXMLElement $xmlElement ): int
+	protected function saveModuleXml( string $moduleId, SimpleXMLElement $xmlElement ): int|FALSE
 	{
 		$moduleFile	= $this->path.$moduleId.'.xml';
 		if( !file_exists( $moduleFile ) )
@@ -432,6 +432,7 @@ class Editor
 		/** @var string $xml */
 		$xml	= $xmlElement->asXML();
 		$xml	= XmlFormatter::format( $xml, TRUE );
-		return FileWriter::save( $moduleFile, $xml );
+		$bytes	= FileWriter::save( $moduleFile, $xml );
+		return is_int( $bytes ) ? $bytes : FALSE;
 	}
 }

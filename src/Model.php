@@ -652,9 +652,13 @@ class Model
 	protected function setEnv( Environment $env ): self
 	{
 		$this->env		= $env;
-		if( !$env->getDatabase() )
+
+		$database		= $env->getDatabase();
+		if( NULL === $database )
 			throw new RuntimeException( 'Database resource needed for '.get_class( $this ) );
-		$this->prefix	= $env->getDatabase()->getPrefix();
+		if( method_exists( $database, 'getPrefix' ) )
+			$this->prefix	= $database->getPrefix();
+
 		return $this;
 	}
 }

@@ -1,4 +1,5 @@
-<?php
+<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
+
 namespace CeusMedia\HydrogenFramework\Model\File;
 
 use CeusMedia\Common\ADT\JSON\Pretty as JsonPretty;
@@ -10,12 +11,13 @@ class JSON extends Abstraction
 	/**
 	 *	@param		string		$fileName
 	 *	@param		mixed		$content
-	 *	@return		int
+	 *	@return		int|FALSE
 	 */
-	public function create( string $fileName, $content ): int
+	public function create( string $fileName, mixed $content ): int|FALSE
 	{
 		$json	= json_encode( $content, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR );
-		return FileWriter::save( $this->path.$fileName, $json );
+		$bytes	= FileWriter::save( $this->path.$fileName, $json );
+		return is_int( $bytes ) ? $bytes : FALSE;
 	}
 
 	/**
@@ -48,12 +50,13 @@ class JSON extends Abstraction
 	/**
 	 *	@param		string		$fileName
 	 *	@param		mixed		$content
-	 *	@return		int
+	 *	@return		int|FALSE
 	 */
-	public function update( string $fileName, $content ): int
+	public function update( string $fileName, mixed $content ): int|FALSE
 	{
 		$current	= $this->read( $fileName );
 		$json		= json_encode( $content, JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR );
-		return FileWriter::save( $this->path.$fileName, $json );
+		$bytes		= FileWriter::save( $this->path.$fileName, $json );
+		return is_int( $bytes ) ? $bytes : FALSE;
 	}
 }

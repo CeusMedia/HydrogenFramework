@@ -1,4 +1,5 @@
-<?php
+<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
+
 /**
  *	Setup for Resource Environment for Hydrogen Applications.
  *
@@ -72,7 +73,7 @@ class Remote extends Environment
 		$this->path		= $options['pathApp'] ?? getCwd() . '/';
 		$this->uri		= $options['pathApp'] ?? getCwd() . '/';											//
 
-		Loader::registerNew( 'php', NULL, $this->path.'classes/' );								//  enable autoloader for remote app classes
+		Loader::create( 'php', $this->path.'classes/' )->register();					//  enable autoloader for remote app classes
 
 		self::$configFile	= $this->path."/config/config.ini";
 
@@ -88,13 +89,18 @@ class Remote extends Environment
 	/**
 	 *	Close remote environment and keep calling client application alive.
 	 *	@access		public
-	 *	@param		array		$additionalResources	Not used in remote environment
-	 *	@param		boolean		$keepAppAlive			Not used in remote environment
+	 *	@param		array		$additionalResources	List of resource member names to be unbound, too
+	 *	@param		boolean		$keepAppAlive			Flag: do not end execution right now if turned on
 	 *	@return		void
 	 */
-	public function close( array $additionalResources = [], bool $keepAppAlive = FALSE )
+	public function close( array $additionalResources = [], bool $keepAppAlive = FALSE ): void
 	{
-		parent::close( $additionalResources );															//  unbind bound resources but keep application alive
+		parent::close( array_merge( [																//  delegate closing with these resources, too
+			'request',																				//  remote request handler
+			'session',																				//  remote session handler
+			'messenger',																			//  application message handler
+			'language',																				//  language handler
+		], array_values( $additionalResources ) ), $keepAppAlive );									//  add additional resources and carry exit flag
 	}
 
 	public function getMessenger(): BaseMessenger

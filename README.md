@@ -11,9 +11,9 @@
 [![Commit date](https://img.shields.io/github/last-commit/CeusMedia/HydrogenFramework.svg?style=flat-square)](https://packagist.org/packages/ceus-media/hydrogen-framework)
 
 This application framework for PHP is a simple yet powerful engine to
-develope custom web applications in MVC style.
+develop custom web applications in MVC style.
 
-A created frame (=empty application with framework and depencies) can be filled with life
+A created frame (=empty application with framework and dependencies) can be filled with life
 by installing modules from existing module sources or create you own module.
 
 

@@ -101,7 +101,7 @@ abstract class Abstraction implements Helper
 	 *	Set environment if needed within this helper.
 	 *	@access		public
 	 *	@param		Environment	$env			Environment Object
-	 *	@return		void
+	 *	@return		self
 	 *	@todo 		remove after helper interface is updated
 	 */
 	public function setEnv( Environment $env ): self
