@@ -55,7 +55,7 @@ class Model
 	protected Environment $env;
 
 	/**	@var	string					$name			Name of Database Table without Prefix */
-	protected string $name				= "";
+	protected string $name				= '';
 
 	/**	@var	array					$columns		List of Database Table Columns */
 	protected array $columns			= [];
@@ -64,13 +64,13 @@ class Model
  	protected array $indices			= [];
 
 	/**	@var	string					$primaryKey		Primary Key of Database Table */
-	protected string $primaryKey		= "";
+	protected string $primaryKey		= '';
 
 	/**	@var	DatabaseTableWriter		$table			Database Table Writer Object for reading from and writing to Database Table */
 	protected DatabaseTableWriter $table;
 
 	/**	@var	string					$prefix			Database Table Prefix */
- 	protected string $prefix;
+ 	protected string $prefix			= '';
 
 	/**	@var    SimpleCacheInterface|NULL    $cache			Model data cache */
 	protected ?SimpleCacheInterface     $cache          = NULL;
@@ -215,10 +215,10 @@ class Model
 	 *	@access		public
 	 *	@param		string			$id				ID to focus on
 	 *	@param		string|NULL		$field			Single Field to return
-	 *	@return		mixed
-     *  @throws	SimpleCacheInvalidArgumentException
+	 *	@return		object|array|string|NULL		Structure depending on fetch type, string if field selected, NULL if field selected and no entries
+     *  @throws		SimpleCacheInvalidArgumentException
 	 */
-	public function get( string $id, ?string $field = NULL )
+	public function get( string $id, ?string $field = NULL ): object|array|string|NULL
 	{
 		if( NULL !== $field )
 			$field	= $this->checkField( $field );
@@ -242,13 +242,13 @@ class Model
 	 *	@param		array			$limits			Map of Limits to include in SQL Query
 	 *	@param		array			$fields			Map of Columns to include in SQL Query
 	 *	@param		array			$groupings		List of columns to group by
-	 *	@param		array			$havings		List of conditions to apply after grouping
+	 *	@param		array			$having			List of conditions to apply after grouping
 	 *	@param		boolean			$strict			Flag: throw exception if result is empty and fields are selected (default: FALSE)
 	 *	@return		array
 	 */
-	public function getAll( array $conditions = [], array $orders = [], array $limits = [], array $fields = [], array $groupings = [], array $havings = [], bool $strict = FALSE ): array
+	public function getAll( array $conditions = [], array $orders = [], array $limits = [], array $fields = [], array $groupings = [], array $having = [], bool $strict = FALSE ): array
 	{
-		$data	= $this->table->find( $fields, $conditions, $orders, $limits, $groupings, $havings );
+		$data	= $this->table->find( $fields, $conditions, $orders, $limits, $groupings, $having );
 		if( $fields )
 			foreach( $data as $nr => $set )
 				$data[$nr]	= $this->getFieldsFromResult( $set, $fields, $strict );
@@ -315,7 +315,7 @@ class Model
 	 *	@todo		change argument order: move fields to end
 	 *	@throws		InvalidArgumentException			If given fields list is neither a list nor a string
 	 */
-	public function getByIndex( string $key, $value, array $orders = [], array $fields = [], bool $strict = FALSE )
+	public function getByIndex( string $key, $value, array $orders = [], array $fields = [], bool $strict = FALSE ): object|array|string|NULL
 	{
 		foreach( $fields as $field )
 			$this->checkField( $field );
@@ -336,7 +336,7 @@ class Model
 	 *	@throws		InvalidArgumentException			If given fields list is neither a list nor a string
 	 *	@todo  		change default value of argument 'strict' to TRUE
 	 */
-	public function getByIndices( array $indices, array $orders = [], array $fields = [], bool $strict = FALSE )
+	public function getByIndices( array $indices, array $orders = [], array $fields = [], bool $strict = FALSE ): object|array|string|NULL
 	{
 		foreach( $fields as $field )
 			$this->checkField( $field );
@@ -509,7 +509,7 @@ class Model
 	 *	@return		void
 	 *	@see		http://dev.mysql.com/doc/refman/4.1/en/truncate.html
 	 */
-	public function truncate()
+	public function truncate(): void
 	{
 		$this->table->truncate();
 	}
@@ -524,11 +524,11 @@ class Model
 	 *	@access		protected
 	 *	@param		string				$field		Table Column to check for existence
 	 *	@param		boolean				$strict		Strict mode (default): throw exception instead of returning FALSE or NULL
-	 *	@return		string|FALSE|NULL	Trimmed Field name if found, otherwise NULL if not mandatory, otherwise NULL or exception in strict mode
+	 *	@return		string|FALSE					Trimmed field name if found, otherwise FALSE or exception in strict mode
 	 *	@throws		InvalidArgumentException		if field is empty (in strict mode, only)
 	 *	@throws		InvalidArgumentException		if field is not a valid column (in strict mode, only)
 	 */
-	protected function checkField( string $field, bool $strict = TRUE )
+	protected function checkField( string $field, bool $strict = TRUE ): string|FALSE
 	{
 		$field	= trim( $field );
 		if( 0 === strlen( $field ) )
@@ -548,10 +548,10 @@ class Model
 	 *	@access		protected
 	 *	@param		array 			$indices		Map of Index Keys and Values
 	 *	@param		boolean			$strict			Strict mode (default): throw exception instead of returning FALSE
-	 *	@return		array|boolean	Map if valid, FALSE otherwise or exceptions in strict mode
+	 *	@return		array|FALSE						Map if valid, FALSE otherwise or exceptions in strict mode
 	 *	@throws		InvalidArgumentException		if at least one requested index is invalid (in strict mode, only)
 	 */
-	protected function checkIndices( array $indices, bool $strict = TRUE )
+	protected function checkIndices( array $indices, bool $strict = TRUE ): array|FALSE
 	{
 		if( 0 === count( $indices ) )
 			throw new InvalidArgumentException( 'Index map must have at least one pair' );
@@ -628,14 +628,10 @@ class Model
 		if( count( $rows ) ){
 			$number	= $this->table->delete();
 			foreach( $rows as $row ){
-				switch( $this->fetchMode ){
-					case PDO::FETCH_CLASS:
-					case PDO::FETCH_OBJ:
-						$id	= $row->{$this->primaryKey};
-						break;
-					default:
-						$id	= $row[$this->primaryKey];
-				}
+				$id	= match( $this->fetchMode ){
+					PDO::FETCH_CLASS, PDO::FETCH_OBJ	=> $row->{$this->primaryKey},
+					default								=> $row[$this->primaryKey],
+				};
 				$this->cache?->delete( $this->cacheKey.$id );
 			}
 		}

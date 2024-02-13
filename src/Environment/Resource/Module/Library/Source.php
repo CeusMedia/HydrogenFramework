@@ -102,16 +102,11 @@ class Source extends AbstractLibrary implements LibraryInterface
 			}
 		}
 
-		switch( $this->source->type ){
-			case 'folder':
-				$this->modules	= $this->getModulesFromFolder();
-				break;
-			case 'http':
-				$this->modules	= $this->getModulesFromHttp();
-				break;
-			default:
-				throw new RuntimeException( 'Source type "'.$this->source->type.'" is not supported' );
-		}
+		$this->modules = match( $this->source->type ){
+			'folder'	=> $this->getModulesFromFolder(),
+			'http'		=> $this->getModulesFromHttp(),
+			default		=> throw new RuntimeException('Source type "' . $this->source->type . '" is not supported'),
+		};
 		if( $useCache )
 			$cache->set( $cacheKeySource, $this->modules );
 		return $this->scanResult = (object) array(
@@ -133,7 +128,7 @@ class Source extends AbstractLibrary implements LibraryInterface
 		$this->env->getRuntime()->reach( 'Hydrogen: Environment_Resource_Module_Library_Source::scanFolder: init' );
 		/** @var SplFileObject $entry */
 		foreach( $index as $entry ){
-			if( preg_match( "@/templates$@", $entry->getPath() ) )
+			if( str_ends_with( $entry->getPath(), '/templates' ) )
 				continue;
 			/** @var string $id */
 			$id		= preg_replace( '@^'.$this->source->path.'@', '', $entry->getPath() );
