@@ -3,7 +3,7 @@
 /**
  *	Empty environment for remote dummy use.
  *
- *	Copyright (c) 2012-2023 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2012-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2012-2023 Christian Würker (ceusmedia.de)
+ *	@copyright		2012-2024 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -36,7 +36,7 @@ use CeusMedia\Common\ADT\Collection\Dictionary as Dictionary;
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2012-2023 Christian Würker (ceusmedia.de)
+ *	@copyright		2012-2024 Christian Würker (ceusmedia.de)
  *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			extend from (namespaced) Environment after all modules are migrated to 0.9
