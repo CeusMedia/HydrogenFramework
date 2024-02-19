@@ -5,7 +5,7 @@
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2012-2024 Christian Würker (ceusmedia.de)
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
 namespace CeusMedia\HydrogenFramework\Environment\Resource;
@@ -23,7 +23,7 @@ use stdClass;
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2012-2024 Christian Würker (ceusmedia.de)
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@deprecated		use module Resource_Disclosure instead
  *	@todo			remove in version 0.9

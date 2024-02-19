@@ -15,13 +15,13 @@
  *	GNU General Public License for more details.
  *
  *	You should have received a copy of the GNU General Public License
- *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *	along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.View
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2010-2024 Christian Würker (ceusmedia.de)
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
 namespace CeusMedia\HydrogenFramework\View;
@@ -35,7 +35,7 @@ use CeusMedia\HydrogenFramework\Environment;
  *	@package		CeusMedia.HydrogenFramework.View
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2010-2024 Christian Würker (ceusmedia.de)
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  *	@todo			rename to HelperInterface, update view helper classes in all modules
  */

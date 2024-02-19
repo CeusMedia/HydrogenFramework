@@ -9,7 +9,7 @@
  *	@package		CeusMedia.HydrogenFramework
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2010-2024 Christian Würker (ceusmedia.de)
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
 
@@ -31,7 +31,7 @@ use RuntimeException;
  *	@package		CeusMedia.HydrogenFramework
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
  *	@copyright		2010-2024 Christian Würker (ceusmedia.de)
- *	@license		http://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
 class Logic
