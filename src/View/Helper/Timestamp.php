@@ -33,6 +33,7 @@ use CeusMedia\Common\UI\HTML\Tag as HtmlTag;
 use CeusMedia\HydrogenFramework\Environment;
 
 use InvalidArgumentException;
+
 /**
  *	View helper for converting and displaying timestamps.
  *
@@ -46,15 +47,15 @@ use InvalidArgumentException;
  */
 class Timestamp extends Abstraction
 {
-	protected ?int $timestamp			= NULL;
-
-	protected string $stringEmpty			= "";
-
 	public static string $formatDatetime	= 'Y-m-d H:i:s';
 
 	public static string $formatDate		= 'Y-m-d';
 
 	public static string $formatTime		= 'H:i:s';
+
+	protected ?int $timestamp				= NULL;
+
+	protected string $stringEmpty			= '';
 
 	/**
 	 *	@todo 		enable environment after interface and abstract support $env on construction
@@ -67,7 +68,7 @@ class Timestamp extends Abstraction
 
 	public function toDate( string $format = NULL, bool $html = FALSE ): string
 	{
-		if( NULL === $this->timestamp || 0 === $this->timestamp )
+		if( NULL === $this->timestamp || 0 === (int) $this->timestamp )
 			return $this->stringEmpty;
 		$format	= $format ?: self::$formatDate;
 		$date	= date( $format, $this->timestamp );
@@ -78,7 +79,7 @@ class Timestamp extends Abstraction
 
 	public function toDatetime( string $format = NULL, bool $html = FALSE ): string
 	{
-		if( NULL === $this->timestamp || 0 === $this->timestamp )
+		if( NULL === $this->timestamp || 0 === (int) $this->timestamp )
 			return $this->stringEmpty;
 		$format	= $format ?: self::$formatDatetime;
 		$date	= date( $format, $this->timestamp );
@@ -89,7 +90,7 @@ class Timestamp extends Abstraction
 
 	public function toPhrase( Environment $env, bool $html = FALSE, string $languageTopic = 'main', string $languageSection = 'phrases-time' ): string
 	{
-		if( NULL === $this->timestamp || 0 === $this->timestamp )
+		if( NULL === $this->timestamp || 0 === (int) $this->timestamp )
 			return $this->stringEmpty;
 
 		$words	= $env->getLanguage()->getWords( $languageTopic );
@@ -109,7 +110,7 @@ class Timestamp extends Abstraction
 
 	public function toTime( string $format = NULL, bool $html = FALSE ): string
 	{
-		if( NULL === $this->timestamp || 0 === $this->timestamp )
+		if( NULL === $this->timestamp || 0 === (int) $this->timestamp )
 			return $this->stringEmpty;
 		$format	= $format ?: self::$formatTime;
 		$time	= date( $format, $this->timestamp );

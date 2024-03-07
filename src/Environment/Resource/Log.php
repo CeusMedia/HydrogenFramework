@@ -203,15 +203,14 @@ class Log
 	protected function applyStrategyOnCollectedData( array $data, object $context ): bool
 	{
 		$isHandled	= FALSE;
+		$captain	= $this->env->getCaptain();
 		foreach( $this->strategies as $strategy ){
 			switch( $strategy ){
 				case self::STRATEGY_MODULE_HOOKS:
-					$captain	= $this->env->getCaptain();
-					$isHandled	= $captain->callHook( 'Env', 'log', $context, $data );
+					$isHandled	= $captain->callHook( 'Env', 'log', $context, $data ) ?? FALSE;
 					break;
 				case self::STRATEGY_CUSTOM_HOOKS:
-					$captain	= $this->env->getCaptain();
-					$isHandled	= $captain->callHook( 'Env:Custom', 'log', $context, $data );
+					$isHandled	= $captain->callHook( 'Env:Custom', 'log', $context, $data ) ?? FALSE;
 					break;
 				case self::STRATEGY_CUSTOM_CALLBACK:
 					$isHandled	= $this->handleLogWithCustomCallback( $data );
@@ -242,15 +241,14 @@ class Log
 	protected function applyStrategyOnCollectedExceptionData( array $data, object $context ): bool
 	{
 		$isHandled	= FALSE;
+		$captain	= $this->env->getCaptain();
 		foreach( $this->strategies as $strategy ){
 			switch( $strategy ){
 				case self::STRATEGY_MODULE_HOOKS:
-					$captain	= $this->env->getCaptain();
-					$isHandled	= $captain->callHook( 'Env', 'logException', $context, $data );
+					$isHandled	= $captain->callHook( 'Env', 'logException', $context, $data ) ?? FALSE;
 					break;
 				case self::STRATEGY_CUSTOM_HOOKS:
-					$captain	= $this->env->getCaptain();
-					$isHandled	= $captain->callHook( 'Env:Custom', 'logException', $context, $data );
+					$isHandled	= $captain->callHook( 'Env:Custom', 'logException', $context, $data ) ?? FALSE;
 					break;
 				case self::STRATEGY_CUSTOM_CALLBACK:
 					$isHandled	= $this->handleExceptionWithCustomCallback( $data );

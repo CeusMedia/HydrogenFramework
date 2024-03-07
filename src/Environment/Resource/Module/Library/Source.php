@@ -143,7 +143,7 @@ class Source extends AbstractLibrary implements LibraryInterface
 			}*/
 			$icon	= $entry->getPath().'/icon';
 			$filePath	= $entry->getPathname();
-			if( !is_readable( $filePath ) )
+			if( !is_readable( $filePath ) && NULL !== $this->env->getMessenger() )
 				$this->env->getMessenger()->noteFailure( 'Module file "'.$filePath.'" is not readable.' );
 			else{
 				try{
@@ -156,14 +156,20 @@ class Source extends AbstractLibrary implements LibraryInterface
 					if( $configDictionary->has( 'active' ) )									//  module has main switch in config
 						$module->isActive		= $configDictionary->get( 'active' );			//  set active by default main switch config value
 					$module->icon	= NULL;
-					if( file_exists( $icon.'.png' ) )
-						$module->icon	= 'data:image/png;base64,'.base64_encode( FileReader::load( $icon.'.png' ) );
-					else if( file_exists( $icon.'.ico' ) )
-						$module->icon	= 'data:image/x-icon;base64,'.base64_encode( FileReader::load( $icon.'.ico' ) );
+					if( file_exists( $icon.'.png' ) ){
+						/** @var string $content */
+						$content		= FileReader::load( $icon.'.png' );
+						$module->icon	= 'data:image/png;base64,'.base64_encode( $content );
+					}
+					else if( file_exists( $icon.'.ico' ) ){
+						/** @var string $content */
+						$content		= FileReader::load( $icon.'.ico' );
+						$module->icon	= 'data:image/x-icon;base64,'.base64_encode( $content );
+					}
 					$list[$id]	= $module;
 				}
 				catch( Exception $e ){
-					$this->env->getMessenger()->noteFailure( 'XML of available Module "'.$id.'" is broken ('.$e->getMessage().').' );
+					$this->env->getMessenger()?->noteFailure( 'XML of available Module "'.$id.'" is broken ('.$e->getMessage().').' );
 				}
 //				if( $cache )
 //					$cache->set( $cacheKey, $module );

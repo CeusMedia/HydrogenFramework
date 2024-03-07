@@ -48,7 +48,7 @@ class Recursive extends Abstraction implements RouterInterface
 	/**
 	 *	@return	void
 	 */
-	public function parseFromRequest()
+	public function parseFromRequest(): void
 	{
 		if( !$this->env->has( 'request' ) )
 			throw new RuntimeException( 'Routing needs a registered request resource' );
@@ -64,6 +64,7 @@ class Recursive extends Abstraction implements RouterInterface
 				$path	= $request->getFromSource( self::$pathKey, 'get' ) ?? '';
 
 		$path	= urldecode( $path );
+		/** @var string $path */
 		$path	= preg_replace( '@^(.*)/?$@U', '\\1', trim( $path ) );
 		$parts	= explode( '/', $path );
 		$left	= $parts;
@@ -79,7 +80,7 @@ class Recursive extends Abstraction implements RouterInterface
 					$controller	= implode( '/', $left );
 					$request->set( '__controller', $controller );
 					if( 0 !== count( $right ) ){
-						if( method_exists( $className, $right[0] ) ){
+						if( method_exists( $className, current( $right ) ) ){
 	//						remark( 'Controller Method: '.$right[0] );
 							$request->set( '__action', array_shift( $right ) );
 						}
@@ -89,7 +90,7 @@ class Recursive extends Abstraction implements RouterInterface
 					}
 					break;
 				}
-				array_unshift( $right, array_pop( $left ) );
+				array_unshift( $right, array_pop( $left ) ?? '_undefined' );
 			}
 		}
 		if( !$request->get( '__controller' ) )

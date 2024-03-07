@@ -109,7 +109,9 @@ class Definition
 	{
 		if( NULL === $this->configAsDictionary ){
 			$dictionary	= new Dictionary();
-			array_walk($this->config, static function( Config $config ) use ($dictionary){
+			array_walk($this->config, static function( Config $config ) use ( $dictionary ){
+				if( NULL === $config->type )
+					return;
 				@settype( $config->value, $config->type );
 				$dictionary->set( $config->key, $config->value );
 			} );

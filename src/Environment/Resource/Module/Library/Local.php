@@ -186,7 +186,9 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 			if( $forceReload )
 				$this->clearCache();
 			if( file_exists( $this->cacheFile ) ){
-				$this->modules	= unserialize( FileReader::load( $this->cacheFile ) );
+				/** @var string $serial */
+				$serial	= FileReader::load( $this->cacheFile );
+				$this->modules	= unserialize( $serial );
 				$this->env->getRuntime()->reach( 'Resource_Module_Library_Local::scan (cache)' );
 				return (object) [
 					'source' 	=> 'cache',
@@ -203,6 +205,7 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 		$index	= new FileRegexIndex( $this->modulePath, '/^[a-z0-9_]+\.xml$/i' );
 		/** @var SplFileObject $entry */
 		foreach( $index as $entry ){
+			/** @var string $moduleId */
 			$moduleId		= preg_replace( '/\.xml$/i', '', $entry->getFilename() );
 			$moduleFile		= $this->modulePath.$moduleId.'.xml';
 			$module			= ModuleReader::load( $moduleFile, $moduleId );

@@ -118,6 +118,7 @@ class Controller
 			$this->setupView( !$env->getRequest()->isAjax() );
 		$env->getRuntime()->reach( 'CMF_Controller('.get_class( $this ).'): got view object' );
 
+		/** @var string $controllerName */
 		$controllerName		= preg_replace( "/^Controller_/", "", get_class( $this ) );				//  get controller name from class name
 		$this->defaultPath	= strtolower( str_replace( '_', '/', $controllerName ) );				//  to guess default controller URI path
 		$this->path			= $this->defaultPath;													//  and note this as controller path
@@ -221,7 +222,7 @@ class Controller
 	 */
 	protected function addData( string $key, mixed $value, string $topic = NULL ): self
 	{
-		$this->view->setData( [$key => $value], $topic );
+		$this->view?->setData( [$key => $value], $topic );
 		return $this;
 	}
 
@@ -235,7 +236,7 @@ class Controller
 	 */
 	protected function callHook( string $resource, string $event, ?object $context, array & $payload ): ?bool
 	{
-		return $this->env->getCaptain()->callHook( $resource, $event, $context, $payload );
+		return $this->env->getCaptain()->callHook( $resource, $event, $context ?? $this, $payload );
 	}
 
 	/**
@@ -249,7 +250,7 @@ class Controller
 	protected function checkAjaxRequest(): void
 	{
 		if( !$this->env->getRequest()->isAjax() ){
-			$this->env->getMessenger()->noteFailure( 'Invalid AJAX/AJAJ access attempt.' );
+			$this->env->getMessenger()?->noteFailure( 'Invalid AJAX/AJAJ access attempt.' );
 			$this->restart( NULL, FALSE, 401 );
 		}
 	}
@@ -282,7 +283,7 @@ class Controller
 	 */
 	protected function getData( string $key = NULL, string $fallback = NULL ): mixed
 	{
-		return $this->view->getData( $key, $fallback );
+		return $this->view?->getData( $key, $fallback );
 	}
 
 	/**

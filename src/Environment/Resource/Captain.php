@@ -258,8 +258,8 @@ class Captain
 				} catch( Exception $e ){
 					$this->handleExceptionOfResourceEventHookCall( $e, $resource, $event, $module );
 					if( $this->env->has( 'messenger' ) ){
-						$this->env->getMessenger()->noteFailure('Call on event ' . $event . '@' . $resource . ' hooked by module ' . $module->id . ' failed: ' . $e->getMessage());
-						$this->env->getLog()->logException($e);
+						$this->env->getMessenger()?->noteFailure('Call on event ' . $event . '@' . $resource . ' hooked by module ' . $module->id . ' failed: ' . $e->getMessage());
+						$this->env->getLog()?->logException($e);
 					} else
 						throw new RuntimeException('Hook ' . $module->id . '::' . $resource . '@' . $event . ' failed: ' . $e->getMessage(), 0, $e);
 				} finally {
@@ -282,7 +282,7 @@ class Captain
 	 */
 	protected function handleExceptionOfResourceEventHookCall( Exception $e, string $resource, string $event, ModuleDefinition $module ): void
 	{
-		$this->env->getLog()->logException( $e );
+		$this->env->getLog()?->logException( $e );
 
 //		$message	= 'Hook %1$s::%2$s@%3$s failed: %4$s';
 //		$message	= 'Call on resource event hook %3$s@%2$s, hooked by module %1$s, failed: %4$s';
@@ -290,8 +290,7 @@ class Captain
 		$message	= sprintf( $message, $module->id, $resource, $event, $e->getMessage() );
 		if( !$this->env->has( 'messenger' ) )
 			throw new RuntimeException( $message, 0, $e );
-		/** @noinspection PhpUnhandledExceptionInspection */
-		$this->env->getMessenger()->noteFailure( $message );
+		$this->env->getMessenger()?->noteFailure( $message );
 	}
 
 	/**
@@ -309,14 +308,14 @@ class Captain
 	{
 		if( 0 === strlen( trim( $stdout ) ) )
 			return;
-		$this->env->getLog()->log( 'notice', $stdout, (object) [
+		$this->env->getLog()?->log( 'notice', $stdout, (object) [
 			'resource'	=> $resource,
 			'event'		=> $event,
 			'module'	=> $module
 		] );
 		if( !$this->env->has( 'messenger' ) )
 			throw new RuntimeException( $stdout );
-		$this->env->getMessenger()->noteNotice( vsprintf(
+		$this->env->getMessenger()?->noteNotice( vsprintf(
 			'Call on event %2$s@%1$s hooked by module %3$s reported: <xmp>%4$s</xmp>',
 			[$resource, $event, $module->id, $stdout]
 		) );

@@ -51,7 +51,7 @@
     ],
     "dev:phpunit": [
       "@dev:install-quiet",
-      "php vendor/bin/phpunit --configuration tool/config/phpunit9.xml --testsuite units"
+      "XDEBUG_MODE=coverage php vendor/bin/phpunit --configuration tool/config/phpunit.xml --testsuite units"
     ],
     "dev:phpstan": [
       "vendor/bin/phpstan analyze --configuration=tool/config/phpstan.neon --memory-limit=1G --verbose"

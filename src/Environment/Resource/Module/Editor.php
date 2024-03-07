@@ -29,12 +29,13 @@
 
 namespace CeusMedia\HydrogenFramework\Environment\Resource\Module;
 
+use CeusMedia\Common\Exception\Conversion as ConversionException;
+use CeusMedia\Common\Exception\IO as IoException;
 use CeusMedia\Common\FS\File\Writer as FileWriter;
 use CeusMedia\Common\XML\DOM\Formater as XmlFormatter;
 use CeusMedia\Common\XML\Element as XmlElement;
 use CeusMedia\Common\XML\ElementReader as XmlReader;
 use CeusMedia\HydrogenFramework\Environment;
-use CeusMedia\HydrogenFramework\Deprecation;
 
 use Exception;
 use InvalidArgumentException;
@@ -75,12 +76,17 @@ class Editor
 	 *	@param		string			$name		Author name
 	 *	@param		string|NULL		$email		Author email address
 	 *	@return		void
+	 *	@throws		RuntimeException		if no module by given ID is installed
+	 *	@throws		IoException				if file is not existing
+	 *	@throws		IoException				if file is not readable
+	 *	@throws		ConversionException		if the XML data could not be parsed
+	 *	@noinspection	PhpUnused
 	 */
-	public function addAuthor( string $moduleId, string $name, ?string $email = NULL )
+	public function addAuthor( string $moduleId, string $name, ?string $email = NULL ): void
 	{
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
 		$link		= $xml->addChild( 'author', $name );
-		if( strlen( trim( $email ) ) )
+		if( NULL !== $email && 0 !== strlen( trim( $email ) ) )
 			$link->addAttribute( 'email', $email );
 		$this->saveModuleXml( $moduleId, $xml );													//  save modified module XML
 	}
@@ -92,12 +98,17 @@ class Editor
 	 *	@param		string			$name		Company name
 	 *	@param		string|NULL		$site		Company web address
 	 *	@return		void
+	 *	@throws		RuntimeException		if no module by given ID is installed
+	 *	@throws		IoException				if file is not existing
+	 *	@throws		IoException				if file is not readable
+	 *	@throws		ConversionException		if the XML data could not be parsed
+	 *	@noinspection	PhpUnused
 	 */
-	public function addCompany( string $moduleId, string $name, ?string $site = NULL )
+	public function addCompany( string $moduleId, string $name, ?string $site = NULL ): void
 	{
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
 		$link		= $xml->addChild( 'company', $name );
-		if( strlen( trim( $site ) ) )
+		if( NULL !== $site && 0 !== strlen( trim( $site ) ) )
 			$link->addAttribute( 'site', trim( $site ) );
 		$this->saveModuleXml( $moduleId, $xml );													//  save modified module XML
 	}
@@ -114,8 +125,13 @@ class Editor
 	 *	@param		string			$protected	Flag: do not deliver this pair to frontend
 	 *	@param		string|NULL		$title		Description
 	 *	@return		void
+	 *	@throws		RuntimeException		if no module by given ID is installed
+	 *	@throws		IoException				if file is not existing
+	 *	@throws		IoException				if file is not readable
+	 *	@throws		ConversionException		if the XML data could not be parsed
+	 *	@noinspection	PhpUnused
 	 */
-	public function addConfig( string $moduleId, string $name, string $type, string $value, string $values, string $mandatory, string $protected, ?string $title = NULL )
+	public function addConfig( string $moduleId, string $name, string $type, string $value, string $values, string $mandatory, string $protected, ?string $title = NULL ): void
 	{
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
 		$link		= $xml->addChild( 'config', $value );											//  add pair node
@@ -128,7 +144,7 @@ class Editor
 			$link->addAttribute( 'mandatory', trim( $mandatory ) );									//  set mandatory attribute
 		if( strlen( trim( $protected ) ) )															//  protected attribute is given
 			$link->addAttribute( 'protected', trim( $protected ) );									//  set protected attribute
-		if( strlen( trim( $title ) ) )																//  title attribute is given
+		if( NULL !== $title && 0 !== strlen( trim( $title ) ) )										//  title attribute is given
 			$link->addAttribute( 'title', trim( addslashes( $title ) ) );							//  set title attribute
 		$this->saveModuleXml( $moduleId, $xml );													//  save modified module XML
 	}
@@ -142,9 +158,13 @@ class Editor
 	 *	@param		string			$source		Source, depending on type
 	 *	@param		string|NULL		$load		Load mode, empty or "auto"
 	 *	@return		void
-	 *	@throws		Exception
+	 *	@throws		RuntimeException		if no module by given ID is installed
+	 *	@throws		IoException				if file is not existing
+	 *	@throws		IoException				if file is not readable
+	 *	@throws		ConversionException		if the XML data could not be parsed
+	 *	@noinspection	PhpUnused
 	 */
-	public function addFile( string $moduleId, string $type, string $resource, string $source, string $load = NULL )
+	public function addFile( string $moduleId, string $type, string $resource, string $source, string $load = NULL ): void
 	{
 		$attributes	= ['source', 'load'];
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
@@ -155,7 +175,7 @@ class Editor
 		$link		= $xml->files->addChild( $type, $resource );									//  add typed resource
 		if( strlen( trim( $source ) ) )																//  source attribute is given
 			$link->addAttribute( 'source', $source );												//  set source attribute
-		if( strlen( trim( $load ) ) )																//  load attribute is given
+		if( NULL !== $load && 0 !== strlen( trim( $load ) ) )										//  load attribute is given
 			$link->addAttribute( 'load', $load );													//  set load attribute
 		$this->saveModuleXml( $moduleId, $xml );													//  save modified module XML
 	}
@@ -171,9 +191,13 @@ class Editor
 	 *	@param		string|NULL		$language	Link language
 	 *	@param		string|NULL		$rank		Link rank in navigation
 	 *	@return		void
-	 *	@throws		Exception
+	 *	@throws		RuntimeException		if no module by given ID is installed
+	 *	@throws		IoException				if file is not existing
+	 *	@throws		IoException				if file is not readable
+	 *	@throws		ConversionException		if the XML data could not be parsed
+	 *	@noinspection	PhpUnused
 	 */
-	public function addLink( string $moduleId, string $path, ?string $link = NULL, ?string $label = NULL, ?string $access = NULL, ?string $language = NULL, ?string $rank = NULL )
+	public function addLink( string $moduleId, string $path, ?string $link = NULL, ?string $label = NULL, ?string $access = NULL, ?string $language = NULL, ?string $rank = NULL ): void
 	{
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
 		$link		= $xml->addChild( 'link', (string) $label );									//
@@ -181,11 +205,11 @@ class Editor
 			$link->addAttribute( 'path', trim( $path ) );											//  set path attribute
 		if( strlen( trim( $link ) ) )																//  link attribute is given
 			$link->addAttribute( 'link', trim( $path ) );											//  set link attribute
-		if( strlen( trim( $access ) ) )																//  access attribute is given
+		if( NULL !== $access && 0 !== strlen( trim( $access ) ) )									//  access attribute is given
 			$link->addAttribute( 'access', trim( $access ) );										//  set access attribute
-		if( strlen( trim( $rank ) ) )																//  rank attribute is given
+		if( NULL !== $rank && 0 !== strlen( trim( $rank ) ) )										//  rank attribute is given
 			$link->addAttribute( 'rank', trim( $rank ) );											//  set rank attribute
-		if( strlen( trim( $language ) ) )															//  language attribute is given
+		if( NULL !== $language && 0 !== strlen( trim( $language ) ) )								//  language attribute is given
 			$link->addAttribute( 'lang', $language, 'xml', $this->nsXml );							//  set language attribute
 		$this->saveModuleXml( $moduleId, $xml );													//  save modified module XML
 	}
@@ -195,9 +219,13 @@ class Editor
 	 *	@param		string		$type
 	 *	@param		string		$relatedModuleId
 	 *	@return		void
-	 *	@throws		Exception
+	 *	@throws		RuntimeException		if no module by given ID is installed
+	 *	@throws		IoException				if file is not existing
+	 *	@throws		IoException				if file is not readable
+	 *	@throws		ConversionException		if the XML data could not be parsed
+	 *	@noinspection	PhpUnused
 	 */
-	public function addRelation( string $moduleId, string $type, string $relatedModuleId )
+	public function addRelation( string $moduleId, string $type, string $relatedModuleId ): void
 	{
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
 		if( !$this->hasXmlNode( $xml, 'relations' ) )												//  relations node not yet existing
@@ -214,9 +242,13 @@ class Editor
 	 *	@param		string		$type
 	 *	@param		string		$version
 	 *	@return		void
-	 *	@throws		Exception
+	 *	@throws		RuntimeException		if no module by given ID is installed
+	 *	@throws		IoException				if file is not existing
+	 *	@throws		IoException				if file is not readable
+	 *	@throws		ConversionException		if the XML data could not be parsed
+	 *	@noinspection	PhpUnused
 	 */
-	public function addSql( string $moduleId, string $ddl, string $event, string $type, string $version )
+	public function addSql( string $moduleId, string $ddl, string $event, string $type, string $version ): void
 	{
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
 		$ddl		= str_replace( '&', '&amp;', "\n".$ddl."\n" );
@@ -239,9 +271,13 @@ class Editor
 	 *	@param		string|NULL		$language
 	 *	@param		int|NULL		$rank
 	 *	@return		void
-	 *	@throws		Exception
+	 *	@throws		RuntimeException		if no module by given ID is installed
+	 *	@throws		IoException				if file is not existing
+	 *	@throws		IoException				if file is not readable
+	 *	@throws		ConversionException		if the XML data could not be parsed
+	 *	@noinspection	PhpUnused
 	 */
-	public function editLink( string $moduleId, int $number, string $path, ?string $link = NULL, ?string $label = NULL, ?string $access = NULL, ?string $language = NULL, ?int $rank = NULL )
+	public function editLink( string $moduleId, int $number, string $path, ?string $link = NULL, ?string $label = NULL, ?string $access = NULL, ?string $language = NULL, ?int $rank = NULL ): void
 	{
 		$xml	= $this->loadModuleXml( $moduleId );												//  load module XML
 		if( !isset( $xml->link[$number] ) )
@@ -250,12 +286,15 @@ class Editor
 		$node	= $xml->link[$number];
 		$node->setValue( (string) $label );
 
+		$access	= trim( $access ?? '' );
+		$link	= trim( $link ?? '' );
 		$node->setAttribute( 'path', trim( $path ) );
-		$node->setAttribute( 'access', 0 !== strlen( trim( $access ) ) ? trim( $access ) : NULL );
-		$node->setAttribute( 'link', 0 !== strlen( trim( $link ) ) ? trim( $link ) : NULL );
+		$node->setAttribute( 'access', 0 !== strlen( $access ) ? $access : NULL );
+		$node->setAttribute( 'link', 0 !== strlen( $link ) ? $link : NULL );
 		$node->setAttribute( 'rank', NULL !== $rank ? (string) $rank : NULL );
 
-		$language	= strlen( trim( $language ) ) ? trim( $language ) : NULL;
+		$language	= trim( $language ?? '' );
+		$language	= 0 !== strlen( $language ) ? $language : NULL;
 		$node->setAttribute( 'lang', $language, 'xml', $this->nsXml );								//  set language attribute
 		$this->saveModuleXml( $moduleId, $xml );													//  save modified module XML
 	}
@@ -264,7 +303,11 @@ class Editor
 	 *	@param		string		$moduleId
 	 *	@param		string		$name
 	 *	@return		bool
-	 *	@throws		Exception
+	 *	@throws		RuntimeException		if no module by given ID is installed
+	 *	@throws		IoException				if file is not existing
+	 *	@throws		IoException				if file is not readable
+	 *	@throws		ConversionException		if the XML data could not be parsed
+	 *	@noinspection	PhpUnused
 	 */
 	public function removeAuthor( string $moduleId, string $name ): bool
 	{
@@ -283,7 +326,11 @@ class Editor
 	 *	@param		string		$moduleId
 	 *	@param		string		$name
 	 *	@return		bool
-	 *	@throws		Exception
+	 *	@throws		RuntimeException		if no module by given ID is installed
+	 *	@throws		IoException				if file is not existing
+	 *	@throws		IoException				if file is not readable
+	 *	@throws		ConversionException		if the XML data could not be parsed
+	 *	@noinspection	PhpUnused
 	 */
 	public function removeCompany( string $moduleId, string $name ): bool
 	{
@@ -302,7 +349,11 @@ class Editor
 	 *	@param		string		$moduleId
 	 *	@param		string		$name
 	 *	@return		bool
-	 *	@throws		Exception
+	 *	@throws		RuntimeException		if no module by given ID is installed
+	 *	@throws		IoException				if file is not existing
+	 *	@throws		IoException				if file is not readable
+	 *	@throws		ConversionException		if the XML data could not be parsed
+	 *	@noinspection	PhpUnused
 	 */
 	public function removeConfig( string $moduleId, string $name ): bool
 	{
@@ -322,7 +373,11 @@ class Editor
 	 *	@param		string		$type
 	 *	@param		string		$resource
 	 *	@return		bool
-	 *	@throws		Exception
+	 *	@throws		RuntimeException		if no module by given ID is installed
+	 *	@throws		IoException				if file is not existing
+	 *	@throws		IoException				if file is not readable
+	 *	@throws		ConversionException		if the XML data could not be parsed
+	 *	@noinspection	PhpUnused
 	 */
 	public function removeFile( string $moduleId, string $type, string $resource ): bool
 	{
@@ -343,7 +398,11 @@ class Editor
 	 *	@param		string		$moduleId
 	 *	@param		int			$number
 	 *	@return		bool
-	 *	@throws		Exception
+	 *	@throws		RuntimeException		if no module by given ID is installed
+	 *	@throws		IoException				if file is not existing
+	 *	@throws		IoException				if file is not readable
+	 *	@throws		ConversionException		if the XML data could not be parsed
+	 *	@noinspection	PhpUnused
 	 */
 	public function removeLink( string $moduleId, int $number ): bool
 	{
@@ -355,6 +414,17 @@ class Editor
 		return TRUE;
 	}
 
+	/**
+	 *	@param		string		$moduleId
+	 *	@param		string		$type
+	 *	@param		string		$relatedModuleId
+	 *	@return		bool
+	 *	@throws		RuntimeException		if no module by given ID is installed
+	 *	@throws		IoException				if file is not existing
+	 *	@throws		IoException				if file is not readable
+	 *	@throws		ConversionException		if the XML data could not be parsed
+	 *	@noinspection	PhpUnused
+	 */
 	public function removeRelation( string $moduleId, string $type, string $relatedModuleId ): bool
 	{
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
@@ -375,7 +445,11 @@ class Editor
 	 *	@param		string|NULL		$versionFrom
 	 *	@param		string|NULL		$versionTo
 	 *	@return		bool
-	 *	@throws		Exception
+	 *	@throws		RuntimeException		if no module by given ID is installed
+	 *	@throws		IoException				if file is not existing
+	 *	@throws		IoException				if file is not readable
+	 *	@throws		ConversionException		if the XML data could not be parsed
+	 *	@noinspection	PhpUnused
 	 */
 	public function removeSql( string $moduleId, string $event, string $type, ?string $versionFrom = NULL, ?string $versionTo = NULL ): bool
 	{
@@ -409,7 +483,9 @@ class Editor
 	 *	@param		string		$moduleId
 	 *	@return		XmlElement
 	 *	@throws		RuntimeException		if no module by given ID is installed
-	 *	@throws		Exception				if reading of module XML file failed
+	 *	@throws		IoException				if file is not existing
+	 *	@throws		IoException				if file is not readable
+	 *	@throws		ConversionException		if the XML data could not be parsed
 	 */
 	protected function loadModuleXml( string $moduleId ): XmlElement
 	{

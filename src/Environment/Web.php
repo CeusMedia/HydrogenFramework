@@ -250,7 +250,7 @@ class Web extends Environment
 	 *	@return		void
 	 *	@todo		check for better HTTP status
 	 */
-	public function relocate( string $uri, int $status = NULL )
+	public function relocate( string $uri, int $status = NULL ): void
 	{
 		$this->restart( $uri, $status, TRUE );
 	}
@@ -270,8 +270,8 @@ class Web extends Environment
 	 *	If third parameter is set to a valid HTTP status code, the code and its HTTP status text will be set for response.
 	 *
 	 *	If forth parameter is set to TRUE, redirects to URIs outside the current domain are allowed.
-	 *	This would look like this: $this->restart( 'http://foreign.tld/', FALSE, NULL, TRUE );
-	 *	There is a shorter alias: $this->relocate( 'http://foreign.tld/' );
+	 *	This would look like this: $this->restart( 'https://foreign.tld/', FALSE, NULL, TRUE );
+	 *	There is a shorter alias: $this->relocate( 'https://foreign.tld/' );
 	 *
 	 *	@access		public
 	 *	@param		string|NULL		$uri				URI to request
@@ -286,8 +286,8 @@ class Web extends Environment
 	 */
 	public function restart( ?string $uri = '', ?int $status = NULL, bool $allowForeignHost = FALSE, int $modeFrom = 0 )
 	{
-		$base	= "";
-		if( !preg_match( "/^http/", $uri ) ){														//  URI is not starting with HTTP scheme
+		$base	= '';
+		if( !str_starts_with( $uri ?? '', 'http' ) ){												//  URI is not starting with HTTP scheme
 			$base	= $this->getBaseUrl();															//  get application base URI
 		}
 		if( !$allowForeignHost ){																	//  redirect to foreign domain not allowed
@@ -297,7 +297,7 @@ class Web extends Environment
 			if( $hostFrom !== $hostTo ){															//  both are not matching
 				$message	= 'Redirection to foreign host is not allowed.';						//  error message
 				if( $this->has( 'messenger' ) ){													//  messenger is available
-					$this->getMessenger()->noteFailure( $message );									//  note message
+					$this->getMessenger()?->noteFailure( $message );								//  note message
 					$this->modules->callHook( 'App', 'onException', $this );						//  call module hooks for end of env construction
 					$this->restart( NULL, NULL, TRUE );												//  redirect to start
 				}
@@ -333,7 +333,7 @@ class Web extends Environment
 	 *	@throws		EnvironmentException	if strict mode and no document root path has been provided by web server
 	 *	@throws		EnvironmentException	if strict mode and no script file path has been provided by web server
 	 */
-	protected function detectSelf( bool $strict = TRUE )
+	protected function detectSelf( bool $strict = TRUE ): void
 	{
 		if( $strict ){
 			if( !getEnv( 'HTTP_HOST' ) ){															//  application has been executed outside a valid web server environment or no HTTP host has been provided by web server
@@ -357,7 +357,7 @@ class Web extends Environment
 		$defaultPort	= $this->scheme === 'https' ? 443 : 80;										//  default port depends on HTTP scheme
 		$serverPort		= (int) getEnv( 'SERVER_PORT' );
 		$serverHost		= (string) getEnv( 'HTTP_HOST' );
-		$this->host		= preg_replace( "/:\d{2,5}$/", '', $serverHost );		//  note requested HTTP host name without port
+		$this->host		= (string) preg_replace( "/:\d{2,5}$/", '', $serverHost );	//  note requested HTTP host name without port
 		$this->port		= $serverPort === $defaultPort ? '' : (string) $serverPort;					//  note requested HTTP port
 		$hostWithPort	= $this->host.( $this->port ? ':'.$this->port : '' );						//  append port if different from default port
 		$this->root		= (string) getEnv( 'DOCUMENT_ROOT' );									//  note document root of web server or virtual host

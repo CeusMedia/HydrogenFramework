@@ -86,15 +86,14 @@ class Model
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		Environment		$env			Application Environment Object
-	 *	@param		string|NULL		$id				ID to focus on
+	 *	@param		Environment			$env			Application Environment Object
 	 *	@return		void
 	 */
-	public function __construct( Environment $env, ?string $id = NULL )
+	public function __construct( Environment $env )
 	{
 		$this->setEnv( $env );
 		$connection	= $this->env->getDatabase();
-		if( method_exists( $connection, 'getConnection' ) )
+		if( NULL !== $connection && method_exists( $connection, 'getConnection' ) )
 			$connection	= $connection->getConnection();
 
 		if( !$connection instanceof PdoConnection )
@@ -103,8 +102,7 @@ class Model
 			$connection,
 			$this->prefix.$this->name,
 			$this->columns,
-			$this->primaryKey,
-			$id
+			$this->primaryKey
 		);
 		if( $this->fetchMode )
 			$this->table->setFetchMode( $this->fetchMode );
@@ -178,13 +176,13 @@ class Model
 	/**
 	 *	Modifies data of single row by ID.
 	 *	@access		public
-	 *	@param		string			$id				ID to focus on
+	 *	@param		int|string		$id				ID to focus on
 	 *	@param		array			$data			Data to edit
 	 *	@param		boolean			$stripTags		Flag: strip HTML Tags from values, default: yes
 	 *	@return		integer			Number of changed rows
      *  @throws	SimpleCacheInvalidArgumentException
 	 */
-	public function edit( string $id, array $data, bool $stripTags = TRUE ): int
+	public function edit( int|string $id, array $data, bool $stripTags = TRUE ): int
 	{
 		$this->table->focusPrimary( (int) $id );
 		$result	= 0;
@@ -213,12 +211,12 @@ class Model
 	/**
 	 *	Returns Data of single Line by ID.
 	 *	@access		public
-	 *	@param		string			$id				ID to focus on
-	 *	@param		string|NULL		$field			Single Field to return
+	 *	@param		int|string			$id				ID to focus on
+	 *	@param		string|NULL			$field			Single Field to return
 	 *	@return		object|array|string|NULL		Structure depending on fetch type, string if field selected, NULL if field selected and no entries
      *  @throws		SimpleCacheInvalidArgumentException
 	 */
-	public function get( string $id, ?string $field = NULL ): object|array|string|NULL
+	public function get( int|string $id, ?string $field = NULL ): object|array|string|NULL
 	{
 		if( NULL !== $field )
 			$field	= $this->checkField( $field );
@@ -412,11 +410,11 @@ class Model
 
 	/**
 	 *	Indicates whether a table row is existing by ID.
-	 *	@param		string			$id				ID to focus on
+	 *	@param		int|string		$id				ID to focus on
 	 *	@return		boolean
      *  @throws		SimpleCacheInvalidArgumentException
 	 */
-	public function has( string $id ): bool
+	public function has( int|string $id ): bool
 	{
 		if( $this->cache?->has( $this->cacheKey.$id ) )
 			return TRUE;
@@ -449,11 +447,11 @@ class Model
 	/**
 	 *	Returns Data of single Line by ID.
 	 *	@access		public
-	 *	@param		string			$id				ID to focus on
+	 *	@param		int|string		$id				ID to focus on
 	 *	@return		boolean
      *  @throws		SimpleCacheInvalidArgumentException
 	 */
-	public function remove( string $id ): bool
+	public function remove( int|string $id ): bool
 	{
 		$this->table->focusPrimary( $id );
 		$result	= FALSE;
@@ -574,7 +572,7 @@ class Model
 	 *	@throws		InvalidArgumentException		if at least one given field is not a table column
 	 *	@throws		DomainException					if one of the fields is not within result
 	 */
-	protected function getFieldsFromResult( $result, array $fields = [], bool $strict = TRUE )
+	protected function getFieldsFromResult( $result, array $fields = [], bool $strict = TRUE ): string|array|object|NULL
 	{
 		if( 0 === count( $fields ) )
 			return $result;

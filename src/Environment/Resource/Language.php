@@ -168,7 +168,7 @@ class Language
 		if( $strict )
 			throw new RuntimeException( $message, 221 );
 		if( $force && $this->env->has( 'messenger' ) )
-			$this->env->getMessenger()->noteFailure( $message );
+			$this->env->getMessenger()?->noteFailure( $message );
 		return [];
 	}
 
@@ -196,7 +196,7 @@ class Language
 		if( $strict )
 			throw new RuntimeException( $message, 221 );
 		if( $force && $this->env->has( 'messenger' ) )
-			$this->env->getMessenger()->noteFailure( $message );
+			$this->env->getMessenger()?->noteFailure( $message );
 		return [];
 	}
 
@@ -233,7 +233,9 @@ class Language
 		if( $reader->exists() )	{
 			$string	= $reader->readString();
 			$this->env->getRuntime()->reach( 'Resource_Language::load('.$topic.'): loaded file' );
+			/** @var string $string */
 			$string	= preg_replace( "/\s;[^\n]+\n+/", "\n", $string );
+			/** @var string $string */
 			$string	= preg_replace( "/\n;[^\n]+\n/Us", "\n", $string );
 #			$plain	= preg_replace( '/".+"/U', "", $string );
 			if( !preg_match( '/".*;.*"/U', $string ) ){
@@ -255,7 +257,7 @@ class Language
 			if( $strict )
 				throw new RuntimeException( $message, 221 );
 			if( $force && $this->env->has( 'messenger' ) )
-				$this->env->getMessenger()->noteFailure( $message );
+				$this->env->getMessenger()?->noteFailure( $message );
 		}
 		$this->env->getRuntime()->reach( 'Resource_Language: end' );
 		return $data;

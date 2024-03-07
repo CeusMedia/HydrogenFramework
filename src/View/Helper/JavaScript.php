@@ -106,7 +106,7 @@ class JavaScript
 		$level	??= CaptainResource::LEVEL_MID;
 		if( !array_key_exists( $level, $this->scripts ) )										//  level is not yet defined in scripts list
 			$this->scripts[$level]	= [];													//  create empty scripts list for level
-		$key	= strlen( $key ?? '' ) ? md5( $key ) : 'default';
+		$key	= ( 0 !== strlen( $key ?? '' ) ) ? md5( $key ) : 'default';
 		if( !array_key_exists( $key, $this->scripts[$level] ) )
 			$this->scripts[$level][$key]	= [];
 		$this->scripts[$level][$key][]	= $script;
@@ -127,7 +127,7 @@ class JavaScript
 		$level	??= CaptainResource::LEVEL_MID;
 		if( !array_key_exists( $level, $this->scriptsOnReady ) )								//  level is not yet defined in scripts list
 			$this->scriptsOnReady[$level]	= [];											//  create empty scripts list for level
-		$key	= strlen( $key ?? '' ) ? md5( $key ) : 'default';
+		$key	= ( 0 !== strlen( $key ?? '' ) ) ? md5( $key ) : 'default';
 		if( !array_key_exists( $key, $this->scriptsOnReady[$level] ) )
 			$this->scriptsOnReady[$level][$key]	= [];
 		$this->scriptsOnReady[$level][$key][]	= $script;										//  note JavaScript code on runlevel
@@ -342,11 +342,15 @@ class JavaScript
 			if( $this->revision )
 				$contents[]	= "/* @revision ".$this->revision." */";
 			foreach( $this->getPlainUrlList() as $url ){
-				if( str_starts_with( $url, 'http' ) )
+				if( str_starts_with( $url, 'http' ) ){
+					/** @var string $content */
 					$content	= NetReader::readUrl( $url );
-				else
+				}
+				else{
+					/** @var string $content */
 					$content	= FileReader::load( $url );
-				if( preg_match( "/\.min\.js$/", $url ) )
+				}
+				if( str_ends_with( $url, '.min.js' ) )
 					array_unshift( $contents, preg_replace( "@/\*.+\*/\n?@sU", "", $content ) );
 				else
 					$contents[]	= $this->compress( $content );
@@ -395,6 +399,7 @@ class JavaScript
 			foreach( $levelScripts as $scripts ){
 				foreach( $scripts as $script ){
 					if( !$this->useCompression ){
+						/** @var string $script */
 						$script		= preg_replace( "/;+$/", ";", trim( $script ) );
 						if( preg_match( "/\r?\n/", $script ) ){
 							$lines	= (array) preg_split( "/\r?\n/", PHP_EOL.$script.PHP_EOL );
@@ -420,7 +425,7 @@ class JavaScript
 	 *	@return		string
 	 *	@throws		IoException
 	 */
-	protected function renderUrls(bool $forceFresh = FALSE ): string
+	protected function renderUrls( bool $forceFresh = FALSE ): string
 	{
 		if( !count( $this->getPlainUrlList() ) )
 			return '';

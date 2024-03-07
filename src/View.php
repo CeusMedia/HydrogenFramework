@@ -371,7 +371,8 @@ class View
 		$list	= [];																				//  prepare empty list
 		$files	= $this->loadContentFiles( $path, $keys, $data );									//  try to load files
 		foreach( $files as $key => $value ){														//  iterate file contents
-			$id	= preg_replace( "/[^a-z]/i", " ", $key );						//  replace not allowed characters
+			/** @var string $id */
+			$id	= preg_replace( "/[^a-z]/i", " ", $key );							//  replace not allowed characters
 			$id	= $prefix ? $prefix." ".$id : $id;													//  prepend prefix to ID if set
 			$id	= CamelCase::convert( $id, FALSE );									//  build camel-cased ID
 			$list[$id]	= $value;																	//  append content to map
@@ -413,15 +414,19 @@ class View
 	 *	@access		protected
 	 *	@param		string|NULL		$section	Section in locale file
 	 *	@param		string|NULL		$topic		Locale file key, eg. test/my, default: current controller
+	 *	@param		bool			$asObject	Return section array as object
 	 *	@return		array|object
+	 *	@todo		implement asObject on topic, breaks current templates
 	 */
-	protected function getWords( ?string $section = NULL, ?string $topic = NULL ): object|array
+	protected function getWords( ?string $section = NULL, ?string $topic = NULL, bool $asObject = TRUE ): object|array
 	{
-		if( empty( $topic ) /*&& $this->env->getLanguage()->hasWords( $this->controller ) */)
-			$topic = $this->controller;
-		if( empty( $section ) )
+		$topic	= $topic ?? $this->controller;
+		if( NULL === $topic )
+			return [];
+		if( NULL === $section )
 			return $this->env->getLanguage()->getWords( $topic );
-		return (object) $this->env->getLanguage()->getSection( $topic, $section );
+		$words	= $this->env->getLanguage()->getSection( $topic, $section );
+		return $asObject ? (object) $words : $words;
 	}
 
 	/**
@@ -453,19 +458,21 @@ class View
 		catch( Exception $e ){
 			$message	= 'Rendering template file "%1$s" failed: %2$s';
 			$message	= sprintf( $message, $filePath, $e->getMessage() );
-			$this->env->getLog()->log( 'error', $message, $this );
-			if( !$this->env->getLog()->logException( $e, $this ) )
+			$this->env->getLog()?->log( 'error', $message, $this );
+			if( !$this->env->getLog()?->logException( $e, $this ) )
 				throw new RuntimeException( $message, 0, $e  );
 			$this->env->getMessenger()?->noteFailure( $message );
 		}
-		$buffer	= (string) ob_get_clean();
-		$buffer	= trim( preg_replace( '/^(<br( ?\/)?>)+/s', '', $buffer ) );			//  get standard output buffer
+		$buffer	= (string) ob_get_clean();														//  get standard output buffer
+		/** @var string $buffer */
+		$buffer	= preg_replace( '/^(<br( ?\/)?>)+/s', '', $buffer );
+		$buffer	= trim( $buffer );
 		if( strlen( $buffer ) ){																//  there is something in buffer
 			if( !is_string( $content ) )														//  the view did not return content
 				$content	= $buffer;															//  use buffer as content
 			else if( $this->env->getMessenger() )												//  otherwise use messenger
 				$this->env->getMessenger()->noteFailure( nl2br( $buffer ) );					//  note as failure
-			else if( !$this->env->getLog()->log( 'error', $buffer, $this ) )					//  logging failed
+			else if( !$this->env->getLog()?->log( 'error', $buffer, $this ) )					//  logging failed
 				throw new RuntimeException( $buffer );											//  throw exception
 		}
 		return (string) $content;

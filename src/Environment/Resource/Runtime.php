@@ -1,4 +1,5 @@
-<?php
+<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
+
 namespace CeusMedia\HydrogenFramework\Environment\Resource;
 
 use CeusMedia\Common\Alg\Time\Clock as Clock;
@@ -40,11 +41,11 @@ class Runtime
 
 	/**
 	 *	...
-	 *	@param		string			$goal			Identifier of goal
+	 *	@param		string|NULL		$goal			Identifier of goal
 	 *	@param		string|NULL		$description	Optional description of goal
 	 *	@return		integer			Number of goals reached at this point
 	 */
-	public function reach( string $goal, ?string $description = NULL ): int
+	public function reach( ?string $goal = NULL, ?string $description = NULL ): int
 	{
 		$this->clock->stopLap( 0, 0, $goal, $description );
 		return count( $this->clock->getLaps() );

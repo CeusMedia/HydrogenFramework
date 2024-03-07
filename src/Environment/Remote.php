@@ -103,7 +103,7 @@ class Remote extends Environment
 		], array_values( $additionalResources ) ), $keepAppAlive );									//  add additional resources and carry exit flag
 	}
 
-	public function getMessenger(): BaseMessenger
+	public function getMessenger(): ?BaseMessenger
 	{
 		return $this->messenger;
 	}

@@ -46,7 +46,7 @@ class Config
 	public string $key;
 
 	/** @var	string|int|float|bool	$value */
-	public $value;
+	public string|int|float|bool $value;
 
 	/** @var	string|NULL				$type */
 	public ?string $type;
@@ -56,7 +56,7 @@ class Config
 	/** @var	bool					$mandatory */
 	public bool $mandatory				= FALSE;
 
-	public ?string $protected			= NULL;
+	public bool|string|NULL $protected	= NULL;
 
 	/** @var	string|NULL				$title */
 	public ?string $title;
@@ -67,7 +67,7 @@ class Config
 	 *	@param		string|NULL				$type
 	 *	@param		string|NULL				$title
 	 */
-	public function __construct( string $key, $value, ?string $type = NULL, ?string $title = NULL )
+	public function __construct( string $key, string|int|float|bool $value, ?string $type = NULL, ?string $title = NULL )
 	{
 		$this->key		= $key;
 		$this->value	= $value;

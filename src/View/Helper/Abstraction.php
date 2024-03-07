@@ -50,6 +50,8 @@ abstract class Abstraction implements Helper
 
 	protected function getWords( string $section, string $topic ): array
 	{
+		if( NULL === $this->env )
+			return [];
 		$words	= $this->env->getLanguage()->getWords( $topic );
 		if( $section && array_key_exists( $section, $words ) )
 			return $words[$section];

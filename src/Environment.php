@@ -201,8 +201,10 @@ class Environment implements ArrayAccess
 		$this->initDatabase();																		//  setup database connection
 		$this->initCache();																			//  setup cache support
 
-		$logStrategies	= [LogResource::STRATEGY_MODULE_HOOKS, ...$this->log->getStrategies()];		//  prepend hook based logging strategy
-		$this->log->setStrategies( array_unique( $logStrategies ) );								//  set new logging strategies list
+		if( NULL !== $this->log ){
+			$strategies	= [LogResource::STRATEGY_MODULE_HOOKS, ...$this->log->getStrategies()];		//  prepend hook based logging strategy
+			$this->log->setStrategies( array_unique( $strategies ) );								//  set new logging strategies list
+		}
 
 		if( !$isFinal )
 			return;
@@ -788,8 +790,8 @@ class Environment implements ArrayAccess
 			$prefix	= 'module.'.strtolower( $moduleId );											//  build config key prefix of module
 			$this->config->set( $prefix, TRUE );													//  enable module in configuration
 			foreach( $module->config as $key => $value ){											//  iterate module configuration pairs
-				if( is_object( $value) ){															//  is module config definition object
-					/** @var ModuleConfig $value */
+				if( $value instanceof ModuleConfig && NULL !== $value->type ){						//  is module config definition object
+					/** @var  $value */
 					@settype( $value->value, $value->type );										//  cast value by set type
 					$this->config->set( $prefix.'.'.$key, $value->value );							//  set configuration pair
 				}
