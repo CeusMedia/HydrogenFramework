@@ -212,7 +212,7 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 			$module->source				= 'local';													//  set source to local
 			$module->path				= $this->modulePath;										//  assume app path as module path
 			$module->isInstalled		= TRUE;														//  module is installed
-			$module->versionInstalled	= $module->version;											//  set installed version by found module version
+			$module->version->installed	= $module->version->current;								//  set installed version by found module version
 			$module->isActive			= TRUE;														//  set active by fallback: not configured -> on (active)
 			$configDictionary			= $module->getConfigAsDictionary();
 			if( $configDictionary->has( 'active' ) )											//  module has main switch in config

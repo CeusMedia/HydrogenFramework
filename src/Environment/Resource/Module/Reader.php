@@ -30,9 +30,17 @@ namespace CeusMedia\HydrogenFramework\Environment\Resource\Module;
 
 use CeusMedia\Common\XML\Element as XmlElement;
 use CeusMedia\Common\XML\ElementReader as XmlReader;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Author as AuthorDefinition;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Company as CompanyDefinition;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Config as ConfigDefinition;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Deprecation as DeprecationDefinition;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\File as FileDefinition;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Hook as HookDefinition;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Job as JobDefinition;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\License as LicenseDefinition;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Relation as RelationDefinition;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\SQL as SqlDefinition;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Version as VersionDefinition;
 
 use Exception;
 use RuntimeException;
@@ -76,6 +84,7 @@ class Reader
 		self::decorateObjectWithConfig( $object, $xml );
 		self::decorateObjectWithRelations( $object, $xml );
 		self::decorateObjectWithLicenses( $object, $xml );
+//		self::decorateObjectWithSql( $object, $xml );
 		return $object;
 	}
 
@@ -135,21 +144,21 @@ class Reader
 		if( !$xml->author )																			//  no author nodes existing
 			return FALSE;
 		foreach( $xml->author as $author ){															//  iterate author nodes
-			$object->authors[]	= (object) [
-				'name'	=> (string) $author,
-				'email'	=> self::castNodeAttributes( $author, 'email' ),
-				'site'	=> self::castNodeAttributes( $author, 'site' )
-			];
+			$object->authors[]	= new AuthorDefinition(
+				(string) $author,
+				self::castNodeAttributes( $author, 'email' ),
+				self::castNodeAttributes( $author, 'site' )
+			);
 		}
 		return TRUE;
 	}
 
 	protected static function decorateObjectWithBasics( Definition $object, XmlElement $xml ): void
 	{
+		$object->version			= new VersionDefinition( (string) $xml->version );
 		$object->title				= (string) $xml->title;
 		$object->category			= (string) $xml->category;
 		$object->description		= (string) $xml->description;
-		$object->version			= (string) $xml->version;
 		$object->price				= (string) $xml->price;
 		if( NULL !== $object->install && isset( $xml->version ) ){
 			$object->install->type		= (string) self::castNodeAttributes( $xml->version, 'install-type' );
@@ -170,11 +179,11 @@ class Reader
 		if( !$xml->company )																		//  no company nodes existing
 			return FALSE;
 		foreach( $xml->company as $company ){														//  iterate company nodes
-			$object->companies[]	= (object) [
-				'name'		=> (string) $company,
-				'email'		=> self::castNodeAttributes( $company, 'email' ),
-				'site'		=> self::castNodeAttributes( $company, 'site' )
-			];
+			$object->companies[]	= new CompanyDefinition(
+				(string) $company,
+				self::castNodeAttributes( $company, 'email' ),
+				self::castNodeAttributes( $company, 'site' )
+			);
 		}
 		return TRUE;
 	}
@@ -309,10 +318,12 @@ class Reader
 			$resource	= self::castNodeAttributes( $hook, 'resource' );
 			/** @var string $event */
 			$event		= self::castNodeAttributes( $hook, 'event' );
-			$object->hooks[$resource][$event][]	= (object) [
-				'level'	=> self::castNodeAttributes( $hook, 'level', 'int', 5 ),
-				'hook'	=> trim( (string) $hook, ' ' ),
-			];
+			$object->hooks[$resource][$event][]	= new HookDefinition(
+				trim( (string) $hook, ' ' ),
+				$resource,
+				$event,
+				self::castNodeAttributes( $hook, 'level', 'int', 5 )
+			);
 		}
 		return TRUE;
 	}
@@ -330,18 +341,18 @@ class Reader
 			return FALSE;
 		foreach( $xml->job as $job ){																//  iterate job nodes
 			$callable		= explode( '::', (string) $job, 2 );
-			$object->jobs[]	= (object) [
-				'id'			=> self::castNodeAttributes( $job, 'id' ),
-				'class'			=> $callable[0],
-				'method'		=> $callable[1],
-				'commands'		=> self::castNodeAttributes( $job, 'commands' ),
-				'arguments'		=> self::castNodeAttributes( $job, 'arguments' ),
-				'mode'			=> self::castNodeAttributes( $job, 'mode', 'array', [] ),
-				'interval'		=> self::castNodeAttributes( $job, 'interval' ),
-				'multiple'		=> self::castNodeAttributes( $job, 'multiple', 'bool' ),
-				'deprecated'	=> self::castNodeAttributes( $job, 'deprecated' ),
-				'disabled'		=> self::castNodeAttributes( $job, 'disabled' ),
-			];
+			$object->jobs[]	= new JobDefinition(
+				self::castNodeAttributes( $job, 'id' ),
+				$callable[0],
+				$callable[1],
+				self::castNodeAttributes( $job, 'commands' ),
+				self::castNodeAttributes( $job, 'arguments' ),
+				self::castNodeAttributes( $job, 'mode', 'array', [] ),
+				self::castNodeAttributes( $job, 'interval' ),
+				self::castNodeAttributes( $job, 'multiple', 'bool' ),
+				self::castNodeAttributes( $job, 'deprecated' ),
+				self::castNodeAttributes( $job, 'disabled' )
+			);
 		}
 		return TRUE;
 	}
@@ -358,11 +369,11 @@ class Reader
 		if( !$xml->license )																		//  no license nodes existing
 			return FALSE;
 		foreach( $xml->license as $license ){														//  iterate license nodes
-			$object->licenses[]	= (object) [
-				'label'			=> (string) $license,
-				'source'		=> self::castNodeAttributes( $license, 'source' ),
-				'title'			=> self::castNodeAttributes( $license, 'title' ),
-			];
+			$object->licenses[]	= new LicenseDefinition(
+				(string) $license,
+				self::castNodeAttributes( $license, 'title' ),
+				self::castNodeAttributes( $license, 'source' )
+			);
 		}
 		return TRUE;
 	}
@@ -410,7 +421,7 @@ class Reader
 			return FALSE;
 		foreach( $xml->log as $entry ){																//  iterate version log entries if available
 			if( $entry->hasAttribute( "version" ) ){												//  only if log entry is versioned
-				$object->versionLog[]	= (object) [												//  append version log entry
+				$object->version->log[]	= (object) [												//  append version log entry
 					'note'		=> (string) $entry,													//  extract entry note
 					'version'	=> $entry->getAttribute( 'version' ),								//  extract entry version
 				];
@@ -432,22 +443,22 @@ class Reader
 			return FALSE;																			//  do nothing
 		if( $xml->relations->needs )																//  if needed modules are defined
 			foreach( $xml->relations->needs as $moduleName )										//  iterate list if needed modules
-				$object->relations->needs[(string) $moduleName]		= (object) [					//  note relation
-					'relation'	=> 'needs',															//  ... as needed
-					'type'		=> self::castNodeAttributes( $moduleName, 'type' ),		//  ... with relation type
-					'id'		=> (string) $moduleName,											//  ... with module ID
-					'source'	=> self::castNodeAttributes( $moduleName, 'source' ),		//  ... with module source, if set
-					'version'	=> self::castNodeAttributes( $moduleName, 'version' ),		//  ... with version, if set
-				];
+				$object->relations->needs[(string) $moduleName]		= new RelationDefinition(		//  note relation
+					(string) $moduleName,															//  ... with module ID
+					self::castNodeAttributes( $moduleName, 'type' ),						//  ... with relation type
+					self::castNodeAttributes( $moduleName, 'source' ),						//  ... with module source, if set
+					self::castNodeAttributes( $moduleName, 'version' ),						//  ... with version, if set
+					'needs'																	//  ... as needed
+				);
 		if( $xml->relations->supports )																//  if supported modules are defined
 			foreach( $xml->relations->supports as $moduleName )										//  iterate list if supported modules
-				$object->relations->supports[(string) $moduleName]	= (object) [					//  note relation
-					'relation'	=> 'supports',														//  ... as supported
-					'type'		=> self::castNodeAttributes( $moduleName, 'type' ),		//  ... with relation type
-					'id'		=> (string) $moduleName,											//  ... with module ID
-					'source'	=> self::castNodeAttributes( $moduleName, 'source' ),		//  ... with module source, if set
-					'version'	=> self::castNodeAttributes( $moduleName, 'version' ),		//  ... with version, if set
-				];
+				$object->relations->supports[(string) $moduleName]	= new RelationDefinition(		//  note relation
+					(string) $moduleName,															//  ... with module ID
+					self::castNodeAttributes( $moduleName, 'type' ),						//  ... with relation type
+					self::castNodeAttributes( $moduleName, 'source' ),						//  ... with module source, if set
+					self::castNodeAttributes( $moduleName, 'version' ),						//  ... with version, if set
+					'supports'																//  ... as supported
+				);
 		return TRUE;
 	}
 
@@ -479,12 +490,12 @@ class Reader
 				$key	= $event.'@'.$type;
 				if( $event == "update" )
 					$key	= $event.":".$version.'@'.$type;
-				$object->sql[$key] = (object) [
-					'event'			=> $event,
-					'version'		=> $version,
-					'type'			=> $type,
-					'sql'			=> (string) $sql
-				];
+				$object->sql[$key] = new SqlDefinition(
+					$event,
+					$version,
+					$type,
+					(string) $sql
+				);
 			}
 		}
 		return TRUE;

@@ -1,8 +1,9 @@
 <?php
 /**
- *	Module definition.
+ *	Module definition: SQL script for event (install, update, uninstall) at specific version.
+ *	Supports different database types.
  *
- *	Copyright (c) 2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +21,7 @@
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module.Definition
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2022 Christian Würker (ceusmedia.de)
+ *	@copyright		2024 Christian Würker (ceusmedia.de)
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -28,20 +29,41 @@
 namespace CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition;
 
 /**
- *	Module definition.
+ *	Module definition: SQL script for event (install, update, uninstall) at specific version.
+ *	Supports different database types.
  *
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module.Definition
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2022 Christian Würker (ceusmedia.de)
+ *	@copyright		2024 Christian Würker (ceusmedia.de)
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class Relations
+class SQL
 {
-	/**	@var		array<Relation>		$needs */
-	public array $needs			= [];
+	/** @var	string				$name */
+	public string $event;
 
-	/**	@var		array<Relation>		$supports */
-	public array $supports		= [];
+	/** @var	string				$version */
+	public string $version;
+
+	/** @var	string				$type */
+	public string $type;
+
+	/** @var	string				$sql */
+	public string $sql;
+
+	/**
+	 *	@param		string			$event
+	 *	@param		string			$version
+	 *	@param		string			$type
+	 *	@param		string			$sql
+	 */
+	public function __construct( string $event, string $version, string $type, string $sql )
+	{
+		$this->event	= $event;
+		$this->version	= $version;
+		$this->type		= $type;
+		$this->sql		= $sql;
+	}
 }

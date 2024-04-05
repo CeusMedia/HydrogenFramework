@@ -29,11 +29,18 @@
 namespace CeusMedia\HydrogenFramework\Environment\Resource\Module;
 
 use CeusMedia\Common\ADT\Collection\Dictionary;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Author;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Company;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Config;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Deprecation;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Files;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Hook;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Job;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Installation;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\License;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Relations;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\SQL;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Version;
 
 /**
  *	Module definition.
@@ -55,30 +62,51 @@ class Definition
 	public string $title;
 	public string $category;
 	public string $description;
-	public array $frameworks			= [];
-	public string $version;
-	public ?string $versionAvailable	= NULL;
-	public ?string $versionInstalled	= NULL;
-	public array $versionLog			= [];
-	public ?Deprecation $deprecation	= NULL;
 	public bool $isActive				= TRUE;
 	public bool $isInstalled			= FALSE;
+	public array $frameworks			= [];
+//	public string $version;
+
+	/**	@var Version $version */
+	public Version $version;
+
+	/**	@var ?Deprecation $deprecation */
+	public ?Deprecation $deprecation	= NULL;
+
+	/**	@var array<Company> $companies */
 	public array $companies				= [];
+
+	/**	@var array<Author> $authors */
 	public array $authors				= [];
+
+	/**	@var array<License> $authors */
 	public array $licenses				= [];
-	public ?string $price				= NULL;
-	public ?string $icon				= NULL;
+
+	/**	@var Files $files */
 	public Files $files;
 
 	/** @var array<Config> $config */
 	public array $config				= [];
 
+	/**	@var Relations $relations */
 	public Relations $relations;
+
+	/** @var array<string,SQL> $sql */
 	public array $sql					= [];
+
 	public array $links					= [];
+
+	/** @var array<string,Hook> $hooks */
 	public array $hooks					= [];
+
+	/** @var array<string,Job> $jobs */
 	public array $jobs					= [];
+
+	/** @var ?Installation $install */
 	public ?Installation $install		= NULL;
+
+	public ?string $price				= NULL;
+	public ?string $icon				= NULL;
 
 	protected ?Dictionary $configAsDictionary	= NULL;
 
@@ -94,7 +122,7 @@ class Definition
 		$this->id			= $id;
 		$this->file			= $file;
 		$this->uri			= $uri ?? ( realpath( $file ) ?: NULL );
-		$this->version		= $version;
+		$this->version		= new Version( $version );
 		$this->files		= new Files();
 		$this->relations	= new Relations();
 		$this->install		= new Installation();

@@ -35,6 +35,7 @@ use CeusMedia\Cache\SimpleCacheInterface;
 use CeusMedia\Cache\SimpleCacheFactory;
 use CeusMedia\Common\ADT\Collection\Dictionary as Dictionary;
 use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
+use CeusMedia\Common\Exception\Deprecation as DeprecationException;
 use CeusMedia\HydrogenFramework\Environment\Exception as EnvironmentException;
 use CeusMedia\HydrogenFramework\Environment\Resource\Acl\Abstraction;
 use CeusMedia\HydrogenFramework\Environment\Resource\Acl\Abstraction as AbstractAclResource;
@@ -258,8 +259,8 @@ class Environment implements ArrayAccess
 	 *	@param		string		$key
 	 *	@param		bool		$strict
 	 *	@return		object|NULL
-	 *	@throws		DomainException		if no resource is registered by given key
-	 * @throws		Exception			if key is 'clock', since replaced by 'runtime'
+	 *	@throws		DomainException			if no resource is registered by given key
+	 *	@throws		DeprecationException	if key is 'clock', since replaced by 'runtime'
 	 */
 	public function get( string $key, bool $strict = TRUE ): object|NULL
 	{

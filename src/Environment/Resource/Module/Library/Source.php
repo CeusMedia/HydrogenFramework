@@ -150,7 +150,7 @@ class Source extends AbstractLibrary implements LibraryInterface
 					$module	= ModuleReader::load( $filePath, $id );
 					$module->path				= $entry->getPath();
 					$module->source				= $this->source->id;
-					$module->versionAvailable	= $module->version;
+					$module->version->available	= $module->version->current;
 					$module->isActive			= TRUE;
 					$configDictionary			= $module->getConfigAsDictionary();
 					if( $configDictionary->has( 'active' ) )									//  module has main switch in config
@@ -201,7 +201,7 @@ class Source extends AbstractLibrary implements LibraryInterface
 		foreach( $modules as $module ){
 			$module->source				= $this->source->id;
 			$module->path				= $this->source->path.str_replace( '_', '/', $module->id );
-			$module->versionAvailable	= $module->version;
+			$module->version->available	= $module->version->current;
 
 			$icon	= $module->path.'/icon';
 			try{
