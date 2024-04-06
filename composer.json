@@ -74,7 +74,7 @@
     ],
     "dev:test-syntax": [
       "@dev:install-quiet",
-      "vendor/bin/parallel-lint src -j 1 --colors"
+      "vendor/bin/parallel-lint src -j 5 --colors"
     ]
   },
   "scripts-descriptions": {

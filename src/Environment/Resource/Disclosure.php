@@ -93,10 +93,10 @@ class Disclosure
 					if( $method->class !== $className )												//  method is inherited
 						continue;																	//  skip this method
 				if( $options['skipFramework'] )														//  skipping framework methods is enabled
-					if( substr( $method->class, 0, 4 ) == "CMF_" )									//  method is inherited from framework
+					if( str_starts_with( $method->class, 'CMF_' ) )									//  method is inherited from framework
 						continue;																	//  skip this method
 				if( $options['skipMagic'] )															//  skipping magic methods is enabled
-					if( substr( $method->name, 0, 2 ) == "__" )										//  method is magic
+					if( str_starts_with( $method->name, '__' ) )										//  method is magic
 						continue;																	//  skip this method
 				if( $options['reflectMethod'] )														//  reflecting methods is enabled to
 					$method->reflection	= $methodReflection;										//  store the method reflection object

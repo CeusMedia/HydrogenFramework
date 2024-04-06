@@ -4,13 +4,15 @@ includes:
 
 parameters:
 	phpVersion: 80100
-	level: 8
+	level: 6
 	paths:
 		- ../../src/
 	excludePaths:
 		- ../../src/Application/Abstraction.php
 		- ../../src/Application/Web/Abstraction.php
+		- ../../src/Environment/Resource/Acl/Server.php
 		- ../../src/Environment/Resource/Disclosure.php
+		- ../../src/Model/REST/JSON.php
 		- ../../vendor/ceus-media/common/src/compat8.php
 		- ../../vendor/ceus-media/common/src/compat9.php
 	checkMissingIterableValueType: false

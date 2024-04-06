@@ -45,7 +45,7 @@ abstract class Abstraction implements LibraryInterface
 {
 	protected array $modules		= [];
 
-	protected ?object $scanResult;
+	protected ?object $scanResult	= NULL;
 
 	/**
 	 *	Return module definition by module ID.

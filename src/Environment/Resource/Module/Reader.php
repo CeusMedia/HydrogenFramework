@@ -38,6 +38,7 @@ use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\File as F
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Hook as HookDefinition;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Job as JobDefinition;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\License as LicenseDefinition;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Link as LinkDefinition;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Relation as RelationDefinition;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\SQL as SqlDefinition;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Version as VersionDefinition;
@@ -146,8 +147,8 @@ class Reader
 		foreach( $xml->author as $author ){															//  iterate author nodes
 			$object->authors[]	= new AuthorDefinition(
 				(string) $author,
-				self::castNodeAttributes( $author, 'email' ),
-				self::castNodeAttributes( $author, 'site' )
+				(string) self::castNodeAttributes( $author, 'email' ),
+				(string) self::castNodeAttributes( $author, 'site' )
 			);
 		}
 		return TRUE;
@@ -181,8 +182,8 @@ class Reader
 		foreach( $xml->company as $company ){														//  iterate company nodes
 			$object->companies[]	= new CompanyDefinition(
 				(string) $company,
-				self::castNodeAttributes( $company, 'email' ),
-				self::castNodeAttributes( $company, 'site' )
+				(string) self::castNodeAttributes( $company, 'email' ),
+				(string) self::castNodeAttributes( $company, 'site' )
 			);
 		}
 		return TRUE;
@@ -200,15 +201,11 @@ class Reader
 		if( !$xml->config )																			//  no config nodes existing
 			return FALSE;
 		foreach( $xml->config as $pair ){															//  iterate config nodes
-			/** @var string $title */
-			$title		= self::castNodeAttributes( $pair, 'title' );
-			/** @var string $type */
-			$type		= self::castNodeAttributes( $pair, 'type' );
+			$title		= (string) self::castNodeAttributes( $pair, 'title' );
+			$type		= (string) self::castNodeAttributes( $pair, 'type' );
 			$type		= trim( strtolower( $type ) );
-			/** @var string $key */
-			$key		= self::castNodeAttributes( $pair, 'name' );
-			/** @var string $info */
-			$info		= self::castNodeAttributes( $pair, 'info' );
+			$key		= (string) self::castNodeAttributes( $pair, 'name' );
+			$info		= (string) self::castNodeAttributes( $pair, 'info' );
 			$title		= ( !$title && $info ) ? $info : $title;
 			$value		= (string) $pair;
 			if( in_array( $type, array( 'boolean', 'bool' ) ) )										//  value is boolean
@@ -394,16 +391,16 @@ class Reader
 			if( $link->hasAttribute( 'lang', 'xml' ) )
 				$language	= $link->getAttribute( 'lang', 'xml' );
 			$label		= (string) $link;
-			$object->links[]	= (object) [
-				'parent'		=> self::castNodeAttributes( $link, 'parent' ),
-				'access'		=> self::castNodeAttributes( $link, 'access' ),
-				'language'		=> $language,
-				'path'			=> self::castNodeAttributes( $link, 'path', 'string', $label ),
-				'link'			=> self::castNodeAttributes( $link, 'link' ),
-				'rank'			=> self::castNodeAttributes( $link, 'rank', 'int', 10 ),
-				'label'			=> $label,
-				'icon'			=> self::castNodeAttributes( $link, 'icon' ),
-			];
+			$object->links[]	= new LinkDefinition(
+				self::castNodeAttributes( $link, 'parent' ),
+				self::castNodeAttributes( $link, 'access' ),
+				$language,
+				self::castNodeAttributes( $link, 'path', 'string', $label ),
+				self::castNodeAttributes( $link, 'link' ),
+				self::castNodeAttributes( $link, 'rank', 'int', 10 ),
+				$label,
+				self::castNodeAttributes( $link, 'icon' )
+			);
 		}
 		return TRUE;
 	}
@@ -420,11 +417,11 @@ class Reader
 		if( !$xml->log )																			//  no log nodes existing
 			return FALSE;
 		foreach( $xml->log as $entry ){																//  iterate version log entries if available
-			if( $entry->hasAttribute( "version" ) ){												//  only if log entry is versioned
-				$object->version->log[]	= (object) [												//  append version log entry
-					'note'		=> (string) $entry,													//  extract entry note
-					'version'	=> $entry->getAttribute( 'version' ),								//  extract entry version
-				];
+			if( $entry->hasAttribute( 'version' ) ){									//  only if log entry is versioned
+				$object->version->addLog(															//  append version log entry
+					(string) $entry,																//  extract entry note
+					$entry->getAttribute( 'version' )									//  extract entry version
+				);
 			}
 		}
 		return TRUE;

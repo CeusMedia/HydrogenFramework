@@ -649,7 +649,7 @@ class Model
 
 		$database		= $env->getDatabase();
 		if( NULL === $database )
-			throw new RuntimeException( 'Database resource needed for '.get_class( $this ) );
+			throw new RuntimeException( 'Database resource needed for '.static::class );
 		if( method_exists( $database, 'getPrefix' ) )
 			$this->prefix	= $database->getPrefix();
 

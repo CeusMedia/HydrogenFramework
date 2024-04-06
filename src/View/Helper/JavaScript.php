@@ -307,12 +307,12 @@ class JavaScript
 		try{
 			return JsMinifier::minify( $script );
 		}
-		catch( Throwable $t ){
+		catch( Throwable ){
 		}
 		try{
 			return NetClosureCompiler::minify( $script );
 		}
-		catch( Throwable $t ){}
+		catch( Throwable ){}
 		return $script;
 	}
 

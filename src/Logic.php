@@ -57,7 +57,7 @@ class Logic
 	public function __construct( Environment $env )
 	{
 		$logicPool	= $env->getLogic();
-		$key		= $logicPool->getKeyFromClassName( get_class( $this ) );
+		$key		= $logicPool->getKeyFromClassName( static::class );
 //		if( $logicPool->has( $key ) && $logicPool->isInstantiated( $key ) )
 //			return $env->logic->get( $key );
 		$this->env		= $env;

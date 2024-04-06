@@ -58,7 +58,7 @@ abstract class Abstraction implements RouterInterface
 		if( strlen( $uri ) ){
 			if( $uri == '.' )
 				$uri	= '';
-			if( substr( $uri, 0, 2 ) == './' )
+			if( str_starts_with( $uri, './' ) )
 				$uri	= substr( $uri, 2 );
 		}
 		return $this->env->url.$uri;

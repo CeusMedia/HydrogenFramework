@@ -38,6 +38,7 @@ use Exception;
  *	@copyright		2010-2024 Christian Würker (ceusmedia.de)
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
+ *	@deprecated		use Resource_JSON_Acl from module Resource:JSON:Client instead
  */
 class Server extends Abstraction
 {
@@ -54,8 +55,9 @@ class Server extends Abstraction
 		if( $this->hasNoAccess( $roleId ) )
 			return [];
 		if( !isset( $this->rights[$roleId] ) ) {
-			/** @phpstan-ignore-next-line */
-			$rights	= $this->env->get( 'server' )->getData( 'role', 'getRights', array( $roleId ) );
+			/** @var Resource_JSON_Client $server */
+			$server	= $this->env->get( 'jsonServerClient' );
+			$rights	= $server->getData( 'role', 'getRights', array( $roleId ) );
 			$this->rights[$roleId]	= [];
 			foreach( $rights as $right ){
 				if( !isset( $this->rights[$roleId][$right->controller] ) )
@@ -94,8 +96,9 @@ class Server extends Abstraction
 		if( $this->hasNoAccess( $roleId ) )
 			return -2;
 		$data	= array( 'controller' => $controller, 'action' => $action );
-		/** @phpstan-ignore-next-line */
-		return $this->env->get( 'server' )->postData( 'role', 'setRight', array( $roleId ), $data );
+		/** @var Resource_JSON_Client $server */
+		$server	= $this->env->get( 'jsonServerClient' );
+		return $server->postData( 'role', 'setRight', array( $roleId ), $data );
 	}
 
 	//  --  PROTECTED  --  //
@@ -108,9 +111,10 @@ class Server extends Abstraction
 	 */
 	protected function getRole( string $roleId ): object|array
 	{
+		/** @var Resource_JSON_Client $server */
+		$server	= $this->env->get( 'jsonServerClient' );
 		if( !$this->roles )
-			/** @phpstan-ignore-next-line */
-			foreach( $this->env->get( 'server' )->getData( 'role', 'index' ) as $role )
+			foreach( $server->getData( 'role', 'index' ) as $role )
 				$this->roles[$role->roleId]	= $role;
 		return $this->roles[$roleId];
 	}

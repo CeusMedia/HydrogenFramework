@@ -72,7 +72,7 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 	{
 		$this->env			= $env;
 		$config				= $this->env->getConfig();
-		$envClass			= get_class( $this->env );
+		$envClass			= $this->env::class;
 		$defaultPaths		= $envClass::$defaultPaths;
 		$this->modulePath	= $env->path.$defaultPaths['config'].'modules/';
 		$this->cacheFile	= $env->path.$defaultPaths['config'].'modules.cache.serial';

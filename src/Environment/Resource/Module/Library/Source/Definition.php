@@ -2,7 +2,7 @@
 /**
  *	Module source definition.
  *
- *	Copyright (c) 2022 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2022-2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module.Libary.Source
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2022 Christian Würker (ceusmedia.de)
+ *	@copyright		2022-2024 Christian Würker (ceusmedia.de)
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -33,7 +33,7 @@ namespace CeusMedia\HydrogenFramework\Environment\Resource\Module\Library\Source
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module.Libary.Source
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2022 Christian Würker (ceusmedia.de)
+ *	@copyright		2022-2024 Christian Würker (ceusmedia.de)
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */

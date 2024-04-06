@@ -1,9 +1,14 @@
 <?php
+
 namespace CeusMedia\HydrogenFramework\Model\REST;
 
 use CeusMedia\HydrogenFramework\Model\Abstraction;
 use Exception;
+use Resource_REST_Client;
 
+/**
+ * @deprecated use Model_REST_Abstraction from module Resource_REST_Client instead
+ */
 abstract class JSON extends Abstraction
 {
 	public static string $resourceRouteBasePath		= '';
@@ -12,25 +17,22 @@ abstract class JSON extends Abstraction
 
 	protected string $basePath;
 
-	/** @var object $client */
+	/** @var Resource_REST_Client $client */
 	protected object $client;
 
 	public function count( array $conditions = [] ): int
 	{
 		$parameters	= array( 'filters' => $conditions, 'limit' => 1 );
-        /** @phpstan-ignore-next-line */
 		return $this->client->get( $this->basePath, $parameters )->data->range->total;
 	}
 
 	public function create( $data ): string
 	{
-        /** @phpstan-ignore-next-line */
 		return $this->client->post( $this->basePath, $data );
 	}
 
 	public function delete( string $id ): bool
 	{
-        /** @phpstan-ignore-next-line */
 		return $this->client->delete( $this->basePath.'/'.$id )->data;
 	}
 
@@ -40,19 +42,16 @@ abstract class JSON extends Abstraction
 			'filters'	=> $conditions,
 			'orders'	=> $orders
 		];
-        /** @phpstan-ignore-next-line */
 		return $this->client->get( $this->basePath, $parameters )->data->items;
 	}
 
 	public function read( string $id )
 	{
-        /** @phpstan-ignore-next-line */
 		return $this->client->get( $this->basePath.'/'.$id )->data;
 	}
 
 	public function update( string $id, $data ): bool
 	{
-        /** @phpstan-ignore-next-line */
 		return $this->client->put( $this->basePath.'/'.$id, $data )->data;
 	}
 

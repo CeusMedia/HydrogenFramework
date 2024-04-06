@@ -208,12 +208,12 @@ class Source extends AbstractLibrary implements LibraryInterface
 				$content		= NetReader::readUrl( $icon.'.png' );
 				$module->icon	= 'data:image/png;base64,'.base64_encode( $content );
 			}
-			catch( Exception $e ){}
+			catch( Exception ){}
 			try{
 				$content		= NetReader::readUrl( $icon.'.ico' );
 				$module->icon	= 'data:image/png;base64,'.base64_encode( $content );
 			}
-			catch( Exception $e ){}
+			catch( Exception ){}
 
 #			print_m( $modules );
 #			die;

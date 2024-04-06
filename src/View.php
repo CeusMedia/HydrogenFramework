@@ -89,7 +89,7 @@ class View
 	 */
 	public function __construct( WebEnvironment $env )
 	{
-		$env->getRuntime()->reach( 'CMF_View('.get_class( $this ).')::init start' );
+		$env->getRuntime()->reach( 'CMF_View('.static::class.')::init start' );
 		$this->setEnv( $env );
 		$this->html		= new HtmlElements();
 		$this->time		= new TimeConverter();
@@ -101,7 +101,7 @@ class View
 			$this->pathTemplates	= './';
 		if( !file_exists( $this->pathTemplates ) )													//  templates folder is not existing
 			throw new RuntimeException( 'Templates folder "'.$this->pathTemplates.'" is missing' );	//  quit with exception
-		$env->getRuntime()->reach( 'CMF_Controller('.get_class( $this ).')::init done' );
+		$env->getRuntime()->reach( 'CMF_Controller('.static::class.')::init done' );
 /*		if( class_exists( 'CMM_TEA_Factory' ) ){
 			$config	= 'config/TEA.ini';
 			if( !file_exists( 'config/TEA.ini' ) )
@@ -420,7 +420,7 @@ class View
 	 */
 	protected function getWords( ?string $section = NULL, ?string $topic = NULL, bool $asObject = TRUE ): object|array
 	{
-		$topic	= $topic ?? $this->controller;
+		$topic	??= $this->controller;
 		if( NULL === $topic )
 			return [];
 		if( NULL === $section )

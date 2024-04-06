@@ -5,7 +5,7 @@
 [![Package version](http://img.shields.io/packagist/v/ceus-media/hydrogen-framework.svg?style=flat-square)](https://packagist.org/packages/ceus-media/hydrogen-framework)
 [![Monthly downloads](http://img.shields.io/packagist/dt/ceus-media/hydrogen-framework.svg?style=flat-square)](https://packagist.org/packages/ceus-media/hydrogen-framework)
 [![PHP version](http://img.shields.io/packagist/php-v/ceus-media/hydrogen-framework.svg?style=flat-square)](https://packagist.org/packages/ceus-media/hydrogen-framework)
-[![PHPStan level](https://img.shields.io/badge/PHPStan-level%207-brightgreen.svg?style=flat-square)](https://packagist.org/packages/ceus-media/hydrogen-framework)
+[![PHPStan level](https://img.shields.io/badge/PHPStan-level%206-brightgreen.svg?style=flat-square)](https://packagist.org/packages/ceus-media/hydrogen-framework)
 [![License](https://img.shields.io/packagist/l/ceus-media/hydrogen-framework.svg?style=flat-square)](https://packagist.org/packages/ceus-media/hydrogen-framework)
 [![Release date](https://img.shields.io/github/release-date/CeusMedia/HydrogenFramework.svg?style=flat-square)](https://packagist.org/packages/ceus-media/hydrogen-framework)
 [![Commit date](https://img.shields.io/github/last-commit/CeusMedia/HydrogenFramework.svg?style=flat-square)](https://packagist.org/packages/ceus-media/hydrogen-framework)

@@ -77,9 +77,9 @@ class Log
 		self::STRATEGY_APP_DEFAULT,
 	];
 
-	protected ?array $customExceptionCallback;
+	protected ?array $customExceptionCallback	= NULL;
 
-	protected ?array $customLogCallback;
+	protected ?array $customLogCallback			= NULL;
 
 	/**
 	 *	...
@@ -299,7 +299,7 @@ class Log
 	{
 		$entry	= vsprintf( '%s THROW %s %s'.PHP_EOL.'%s'.PHP_EOL, [
 			$data['datetime'],
-			get_class( $data['exception'] ),
+			$data['exception']::class,
 			$data['exception']->getMessage(),
 			$data['exception']->getTraceAsString(),
 		] );
@@ -317,7 +317,7 @@ class Log
 		$entry	= join( PHP_EOL, [
 			'Datetime:   '.$data['datetime'],
 			'Microtime:  '.$data['microtime'],
-			'Type:       '.get_class( $data['exception'] ),
+			'Type:       '.$data['exception']::class,
 			'Message:    '.$data['exception']->getMessage(),
 			'Trace:',
 			$data['exception']->getTraceAsString(),
@@ -334,10 +334,10 @@ class Log
 	 */
 	protected function handleExceptionWithCustomCallback( array $data ): bool
 	{
-		if( $this->customExceptionCallback ){
+		if( NULL !== $this->customExceptionCallback ){
 			$callable	= $this->customExceptionCallback;
 			if( is_object( $callable[0] ) && is_callable( $callable, TRUE ) ){
-				$className	= get_class( $callable[0] );
+				$className	= $callable[0]::class;
 				$reflection	= new ReflectionMethod( $className, $callable[1] );
 				return $reflection->invokeArgs( $callable[0], [$data] );
 			}
@@ -389,10 +389,10 @@ class Log
 	 */
 	protected function handleLogWithCustomCallback( array $data ): bool
 	{
-		if( $this->customLogCallback ){
+		if( NULL !== $this->customLogCallback ){
 			$callable	= $this->customLogCallback;
 			if( is_object( $callable[0] ) && is_callable( $callable, TRUE ) ){
-				$className	= get_class( $callable[0] );
+				$className	= $callable[0]::class;
 				$reflection	= new ReflectionMethod( $className, $callable[1] );
 				return $reflection->invokeArgs( $callable[0], [$data] );
 			}

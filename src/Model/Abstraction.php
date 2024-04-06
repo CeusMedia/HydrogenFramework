@@ -21,7 +21,7 @@ abstract class Abstraction
 	{
 		$this->env	= $env;
 		$this->__onInit();
-		$this->className	= get_class( $this );
+		$this->className	= static::class;
 	}
 
 	/*  --  ABSTRACT CRUD METHODS  --  */
@@ -134,7 +134,7 @@ abstract class Abstraction
 			@$this->get( $id );
 			return TRUE;
 		}
-		catch( Exception $e ){}
+		catch( Exception ){}
 		return FALSE;
 	}
 

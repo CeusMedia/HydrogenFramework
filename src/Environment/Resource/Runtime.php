@@ -125,28 +125,15 @@ class Runtime
 
 	protected function markDeprecation( string $type = NULL ): void
 	{
-		switch( $type ){
-			case 'sleep':
-				$message	= 'Environment clock $env->getClock()->sleep() is deprecated.';
-				break;
-			case 'speed':
-				$message	= 'Environment clock $env->getClock()->speed() is deprecated.';
-				break;
-			case 'usleep':
-				$message	= 'Environment clock $env->getClock()->usleep() is deprecated.';
-				break;
-			case 'uspeed':
-				$message	= 'Environment clock $env->getClock()->uspeed() is deprecated.';
-				break;
-			case 'stop':
-				$message	= 'Environment clock $env->getClock()->stop() is deprecated. Use $env->getRuntime()->get() instead';
-				break;
-			case 'stopLap':
-				$message	= 'Environment clock $env->getClock()->stopLap() is deprecated. Use $env->getRuntime()->reach() instead';
-				break;
-			default:
-				$message	= 'Environment clock $env->getClock() is deprecated. Use module $env->getRuntime() instead';
-		}
+		$message = match( $type ){
+			'sleep'		=> 'Environment clock $env->getClock()->sleep() is deprecated.',
+			'speed'		=> 'Environment clock $env->getClock()->speed() is deprecated.',
+			'usleep'	=> 'Environment clock $env->getClock()->usleep() is deprecated.',
+			'uspeed'	=> 'Environment clock $env->getClock()->uspeed() is deprecated.',
+			'stop'		=> 'Environment clock $env->getClock()->stop() is deprecated. Use $env->getRuntime()->get() instead',
+			'stopLap'	=> 'Environment clock $env->getClock()->stopLap() is deprecated. Use $env->getRuntime()->reach() instead',
+			default		=> 'Environment clock $env->getClock() is deprecated. Use module $env->getRuntime() instead',
+		};
 
 		Deprecation::getInstance()
 			->setErrorVersion( '0.8.7.9' )

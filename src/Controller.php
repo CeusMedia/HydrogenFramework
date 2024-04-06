@@ -109,17 +109,17 @@ class Controller
 	 */
 	public function __construct( WebEnvironment $env, bool $setupView = TRUE )
 	{
-		$env->getRuntime()->reach( 'CMF_Controller('.get_class( $this ).')' );
+		$env->getRuntime()->reach( 'CMF_Controller('.static::class.')' );
 		static::$moduleId	= trim( static::$moduleId );
 		$this->setEnv( $env );
 
 //		$env->getRuntime()->reach( 'CMF_Controller('.get_class( $this ).'): env set' );
 		if( $setupView )
 			$this->setupView( !$env->getRequest()->isAjax() );
-		$env->getRuntime()->reach( 'CMF_Controller('.get_class( $this ).'): got view object' );
+		$env->getRuntime()->reach( 'CMF_Controller('.static::class.'): got view object' );
 
 		/** @var string $controllerName */
-		$controllerName		= preg_replace( "/^Controller_/", "", get_class( $this ) );				//  get controller name from class name
+		$controllerName		= preg_replace( "/^Controller_/", "", static::class );				//  get controller name from class name
 		$this->defaultPath	= strtolower( str_replace( '_', '/', $controllerName ) );				//  to guess default controller URI path
 		$this->path			= $this->defaultPath;													//  and note this as controller path
 
@@ -138,7 +138,7 @@ class Controller
 			$this->callHook( 'App', 'onException', $this, $payload );
 			throw new RuntimeException( $e->getMessage(), $e->getCode(), $e );
 		}
-		$env->getRuntime()->reach( 'CMF_Controller('.get_class( $this ).'): done' );				//  log time of construction
+		$env->getRuntime()->reach( 'CMF_Controller('.static::class.'): done' );				//  log time of construction
 	}
 
 	public function getView(): ?View

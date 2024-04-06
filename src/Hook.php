@@ -113,10 +113,10 @@ class Hook
 		if( !method_exists( $this, $method ) )
 			throw new BadMethodCallException( vsprintf(
 				'Hook method %s::%s is not existing',
-				[get_class( $this ), $method]
+				[static::class, $method]
 			) );
 
-		$reflection = new ReflectionMethod( get_class( $this ), $method );
+		$reflection = new ReflectionMethod( static::class, $method );
 		if( $reflection->isStatic() ) {
 			return $this->fetchStatic( $method );
 		}
@@ -193,10 +193,9 @@ class Hook
 	 */
 	protected function fetchStatic( string $method ): ?bool
 	{
-		$call	= [get_class( $this ), $method];
+		$call	= [static::class, $method];
 		if( !is_callable( $call ) )
-			throw new BadMethodCallException( vsprintf('Hook method %s::%s is not callable', [
-				get_class( $this ), $method] ) );
+			throw new BadMethodCallException( vsprintf('Hook method %s::%s is not callable', $call ) );
 
 		return call_user_func_array( $call, [
 			$this->env,

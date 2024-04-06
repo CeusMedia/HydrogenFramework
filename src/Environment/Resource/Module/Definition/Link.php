@@ -1,8 +1,8 @@
 <?php
 /**
- *	Module definition: Relations.
+ *	Module definition: Link.
  *
- *	Copyright (c) 2022-2024 Christian Würker (ceusmedia.de)
+ *	Copyright (c) 2024 Christian Würker (ceusmedia.de)
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module.Definition
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2022-2024 Christian Würker (ceusmedia.de)
+ *	@copyright		2024 Christian Würker (ceusmedia.de)
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -28,20 +28,45 @@
 namespace CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition;
 
 /**
- *	Module definition: Relations.
+ *	Module definition: Link.
  *
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module.Definition
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2022-2024 Christian Würker (ceusmedia.de)
+ *	@copyright		2024 Christian Würker (ceusmedia.de)
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class Relations
+class Link
 {
-	/**	@var		array<Relation>		$needs */
-	public array $needs			= [];
+	public ?string $parent		= NULL;
+	public ?string $access		= NULL;
+	public ?string $language	= NULL;
+	public ?string $path		= NULL;
+	public ?string $link		= NULL;
+	public ?string $rank		= NULL;
+	public ?string $label		= NULL;
+	public ?string $icon		= NULL;
 
-	/**	@var		array<Relation>		$supports */
-	public array $supports		= [];
+	/**
+	 *	@param		string|NULL		$parent
+	 *	@param		string|NULL		$access
+	 *	@param		string|NULL		$language
+	 *	@param		string|NULL		$path
+	 *	@param		string|NULL		$link
+	 *	@param		string|NULL		$rank
+	 *	@param		string|NULL		$label
+	 *	@param		string|NULL		$icon
+	 */
+	public function __construct( ?string $parent, ?string $access, ?string $language, ?string $path, ?string $link, ?string $rank, ?string $label, ?string $icon )
+	{
+		$this->parent		= $parent;
+		$this->access		= $access;
+		$this->language		= $language;
+		$this->path			= $path;
+		$this->link			= $link;
+		$this->rank			= $rank;
+		$this->label		= $label;
+		$this->icon			= $icon;
+	}
 }
