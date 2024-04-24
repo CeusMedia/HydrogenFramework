@@ -1,10 +1,10 @@
 includes:
-#	- vendor/phpstan/phpstan-strict-rules/rules.neon
+#	- ../../vendor/phpstan/phpstan-strict-rules/rules.neon
 	- phpstan-baseline.neon
 
 parameters:
 	phpVersion: 80100
-	level: 6
+	level: 7
 	paths:
 		- ../../src/
 	excludePaths:
@@ -15,6 +15,8 @@ parameters:
 		- ../../src/Model/REST/JSON.php
 		- ../../vendor/ceus-media/common/src/compat8.php
 		- ../../vendor/ceus-media/common/src/compat9.php
-	checkMissingIterableValueType: false
 	treatPhpDocTypesAsCertain: false
 	reportUnmatchedIgnoredErrors: true
+	ignoreErrors:
+		- identifier: missingType.iterableValue
+
