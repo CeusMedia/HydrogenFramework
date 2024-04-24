@@ -240,7 +240,7 @@ class Reader
 
 			$item				= new ConfigDefinition( trim( $key ), $value, $type , $title );		//  container for config entry
 
-			$item->values		= self::castNodeAttributesToArray( $pair, 'values', 'array' );
+			$item->values		= self::castNodeAttributesToArray( $pair, 'values' );
 			$item->mandatory	= (bool) self::castNodeAttributesToBool( $pair, 'mandatory', 'bool' );
 			/** @var bool|string $protected */
 			$protected			= self::castNodeAttributesToString( $pair, 'protected' );
