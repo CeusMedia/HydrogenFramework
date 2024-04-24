@@ -60,8 +60,8 @@ class Job
 	/** @var	string				$interval */
 	public string $interval;
 
-	/** @var	string				$multiple */
-	public string $multiple;
+	/** @var	bool				$multiple */
+	public bool $multiple;
 
 	/** @var	string				$deprecated */
 	public string $deprecated;
@@ -77,11 +77,11 @@ class Job
 	 *	@param		string			$arguments
 	 *	@param		array			$mode
 	 *	@param		string			$interval
-	 *	@param		string			$multiple
+	 *	@param		bool			$multiple
 	 *	@param		string			$deprecated
 	 *	@param		string			$disabled
 	 */
-	public function __construct( string $id, string $class, string $method, string $commands, string $arguments, array $mode, string $interval, string $multiple, string $deprecated, string $disabled )
+	public function __construct( string $id, string $class, string $method, string $commands, string $arguments, array $mode, string $interval, bool $multiple, string $deprecated, string $disabled )
 	{
 		$this->id			= $id;
 		$this->class		= $class;

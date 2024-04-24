@@ -107,30 +107,57 @@ class Reader
 	/**
 	 *	@param		XmlElement		$node
 	 *	@param		string			$attribute
-	 *	@param		string			$type
 	 *	@param		mixed			$default
-	 *	@return		array|string|bool|int|NULL
+	 *	@return		array|NULL
 	 */
-	protected static function castNodeAttributes( XmlElement $node, string $attribute, string $type = 'string', mixed $default = NULL ): array|string|bool|int|NULL
+	protected static function castNodeAttributesToArray( XmlElement $node, string $attribute, mixed $default = NULL ): array|NULL
 	{
-		if( !$node->hasAttribute( $attribute ) ){
-			return match( $type ){
-				'array'				=> $default ?? [],
-				'string'			=> $default ?? '',
-				'bool', 'boolean'	=> $default ?? FALSE,
-				'int', 'integer'	=> $default ?? 0,
-				default				=> $default ?? NULL,
-			};
-		}
+		if( !$node->hasAttribute( $attribute ) )
+			return $default ?? [];
 		$value	= $node->getAttribute( $attribute );
-		return match( $type ){
-			'array'				=> preg_split( '/\s*,\s*/', trim( $value ) ),
-			'string'			=> trim( $value ),
-			'time'				=> strtotime( $value ),
-			'bool', 'boolean'	=> in_array( strtolower( $value ), ['true', 'yes', '1', TRUE] ),
-			'int', 'integer'	=> (int) $value,
-			default				=> $value,
-		};
+		return preg_split( '/\s*,\s*/', trim( $value ) ) ?: [];
+	}
+
+	/**
+	 *	@param		XmlElement		$node
+	 *	@param		string			$attribute
+	 *	@param		mixed			$default
+	 *	@return		bool|NULL
+	 */
+	protected static function castNodeAttributesToBool( XmlElement $node, string $attribute, mixed $default = NULL ): bool|NULL
+	{
+		if( !$node->hasAttribute( $attribute ) )
+			return $default ?? FALSE;
+		$value	= $node->getAttribute( $attribute );
+		return in_array( strtolower( $value ), ['true', 'yes', '1', TRUE] );
+	}
+
+	/**
+	 *	@param		XmlElement		$node
+	 *	@param		string			$attribute
+	 *	@param		mixed			$default
+	 *	@return		int|NULL
+	 */
+	protected static function castNodeAttributesToInt( XmlElement $node, string $attribute, mixed $default = NULL ): int|NULL
+	{
+		if( !$node->hasAttribute( $attribute ) )
+			return $default ?? 0;
+		$value	= $node->getAttribute( $attribute );
+		return (int) $value;
+	}
+
+	/**
+	 *	@param		XmlElement		$node
+	 *	@param		string			$attribute
+	 *	@param		mixed			$default
+	 *	@return		string|NULL
+	 */
+	protected static function castNodeAttributesToString( XmlElement $node, string $attribute, mixed $default = NULL ): string|NULL
+	{
+		if( !$node->hasAttribute( $attribute ) )
+			return $default ?? '';
+		$value	= $node->getAttribute( $attribute );
+		return trim( $value );
 	}
 
 	/**
@@ -147,8 +174,8 @@ class Reader
 		foreach( $xml->author as $author ){															//  iterate author nodes
 			$object->authors[]	= new AuthorDefinition(
 				(string) $author,
-				(string) self::castNodeAttributes( $author, 'email' ),
-				(string) self::castNodeAttributes( $author, 'site' )
+				self::castNodeAttributesToString( $author, 'email' ),
+				self::castNodeAttributesToString( $author, 'site' )
 			);
 		}
 		return TRUE;
@@ -162,9 +189,9 @@ class Reader
 		$object->description		= (string) $xml->description;
 		$object->price				= (string) $xml->price;
 		if( NULL !== $object->install && isset( $xml->version ) ){
-			$object->install->type		= (string) self::castNodeAttributes( $xml->version, 'install-type' );
-			$object->install->date		= (string) self::castNodeAttributes( $xml->version, 'install-date' );
-			$object->install->source	= (string) self::castNodeAttributes( $xml->version, 'install-source' );
+			$object->install->type		= self::castNodeAttributesToString( $xml->version, 'install-type' );
+			$object->install->date		= self::castNodeAttributesToString( $xml->version, 'install-date' );
+			$object->install->source	= self::castNodeAttributesToString( $xml->version, 'install-source' );
 		}
 	}
 
@@ -182,8 +209,8 @@ class Reader
 		foreach( $xml->company as $company ){														//  iterate company nodes
 			$object->companies[]	= new CompanyDefinition(
 				(string) $company,
-				(string) self::castNodeAttributes( $company, 'email' ),
-				(string) self::castNodeAttributes( $company, 'site' )
+				self::castNodeAttributesToString( $company, 'email' ),
+				self::castNodeAttributesToString( $company, 'site' )
 			);
 		}
 		return TRUE;
@@ -201,11 +228,11 @@ class Reader
 		if( !$xml->config )																			//  no config nodes existing
 			return FALSE;
 		foreach( $xml->config as $pair ){															//  iterate config nodes
-			$title		= (string) self::castNodeAttributes( $pair, 'title' );
-			$type		= (string) self::castNodeAttributes( $pair, 'type' );
+			$title		= self::castNodeAttributesToString( $pair, 'title' );
+			$type		= (string) self::castNodeAttributesToString( $pair, 'type' );
 			$type		= trim( strtolower( $type ) );
-			$key		= (string) self::castNodeAttributes( $pair, 'name' );
-			$info		= (string) self::castNodeAttributes( $pair, 'info' );
+			$key		= (string) self::castNodeAttributesToString( $pair, 'name' );
+			$info		= self::castNodeAttributesToString( $pair, 'info' );
 			$title		= ( !$title && $info ) ? $info : $title;
 			$value		= (string) $pair;
 			if( in_array( $type, array( 'boolean', 'bool' ) ) )										//  value is boolean
@@ -213,10 +240,10 @@ class Reader
 
 			$item				= new ConfigDefinition( trim( $key ), $value, $type , $title );		//  container for config entry
 
-			$item->values		= (array) self::castNodeAttributes( $pair, 'values', 'array' );
-			$item->mandatory	= (bool) self::castNodeAttributes( $pair, 'mandatory', 'bool' );
+			$item->values		= self::castNodeAttributesToArray( $pair, 'values', 'array' );
+			$item->mandatory	= (bool) self::castNodeAttributesToBool( $pair, 'mandatory', 'bool' );
 			/** @var bool|string $protected */
-			$protected			= self::castNodeAttributes( $pair, 'protected' );
+			$protected			= self::castNodeAttributesToString( $pair, 'protected' );
 			$item->protected	= $protected;
 			$object->config[$key]	= $item;
 		}
@@ -236,7 +263,7 @@ class Reader
 			return FALSE;
 		$object->deprecation	= new DeprecationDefinition(										//  note deprecation object
 			(string) $xml->deprecation,																//  ... with message
-			(string) self::castNodeAttributes( $xml->deprecation, 'url' )					//  ... with follow-up URL, if set
+			self::castNodeAttributesToString( $xml->deprecation, 'url' )					//  ... with follow-up URL, if set
 		);
 		return TRUE;
 	}
@@ -284,7 +311,7 @@ class Reader
 	protected static function decorateObjectWithFrameworks( Definition $object, XmlElement $xml ): bool
 	{
 		/** @var string $frameworks */
-		$frameworks	= self::castNodeAttributes( $xml, 'frameworks', 'string', 'Hydrogen:<0.9' );
+		$frameworks	= self::castNodeAttributesToString( $xml, 'frameworks', 'Hydrogen:<0.9' );
 		if( !strlen( trim( $frameworks ) ) )
 			return FALSE;
 		/** @var array $list */
@@ -312,14 +339,14 @@ class Reader
 			return FALSE;
 		foreach( $xml->hook as $hook ){																//  iterate hook nodes
 			/** @var string $resource */
-			$resource	= self::castNodeAttributes( $hook, 'resource' );
+			$resource	= self::castNodeAttributesToString( $hook, 'resource' );
 			/** @var string $event */
-			$event		= self::castNodeAttributes( $hook, 'event' );
+			$event		= self::castNodeAttributesToString( $hook, 'event' );
 			$object->hooks[$resource][$event][]	= new HookDefinition(
 				trim( (string) $hook, ' ' ),
 				$resource,
 				$event,
-				self::castNodeAttributes( $hook, 'level', 'int', 5 )
+				(int) self::castNodeAttributesToInt( $hook, 'level', 5 )
 			);
 		}
 		return TRUE;
@@ -339,16 +366,16 @@ class Reader
 		foreach( $xml->job as $job ){																//  iterate job nodes
 			$callable		= explode( '::', (string) $job, 2 );
 			$object->jobs[]	= new JobDefinition(
-				self::castNodeAttributes( $job, 'id' ),
+				(string) self::castNodeAttributesToString( $job, 'id' ),
 				$callable[0],
 				$callable[1],
-				self::castNodeAttributes( $job, 'commands' ),
-				self::castNodeAttributes( $job, 'arguments' ),
-				self::castNodeAttributes( $job, 'mode', 'array', [] ),
-				self::castNodeAttributes( $job, 'interval' ),
-				self::castNodeAttributes( $job, 'multiple', 'bool' ),
-				self::castNodeAttributes( $job, 'deprecated' ),
-				self::castNodeAttributes( $job, 'disabled' )
+				(string) self::castNodeAttributesToString( $job, 'commands' ),
+				(string) self::castNodeAttributesToString( $job, 'arguments' ),
+				(array) self::castNodeAttributesToArray( $job, 'mode', [] ),
+				(string) self::castNodeAttributesToString( $job, 'interval' ),
+				(bool) self::castNodeAttributesToBool( $job, 'multiple', FALSE ),
+				(string) self::castNodeAttributesToString( $job, 'deprecated' ),
+				(string) self::castNodeAttributesToString( $job, 'disabled' )
 			);
 		}
 		return TRUE;
@@ -368,8 +395,8 @@ class Reader
 		foreach( $xml->license as $license ){														//  iterate license nodes
 			$object->licenses[]	= new LicenseDefinition(
 				(string) $license,
-				self::castNodeAttributes( $license, 'title' ),
-				self::castNodeAttributes( $license, 'source' )
+				self::castNodeAttributesToString( $license, 'title' ),
+				self::castNodeAttributesToString( $license, 'source' )
 			);
 		}
 		return TRUE;
@@ -392,14 +419,14 @@ class Reader
 				$language	= $link->getAttribute( 'lang', 'xml' );
 			$label		= (string) $link;
 			$object->links[]	= new LinkDefinition(
-				self::castNodeAttributes( $link, 'parent' ),
-				self::castNodeAttributes( $link, 'access' ),
+				self::castNodeAttributesToString( $link, 'parent' ),
+				self::castNodeAttributesToString( $link, 'access' ),
 				$language,
-				self::castNodeAttributes( $link, 'path', 'string', $label ),
-				self::castNodeAttributes( $link, 'link' ),
-				self::castNodeAttributes( $link, 'rank', 'int', 10 ),
+				self::castNodeAttributesToString( $link, 'path', $label ),
+				self::castNodeAttributesToString( $link, 'link' ),
+				self::castNodeAttributesToInt( $link, 'rank', 10 ),
 				$label,
-				self::castNodeAttributes( $link, 'icon' )
+				self::castNodeAttributesToString( $link, 'icon' )
 			);
 		}
 		return TRUE;
@@ -442,18 +469,18 @@ class Reader
 			foreach( $xml->relations->needs as $moduleName )										//  iterate list if needed modules
 				$object->relations->needs[(string) $moduleName]		= new RelationDefinition(		//  note relation
 					(string) $moduleName,															//  ... with module ID
-					self::castNodeAttributes( $moduleName, 'type' ),						//  ... with relation type
-					self::castNodeAttributes( $moduleName, 'source' ),						//  ... with module source, if set
-					self::castNodeAttributes( $moduleName, 'version' ),						//  ... with version, if set
+					(string) self::castNodeAttributesToString( $moduleName, 'type' ),			//  ... with relation type
+					(string) self::castNodeAttributesToString( $moduleName, 'source' ),			//  ... with module source, if set
+					(string) self::castNodeAttributesToString( $moduleName, 'version' ),		//  ... with version, if set
 					'needs'																	//  ... as needed
 				);
 		if( $xml->relations->supports )																//  if supported modules are defined
 			foreach( $xml->relations->supports as $moduleName )										//  iterate list if supported modules
 				$object->relations->supports[(string) $moduleName]	= new RelationDefinition(		//  note relation
 					(string) $moduleName,															//  ... with module ID
-					self::castNodeAttributes( $moduleName, 'type' ),						//  ... with relation type
-					self::castNodeAttributes( $moduleName, 'source' ),						//  ... with module source, if set
-					self::castNodeAttributes( $moduleName, 'version' ),						//  ... with version, if set
+					(string) self::castNodeAttributesToString( $moduleName, 'type' ),			//  ... with relation type
+					(string) self::castNodeAttributesToString( $moduleName, 'source' ),			//  ... with module source, if set
+					(string) self::castNodeAttributesToString( $moduleName, 'version' ),		//  ... with version, if set
 					'supports'																//  ... as supported
 				);
 		return TRUE;
@@ -473,13 +500,13 @@ class Reader
 			return FALSE;
 		foreach( $xml->sql as $sql ){																//  iterate sql nodes
 			/** @var string $event */
-			$event		= self::castNodeAttributes( $sql, 'on' );
+			$event		= self::castNodeAttributesToString( $sql, 'on' );
 			/** @var string $to */
-			$to			= self::castNodeAttributes( $sql, 'version-to' );
+			$to			= self::castNodeAttributesToString( $sql, 'version-to' );
 			/** @var string $version */
-			$version	= self::castNodeAttributes( $sql, 'version', 'string', $to );	//  @todo: remove fallback
+			$version	= self::castNodeAttributesToString( $sql, 'version', $to );	//  @todo: remove fallback
 			/** @var string $type */
-			$type		= self::castNodeAttributes( $sql, 'type', 'string', '*' );
+			$type		= self::castNodeAttributesToString( $sql, 'type', '*' );
 			if( $event === 'update' && !$version )
 				throw new Exception( 'SQL type "update" needs attribute "version"' );
 

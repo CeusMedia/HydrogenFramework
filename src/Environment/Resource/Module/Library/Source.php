@@ -109,10 +109,10 @@ class Source extends AbstractLibrary implements LibraryInterface
 		};
 		if( $useCache )
 			$cache->set( $cacheKeySource, $this->modules );
-		return $this->scanResult = (object) array(
+		return $this->scanResult	= (object) [
 			'source'	=> $this->source->type,
 			'count'		=> count( $this->modules ),
-		);
+		];
 	}
 
 	protected function getModulesFromFolder(): array

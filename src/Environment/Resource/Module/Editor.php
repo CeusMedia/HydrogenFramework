@@ -87,7 +87,7 @@ class Editor
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
 		$link		= $xml->addChild( 'author', $name );
 		if( NULL !== $email && 0 !== strlen( trim( $email ) ) )
-			$link->addAttribute( 'email', $email );
+			$link?->addAttribute( 'email', $email );
 		$this->saveModuleXml( $moduleId, $xml );													//  save modified module XML
 	}
 
@@ -109,7 +109,7 @@ class Editor
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
 		$link		= $xml->addChild( 'company', $name );
 		if( NULL !== $site && 0 !== strlen( trim( $site ) ) )
-			$link->addAttribute( 'site', trim( $site ) );
+			$link?->addAttribute( 'site', trim( $site ) );
 		$this->saveModuleXml( $moduleId, $xml );													//  save modified module XML
 	}
 
@@ -135,17 +135,17 @@ class Editor
 	{
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
 		$link		= $xml->addChild( 'config', $value );											//  add pair node
-		$link->addAttribute( 'name', $name );														//  set name attribute
+		$link?->addAttribute( 'name', $name );														//  set name attribute
 		if( strlen( trim( $type ) ) )																//  type attribute is given
-			$link->addAttribute( 'type', trim( $type ) );											//  set type attribute
+			$link?->addAttribute( 'type', trim( $type ) );											//  set type attribute
 		if( strlen( trim( $values ) ) )																//  values attribute is given
-			$link->addAttribute( 'values', trim( $values ) );										//  set values attribute
+			$link?->addAttribute( 'values', trim( $values ) );										//  set values attribute
 		if( strlen( trim( $mandatory ) ) )															//  mandatory attribute is given
-			$link->addAttribute( 'mandatory', trim( $mandatory ) );									//  set mandatory attribute
+			$link?->addAttribute( 'mandatory', trim( $mandatory ) );									//  set mandatory attribute
 		if( strlen( trim( $protected ) ) )															//  protected attribute is given
-			$link->addAttribute( 'protected', trim( $protected ) );									//  set protected attribute
+			$link?->addAttribute( 'protected', trim( $protected ) );									//  set protected attribute
 		if( NULL !== $title && 0 !== strlen( trim( $title ) ) )										//  title attribute is given
-			$link->addAttribute( 'title', trim( addslashes( $title ) ) );							//  set title attribute
+			$link?->addAttribute( 'title', trim( addslashes( $title ) ) );							//  set title attribute
 		$this->saveModuleXml( $moduleId, $xml );													//  save modified module XML
 	}
 
@@ -174,9 +174,9 @@ class Editor
 			throw new InvalidArgumentException( 'No resource given' );
 		$link		= $xml->files->addChild( $type, $resource );									//  add typed resource
 		if( strlen( trim( $source ) ) )																//  source attribute is given
-			$link->addAttribute( 'source', $source );												//  set source attribute
+			$link?->addAttribute( 'source', $source );												//  set source attribute
 		if( NULL !== $load && 0 !== strlen( trim( $load ) ) )										//  load attribute is given
-			$link->addAttribute( 'load', $load );													//  set load attribute
+			$link?->addAttribute( 'load', $load );													//  set load attribute
 		$this->saveModuleXml( $moduleId, $xml );													//  save modified module XML
 	}
 
@@ -200,17 +200,17 @@ class Editor
 	public function addLink( string $moduleId, string $path, ?string $link = NULL, ?string $label = NULL, ?string $access = NULL, ?string $language = NULL, ?string $rank = NULL ): void
 	{
 		$xml		= $this->loadModuleXml( $moduleId );											//  load module XML
-		$link		= $xml->addChild( 'link', (string) $label );									//
+		$node		= $xml->addChild( 'link', (string) $label );									//
 		if( strlen( trim( $path ) ) )																//  path attribute is given
-			$link->addAttribute( 'path', trim( $path ) );											//  set path attribute
-		if( strlen( trim( $link ) ) )																//  link attribute is given
-			$link->addAttribute( 'link', trim( $path ) );											//  set link attribute
+			$node?->addAttribute( 'path', trim( $path ) );											//  set path attribute
+		if( strlen( trim( $link ?? '' ) ) )																//  link attribute is given
+			$node?->addAttribute( 'link', trim( $path ) );											//  set link attribute
 		if( NULL !== $access && 0 !== strlen( trim( $access ) ) )									//  access attribute is given
-			$link->addAttribute( 'access', trim( $access ) );										//  set access attribute
+			$node?->addAttribute( 'access', trim( $access ) );										//  set access attribute
 		if( NULL !== $rank && 0 !== strlen( trim( $rank ) ) )										//  rank attribute is given
-			$link->addAttribute( 'rank', trim( $rank ) );											//  set rank attribute
+			$node?->addAttribute( 'rank', trim( $rank ) );											//  set rank attribute
 		if( NULL !== $language && 0 !== strlen( trim( $language ) ) )								//  language attribute is given
-			$link->addAttribute( 'lang', $language, 'xml', $this->nsXml );							//  set language attribute
+			$node?->addAttribute( 'lang', $language, 'xml', $this->nsXml );							//  set language attribute
 		$this->saveModuleXml( $moduleId, $xml );													//  save modified module XML
 	}
 
@@ -231,7 +231,7 @@ class Editor
 		if( !$this->hasXmlNode( $xml, 'relations' ) )												//  relations node not yet existing
 			$xml->addChild( 'relations' );															//  create relations node
 		$node		= $xml->relations->addChild( $type, $relatedModuleId );							//  add new relation node
-		$node->addAttribute( 'type', $type );														//  set type attribute on new node
+		$node?->addAttribute( 'type', $type );														//  set type attribute on new node
 		$this->saveModuleXml( $moduleId, $xml );													//  save modified module XML
 	}
 
@@ -460,7 +460,7 @@ class Editor
 			if( $sql->event->getValue() !== $event || $sql->type->getValue() !== $type )		//  event and type are matching
 				continue;
 			$matchingVersions	= $sql->from->getValue() === $versionFrom;						//  compare versions
-			if( $event !== "update" || ( $event === "update" && $matchingVersions ) ){			//  check versions on update
+			if( $event !== "update" || $matchingVersions ){										//  check versions on update
 				$sql->remove();																	//  remove XML node
 				$this->saveModuleXml( $moduleId, $xml );										//  save modified module XML
 				return TRUE;

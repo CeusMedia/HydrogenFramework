@@ -96,10 +96,10 @@ class Definition
 
 	public array $links					= [];
 
-	/** @var array<string,Hook> $hooks */
+	/** @var array<string,array<string,array<int,Hook>>> $hooks */
 	public array $hooks					= [];
 
-	/** @var array<string,Job> $jobs */
+	/** @var array<int|string,Job> $jobs */
 	public array $jobs					= [];
 
 	/** @var ?Installation $install */

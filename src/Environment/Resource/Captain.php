@@ -180,7 +180,7 @@ class Captain
 	 *	@access		public
 	 *	@param		string		$resource
 	 *	@param		string		$event
-	 *	@return		array
+	 *	@return		array<int,array<int,object{resource: string, event: string, moduleId: string, function: string}>>
 	 */
 	public function collectHooks( string $resource, string $event ): array
 	{
@@ -196,10 +196,10 @@ class Captain
 
 			foreach( $module->hooks[$resource][$event] as $hook ){
 				$hooks[$hook->level][] = (object) [
-					'module'	=> $module,
+					'moduleId'	=> $module->id,
 					'event'		=> $event,
 					'resource'	=> $resource,
-					'function'	=> $hook->hook,
+					'function'	=> $hook->callback,
 				];
 			}
 		}
@@ -209,7 +209,7 @@ class Captain
 	}
 
 	/**
-	 *	@param		array		$hooks
+	 *	@param		array<int,array<int,object{resource: string, event: string, moduleId: string, function: string}>>		$hooks
 	 *	@param		object		$context
 	 *	@param		array		$payload
 	 *	@return		bool
@@ -226,7 +226,7 @@ class Captain
 			foreach( $levelHooks as $hook ){
 				if( 0 === strlen( $hook->function ) )
 					continue;
-				$module		= $hook->module;
+				$module		= $this->env->getModules()->get( $hook->moduleId );
 				$resource	= $hook->resource;
 				$event		= $hook->event;
 				$function	= $hook->function;
@@ -245,28 +245,32 @@ class Captain
 
 					/** @var Hook $hookObject */
 					$hookObject	= Factory::createObject( $callback[0], [$this->env, $context] );
-					$hookObject->setModule( $hook->module )->setPayload( $payload );
+					$hookObject->setModule( $module )->setPayload( $payload );
 					$result		= $hookObject->fetch( $callback[1] );
 
 					$this->env->getRuntime()->reach( vsprintf(
 						'<!--Resource_Module_Library_Local::call-->Hook: %s@%s: %s',
-						[$event, $resource, $module->id]
+						[$event, $resource, $hook->moduleId]
 					) );
 
 					$stdout		= (string) ob_get_clean();
 					$this->handleStdoutOfResourceEventHookCall( $stdout, $resource, $event, $module );
 				} catch( Exception $e ){
+					$messageParams	= [$module->id, $resource, $event, $e->getMessage()];
 					$this->handleExceptionOfResourceEventHookCall( $e, $resource, $event, $module );
 					if( $this->env->has( 'messenger' ) ){
-						$this->env->getMessenger()?->noteFailure('Call on event ' . $event . '@' . $resource . ' hooked by module ' . $module->id . ' failed: ' . $e->getMessage());
-						$this->env->getLog()?->logException($e);
+						$this->env->getMessenger()?->noteFailure( vsprintf(
+							'Call on event %s@%s hooked by module %s failed: %s',
+							$messageParams
+						) );
+						$this->env->getLog()?->logException( $e );
 					} else
-						throw new RuntimeException('Hook ' . $module->id . '::' . $resource . '@' . $event . ' failed: ' . $e->getMessage(), 0, $e);
+						throw new RuntimeException( vsprintf( 'Hook %s::%s@%s failed: %s', $messageParams ), 0, $e );
 				} finally {
-					unset($this->openHooks[$resource . '::' . $event]);
+					unset( $this->openHooks[$resource.'::'.$event] );
 				}
 			}
-			if (TRUE === $result)
+			if( TRUE === $result )
 				return TRUE;
 		}
 		return FALSE;

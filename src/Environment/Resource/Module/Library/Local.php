@@ -231,10 +231,10 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 		if( $useCache )
 			FileWriter::save( $this->cacheFile, serialize( $this->modules ) );
 		$this->env->getRuntime()->reach( 'Resource_Module_Library_Local::scan (files)' );
-		return $this->scanResult = (object) array(
+		return $this->scanResult = (object) [
 			'source' 	=> 'files',
 			'count'		=> count( $this->modules ),
-		);
+		];
 	}
 
 	/**

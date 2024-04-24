@@ -44,7 +44,7 @@ class Link
 	public ?string $language	= NULL;
 	public ?string $path		= NULL;
 	public ?string $link		= NULL;
-	public ?string $rank		= NULL;
+	public ?int $rank			= NULL;
 	public ?string $label		= NULL;
 	public ?string $icon		= NULL;
 
@@ -54,11 +54,11 @@ class Link
 	 *	@param		string|NULL		$language
 	 *	@param		string|NULL		$path
 	 *	@param		string|NULL		$link
-	 *	@param		string|NULL		$rank
+	 *	@param		int|NULL		$rank
 	 *	@param		string|NULL		$label
 	 *	@param		string|NULL		$icon
 	 */
-	public function __construct( ?string $parent, ?string $access, ?string $language, ?string $path, ?string $link, ?string $rank, ?string $label, ?string $icon )
+	public function __construct( ?string $parent, ?string $access, ?string $language, ?string $path, ?string $link, ?int $rank, ?string $label, ?string $icon )
 	{
 		$this->parent		= $parent;
 		$this->access		= $access;
