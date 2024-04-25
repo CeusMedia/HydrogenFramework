@@ -231,7 +231,7 @@ class Language
 		$reader		= new FileReader( $fileName, FALSE );
 		$data		= [];
 		if( $reader->exists() )	{
-			$string	= $reader->readString();
+			$string	= $reader->readString() ?? '';
 			$this->env->getRuntime()->reach( 'Resource_Language::load('.$topic.'): loaded file' );
 			/** @var string $string */
 			$string	= preg_replace( "/\s;[^\n]+\n+/", "\n", $string );

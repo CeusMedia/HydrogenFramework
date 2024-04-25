@@ -4,7 +4,7 @@ includes:
 
 parameters:
 	phpVersion: 80100
-	level: 7
+	level: 8
 	paths:
 		- ../../src/
 	excludePaths:

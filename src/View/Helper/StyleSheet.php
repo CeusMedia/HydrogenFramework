@@ -39,6 +39,7 @@ use CeusMedia\Common\FS\Folder\Lister as FolderLister;
 use CeusMedia\Common\Net\Reader as NetReader;
 use CeusMedia\Common\UI\HTML\Tag as HtmlTag;
 use CeusMedia\HydrogenFramework\Environment\Resource\Captain as CaptainResource;
+use SplFileInfo;
 
 /**
  *	Component to collect and combine StyleSheet.
@@ -110,9 +111,9 @@ class StyleSheet
 	{
 		$prefix = preg_replace( "/^([a-z0-9]+)/", "\\1", $this->prefix );
 		$index	= new RegexFileFilter( $this->pathCache, '/^'.$prefix.'\w+\.css$/' );
-		foreach( $index as $file ){
+		/** @var SplFileInfo $file */
+		foreach( $index as $file )
 			unlink( $file->getPathname() );
-		}
 		return $this;
 	}
 
@@ -288,6 +289,7 @@ class StyleSheet
 		$pathSelf	= str_replace( $pathRoot, '', $pathSelf );								//  get path relative to document root for symbolic link map
 
 		$symlinks	= [];																			//  prepare map of symbolic links for CSS relocator
+		/** @var SplFileInfo $item */
 		foreach( FolderLister::getFolderList( 'themes' ) as $item )									//  iterate theme folders
 			if( is_link( ( $path = $item->getPathname() ) ) )										//  if theme folder is a link
 				$symlinks['/'.$pathSelf.'/themes/'.$item->getFilename()] = realpath( $path );		//  not symbolic link
@@ -302,7 +304,7 @@ class StyleSheet
 				continue;																			//  skip to next without relocation etc.
 			}
 			$pathFile	= dirname( $url->url ).'/';													//  get path to CSS file within app
-			$content	= FileReader::load( $url->url );											//  read local CSS content
+			$content	= FileReader::load( $url->url ) ?? '';										//  read local CSS content
 			$content	= $combiner->combineString( $pathFile, $content, TRUE );					//  insert imported CSS files within CSS content
 			if( preg_match( "/\/[a-z]+/", $content ) )												//  CSS content contains path notations
 				$content	= $relocator->rewrite( $content, $pathFile, $pathRoot, $symlinks );		//  relocate resources paths in CSS content

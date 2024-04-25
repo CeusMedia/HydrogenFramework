@@ -2,13 +2,13 @@
 
 *A PHP application framework using MVC, with design patterns and modules.*
 
-[![Package version](http://img.shields.io/packagist/v/ceus-media/hydrogen-framework.svg?style=flat-square)](https://packagist.org/packages/ceus-media/hydrogen-framework)
-[![Monthly downloads](http://img.shields.io/packagist/dt/ceus-media/hydrogen-framework.svg?style=flat-square)](https://packagist.org/packages/ceus-media/hydrogen-framework)
-[![PHP version](http://img.shields.io/packagist/php-v/ceus-media/hydrogen-framework.svg?style=flat-square)](https://packagist.org/packages/ceus-media/hydrogen-framework)
-[![PHPStan level](https://img.shields.io/badge/PHPStan-level%206-brightgreen.svg?style=flat-square)](https://packagist.org/packages/ceus-media/hydrogen-framework)
-[![License](https://img.shields.io/packagist/l/ceus-media/hydrogen-framework.svg?style=flat-square)](https://packagist.org/packages/ceus-media/hydrogen-framework)
-[![Release date](https://img.shields.io/github/release-date/CeusMedia/HydrogenFramework.svg?style=flat-square)](https://packagist.org/packages/ceus-media/hydrogen-framework)
-[![Commit date](https://img.shields.io/github/last-commit/CeusMedia/HydrogenFramework.svg?style=flat-square)](https://packagist.org/packages/ceus-media/hydrogen-framework)
+![Branch](https://img.shields.io/badge/Branch-1.0.x-blue?style=flat-square)
+![Release](https://img.shields.io/badge/Release----blue?style=flat-square)
+![PHP version](https://img.shields.io/badge/PHP-%5E8.1-blue?style=flat-square&color=777BB4)
+![PHPStan level](https://img.shields.io/badge/PHPStan_level-8-darkgreen?style=flat-square)
+[![Monthly downloads](https://img.shields.io/packagist/dt/ceus-media/hydrogen-framework.svg?style=flat-square)](https://packagist.org/packages/ceus-media/hydrogen-framework)
+[![Package version](https://img.shields.io/packagist/v/ceus-media/common.svg?style=flat-square)](https://packagist.org/packages/ceus-media/common)
+[![License](https://img.shields.io/packagist/l/ceus-media/common.svg?style=flat-square)](https://packagist.org/packages/ceus-media/common)
 
 This application framework for PHP is a simple yet powerful engine to
 develop custom web applications in MVC style.
@@ -81,7 +81,7 @@ Provide database credentials to access or even create a database.
 **Skip** configuration of **PHPUnit** for now.
 
 You now have the hydrogen project file <code>.hymn</code>.
-This file will extend in the process and holds all information needed to (re-)install a constallation of defined and configured modules from defined sources.
+This file will extend in the process and holds all information needed to (re-)install a constellation of defined and configured modules from defined sources.
 
 #### Add local module source
 ```
@@ -126,12 +126,12 @@ Installing a module will prefer the default source, if not specified otherwise.
 ### Installing modules
 #### Module categories
 In the world of Hydrogen modules, there a several types of modules called category.
-Some module are very small and just provide one JavaScript file.
+Some modules are very small and just provide one JavaScript file.
 
 Others are complex and deliver:
 - views, maybe with forms and style definitions
 - language file (aka localization)
-- mails, if mails need to be send
+- mails, if mails need to be sent
 - jobs, to be executed via CLI or cron tab
 - HTML blocks to customer views and explain things
 . JavaScript, for dynamics with web views
@@ -175,7 +175,7 @@ For this example, we will use the app module <code>App_Site</code>:
 ```
 hymn app-install App_Site
 ```
-This will install a boilerblate web application with:
+This will install a boilerplate web application with:
 - Basic Layout: default master template of some HTML blocks for header and footer etc.
 - Module <code>UI_Bootstrap</code>: CSS framework Bootstrap.
 - Module <code>JS_jQuery</code>: JavaScript framework JQuery.
@@ -186,9 +186,9 @@ The CSS framework Bootstrap comes with the icon set of Font Awesome and installs
 - Module <code>UI_Font_FontAwesome</code>: Font Awesome integration.
 
 One of the system components (a logger) can be configured to send e-mails on errors.
-Therefore a module capapble of sending mails will be installed automatically.
+Therefore, a module capable of sending mails will be installed automatically.
 
-Since the sending of mails will by handled by a CLI script (to be decoupled from the web application), a mail queue will be introduced to a database and a job handling mechanism will be installed:
+Since the sending of mails will be handled by a CLI script (to be decoupled from the web application), a mail queue will be introduced to a database and a job handling mechanism will be installed:
 - Module <code>Resource_Mail</code>: a mail generator, queue and sender
 - Module <code>Resource_Jobs</code>: a manager to execute module jobs via CLI or cron job
 
@@ -205,13 +205,13 @@ Now, open the project URL in a browser.
 
 ## Sandbox application
 
-If the installation is too much for you right now, you could checkout a simple sandbox installation.
+If the installation is too much for you right now, you could check out a simple sandbox installation.
 
 Clone an empty application skeleton:
 
 ```composer create-project ceus-media/hydrogen-app -n```
 
-Afterwards change into project folder and run setup for development:
+Afterward, change into project folder and run setup for development:
 
 ```cd hydrogen-app && make set-install-mode-dev```
 
@@ -251,8 +251,8 @@ Or any other online Git repository, shared or private.
 
 ### Event System
 
-Besides the usual Request->Dispatch->Render->Response behavior, a event system exists to inject module code with the bootstrap process.
-Therefore events can be attach on hooks, which will be called by the system during boot or later within modules.
+Besides the usual Request->Dispatch->Render->Response behavior, an event system exists to inject module code with the bootstrap process.
+Therefore, events can be attached on hooks, which will be called by the system during boot or later within modules.
 
 ### Default Hook Calls
 

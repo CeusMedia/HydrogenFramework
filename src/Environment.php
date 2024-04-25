@@ -59,7 +59,6 @@ use Exception;
 use InvalidArgumentException;
 use RangeException;
 use ReflectionException;
-use ReturnTypeWillChange;
 use RuntimeException;
 
 /**
@@ -441,11 +440,9 @@ class Environment implements ArrayAccess
 	 *	Returns PHP configuration and version management.
 	 *	@access		public
 	 *	@return		PhpResource
-	 *	@noinspection	PhpDocMissingThrowsInspection
 	 */
 	public function getPhp(): PhpResource
 	{
-		/** @noinspection PhpUnhandledExceptionInspection */
 		/** @var PhpResource $resource */
 		$resource	= $this->get( 'php' );
 		return $resource;
@@ -458,11 +455,9 @@ class Environment implements ArrayAccess
 
 	/**
 	 *	@return		RuntimeResource
-	 *	@noinspection	PhpDocMissingThrowsInspection
 	 */
 	public function getRuntime(): RuntimeResource
 	{
-		/** @noinspection PhpUnhandledExceptionInspection */
 		/** @var RuntimeResource $resource */
 		$resource	= $this->get( 'runtime' );
 		return $resource;
@@ -716,14 +711,14 @@ class Environment implements ArrayAccess
 	/**
 	 *	@access		protected
 	 *	@return		self
-	 *	@todo  		why not keep the resource object instead of reflected class list? would need refactoring of resource and related modules, thou...
-	 *	@todo  		extract to resource module: question is where to store the resource? in env again?
-	 *	@todo  		to be deprecated in 0.9: please use module Resource_Disclosure instead
+	 *	@todo		why not keep the resource object instead of reflected class list? would need refactoring of resource and related modules, thou...
+	 *	@todo		extract to resource module: question is where to store the resource? in env again?
+	 *	@todo		to be deprecated in 0.9: please use module Resource_Disclosure instead
 	 */
 	protected function initDisclosure(): self
 	{
-		$disclosure	= new DisclosureResource( [] );
-		$this->disclosure	= $disclosure->reflect( 'classes/Controller/', array( 'classPrefix' => 'Controller_' ) );
+		$disclosure			= new DisclosureResource( [] );
+		$this->disclosure	= $disclosure->reflect( 'classes/Controller/', ['classPrefix' => 'Controller_'] );
 		$this->runtime->reach( 'env: disclosure', 'Finished setup of self disclosure handler.' );
 		return $this;
 	}
@@ -830,34 +825,39 @@ class Environment implements ArrayAccess
 		return $this;
 	}
 
-    #[ReturnTypeWillChange]
-	public function offsetExists( $offset ): bool
+	/**
+	 *	@param		mixed		$offset
+	 *	@return		bool
+	 */
+	public function offsetExists( mixed $offset ): bool
 	{
 //		return property_exists( $this, $key );														//  PHP 5.3
-		return isset( $this->$offset );																//  PHP 5.2
+		return isset( $this->{strval( $offset )} );																//  PHP 5.2
 	}
 
 	/**
-	 *	@param		string		$offset
+	 *	@param		mixed		$offset
 	 *	@return		object|NULL
 	 *	@throws		Exception
 	 */
-    #[ReturnTypeWillChange]
-    public function offsetGet( $offset ): object|NULL
+	public function offsetGet( mixed $offset ): object|NULL
 	{
-		return $this->get( $offset );
+		return $this->get( strval( $offset ) );
 	}
 
-    #[ReturnTypeWillChange]
-    public function offsetSet( $offset, $value ): void
+	/**
+	 *	@param		mixed		$offset
+	 *	@param		mixed		$value
+	 *	@return		void
+	 */
+	public function offsetSet( mixed $offset, mixed $value ): void
 	{
-		$this->set( $offset, $value );
+		$this->set( strval( $offset ), $value );
 	}
 
-    #[ReturnTypeWillChange]
-    public function offsetUnset( $offset ): void
+	public function offsetUnset( mixed $offset ): void
 	{
-		$this->remove( $offset );
+		$this->remove( strval( $offset ) );
 	}
 
 	public function remove( string $key ): self

@@ -39,6 +39,7 @@ use DomainException;
 use ReflectionException;
 use ReflectionMethod;
 use RuntimeException;
+use stdClass;
 
 /**
  *	Hook, to be called by captain on events, mostly registered by modules.
@@ -82,7 +83,7 @@ class Hook
 	 */
 	public static function callHook( Environment $env, string $resource, string $event, ?object $context, array & $payload ): ?bool
 	{
-		return $env->getCaptain()->callHook( $resource, $event, $context, $payload );
+		return $env->getCaptain()->callHook( $resource, $event, $context ?? new stdClass(), $payload );
 	}
 
 	/**
@@ -173,10 +174,10 @@ class Hook
 	/**
 	 *	Sets map of hook payload data.
 	 *	@access		public
-	 *	@param		array|NULL		$payload		Map of hook payload data
+	 *	@param		array		$payload		Map of hook payload data
 	 *	@return		self
 	 */
-	public function setPayload( ?array & $payload ): self
+	public function setPayload( array & $payload ): self
 	{
 		$this->payload	= & $payload;
 		return $this;

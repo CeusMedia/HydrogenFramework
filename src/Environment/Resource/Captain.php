@@ -226,6 +226,7 @@ class Captain
 			foreach( $levelHooks as $hook ){
 				if( 0 === strlen( $hook->function ) )
 					continue;
+				/** @var ModuleDefinition $module */
 				$module		= $this->env->getModules()->get( $hook->moduleId );
 				$resource	= $hook->resource;
 				$event		= $hook->event;
@@ -246,6 +247,8 @@ class Captain
 					/** @var Hook $hookObject */
 					$hookObject	= Factory::createObject( $callback[0], [$this->env, $context] );
 					$hookObject->setModule( $module )->setPayload( $payload );
+					if( NULL !== $module )
+						$hookObject->setModule( $module );
 					$result		= $hookObject->fetch( $callback[1] );
 
 					$this->env->getRuntime()->reach( vsprintf(

@@ -40,6 +40,7 @@ use CeusMedia\Common\UI\HTML\Tag as HtmlTag;
 use CeusMedia\HydrogenFramework\Environment;
 use CeusMedia\HydrogenFramework\Environment\Resource\Captain as CaptainResource;
 
+use SplFileInfo;
 use Throwable;
 
 /**
@@ -165,6 +166,7 @@ class JavaScript
 		$index			= new FileIterator( $this->pathCache );
 		$lengthPrefix	= strlen( $this->prefix );
 		$lengthSuffix	= strlen( $suffix = $this->suffix.'.js' );
+		/** @var SplFileInfo $item */
 		foreach( $index as $item ){
 			$fileName	= $item->getFilename();
 			if( $this->prefix && substr( $fileName, 0, $lengthPrefix ) != $this->prefix )
