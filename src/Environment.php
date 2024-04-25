@@ -36,6 +36,7 @@ use CeusMedia\Cache\SimpleCacheFactory;
 use CeusMedia\Common\ADT\Collection\Dictionary as Dictionary;
 use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
 use CeusMedia\Common\Exception\Deprecation as DeprecationException;
+use CeusMedia\Common\Net\HTTP\Request as HttpRequest;
 use CeusMedia\HydrogenFramework\Environment\Exception as EnvironmentException;
 use CeusMedia\HydrogenFramework\Environment\Resource\Acl\Abstraction;
 use CeusMedia\HydrogenFramework\Environment\Resource\Acl\Abstraction as AbstractAclResource;
@@ -160,8 +161,8 @@ class Environment implements ArrayAccess
 	/**	@var	RuntimeResource				$runtime		Runtime Object */
 	protected RuntimeResource $runtime;
 
-	/**	@var	Dictionary					$request		Request Object */
-	private Dictionary $request;
+	/**	@var	HttpRequest|Dictionary		$request		Request Object */
+	private HttpRequest|Dictionary $request;
 
 	/**	@var	Dictionary					$session		Session Object */
 	private Dictionary $session;
@@ -450,7 +451,7 @@ class Environment implements ArrayAccess
 		return $resource;
 	}
 
-	public function getRequest(): Dictionary
+	public function getRequest(): HttpRequest|Dictionary
 	{
 		return $this->request;
 	}
