@@ -78,13 +78,13 @@ class LogicPool
 	/**
 	 *	Magic.
 	 *	@access		public
-	 *	@param		string			$key			Key of logic object to store in pool
-	 *	@param		object			$logicObject	Logic object to store in pool
+	 *	@param		string			$key				Key of logic object to store in pool
+	 *	@param		string|object	$logicClassOrObject	Logic instance or class name to store in pool
 	 *	@return		void
 	 */
-	public function __set( string $key, object $logicObject )
+	public function __set( string $key, string|object $logicClassOrObject )
 	{
-		$this->set( $key, $logicObject );
+		$this->set( $key, $logicClassOrObject );
 	}
 
 	/**
@@ -157,11 +157,11 @@ class LogicPool
 	 */
 	public function getKeyFromClassName( string $className ): string
 	{
-		if( strlen( trim( $className ) ) === 0 )
+		if( '' === trim( $className ) )
 			throw new InvalidArgumentException( 'Class name cannot be empty' );
 		$parts	= explode( ' ', str_replace( '_', ' ', $className ) );
 		$prefix	= array_shift( $parts );
-		if( $prefix !== 'Logic' )
+		if( 'Logic' !== ltrim( $prefix, '\\' ) )
 			throw new InvalidArgumentException( 'Given class is not a logic class (needs to start with Logic_)' );
 		return CamelCase::encode( implode( ' ', $parts ) );
 	}
@@ -225,7 +225,7 @@ class LogicPool
 	 *	@throws		RuntimeException					if key is already existing in pool and overriding disabled
 	 *	@throws		InvalidArgumentException			if logic component is neither an instance nor a string
 	 */
-	public function set( string $key, $logicClassOrObject, bool $override = TRUE )
+	public function set( string $key, string|object $logicClassOrObject, bool $override = TRUE )
 	{
 		if( $this->has( $key ) && !$override )
 			throw new RuntimeException( 'Logic "'.$key.'" is already in logic pool' );

@@ -183,7 +183,9 @@ class Environment implements ArrayAccess
 		$frameworkConfig	= parse_ini_file( dirname( __DIR__ ).'/hydrogen.ini' );
 		$this->version		= $frameworkConfig['version'];
 
-		static::$defaultPaths['cache']	= sys_get_temp_dir().'/cache/';
+		if( !isset( static::$defaultPaths['cache'] ) )
+			static::$defaultPaths['cache']	= sys_get_temp_dir().'/cache/';
+
 		$this->options		= $options;																//  store given environment options
 		$this->path			= $options['pathApp'] ?? getCwd() . '/';								//  detect application path
 		$this->uri			= getCwd().'/';															//  detect application base URI
@@ -661,27 +663,21 @@ class Environment implements ArrayAccess
 	 */
 	protected function initConfiguration(): self
 	{
-		$configFile	= static::$defaultPaths['config'].static::$configFile;							//  get config file @todo remove this old way
-		if( !empty( $this->options['configFile'] ) )												//  get config file from options @todo enforce this new way
+		$configPath	= static::$defaultPaths['config'];
+		$configFile	= $configPath.static::$configFile;												//  get config file @todo remove this old way
+		if( '' !== trim( $this->options['configFile'] ?? '' ) )								//  get config file from options @todo enforce this new way
 			$configFile	= $this->options['configFile'];												//  get config file from options
-		if( !file_exists( $configFile ) ){															//  config file not found
-			$message	= sprintf( 'Config file "%s" not existing', $configFile );
-			throw new EnvironmentException( $message );												//  quit with exception
+
+		if( !file_exists( $this->path.$configFile ) ){										//  config file not found
+			$message	= 'Config file "%s" not found in %s';
+			throw new EnvironmentException( sprintf( $message, $configFile, $this->path ) );		//  quit with exception
 		}
 		/** @var array $data */
-		$data	= parse_ini_file( $configFile );													//  parse configuration file (without section support)
+		$data	= parse_ini_file( $this->path.$configFile );								//  parse configuration file (without section support)
 		ksort( $data );
 		$this->config	= new Dictionary( $data );													//  create dictionary from array
 
-		/*  -- DEFAULT PATHS  --  */
-		foreach( static::$defaultPaths as $key => $value ){											//  iterate default paths
-			if( !$this->config->has( 'path.'.$key ) ){												//  path is not set in config
-				if( 0 !== strlen( trim( $value ) ) )
-					$value	= rtrim( trim( $value ), '/' ).'/';
-				$this->config->set( 'path.'.$key, $value );											//  set path in config (in memory)
-			}
-		}
-
+		$this->realizeDefaultPathsInConfigResource();
 		$this->detectMode();
 		$this->runtime->reach( 'env: config', 'Finished setup of base app configuration.' );
 		return $this;
@@ -858,6 +854,22 @@ class Environment implements ArrayAccess
 	public function offsetUnset( mixed $offset ): void
 	{
 		$this->remove( strval( $offset ) );
+	}
+
+
+	/**
+	 *	@param		bool		$force		Flag: save even if already set, default: no
+	 *	@return		void
+	 */
+	protected function realizeDefaultPathsInConfigResource( bool $force = FALSE ): void
+	{
+		foreach( static::$defaultPaths as $key => $value ){											//  iterate default paths
+			if( !$this->config->has( 'path.'.$key ) || $force ){								//  path is not set in config
+				if( 0 !== strlen( trim( $value ?? '' ) ) )
+					$value	= rtrim( trim( $value ), '/' ).'/';
+				$this->config->set( 'path.'.$key, $value );											//  set path in config (in memory)
+			}
+		}
 	}
 
 	public function remove( string $key ): self
