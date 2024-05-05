@@ -36,6 +36,7 @@ use CeusMedia\Cache\SimpleCacheFactory;
 use CeusMedia\Common\ADT\Collection\Dictionary as Dictionary;
 use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
 use CeusMedia\Common\Exception\Deprecation as DeprecationException;
+use CeusMedia\Common\Exception\FileNotExisting as FileNotExistingException;
 use CeusMedia\Common\Net\HTTP\Request as HttpRequest;
 use CeusMedia\HydrogenFramework\Environment\Exception as EnvironmentException;
 use CeusMedia\HydrogenFramework\Environment\Resource\Acl\Abstraction;
@@ -659,7 +660,8 @@ class Environment implements ArrayAccess
 	 *	Sets up configuration resource reading main config file and module config files.
 	 *	@access		protected
 	 *	@return		self
-	 *	@throws		EnvironmentException
+	 *	@throws		FileNotExistingException
+	 *	@throws		RuntimeException
 	 */
 	protected function initConfiguration(): self
 	{
@@ -668,12 +670,18 @@ class Environment implements ArrayAccess
 		if( '' !== trim( $this->options['configFile'] ?? '' ) )								//  get config file from options @todo enforce this new way
 			$configFile	= $this->options['configFile'];												//  get config file from options
 
-		if( !file_exists( $this->path.$configFile ) ){										//  config file not found
-			$message	= 'Config file "%s" not found in %s';
-			throw new EnvironmentException( sprintf( $message, $configFile, $this->path ) );		//  quit with exception
+		$absolutePrefix	= str_starts_with( $configFile, '/' ) ? '' : $this->path;					//  prefix with app path if not already absolute
+		$absolutePath	= $absolutePrefix.$configFile;
+		if( !file_exists( $absolutePath ) ){														//  config file not found
+			$message	= 'Main config file not found (%2$s%1$s)';
+			throw FileNotExistingException::create()												//  quit with exception
+				->setMessage( sprintf( $message, $configFile, $absolutePrefix ) )
+				->setResource( $absolutePath );
 		}
-		/** @var array $data */
-		$data	= parse_ini_file( $this->path.$configFile );								//  parse configuration file (without section support)
+		$data	= parse_ini_file( $absolutePath );													//  parse configuration file (without section support)
+		if( FALSE === $data )
+			throw new RuntimeException( 'Reading config file failed.' );					//  quit with exception
+
 		ksort( $data );
 		$this->config	= new Dictionary( $data );													//  create dictionary from array
 
