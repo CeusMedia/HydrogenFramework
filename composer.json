@@ -22,9 +22,9 @@
     "ext-pdo": "*",
     "ext-simplexml": "*",
     "ceus-media/cache": "^0.5 | 0.5.x-dev",
-    "ceus-media/common": "^1.0 | 1.0.x-dev | ^0.9 | 0.9.x-dev",
+    "ceus-media/common": "^1.0 | 1.0.x-dev",
     "ceus-media/database": "^0.6 | 0.6.x-dev",
-    "ceus-media/template-engine": "dev-master",
+    "ceus-media/template-engine": "^0.5 | 0.5.x-dev",
     "psr/log": "^3 | 3.x-dev"
   },
   "require-dev": {
