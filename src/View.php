@@ -81,6 +81,25 @@ class View
 	protected string $pathTemplates		= 'templates/';
 
 	/**
+	 *	Applies hook View::onRenderContent to already created content
+	 *	@param		WebEnvironment	$env
+	 *	@param		object			$context
+	 *	@param		string			$content		Already created content to apply hook to
+	 *	@param		string			$dataType
+	 *	@return		string
+	 *	@throws		ReflectionException
+	 */
+	public static function renderContentStatic( WebEnvironment $env, object $context, string $content, string $dataType = "HTML" ): string
+	{
+		$payload	= [
+			'content'	=> $content,
+			'type'		=> $dataType
+		];
+		$env->getCaptain()->callHook( 'View', 'onRenderContent', $context, $payload );
+		return $payload['content'];
+	}
+
+	/**
 	 *	Constructor.
 	 *	@access		public
 	 *	@param		WebEnvironment		$env			Framework Resource Environment Object
@@ -102,20 +121,6 @@ class View
 		if( !file_exists( $this->pathTemplates ) )													//  templates folder is not existing
 			throw new RuntimeException( 'Templates folder "'.$this->pathTemplates.'" is missing' );	//  quit with exception
 		$env->getRuntime()->reach( 'CMF_Controller('.static::class.')::init done' );
-/*		if( class_exists( 'CMM_TEA_Factory' ) ){
-			$config	= 'config/TEA.ini';
-			if( !file_exists( 'config/TEA.ini' ) )
-				$config	= array( 'CMC' => array( 'active' => TRUE ) );
-			$this->tea		= new CMM_TEA_Factory( $config );
-			$this->tea->setDefaultType( 'PHP' );
-#			$this->tea->hasEngine( 'STE' ){
-				$this->tea->setDefaultType( 'STE' );
-				CMM_STE_Template::addPlugin( new CMM_STE_Plugin_Comments() );
-#			}
-			$this->tea->setTemplatePath( '' );
-			$this->tea->setCachePath( 'tmp/cache/templates/' );
-			$this->tea->setCompilePath( 'tmp/cache/templates_c/' );
-		}*/
 //		$this->env->getMessenger()->noteNotice( "View::Construct: ".get_class( $this ) );
 		$this->env->getCaptain()->callHook( 'View', 'onConstruct', $this );
 		$this->__onInit();
@@ -136,20 +141,19 @@ class View
 
 	/**
 	 *	@param		string			$name
-	 *	@param		object|string	$object
+	 *	@param		object|string	$objectOrClassName
 	 *	@param		array			$parameters
 	 *	@return		$this
 	 *	@throws		ReflectionException
 	 */
-	public function addHelper( string $name, $object, array $parameters = [] ): self
+	public function addHelper( string $name, object|string $objectOrClassName, array $parameters = [] ): self
 	{
-		if( is_object( $object ) ){
-			if( is_callable( [$object, 'setEnv'] ) )
-				$object->setEnv( $this->env );
-			$this->helpers->set( $name, $object );
-		}
-		else
-			$this->registerHelper( $name, $object, $parameters );
+		if( is_string( $objectOrClassName ) )
+			return $this->registerHelper( $name, $objectOrClassName, $parameters );
+
+		if( is_callable( [$objectOrClassName, 'setEnv'] ) )
+			$objectOrClassName->setEnv( $this->env );
+		$this->helpers->set( $name, $objectOrClassName );
 		return $this;
 	}
 
@@ -183,11 +187,14 @@ class View
 	 */
 	public function getHelper( string $name, bool $strict = TRUE ): ?Helper
 	{
-		if( isset( $this->helpers[$name] ) )
-			return $this->helpers[$name];
-		if( !$strict )
-			return NULL;
-		throw new InvalidArgumentException( 'No view helper set by name "'.htmlentities( $name, ENT_QUOTES, 'UTF-8' ).'"' );
+		if( !$this->helpers->has( $name ) ){
+			if( !$strict )
+				return NULL;
+			throw new InvalidArgumentException( 'No view helper set by name "'.htmlentities( $name, ENT_QUOTES, 'UTF-8' ).'"' );
+		}
+		/** @var Helper $helper */
+		$helper	= $this->helpers->get( $name );
+		return $helper;
 	}
 
 	public function getHelpers(): Dictionary
@@ -439,30 +446,27 @@ class View
 	 */
 	protected function realizeTemplate( string $filePath, array $data = [] ): string
 	{
-		$___content	= '';
-		$___templateUri	= $filePath;
-		ob_start();
-		extract( $data );																		//
-		$view		= $___view		= $this;													//
-		$env		= $___env		= $this->env;												//
-		$config		= $___config	= $this->env->getConfig();									//
-		$request	= $___request	= $this->env->getRequest();									//
-		$session	= $___session	= $this->env->getSession();									//
-		$helpers	= $___helpers	= $this->helpers;											//
+		$payload	= [
+			'templateUri'	=> $filePath,
+			'data'			=> [
+				'view'		=> $this,
+				'env'		=> $this->env,
+				'config'	=> $this->env->getConfig(),
+				'request'	=> $this->env->getRequest(),
+				'session'	=> $this->env->getSession(),
+				'helpers'	=> $this->helpers,
+			],
+			'content'		=> '',
+		];
 
-		try{
-			$content	= include( $___templateUri );											//  render template by include
-			if( $content === FALSE )
-				throw new RuntimeException( 'Template file "'.$___templateUri.'" is not existing' );
-		}
-		catch( Exception $e ){
-			$message	= 'Rendering template file "%1$s" failed: %2$s';
-			$message	= sprintf( $message, $filePath, $e->getMessage() );
-			$this->env->getLog()?->log( 'error', $message, $this );
-			if( !$this->env->getLog()?->logException( $e, $this ) )
-				throw new RuntimeException( $message, 0, $e  );
-			$this->env->getMessenger()?->noteFailure( $message );
-		}
+		ob_start();
+		$this->env->getCaptain()->callHook( 'View', 'realizeTemplate', $this, $payload );
+		$content	= $payload['content'];
+
+		if( '' === $content )																	//  no hook realized template
+			$content	= $this->realizeTemplateWithInclude( $filePath, $data );				//  realize with own strategy
+
+		//  handle output buffer of template realization
 		$buffer	= (string) ob_get_clean();														//  get standard output buffer
 		/** @var string $buffer */
 		$buffer	= preg_replace( '/^(<br( ?\/)?>)+/s', '', $buffer );
@@ -477,27 +481,6 @@ class View
 		}
 		return (string) $content;
 	}
-
-//	/**
-//	 *	...
-//	 *	Check if template file is existing MUST be done beforehand.
-//	 *	@param		string		$filePath		Template file path name with templates folder
-//	 *	@param		array		$data			Additional template data, appended to assigned view data
-//	 *	@return		string		Template content with applied data
-//	 */
-/*	protected function realizeTemplateWithTEA( string $filePath, array $data = [] ): string
-	{
-		$data['view']		= $this;															//
-		$data['env']		= $this->env;														//
-		$data['config']		= $this->env->getConfig();											//
-		$data['request']	= $this->env->getRequest();											//
-		$data['session']	= $this->env->getSession();											//
-		$data['helpers']	= $this->helpers;													//
-		$this->env->getPage()->tea->setDefaultType( 'PHP' );									//
-		$template	= $this->env->getPage()->tea->getTemplate( $filePath );						//
-		$template->setData( $data );															//
-		return $template->render();																//  render content with template engine
-	}*/
 
 	/**
 	 *	@param		string		$name
@@ -524,25 +507,6 @@ class View
 	public function renderContent( string $content, string $dataType = "HTML" ): string
 	{
 		return static::renderContentStatic( $this->env, $this, $content, $dataType );
-	}
-
-	/**
-	 *	Applies hook View::onRenderContent to already created content
-	 *	@param		WebEnvironment	$env
-	 *	@param		object			$context
-	 *	@param		string			$content		Already created content to apply hook to
-	 *	@param		string			$dataType
-	 *	@return		string
-	 *	@throws		ReflectionException
-	 */
-	public static function renderContentStatic( WebEnvironment $env, object $context, string $content, string $dataType = "HTML" ): string
-	{
-		$payload	= [
-			'content'	=> $content,
-			'type'		=> $dataType
-		];
-		$env->getCaptain()->callHook( 'View', 'onRenderContent', $context, $payload );
-		return $payload['content'];
 	}
 
 	/**
@@ -595,11 +559,42 @@ class View
 	 */
 	protected function setPageTitle( string $section = 'index', string $key = 'title', array $data = [], int $mode = 1 ): self
 	{
-		$data	= $this->getData();
-		if( isset( $data['words'][$section][$key] ) ){
+		/** @var array<string,string> $words */
+		$words	= $this->getData( 'words', [] );
+		if( isset( $words[$section][$key] ) ){
 			$modes	= [-1 => 'prepend', 0 => 'set', 1 => 'append'];
-			$this->env->getPage()->setTitle( $data['words'][$section][$key], $modes[$mode] );
+			$this->env->getPage()->setTitle( $words[$section][$key], $modes[$mode] );
 		}
 		return $this;
+	}
+
+	//  --  PRIVATE  --  //
+
+	private function realizeTemplateWithInclude( string $filePath, array $data = [] ): string
+	{
+		$___templateUri	= $filePath;
+		extract( $data );																		//
+		$view		= $___view		= $this;													//
+		$env		= $___env		= $this->env;												//
+		$config		= $___config	= $this->env->getConfig();									//
+		$request	= $___request	= $this->env->getRequest();									//
+		$session	= $___session	= $this->env->getSession();									//
+		$helpers	= $___helpers	= $this->helpers;											//
+
+		try{
+			$content	= include( $___templateUri );											//  render template by include
+			if( $content === FALSE )
+				throw new RuntimeException( 'Template file "'.$___templateUri.'" is not existing' );
+		}
+		catch( Exception $e ){
+			$message	= 'Rendering template file "%1$s" failed: %2$s';
+			$message	= sprintf( $message, $filePath, $e->getMessage() );
+			$this->env->getLog()?->log( 'error', $message, $this );
+			if( !$this->env->getLog()?->logException( $e, $this ) )
+				throw new RuntimeException( $message, 0, $e  );
+			$this->env->getMessenger()?->noteFailure( $message );
+		}
+
+		return (string) $content;
 	}
 }
