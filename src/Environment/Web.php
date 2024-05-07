@@ -126,10 +126,9 @@ class Web extends Environment
 	 */
 	public function __construct( array $options = [] )
 	{
-		ob_start();
 		try{
 			parent::__construct( $options, FALSE );
-			$this->detectSelf();
+			$this->detectSelf( ! (bool) ( $options['isTest'] ?? FALSE ) );
 			$this->initSession();																	//  setup session support
 			$this->initMessenger();																	//  setup user interface messenger
 			$this->initCookie();																	//  setup cookie support
@@ -362,6 +361,8 @@ class Web extends Environment
 		$hostWithPort	= $this->host.( $this->port ? ':'.$this->port : '' );						//  append port if different from default port
 		$this->root		= (string) getEnv( 'DOCUMENT_ROOT' );									//  note document root of web server or virtual host
 		$path			= dirname( (string) getEnv( 'SCRIPT_NAME' ) );
+		if( $this->options['pathApp'] )
+			$path		= $this->options['pathApp'];
 		$this->path		= preg_replace( "@^/$@", "", $path )."/";		//  note requested working path
 		$this->url		= $this->scheme.'://'.$hostWithPort.$this->path;							//  note calculated base application URI
 		$this->uri		= $this->root.$this->path;													//  note calculated absolute base application path

@@ -122,7 +122,7 @@ class Hook
 			return $this->fetchStatic( $method );
 		}
 		else {
-			return $this->$method($this->env, $this->context, $this->module, $this->payload);
+			return $this->$method( $this->env, $this->context, $this->module, $this->payload );
 		}
 	}
 
@@ -131,7 +131,7 @@ class Hook
 	 *	@access		public
 	 *	@return		array|NULL
 	 */
-	public function getPayload() : ?array
+	public function & getPayload() : ?array
 	{
 		return $this->payload;
 	}

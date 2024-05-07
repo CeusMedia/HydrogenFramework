@@ -250,6 +250,7 @@ class Captain
 					if( NULL !== $module )
 						$hookObject->setModule( $module );
 					$result		= $hookObject->fetch( $callback[1] );
+					$payload	= $hookObject->getPayload();
 
 					$this->env->getRuntime()->reach( vsprintf(
 						'<!--Resource_Module_Library_Local::call-->Hook: %s@%s: %s',

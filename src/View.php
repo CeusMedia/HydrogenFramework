@@ -118,6 +118,8 @@ class View
 			$this->pathTemplates	= $this->env->getConfig()->get( 'path.templates' );
 		if( 0 === strlen( trim( $this->pathTemplates ) ) )
 			$this->pathTemplates	= './';
+		if( !str_starts_with( $this->pathTemplates, '/' ) )
+			$this->pathTemplates	= $this->env->uri.$this->pathTemplates;
 		if( !file_exists( $this->pathTemplates ) )													//  templates folder is not existing
 			throw new RuntimeException( 'Templates folder "'.$this->pathTemplates.'" is missing' );	//  quit with exception
 		$env->getRuntime()->reach( 'CMF_Controller('.static::class.')::init done' );
@@ -356,10 +358,7 @@ class View
 
 		//  old solution, extract to module UI_TemplateAbstraction
 		/*  --  LOAD TEMPLATE AND APPLY DATA  --  */
-//		if( $this->env->getPage()->tea )
-//			$content	= $this->realizeTemplateWithTEA( $filePath, $data );
-//		else
-			$content	= $this->realizeTemplate( $filePath, $data );								//
+		$content	= $this->realizeTemplate( $filePath, $data );								//
 		if( $renderContent )
 			$content	= $this->renderContent( $content );											//  apply modules to content
 		return $content;																			//  return loaded and rendered content
@@ -447,7 +446,7 @@ class View
 	protected function realizeTemplate( string $filePath, array $data = [] ): string
 	{
 		$payload	= [
-			'templateUri'	=> $filePath,
+			'filePath'	=> $filePath,
 			'data'			=> [
 				'view'		=> $this,
 				'env'		=> $this->env,
@@ -458,6 +457,7 @@ class View
 			],
 			'content'		=> '',
 		];
+		$payload['data']	= array_merge( $data, $payload['data'] );
 
 		ob_start();
 		$this->env->getCaptain()->callHook( 'View', 'realizeTemplate', $this, $payload );
