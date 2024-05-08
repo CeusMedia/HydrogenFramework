@@ -156,9 +156,10 @@ class StyleSheet
 		$list	= [];
 		foreach( $this->urls as $map ){
 			foreach( $map as $url ){
+				$clone	= clone( $url );
 				if( !preg_match( "@^[a-z]+://@", $url->url ) )
-					$url->url	= $this->pathBase.$url->url;
-				$list[]	= $url;
+					$clone->url	= $this->pathBase.$url->url;
+				$list[]	= $clone;
 			}
 		}
 		return $list;
