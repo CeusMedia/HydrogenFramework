@@ -361,7 +361,7 @@ class Web extends Environment
 		$hostWithPort	= $this->host.( $this->port ? ':'.$this->port : '' );						//  append port if different from default port
 		$this->root		= (string) getEnv( 'DOCUMENT_ROOT' );									//  note document root of web server or virtual host
 		$path			= dirname( (string) getEnv( 'SCRIPT_NAME' ) );
-		if( $this->options['pathApp'] )
+		if( $this->options['pathApp'] ?? '' )
 			$path		= $this->options['pathApp'];
 		$this->path		= preg_replace( "@^/$@", "", $path )."/";		//  note requested working path
 		$this->url		= $this->scheme.'://'.$hostWithPort.$this->path;							//  note calculated base application URI
