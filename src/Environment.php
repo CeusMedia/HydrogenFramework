@@ -37,6 +37,7 @@ use CeusMedia\Common\ADT\Collection\Dictionary as Dictionary;
 use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
 use CeusMedia\Common\Exception\Deprecation as DeprecationException;
 use CeusMedia\Common\Exception\FileNotExisting as FileNotExistingException;
+use CeusMedia\Common\Exception\IO as IoException;
 use CeusMedia\Common\Net\HTTP\Request as HttpRequest;
 use CeusMedia\HydrogenFramework\Environment\Exception as EnvironmentException;
 use CeusMedia\HydrogenFramework\Environment\Resource\Acl\Abstraction;
@@ -174,8 +175,8 @@ class Environment implements ArrayAccess
 	 *	@param		boolean		$isFinal			Flag: there is no extending environment class, default: TRUE
 	 *	@return		void
 	 *	@todo		possible error: call to onInit is to soon of another environment if existing
-	 *	@throws		EnvironmentException
-	 *	@throws		Exception
+	 *	@throws		ReflectionException
+	 *	@throws		\Psr\SimpleCache\InvalidArgumentException
 	 */
 	public function __construct( array $options = [], bool $isFinal = TRUE )
 	{
@@ -539,6 +540,8 @@ class Environment implements ArrayAccess
 	 *
 	 *	@access		protected
 	 *	@return		void
+	 *	@throws		RuntimeException
+	 *	@throws		ReflectionException
 	 */
 	protected function __onInit(): void
 	{
@@ -758,8 +761,10 @@ class Environment implements ArrayAccess
 	/**
 	 *	@access		protected
 	 *	@return		self
+	 *	@throws		ReflectionException
+	 *	@throws		FileNotExistingException	if strict and file is not existing or given path is not a file
+	 *	@throws		IoException					if strict and file is not readable
 	 *	@todo		remove support for base_config::module.acl.public
-	 *	@throws		Exception
 	 */
 	protected function initModules(): self
 	{

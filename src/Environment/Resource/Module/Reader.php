@@ -28,6 +28,8 @@
 
 namespace CeusMedia\HydrogenFramework\Environment\Resource\Module;
 
+use CeusMedia\Common\Exception\Conversion as ConversionException;
+use CeusMedia\Common\Exception\IO as IoException;
 use CeusMedia\Common\XML\Element as XmlElement;
 use CeusMedia\Common\XML\ElementReader as XmlReader;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Author as AuthorDefinition;
@@ -64,7 +66,9 @@ class Reader
 	 *	@param		string		$filePath		File path to module XML file
 	 *	@param		string		$id				Module ID
 	 *	@return		Definition					Module data object
-	 *	@throws		Exception	if XML file could not been loaded and parsed
+	 *	@throws		IoException					if file is not existing
+	 *	@throws		IoException					if file is not readable
+	 *	@throws		ConversionException			if the XML data could not be parsed
 	 */
 	public static function load( string $filePath, string $id ): Definition
 	{

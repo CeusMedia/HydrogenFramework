@@ -138,7 +138,7 @@ class Web extends Environment
 			$this->initLanguage();																	//  setup language support
 			$this->initPage();																		//
 			$this->initAcl();																		//
-			$this->modules->callHook( 'Env', 'constructEnd', $this );								//  call module hooks for end of env construction
+			$this->modules->callHook( 'Env', 'constructEnd', $this );					//  call module hooks for end of env construction
 			$this->__onInit();																		//  default callback for construction end
 			$this->runtime->reach( 'Environment (Web): construction end' );					//  log time of construction
 		}
@@ -291,14 +291,14 @@ class Web extends Environment
 		}
 		if( !$allowForeignHost ){																	//  redirect to foreign domain not allowed
 			$scheme		= getEnv( 'HTTPS' ) ? 'https' : 'http';
-			$hostFrom	= parse_url( $scheme.'://'.getEnv( 'HTTP_HOST' ), PHP_URL_HOST );			//  current host domain
-			$hostTo		= parse_url( $base.$uri, PHP_URL_HOST );									//  requested host domain
+			$hostFrom	= parse_url( $scheme.'://'.getEnv( 'HTTP_HOST' ), PHP_URL_HOST );		//  current host domain
+			$hostTo		= parse_url( $base.$uri, PHP_URL_HOST );						//  requested host domain
 			if( $hostFrom !== $hostTo ){															//  both are not matching
 				$message	= 'Redirection to foreign host is not allowed.';						//  error message
 				if( $this->has( 'messenger' ) ){													//  messenger is available
 					$this->getMessenger()?->noteFailure( $message );								//  note message
-					$this->modules->callHook( 'App', 'onException', $this );						//  call module hooks for end of env construction
-					$this->restart( NULL, NULL, TRUE );												//  redirect to start
+//	broken			$this->modules->callHook( 'App', 'onException', $this );						//  call module hooks for end of env construction
+					$this->restart( NULL, NULL, TRUE );						//  redirect to start
 				}
 				print( $message );																	//  otherwise print message
 				exit;																				//  and exit
@@ -308,7 +308,7 @@ class Web extends Environment
 	#	$this->session->close();																	//  close session
 		if( $status )																				//  an HTTP status code is to be set
 			HttpStatus::sendHeader( $status );														//  send HTTP status code header
-		header( "Location: ".$base.$uri );															//  send HTTP redirect header
+		header( "Location: ".$base.$uri );													//  send HTTP redirect header
 
 		$link	= HtmlTag::create( 'a', $base.$uri, array( 'href' => $base.$uri ) );
 		$text	= HtmlTag::create( 'small', 'Redirecting to '.$link.' ...' );
@@ -335,17 +335,17 @@ class Web extends Environment
 	protected function detectSelf( bool $strict = TRUE ): void
 	{
 		if( $strict ){
-			if( !getEnv( 'HTTP_HOST' ) ){															//  application has been executed outside a valid web server environment or no HTTP host has been provided by web server
+			if( !getEnv( 'HTTP_HOST' ) ){														//  application has been executed outside a valid web server environment or no HTTP host has been provided by web server
 				throw new EnvironmentException(
 					'This application needs to be executed within by a web server'
 				);
 			}
-			if( !getEnv( 'DOCUMENT_ROOT' ) ){														//  no document root path has been provided by web server
+			if( !getEnv( 'DOCUMENT_ROOT' ) ){													//  no document root path has been provided by web server
 				throw new EnvironmentException(
 					'Your web server needs to provide a document root path'
 				);
 			}
-			if( !getEnv( 'SCRIPT_NAME' ) ){															//  no script file path has been provided by web server
+			if( !getEnv( 'SCRIPT_NAME' ) ){													//  no script file path has been provided by web server
 				throw new EnvironmentException(
 					'Your web server needs to provide the running scripts file path'
 				 );
@@ -363,7 +363,7 @@ class Web extends Environment
 		$path			= dirname( (string) getEnv( 'SCRIPT_NAME' ) );
 		if( $this->options['pathApp'] ?? '' )
 			$path		= $this->options['pathApp'];
-		$this->path		= preg_replace( "@^/$@", "", $path )."/";		//  note requested working path
+		$this->path		= preg_replace( "@^/$@", "", $path )."/";					//  note requested working path
 		$this->url		= $this->scheme.'://'.$hostWithPort.$this->path;							//  note calculated base application URI
 		$this->uri		= $this->root.$this->path;													//  note calculated absolute base application path
 		$this->runtime->reach( 'env: self detection' );
@@ -385,7 +385,7 @@ class Web extends Environment
 		if( file_exists( $configHost ) ){															//  config file for host is existing
 			$lines	= (array) parse_ini_file( $configHost );										//  read host config pairs
 			foreach( $lines as $key => $value ){													//  iterate pairs
-				if( preg_match( '/^[\d.]+$/', $value ) )									//  value is integer or float
+				if( preg_match( '/^[\d.]+$/', $value ) )										//  value is integer or float
 					$value	= (float) $value;														//  convert value to numeric
 				else if( in_array( strtolower( $value ), array( "yes", "true" ) ) )					//  value *means* yes
 					$value	= TRUE;																	//  change value to boolean TRUE
@@ -510,24 +510,24 @@ class Web extends Environment
 
 		// @todo check if this old workaround public URL paths extended by module is still needed and remove
 		$isInside	= (int) $this->session->get( 'auth_user_id' );
-		$inside		= explode( ',', $this->config->get( 'module.acl.inside', '' ) );					//  get current inside link list
-		$outside	= explode( ',', $this->config->get( 'module.acl.outside', '' ) );					//  get current outside link list
+		$inside		= explode( ',', $this->config->get( 'module.acl.inside', '' ) );		//  get current inside link list
+		$outside	= explode( ',', $this->config->get( 'module.acl.outside', '' ) );		//  get current outside link list
 		foreach( $this->modules->getAll() as $module ){
-			foreach( $module->links as $link ){													//  iterate module links
+			foreach( $module->links as $link ){														//  iterate module links
 				$link->path	= $link->path ?: 'index/index';
-				if( $link->access == "inside" ){												//  link is inside public
-					$path	= str_replace( '/', '_', $link->path );								//  get link path
-					if( !in_array( $path, $inside ) )											//  link is not in public link list
-						$inside[]	= $path;													//  add link to public link list
+				if( $link->access == "inside" ){													//  link is inside public
+					$path	= str_replace( '/', '_', $link->path );					//  get link path
+					if( !in_array( $path, $inside ) )												//  link is not in public link list
+						$inside[]	= $path;														//  add link to public link list
 				}
-				if( $link->access == "outside" ){												//  link is outside public
-					$path	= str_replace( '/', '_', $link->path );								//  get link path
-					if( !in_array( $path, $inside ) )											//  link is not in public link list
-						$outside[]	= $path;													//  add link to public link list
+				if( $link->access == "outside" ){													//  link is outside public
+					$path	= str_replace( '/', '_', $link->path );					//  get link path
+					if( !in_array( $path, $inside ) )												//  link is not in public link list
+						$outside[]	= $path;														//  add link to public link list
 				}
 			}
 		}
-		$this->config->set( 'module.acl.inside', implode( ',', array_unique( $inside ) ) );		//  save public link list
+		$this->config->set( 'module.acl.inside', implode( ',', array_unique( $inside ) ) );	//  save public link list
 		$this->config->set( 'module.acl.outside', implode( ',', array_unique( $outside ) ) );	//  save public link list
 		$this->modules->callHook( 'Session', 'init', $this->session );
 		$this->runtime->reach( 'env: session: init done' );

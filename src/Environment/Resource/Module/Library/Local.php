@@ -27,6 +27,8 @@
  */
 namespace CeusMedia\HydrogenFramework\Environment\Resource\Module\Library;
 
+use CeusMedia\Common\Exception\FileNotExisting as FileNotExistingException;
+use CeusMedia\Common\Exception\IO as IoException;
 use CeusMedia\Common\FS\File\Reader as FileReader;
 use CeusMedia\Common\FS\File\RegexFilter as FileRegexIndex;
 use CeusMedia\Common\FS\File\Writer as FileWriter;
@@ -66,14 +68,14 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 	 *	@access		public
 	 *	@param		Environment		$env			Environment instance
 	 *	@return		void
-	 *	@throws		Exception	if XML file could not been loaded and parsed
+	 *	@throws		FileNotExistingException		if strict and file is not existing or given path is not a file
+	 *	@throws		IoException						if strict and file is not readable
 	 */
 	public function __construct( Environment $env )
 	{
 		$this->env			= $env;
 		$config				= $this->env->getConfig();
-		$envClass			= $this->env::class;
-		$defaultPaths		= $envClass::$defaultPaths;
+		$defaultPaths		= $this->env::$defaultPaths;
 		$this->modulePath	= $env->path.$defaultPaths['config'].'modules/';
 		$this->cacheFile	= $env->path.$defaultPaths['config'].'modules.cache.serial';
 		if( $config->get( 'path.module.config' ) )
@@ -92,6 +94,7 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 	 *	@throws		RuntimeException			if given static class method is not existing
 	 *	@throws		RuntimeException			if method call produces stdout output, for example warnings and notices
 	 *	@throws		RuntimeException			if method call is throwing an exception
+	 *	@throws		ReflectionException
 	 */
 	public function callHook( string $resource, string $event, object $context ): int
 	{
@@ -178,7 +181,8 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 	 *	@param		boolean		$useCache		Flag: use cache if available
 	 *	@param		boolean		$forceReload	Flag: clear cache beforehand if available
 	 *	@return		object		Data object containing the result source and number of found modules
-	 *	@throws		Exception	if XML file could not been loaded and parsed
+	 *	@throws		FileNotExistingException	if strict and file is not existing or given path is not a file
+	 *	@throws		IoException					if strict and file is not readable
 	 */
 	public function scan( bool $useCache = FALSE, bool $forceReload = FALSE ): object
 	{
