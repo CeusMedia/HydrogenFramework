@@ -13,7 +13,7 @@ use JsonException;
 use ReflectionException;
 use Throwable;
 
-class API
+class Api
 {
 	protected WebEnvironment $env;
 
@@ -159,9 +159,8 @@ class API
 	 *	@param		integer			$statusCode		HTTP status code of response
 	 *	@param		string|NULL		$mimeType		MIME type to send (default: defaultMimeType)
 	 *	@return		integer			Number of sent bytes, if exitAfterwards is disabled (default: no)
-	 *	@throws		JsonException
 	 */
-	protected function respondError( string|int $code, ?string $message = NULL, int $statusCode = 412, ?string $mimeType = NULL ): int
+	protected function respondError( string $message, string|int $code = 0, int $statusCode = 412, ?string $mimeType = NULL ): int
 	{
 		$response	= [
 			'status'	=> 'error',
@@ -171,8 +170,14 @@ class API
 		$dev	= (string) ob_get_clean();
 		if( ob_get_level() && strlen( trim( $dev ) ) )
 			$response['dev']	= $dev;
-		$json	= json_encode( $response,JSON_THROW_ON_ERROR );
-		return $this->respond( $json, $statusCode, $mimeType );
+		$mimeType	= $this->evaluateMimeType( $mimeType );
+		try{
+			$response	= $this->encodeResponseByMimeType( $response, $mimeType );
+			return $this->respond( $response, $statusCode, $mimeType );
+		}
+		catch( Exception $e ){
+			return $this->respondError( $message, 0, $code, 'text/plain' );
+		}
 	}
 
 	/**
