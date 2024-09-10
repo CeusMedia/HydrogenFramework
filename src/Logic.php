@@ -71,10 +71,10 @@ class Logic
 
 	/**
 	 *	@param		Environment			$env
-	 *	@return		self
+	 *	@return		static
 	 *	@throws		ReflectionException
 	 */
-	public static function getInstance( Environment $env ): self
+	public static function getInstance( Environment $env ): static
 	{
 		$logicPool	= $env->getLogic();
 		$className	= static::class;
