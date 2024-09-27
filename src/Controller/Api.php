@@ -154,8 +154,8 @@ class Api
 	 *	Sends error message.
 	 *	Exits afterwards, if enabled (default: yes).
 	 *	@access		protected
+	 *	@param		string			$message		Error message to send
 	 *	@param		string|int		$code			Error code to send
-	 *	@param		string|NULL		$message		Error message to send
 	 *	@param		integer			$statusCode		HTTP status code of response
 	 *	@param		string|NULL		$mimeType		MIME type to send (default: defaultMimeType)
 	 *	@return		integer			Number of sent bytes, if exitAfterwards is disabled (default: no)
@@ -176,7 +176,7 @@ class Api
 			return $this->respond( $response, $statusCode, $mimeType );
 		}
 		catch( Exception $e ){
-			return $this->respondError( $message, 0, $code, 'text/plain' );
+			return $this->respondError( $message, $code, 500, 'text/plain' );
 		}
 	}
 

@@ -72,11 +72,14 @@ class Model
 	/**	@var	string					$prefix			Database Table Prefix */
  	protected string $prefix			= '';
 
-	/**	@var    SimpleCacheInterface|NULL    $cache			Model data cache */
-	protected ?SimpleCacheInterface     $cache          = NULL;
-
 	/**	@var	integer					$fetchMode		PDO fetch mode */
 	protected int $fetchMode;
+
+	/**	@var	?string					$className		Name of entity class for fetch mode FETCH_CLASS */
+	protected ?string $className		= NULL;
+
+	/**	@var	?SimpleCacheInterface	$cache			Model data cache */
+	protected ?SimpleCacheInterface		$cache			= NULL;
 
 	/**	@var	string					$cacheKey		Base key in cache */
 	protected string $cacheKey;
@@ -104,8 +107,14 @@ class Model
 			$this->columns,
 			$this->primaryKey
 		);
-		if( $this->fetchMode )
+		if( $this->fetchMode ){
+			if( PDO::FETCH_CLASS === $this->fetchMode ){
+				if( '' === ( $this->className ?? '' ) )
+					throw new RuntimeException( 'Cannot set set mode FETCH_CLASS without entity class name' );
+				$this->table->setFetchEntityClass( $this->className );
+			}
 			$this->table->setFetchMode( $this->fetchMode );
+		}
 		$this->table->setIndices( $this->indices );
 //		$this->cache	= ObjectFactory::createObject( self::$cacheClass );
 		$this->cacheKey	= 'db.'.$this->prefix.$this->name.'.';
