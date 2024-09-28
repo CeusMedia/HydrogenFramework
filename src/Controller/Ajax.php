@@ -23,6 +23,8 @@ use Throwable;
  */
 abstract class Ajax
 {
+	public static array $supportedCompressions	= ['gzip', 'deflate'];
+
 	protected WebEnvironment $env;
 
 	protected HttpRequest $request;
@@ -32,8 +34,6 @@ abstract class Ajax
 	protected PartitionSession $session;
 
 	protected string $defaultResponseMimeType	= 'text/json';
-
-	protected string $compressionMethod			= 'gzip';
 
 	protected bool $exitAfterwards				= TRUE;
 
@@ -57,6 +57,7 @@ abstract class Ajax
 		catch( Exception $e ){
 			$this->respondException( $e );
 		}
+
 		if( $this->env->getMode() & Environment::MODE_LIVE ){
 			if( !method_exists( $this->request, 'isAjax' ) || !$this->request->isAjax() )
 				$this->respondError( 400000, 'Access denied for non-AJAX requests', 406 );
@@ -179,8 +180,8 @@ abstract class Ajax
 		if( ob_get_level() && strlen( trim( $dev ) ) )
 			$this->response->addHeaderPair( 'X-Ajax-Dev', base64_encode( $dev ) );
 
-		$sender	= new HttpResponseSender( $this->response );
-		$sender->setCompression( $this->compressionMethod );
-		return $sender->send( $this->sendLengthHeader, $this->exitAfterwards );
+		HttpResponseSender::$supportedCompressions	= self::$supportedCompressions;
+		$sender	= new HttpResponseSender( $this->response, $this->request );
+		return $sender->send( $this->sendLengthHeader, $this->exitAfterwards )->getBodyLength();
 	}
 }

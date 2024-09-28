@@ -247,11 +247,11 @@ class LogicPool
 	protected function createInstance( string $className ): object
 	{
 		if( is_subclass_of( $className, Logic::class ) )
-			return ObjectFactory::createObject( $className, array( $this->env ) );
+			return ObjectFactory::createObject( $className, [$this->env] );
 
 		// @todo activate this line after deprecation of old logic classes
 //		throw new InvalidArgumentException( 'Given class "'.$className.'" is not a valid logic class' );
-		$arguments	= array( $this->env );
+		$arguments	= [$this->env];
 //		if( is_subclass_of( $className, SingletonLogic::class ) )
 //			if( is_callable( [$className, 'getInstance'] ) )
 //				return call_user_func_array( [$className, 'getInstance'], $arguments );

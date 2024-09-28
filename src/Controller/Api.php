@@ -15,6 +15,8 @@ use Throwable;
 
 class Api
 {
+	public static array $supportedCompressions	= ['gzip', 'deflate'];
+
 	protected WebEnvironment $env;
 
 	protected HttpRequest $request;
@@ -23,13 +25,11 @@ class Api
 
 	protected PartitionSession $session;
 
-	protected string $defaultResponseMimeType	= 'application/json';
-
-	protected string $compressionMethod			= 'gzip';
-
 	protected bool $exitAfterwards				= TRUE;
 
 	protected bool $sendLengthHeader			= FALSE;
+
+	protected string $defaultResponseMimeType	= 'application/json';
 
 	protected array $supportedMimeTypes			= [
 		'application/json',
@@ -51,11 +51,6 @@ class Api
 			$this->request		= $this->env->getRequest();
 			$this->session		= $this->env->getSession();
 			$this->response		= new HttpResponse();
-		}
-		catch( Exception $e ){
-			$this->respondException( $e );
-		}
-		try{
 			$this->__onInit();
 		}
 		catch( Exception $e ){
@@ -100,11 +95,11 @@ class Api
 
 		DevOutput::$defaultChannel	= DevOutput::CHANNEL_CONSOLE;
 
+		if( 'application/x-php' === $mimeType )
+			return serialize( $content );
+
 		if( in_array( $mimeType, ['application/json', 'text/json'], TRUE ) )
 			return json_encode( $content, JSON_THROW_ON_ERROR );
-
-		if( in_array( $mimeType, ['application/x-php'], TRUE ) )
-			return serialize( $content );
 
 		/** @var string $display */
 		$display	= print_m( $content, NULL, NULL, TRUE );
@@ -175,7 +170,7 @@ class Api
 			$response	= $this->encodeResponseByMimeType( $response, $mimeType );
 			return $this->respond( $response, $statusCode, $mimeType );
 		}
-		catch( Exception $e ){
+		catch( Exception ){
 			return $this->respondError( $message, $code, 500, 'text/plain' );
 		}
 	}
@@ -228,8 +223,8 @@ class Api
 		if( ob_get_level() && strlen( trim( $dev ) ) )
 			$this->response->addHeaderPair( 'X-API-Dev', base64_encode( $dev ) );
 
-		$sender	= new HttpResponseSender( $this->response );
-		$sender->setCompression( $this->compressionMethod );
-		return $sender->send( $this->sendLengthHeader, $this->exitAfterwards );
+		HttpResponseSender::$supportedCompressions	= self::$supportedCompressions;
+		$sender	= new HttpResponseSender( $this->response, $this->request );
+		return $sender->send( $this->sendLengthHeader, $this->exitAfterwards )->getBodyLength();
 	}
 }
