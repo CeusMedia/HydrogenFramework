@@ -380,6 +380,15 @@ class Model
 	}
 
 	/**
+	 *	Returns set fetch mode.
+	 *	@return		int
+	 */
+	public function getFetchMode(): int
+	{
+		return $this->fetchMode;
+	}
+
+	/**
 	 *	Returns list of table index columns.
 	 *	@access		public
 	 *	@return		array
