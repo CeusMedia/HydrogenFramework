@@ -21,14 +21,14 @@
     "ext-json": "*",
     "ext-pdo": "*",
     "ext-simplexml": "*",
-    "ceus-media/cache": "^0.5 | 0.5.x-dev",
+    "ceus-media/cache": "^0.6 | 0.6.x-dev | ^0.5 | 0.5.x-dev",
     "ceus-media/common": "^1.0 | 1.0.x-dev",
     "ceus-media/database": "^0.6 | 0.6.x-dev",
     "ceus-media/template-engine": "^0.5 | 0.5.x-dev",
     "psr/log": "^3 | 3.x-dev"
   },
   "require-dev": {
-    "ceus-media/doc-creator": "*",
+    "ceus-media/doc-creator": "^1.0 | 1.0.x-dev",
     "phpunit/phpunit": "^9 | ^10",
     "phpstan/phpstan": "^1",
     "phpstan/phpstan-strict-rules": "^1",
