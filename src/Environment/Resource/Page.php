@@ -352,14 +352,14 @@ class Page extends HtmlPage
 	 *	Matches given value into a scale between 0 and 9.
 	 *	Contains fallback for older module versions using level as string (top,mid,end) or boolean.
 	 *	Understands:
-	 *	- integer (limited to [0-9])
-	 *	- NULL or empty string as level 5 (mid).
+	 *	- integer (limited to [1-9])
+	 *	- NULL, integer 0 or empty string as level 5 (mid).
 	 *	- boolean TRUE as level 1 (top).
 	 *	- boolean FALSE as level 9 (mid).
 	 *	- string {top,start,head} as level 1.
-	 *	- string {high, higher, highest} as levels 4, 3, 2.
+	 *	- string {highest,higher,high} as levels 2, 3, 4.
 	 *	- string {mid,center,normal,default,unknown} as level 5.
-	 *	- string {low, lower, lowest} as levels 6, 7, 8.
+	 *	- string {low,lower,lowest} as levels 6, 7, 8.
 	 *	- string {end,tail,bottom} as level 9.
 	 *	- anything else as level 5.
 	 *	@static
@@ -369,21 +369,25 @@ class Page extends HtmlPage
 	 */
 	public static function interpretLoadLevel( int|string|bool|NULL $level = NULL ): int
 	{
+		if( NULL === $level || 0 === $level )
+			return Captain::LEVEL_MID;
 		if( is_int( $level ) )
 			return min( max( abs( $level ), Captain::LEVEL_TOP ), Captain::LEVEL_END );
 		if( is_bool( $level ) )
 			return $level ? Captain::LEVEL_HIGH : Captain::LEVEL_LOW;
-		if( NULL === $level )
+		$level	= trim( $level );
+		if( in_array( $level, ['center', 'normal', 'default', 'unknown', ''], TRUE ) )
 			return Captain::LEVEL_MID;
-		if( 0 !== preg_match( '/^[0-9]$/', trim( $level ) ) )
-			return self::interpretLoadLevel( (int) $level );
-		$midAliases	= ['center', 'normal', 'default', 'unknown', ''];
+		if( 0 !== preg_match( '/^[1-9]$/', $level ) )
+			return intval( $level );
 		$level	= $level == 'head' ? 'top' : $level;
 		$level	= $level == 'tail' ? 'end' : $level;
-		$level	= in_array( $level, $midAliases, TRUE ) ? 'mid' : $level;
 		$levelConstants	= new Constant( Captain::class );											//  reflect constants of Captain
-		try{ return $levelConstants->getValue( strtoupper( $level ), 'LEVEL' ); }
-		catch( DomainException|RangeException|ReflectionException ){ return Captain::LEVEL_MID; }
+		/** @noinspection PhpUnhandledExceptionInspection */
+		if( $levelConstants->hasValue( strtoupper( $level ), 'LEVEL' ) )
+			/** @noinspection PhpUnhandledExceptionInspection */
+			return $levelConstants->getValue( strtoupper( $level ), 'LEVEL' );
+		return Captain::LEVEL_MID;
 	}
 
 	/**
