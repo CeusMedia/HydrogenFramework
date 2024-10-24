@@ -77,6 +77,21 @@ class Captain
 	public const LEVEL_BOTTOM		= 9;
 	public const LEVEL_END			= 9;
 
+	public const LEVELS	= [
+		self::LEVEL_UNKNOWN,
+		self::LEVEL_TOP,
+		self::LEVEL_START,
+		self::LEVEL_HIGHEST,
+		self::LEVEL_HIGH,
+		self::LEVEL_HIGHER,
+		self::LEVEL_MID,
+		self::LEVEL_LOWER,
+		self::LEVEL_LOW,
+		self::LEVEL_LOWEST,
+		self::LEVEL_BOTTOM,
+		self::LEVEL_END,
+	];
+
 	/**	@var		Environment			$env			Environment object */
 	protected Environment $env;
 

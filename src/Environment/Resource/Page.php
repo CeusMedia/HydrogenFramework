@@ -28,6 +28,7 @@
 namespace CeusMedia\HydrogenFramework\Environment\Resource;
 
 use CeusMedia\Common\ADT\Collection\Dictionary;
+use CeusMedia\Common\Alg\Obj\Constant;
 use CeusMedia\Common\UI\HTML\PageFrame as HtmlPage;
 use CeusMedia\Common\UI\HTML\Tag as HtmlTag;
 use CeusMedia\HydrogenFramework\Environment as Environment;
@@ -39,7 +40,9 @@ use CeusMedia\HydrogenFramework\View\Helper\StyleSheet as CssHelper;
 use CeusMedia\HydrogenFramework\View\Helper\JavaScript as JsHelper;
 
 use InvalidArgumentException;
+use DomainException;
 use RangeException;
+use ReflectionException;
 use RuntimeException;
 use stdClass;
 
@@ -350,36 +353,37 @@ class Page extends HtmlPage
 	 *	Contains fallback for older module versions using level as string (top,mid,end) or boolean.
 	 *	Understands:
 	 *	- integer (limited to [0-9])
-	 *	- NULL or empty string as level 4 (mid).
+	 *	- NULL or empty string as level 5 (mid).
 	 *	- boolean TRUE as level 1 (top).
-	 *	- boolean FALSE as level 4 (mid).
-	 *	- string {top,head,start} as level 1.
-	 *	- string {mid,center,normal,default} as level 4.
-	 *	- string {end,tail,bottom} as level 8.
+	 *	- boolean FALSE as level 9 (mid).
+	 *	- string {top,start,head} as level 1.
+	 *	- string {high, higher, highest} as levels 4, 3, 2.
+	 *	- string {mid,center,normal,default,unknown} as level 5.
+	 *	- string {low, lower, lowest} as levels 6, 7, 8.
+	 *	- string {end,tail,bottom} as level 9.
+	 *	- anything else as level 5.
 	 *	@static
 	 *	@access		public
-	 *	@param		mixed			$level 			Load level: 0-9 or {top(1),mid(4),end(8)} or {TRUE(1),FALSE(4)} or NULL(4)
-	 *	@return		integer			Level as integer value between 0 and 9
-	 *	@throws		InvalidArgumentException		if level is not if type NULL, boolean, integer or string
-	 *	@throws		RangeException					if given string is not within {top,head,start,mid,center,normal,default,end,tail,bottom}
+	 *	@param		int|string|bool|NULL		$level		Load level: 0-9 or {top(1),mid(5),end(9)} or {TRUE(3),FALSE(7)} or NULL(5)
+	 *	@return		integer						Level as integer value between 0 and 9
 	 */
-	public static function interpretLoadLevel( $level ): int
+	public static function interpretLoadLevel( int|string|bool|NULL $level = NULL ): int
 	{
-		if( is_null( $level ) || !strlen( trim( $level ) ) )
-			return Captain::LEVEL_MID;
-		if( is_int( $level ) || ( is_string( $level ) && preg_match( '/^[0-9]$/', trim( $level ) ) ) )
-			return (int) min( max( abs( $level ), Captain::LEVEL_TOP), Captain::LEVEL_END );
+		if( is_int( $level ) )
+			return min( max( abs( $level ), Captain::LEVEL_TOP ), Captain::LEVEL_END );
 		if( is_bool( $level ) )
 			return $level ? Captain::LEVEL_HIGH : Captain::LEVEL_LOW;
-		if( !is_string( $level ) )
-			throw new InvalidArgumentException( 'Load level must be integer or string' );
-		if( in_array( $level, array( 'top', 'head', 'start' ) ) )
-			return Captain::LEVEL_HIGHEST;
-		if( in_array( $level, array( 'mid', 'center', 'normal', 'default' ) ) )
+		if( NULL === $level )
 			return Captain::LEVEL_MID;
-		if( in_array( $level, array( 'end', 'tail', 'bottom' ) ) )
-			return Captain::LEVEL_LOWEST;
-		throw new RangeException( 'Invalid load level: '.$level );
+		if( 0 !== preg_match( '/^[0-9]$/', trim( $level ) ) )
+			return self::interpretLoadLevel( (int) $level );
+		$midAliases	= ['center', 'normal', 'default', 'unknown', ''];
+		$level	= $level == 'head' ? 'top' : $level;
+		$level	= $level == 'tail' ? 'end' : $level;
+		$level	= in_array( $level, $midAliases, TRUE ) ? 'mid' : $level;
+		$levelConstants	= new Constant( Captain::class );											//  reflect constants of Captain
+		try{ return $levelConstants->getValue( strtoupper( $level ), 'LEVEL' ); }
+		catch( DomainException|RangeException|ReflectionException ){ return Captain::LEVEL_MID; }
 	}
 
 	/**

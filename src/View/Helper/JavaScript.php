@@ -107,7 +107,7 @@ class JavaScript
 		$level	??= CaptainResource::LEVEL_MID;
 		if( !array_key_exists( $level, $this->scripts ) )										//  level is not yet defined in scripts list
 			$this->scripts[$level]	= [];													//  create empty scripts list for level
-		$key	= ( 0 !== strlen( $key ?? '' ) ) ? md5( $key ) : 'default';
+		$key	= $this->generateScriptKeyHash( $key );
 		if( !array_key_exists( $key, $this->scripts[$level] ) )
 			$this->scripts[$level][$key]	= [];
 		$this->scripts[$level][$key][]	= $script;
@@ -128,7 +128,7 @@ class JavaScript
 		$level	??= CaptainResource::LEVEL_MID;
 		if( !array_key_exists( $level, $this->scriptsOnReady ) )								//  level is not yet defined in scripts list
 			$this->scriptsOnReady[$level]	= [];											//  create empty scripts list for level
-		$key	= ( 0 !== strlen( $key ?? '' ) ) ? md5( $key ) : 'default';
+		$key	= $this->generateScriptKeyHash( $key );
 		if( !array_key_exists( $key, $this->scriptsOnReady[$level] ) )
 			$this->scriptsOnReady[$level][$key]	= [];
 		$this->scriptsOnReady[$level][$key][]	= $script;										//  note JavaScript code on runlevel
@@ -149,7 +149,7 @@ class JavaScript
 		$level	??= CaptainResource::LEVEL_MID;
 		if( !array_key_exists( $level, $this->urls ) )											//  level is not yet defined in scripts list
 			$this->urls[$level]	= [];														//  create empty scripts list for level
-		$key	= ( 0 !== strlen( $key ?? '' ) ) ? md5( $key ) : 'default';
+		$key	= $this->generateScriptKeyHash( $key );
 		if( !array_key_exists( $key, $this->urls[$level] ) )
 			$this->urls[$level][$key]	= [];
 		$this->urls[$level][$key][]	= $url;														//  note JavaScript code on runlevel
@@ -316,6 +316,17 @@ class JavaScript
 		}
 		catch( Throwable ){}
 		return $script;
+	}
+
+	/**
+	 *	@param		string|NULL		$key
+	 *	@return		string
+	 */
+	protected function generateScriptKeyHash( ?string $key = NULL ): string
+	{
+		if( NULL === $key || '' === trim( $key ) )
+			return 'default';
+		return md5( $key );
 	}
 
 	/**
