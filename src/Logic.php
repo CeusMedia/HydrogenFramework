@@ -81,7 +81,7 @@ class Logic
 		$key		= $logicPool->getKeyFromClassName( $className );
 		if( !$logicPool->has( $key ) )
 			$logicPool->add( $key, $className );
-		/** @var self $instance */
+		/** @var static $instance */
 		$instance	= $logicPool->get( $key );
 		return $instance;
 	}

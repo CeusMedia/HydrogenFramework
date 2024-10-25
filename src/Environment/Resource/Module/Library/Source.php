@@ -197,7 +197,7 @@ class Source extends AbstractLibrary implements LibraryInterface
 			throw new RuntimeException( 'Source URL "'.$this->source->path.'" is not existing (Code '.$status.')' );
 		if( $reader->getResponseHeader( 'Content-Type' ) !== 'application/json' )
 			throw new RuntimeException( 'Source did not return JSON data' );
-		$modules	= json_decode( $response->getBody(), FALSE, 512, JSON_THROW_ON_ERROR );
+		$modules	= json_decode( $response->getBody() ?? '[]', FALSE, 512, JSON_THROW_ON_ERROR );
 		foreach( $modules as $module ){
 			$module->source				= $this->source->id;
 			$module->path				= $this->source->path.str_replace( '_', '/', $module->id );
