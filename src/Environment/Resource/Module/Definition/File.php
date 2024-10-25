@@ -43,13 +43,16 @@ class File
 	public string $file;
 
 	/** @var	bool|string|NULL	$load */
-	public $load;
+	public bool|string|NULL $load	= NULL;
 
 	/** @var	int|string|NULL		$level */
-	public $level;
+	public int|string|NULL $level	= NULL;
 
 	/** @var	string|null			$source */
 	public ?string $source			= NULL;
+
+	/** @var	string|null			$theme */
+	public ?string $theme			= NULL;
 
 	/**
 	 *	@param		string		$file
