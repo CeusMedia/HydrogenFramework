@@ -12,12 +12,16 @@
 
 namespace CeusMedia\HydrogenFramework\Environment\Resource;
 
+use CeusMedia\Common\Renderable;
 use CeusMedia\HydrogenFramework\Environment;
 use DateTimeInterface;
 use DomainException;
+use JsonException;
 use ReflectionException;
 use ReflectionMethod;
 use RuntimeException;
+use Serializable;
+use Stringable;
 use Throwable;
 
 /**
@@ -107,18 +111,18 @@ class Log
 	 *	Logs message by registered hooks or local log file fallback.
 	 *	@access		public
 	 *	@param		string				$type			Message type as string (debug,info,note,warn,error), @see ::TYPE_*
-	 *	@param		mixed				$message		Message as string, array or data object
+	 *	@param		string|object|NULL	$message		Message as string, array or data object
 	 *	@param		string|object|NULL	$context		Context of message as object or string
 	 *	@return		bool
 	 *	@trigger	Env::log			Calls hook for handling by installed modules
 	 *	@trigger	Env:Custom::log		Calls hook for handling by custom module hooks
-	 *	@throws		ReflectionException
 	 */
-	public function log( string $type, $message, $context = NULL ): bool
+	public function log( string $type, string|object $message = NULL, string|object $context = NULL ): bool
 	{
 		$context	??= (object) [];
 		$context	= is_string( $context ) ? (object) ['context' => $context] : $context;
-		$data		= $this->collectLogData( $type, (string) $message, $context );
+		$message	= $this->flattenMessage( $message );
+		$data		= $this->collectLogData( $type, $message, $context );
 		return $this->applyStrategyOnCollectedData( $data, $context );
 	}
 
@@ -126,12 +130,12 @@ class Log
 	 *	Logs exception by registered hooks or local log file fallback.
 	 *	@access		public
 	 *	@param		Throwable			$exception		Exception to log
-	 *	@param		string|object		$context		Context of message as object or string
+	 *	@param		string|object|NULL	$context		Context of message as object or string
 	 *	@return		boolean				TRUE if handled by called module hooks
 	 *	@trigger	Env::logException	Calls hook for handling by installed modules
 	 *	@throws		ReflectionException
 	 */
-	public function logException( Throwable $exception, $context = NULL ): bool
+	public function logException( Throwable $exception, string|object $context = NULL ): bool
 	{
 		$context	??= (object) [];
 		$context	= is_string( $context ) ? (object) ['context' => $context] : $context;
@@ -198,22 +202,20 @@ class Log
 	 *	@param		array		$data
 	 *	@param		object		$context
 	 *	@return		bool
-	 *	@throws		ReflectionException
 	 */
 	protected function applyStrategyOnCollectedData( array $data, object $context ): bool
 	{
 		$isHandled	= FALSE;
-		$captain	= $this->env->getCaptain();
 		foreach( $this->strategies as $strategy ){
 			switch( $strategy ){
 				case self::STRATEGY_MODULE_HOOKS:
-					$isHandled	= $captain->callHook( 'Env', 'log', $context, $data ) ?? FALSE;
+					$isHandled	= $this->handleLogWithModuleHooks( $data, $context );
 					break;
 				case self::STRATEGY_CUSTOM_HOOKS:
-					$isHandled	= $captain->callHook( 'Env:Custom', 'log', $context, $data ) ?? FALSE;
+					$isHandled	= $this->handleLogWithCustomHooks( $data, $context );
 					break;
 				case self::STRATEGY_CUSTOM_CALLBACK:
-					$isHandled	= $this->handleLogWithCustomCallback( $data );
+					$isHandled	= $this->handleLogWithCustomCallback( $data, $context );
 					break;
 				case self::STRATEGY_APP_TYPED:
 					$isHandled	= $this->handleLogWithAppTyped( $data );
@@ -241,14 +243,13 @@ class Log
 	protected function applyStrategyOnCollectedExceptionData( array $data, object $context ): bool
 	{
 		$isHandled	= FALSE;
-		$captain	= $this->env->getCaptain();
 		foreach( $this->strategies as $strategy ){
 			switch( $strategy ){
 				case self::STRATEGY_MODULE_HOOKS:
-					$isHandled	= $captain->callHook( 'Env', 'logException', $context, $data ) ?? FALSE;
+					$isHandled	= $this->handleExceptionWithModuleHooks( $data, $context );
 					break;
 				case self::STRATEGY_CUSTOM_HOOKS:
-					$isHandled	= $captain->callHook( 'Env:Custom', 'logException', $context, $data ) ?? FALSE;
+					$isHandled	= $this->handleExceptionWithCustomHooks( $data, $context );
 					break;
 				case self::STRATEGY_CUSTOM_CALLBACK:
 					$isHandled	= $this->handleExceptionWithCustomCallback( $data );
@@ -287,6 +288,36 @@ class Log
 			'datetime'		=> date( DateTimeInterface::RFC3339_EXTENDED ),
 			'microtime'		=> microtime( TRUE ),
 		];
+	}
+
+	/**
+	 *	@param		string|object|NULL $message
+	 *	@return		string
+	 */
+	protected function flattenMessage( string|object $message = NULL ): string
+	{
+		if( NULL === $message )
+			return '';
+		if( is_string( $message ) )
+			return $message;
+		if( $message instanceof Renderable )
+			return $message->render();
+		if( $message instanceof Serializable ){
+			try{
+				return $message->serialize();
+			}
+			catch( Throwable $e ) {
+				return $e->getMessage();
+			}
+		}
+		if( $message instanceof Stringable )
+			return (string) $message;
+		try{
+			return json_encode( $message, JSON_THROW_ON_ERROR );
+		}
+		catch( JsonException ){
+			return json_last_error_msg();
+		}
 	}
 
 	/**
@@ -348,6 +379,37 @@ class Log
 	}
 
 	/**
+	 *	@param		array		$data
+	 *	@param		object		$context		Context data object
+	 *	@return		bool
+	 */
+	protected function handleExceptionWithCustomHooks( array $data, object $context ): bool
+	{
+		try{
+			return $this->env->getCaptain()
+				->callHook( 'Env:Custom', 'logException', $context, $data ) ?? FALSE;
+		}
+		catch( Throwable $e ){
+			return $this->handleExceptionWithAppTyped( ['type' => 'exception', 'exception' => $e] );
+		}
+	}
+	/**
+	 *	@param		array		$data
+	 *	@param		object		$context		Context data object
+	 *	@return		bool
+	 */
+	protected function handleExceptionWithModuleHooks( array $data, object $context ): bool
+	{
+		try{
+			return $this->env->getCaptain()
+				->callHook( 'Env', 'logException', $context, $data ) ?? FALSE;
+		}
+		catch( Throwable $t ){
+			return $this->handleExceptionWithAppTyped( ['type' => 'exception', 'exception' => $t] );
+		}
+	}
+
+	/**
 	 *	...
 	 *	@access		protected
 	 *	@param		array		$data
@@ -384,20 +446,60 @@ class Log
 	 *	...
 	 *	@access		protected
 	 *	@param		array		$data
+	 *	@param		object		$context		Context data object
 	 *	@return		bool
-	 *	@throws		ReflectionException
 	 */
-	protected function handleLogWithCustomCallback( array $data ): bool
+	protected function handleLogWithCustomCallback( array $data, object $context ): bool
 	{
 		if( NULL !== $this->customLogCallback ){
 			$callable	= $this->customLogCallback;
 			if( is_object( $callable[0] ) && is_callable( $callable, TRUE ) ){
 				$className	= $callable[0]::class;
-				$reflection	= new ReflectionMethod( $className, $callable[1] );
-				return $reflection->invokeArgs( $callable[0], [$data] );
+				try{
+					$reflection	= new ReflectionMethod( $className, $callable[1] );
+					$reflection->invokeArgs( $callable[0], [$data] );
+				}
+				catch( ReflectionException $e ){
+					$this->handleExceptionWithAppTyped( $this->collectLogExceptionData( $e, $context ) );		//  log invocation error
+				}
+				return FALSE;
 			}
 			if( class_exists( $callable[0] ) && is_callable( $callable, TRUE ) )
 				return (bool) call_user_func_array( $callable, [$data] );
+		}
+		return FALSE;
+	}
+
+	/**
+	 *	@param		array		$data
+	 *	@param		object		$context		Context data object
+	 *	@return		bool
+	 */
+	protected function handleLogWithCustomHooks( array $data, object $context ): bool
+	{
+		try{
+			return $this->env->getCaptain()
+				->callHook( 'Env:Custom', 'log', $context, $data ) ?? FALSE;
+		}
+		catch( Throwable $t ){
+			$this->handleLogWithAppTyped( ['type' => 'exception', 'exception' => $t] );
+		}
+		return FALSE;
+	}
+
+	/**
+	 *	@param		array		$data
+	 *	@param		object		$context		Context data object
+	 *	@return		bool
+	 */
+	protected function handleLogWithModuleHooks( array $data, object $context ): bool
+	{
+		try{
+			return $this->env->getCaptain()
+				->callHook( 'Env', 'log', $context, $data ) ?? FALSE;
+		}
+		catch( Throwable $e ){
+			$this->handleLogWithAppTyped( ['type' => 'exception', 'exception' => $e] );
 		}
 		return FALSE;
 	}

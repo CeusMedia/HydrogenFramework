@@ -18,5 +18,6 @@ parameters:
 	treatPhpDocTypesAsCertain: false
 	reportUnmatchedIgnoredErrors: true
 	ignoreErrors:
-		- identifier: missingType.iterableValue
+		-
+			identifier: missingType.iterableValue
 
