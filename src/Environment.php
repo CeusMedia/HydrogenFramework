@@ -189,7 +189,7 @@ class Environment implements ArrayAccess
 			static::$defaultPaths['cache']	= sys_get_temp_dir().'/cache/';
 
 		$this->options		= $options;																//  store given environment options
-		$this->path			= $options['pathApp'] ?? getCwd() . '/';								//  detect application path
+		$this->path			= rtrim( $options['pathApp'] ?? getCwd(), '/' ) . '/';	//  detect application path
 		$this->uri			= getCwd().'/';															//  detect application base URI
 
 		date_default_timezone_set( @date_default_timezone_get() );									//  avoid having no timezone set

@@ -15,11 +15,9 @@ namespace CeusMedia\HydrogenFramework\Environment\Resource;
 use CeusMedia\Common\Renderable;
 use CeusMedia\HydrogenFramework\Environment;
 use DateTimeInterface;
-use DomainException;
 use JsonException;
 use ReflectionException;
 use ReflectionMethod;
-use RuntimeException;
 use Serializable;
 use Stringable;
 use Throwable;
@@ -86,7 +84,8 @@ class Log
 	protected ?array $customLogCallback			= NULL;
 
 	/**
-	 *	...
+	 *	Constructor.
+	 *	Receives link to environment.
 	 *	@access		public
 	 *	@return		void
 	 *	@todo 		add path fallback using Null-Coalesce
@@ -94,7 +93,7 @@ class Log
 	public function __construct( Environment $env )
 	{
 		$this->env	= $env;
-		$this->path	= $env->getConfig()->get( 'path.logs' );
+		$this->path	= $env->path.$env->getPath( 'logs' );
 	}
 
 	/**
@@ -133,7 +132,6 @@ class Log
 	 *	@param		string|object|NULL	$context		Context of message as object or string
 	 *	@return		boolean				TRUE if handled by called module hooks
 	 *	@trigger	Env::logException	Calls hook for handling by installed modules
-	 *	@throws		ReflectionException
 	 */
 	public function logException( Throwable $exception, string|object $context = NULL ): bool
 	{
@@ -236,9 +234,6 @@ class Log
 	 *	@param		array		$data
 	 *	@param		object		$context
 	 *	@return		bool
-	 *	@throws		DomainException
-	 *	@throws		ReflectionException
-	 *	@throws		RuntimeException
 	 */
 	protected function applyStrategyOnCollectedExceptionData( array $data, object $context ): bool
 	{
@@ -252,7 +247,7 @@ class Log
 					$isHandled	= $this->handleExceptionWithCustomHooks( $data, $context );
 					break;
 				case self::STRATEGY_CUSTOM_CALLBACK:
-					$isHandled	= $this->handleExceptionWithCustomCallback( $data );
+					$isHandled	= $this->handleExceptionWithCustomCallback( $data, $context );
 					break;
 				case self::STRATEGY_APP_TYPED:
 					$isHandled	= $this->handleExceptionWithAppTyped( $data );
@@ -360,17 +355,23 @@ class Log
 	 *	...
 	 *	@access		protected
 	 *	@param		array		$data
+	 *	@param		object		$context		Context data object
 	 *	@return		bool
-	 *	@throws		ReflectionException
 	 */
-	protected function handleExceptionWithCustomCallback( array $data ): bool
+	protected function handleExceptionWithCustomCallback( array $data, object $context ): bool
 	{
 		if( NULL !== $this->customExceptionCallback ){
 			$callable	= $this->customExceptionCallback;
 			if( is_object( $callable[0] ) && is_callable( $callable, TRUE ) ){
-				$className	= $callable[0]::class;
-				$reflection	= new ReflectionMethod( $className, $callable[1] );
-				return $reflection->invokeArgs( $callable[0], [$data] );
+				try{
+					$reflection	= new ReflectionMethod( $callable[0]::class, $callable[1] );
+					$reflection->invokeArgs( $callable[0], [$data] );
+					return TRUE;
+				}
+				catch( ReflectionException $e ){
+					$this->handleExceptionWithAppTyped( $this->collectLogExceptionData( $e, $context ) );		//  log invocation error
+					return FALSE;
+				}
 			}
 			if( class_exists( $callable[0] ) && is_callable( $callable, TRUE ) )
 				return (bool) call_user_func_array( $callable, [$data] );
@@ -393,6 +394,7 @@ class Log
 			return $this->handleExceptionWithAppTyped( ['type' => 'exception', 'exception' => $e] );
 		}
 	}
+
 	/**
 	 *	@param		array		$data
 	 *	@param		object		$context		Context data object
@@ -454,15 +456,15 @@ class Log
 		if( NULL !== $this->customLogCallback ){
 			$callable	= $this->customLogCallback;
 			if( is_object( $callable[0] ) && is_callable( $callable, TRUE ) ){
-				$className	= $callable[0]::class;
 				try{
-					$reflection	= new ReflectionMethod( $className, $callable[1] );
+					$reflection	= new ReflectionMethod( $callable[0]::class, $callable[1] );
 					$reflection->invokeArgs( $callable[0], [$data] );
+					return TRUE;
 				}
 				catch( ReflectionException $e ){
 					$this->handleExceptionWithAppTyped( $this->collectLogExceptionData( $e, $context ) );		//  log invocation error
+					return FALSE;
 				}
-				return FALSE;
 			}
 			if( class_exists( $callable[0] ) && is_callable( $callable, TRUE ) )
 				return (bool) call_user_func_array( $callable, [$data] );
@@ -481,8 +483,8 @@ class Log
 			return $this->env->getCaptain()
 				->callHook( 'Env:Custom', 'log', $context, $data ) ?? FALSE;
 		}
-		catch( Throwable $t ){
-			$this->handleLogWithAppTyped( ['type' => 'exception', 'exception' => $t] );
+		catch( Throwable $e ){
+			$this->handleLogWithAppTyped( $this->collectLogExceptionData( $e, $context ) );
 		}
 		return FALSE;
 	}
@@ -499,7 +501,7 @@ class Log
 				->callHook( 'Env', 'log', $context, $data ) ?? FALSE;
 		}
 		catch( Throwable $e ){
-			$this->handleLogWithAppTyped( ['type' => 'exception', 'exception' => $e] );
+			$this->handleLogWithAppTyped( $this->collectLogExceptionData( $e, $context ) );
 		}
 		return FALSE;
 	}

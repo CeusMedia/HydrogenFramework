@@ -4,3 +4,4 @@
 /tool/config/.phpunit.cache
 /tool/config/.phpunit.result.cache
 /.idea
+/test/assets/app/logs
