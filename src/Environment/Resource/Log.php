@@ -83,6 +83,8 @@ class Log
 
 	protected ?array $customLogCallback			= NULL;
 
+	protected array $failedStrategies			= [];
+
 	/**
 	 *	Constructor.
 	 *	Receives link to environment.
@@ -239,6 +241,8 @@ class Log
 	{
 		$isHandled	= FALSE;
 		foreach( $this->strategies as $strategy ){
+			if( in_array( $strategy, $this->failedStrategies ) )
+				continue;
 			switch( $strategy ){
 				case self::STRATEGY_MODULE_HOOKS:
 					$isHandled	= $this->handleExceptionWithModuleHooks( $data, $context );
@@ -259,6 +263,7 @@ class Log
 			if( $isHandled && in_array( $strategy, $this->lastStrategies ) )
 				break;
 		}
+		$this->failedStrategies	= [];
 		return $isHandled;
 	}
 
@@ -369,7 +374,10 @@ class Log
 					return TRUE;
 				}
 				catch( ReflectionException $e ){
-					$this->handleExceptionWithAppTyped( $this->collectLogExceptionData( $e, $context ) );		//  log invocation error
+					$this->failedStrategies[]	= self::STRATEGY_CUSTOM_CALLBACK;
+					$this->logException( $e );
+//					$this->handleExceptionWithAppTyped( $this->collectLogExceptionData( $e, $context ) );		//  log invocation error
+//					$this->handleExceptionWithAppDefault( $data );												//  log former error
 					return FALSE;
 				}
 			}
@@ -391,7 +399,8 @@ class Log
 				->callHook( 'Env:Custom', 'logException', $context, $data ) ?? FALSE;
 		}
 		catch( Throwable $e ){
-			return $this->handleExceptionWithAppTyped( ['type' => 'exception', 'exception' => $e] );
+			$this->handleExceptionWithAppTyped( ['type' => 'exception', 'exception' => $e] );
+			return FALSE;
 		}
 	}
 
@@ -407,7 +416,10 @@ class Log
 				->callHook( 'Env', 'logException', $context, $data ) ?? FALSE;
 		}
 		catch( Throwable $t ){
-			return $this->handleExceptionWithAppTyped( ['type' => 'exception', 'exception' => $t] );
+			$this->failedStrategies[]	= self::STRATEGY_MODULE_HOOKS;
+			$this->logException( $t );
+//			$this->handleExceptionWithAppTyped( ['type' => 'exception', 'exception' => $t] );
+			return FALSE;
 		}
 	}
 
@@ -461,8 +473,10 @@ class Log
 					$reflection->invokeArgs( $callable[0], [$data] );
 					return TRUE;
 				}
-				catch( ReflectionException $e ){
-					$this->handleExceptionWithAppTyped( $this->collectLogExceptionData( $e, $context ) );		//  log invocation error
+				catch( Throwable $e ){
+					$this->failedStrategies[]	= self::STRATEGY_CUSTOM_CALLBACK;
+					$this->logException( $e );
+//					$this->handleExceptionWithAppTyped( $this->collectLogExceptionData( $e, $context ) );		//  log invocation error
 					return FALSE;
 				}
 			}
@@ -484,7 +498,9 @@ class Log
 				->callHook( 'Env:Custom', 'log', $context, $data ) ?? FALSE;
 		}
 		catch( Throwable $e ){
-			$this->handleLogWithAppTyped( $this->collectLogExceptionData( $e, $context ) );
+			$this->failedStrategies[]	= self::STRATEGY_CUSTOM_HOOKS;
+			$this->logException( $e );
+//			$this->handleExceptionWithAppTyped( $this->collectLogExceptionData( $e, $context ) );
 		}
 		return FALSE;
 	}
@@ -501,7 +517,9 @@ class Log
 				->callHook( 'Env', 'log', $context, $data ) ?? FALSE;
 		}
 		catch( Throwable $e ){
-			$this->handleLogWithAppTyped( $this->collectLogExceptionData( $e, $context ) );
+			$this->failedStrategies[]	= self::STRATEGY_MODULE_HOOKS;
+			$this->logException( $e );
+//			$this->handleLogWithAppTyped( $this->collectLogExceptionData( $e, $context ) );
 		}
 		return FALSE;
 	}

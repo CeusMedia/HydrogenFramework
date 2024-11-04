@@ -834,6 +834,26 @@ class Environment implements ArrayAccess
 		return $this;
 	}
 
+	public function isInDevMode(): bool
+	{
+		return self::MODE_DEV === ( $this->mode & self::MODE_DEV );
+	}
+
+	public function isInLiveMode(): bool
+	{
+		return self::MODE_LIVE === ( $this->mode & self::MODE_LIVE );
+	}
+
+	public function isInStageMode(): bool
+	{
+		return self::MODE_STAGE === ( $this->mode & self::MODE_STAGE );
+	}
+
+	public function isInTestMode(): bool
+	{
+		return self::MODE_TEST === ( $this->mode & self::MODE_TEST );
+	}
+
 	/**
 	 *	@param		mixed		$offset
 	 *	@return		bool
@@ -907,6 +927,24 @@ class Environment implements ArrayAccess
 			throw new InvalidArgumentException( sprintf( $message, $key ) );
 		}
 		$this->$key	= $object;
+		return $this;
+	}
+
+	/**
+	 *	Sets environment mode.
+	 *	Disabled for productive environments aka environments in LIVE mode.
+	 *	@param		int		$mode		One of ::MODES
+	 *	@return		static
+	 *	@throws		RuntimeException	if current environments is in LIVE mode
+	 *	@throws		RangeException		if an invalid mode has been given
+	 */
+	public function setMode( int $mode ): static
+	{
+		if( $this->isInLiveMode() )
+			throw new RuntimeException( 'Setting environment mode is disabled on productive environments' );
+		if( !in_array( $mode, self::MODES, TRUE ) )
+			throw new RangeException( 'Invalid mode' );
+		$this->mode	= $mode;
 		return $this;
 	}
 

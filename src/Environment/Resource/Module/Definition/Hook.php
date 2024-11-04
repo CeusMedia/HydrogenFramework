@@ -27,6 +27,8 @@
 
 namespace CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition;
 
+use CeusMedia\HydrogenFramework\Environment\Resource\Captain;
+
 /**
  *	Module definition: Hook.
  *
@@ -55,9 +57,9 @@ class Hook
 	 *	@param		string		$callback
 	 *	@param		string		$resource
 	 *	@param		string		$event
-	 *	@param		int			$level
+	 *	@param		int			$level		Default: 5 (mid)
 	 */
-	public function __construct( string $callback, string $resource, string $event, int $level )
+	public function __construct( string $callback, string $resource, string $event, int $level = Captain::LEVEL_MID )
 	{
 		$this->callback		= $callback;
 		$this->resource		= $resource;

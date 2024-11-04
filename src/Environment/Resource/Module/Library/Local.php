@@ -29,6 +29,7 @@ namespace CeusMedia\HydrogenFramework\Environment\Resource\Module\Library;
 
 use CeusMedia\Common\Exception\FileNotExisting as FileNotExistingException;
 use CeusMedia\Common\Exception\IO as IoException;
+use CeusMedia\Common\Exception\NotSupported as NotSupportedException;
 use CeusMedia\Common\FS\File\Reader as FileReader;
 use CeusMedia\Common\FS\File\RegexFilter as FileRegexIndex;
 use CeusMedia\Common\FS\File\Writer as FileWriter;
@@ -38,7 +39,6 @@ use CeusMedia\HydrogenFramework\Environment\Resource\Module\Reader as ModuleRead
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\LibraryInterface as LibraryInterface;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Library\Abstraction as AbstractLibrary;
 use Countable;
-use Exception;
 use ReflectionException;
 use RuntimeException;
 use SplFileObject;
@@ -63,6 +63,27 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 
 	protected string $cacheFile;
 
+	public static function readModuleFile( string $filePath, string $moduleId, string $modulesPath ): ModuleDefinition
+	{
+		$module			= ModuleReader::load( $filePath, $moduleId );
+		$module->source				= 'local';													//  set source to local
+		$module->path				= $modulesPath;												//  assume app path as module path
+		$module->isInstalled		= TRUE;														//  module is installed
+		$module->version->installed	= $module->version->current;								//  set installed version by found module version
+		$module->isActive			= TRUE;														//  set active by fallback: not configured -> on (active)
+		$configDictionary			= $module->getConfigAsDictionary();
+		if( $configDictionary->has( 'active' ) )											//  module has main switch in config
+			$module->isActive		= $configDictionary->get( 'active' );					//  set active by default main switch config value
+
+/*		This snippet from source library is not working in local installation.
+		$icon	= $entry->getPath().'/'.$moduleId;
+		if( file_exists( $icon.'.png' ) )
+			$module->icon	= 'data:image/png;base64,'.base64_encode( FileReader::load( $icon.'.png' ) );
+		else if( file_exists( $icon.'.ico' ) )
+			$module->icon	= 'data:image/x-icon;base64,'.base64_encode( FileReader::load( $icon.'.ico' ) );*/
+		return $module;
+	}
+
 	/**
 	 *	Constructor.
 	 *	@access		public
@@ -82,6 +103,22 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 			$this->modulePath	= $config->get( 'path.module.config' );
 		$this->env->getRuntime()->reach( 'Resource_Module_Library_Local::construction' );
 		$this->scan( (bool) $config->get( 'system.cache.modules' ) );
+	}
+
+	/**
+	 *	Adds a module by module definition.
+	 *	Disabled in productive environments.
+	 *	@param		ModuleDefinition		$module
+	 *	@return		static
+	 *	@throws		NotSupportedException in productive environment
+	 */
+	public function add( ModuleDefinition $module ): static
+	{
+		if( $this->env->isInLiveMode() )
+			throw new NotSupportedException( 'Adding modules dynamically is not allowed in productive environment' );
+
+		$this->modules[$module->id]	= $module;
+		return $this;
 	}
 
 	/**
@@ -212,23 +249,7 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 			/** @var string $moduleId */
 			$moduleId		= preg_replace( '/\.xml$/i', '', $entry->getFilename() );
 			$moduleFile		= $this->modulePath.$moduleId.'.xml';
-			$module			= ModuleReader::load( $moduleFile, $moduleId );
-			$module->source				= 'local';													//  set source to local
-			$module->path				= $this->modulePath;										//  assume app path as module path
-			$module->isInstalled		= TRUE;														//  module is installed
-			$module->version->installed	= $module->version->current;								//  set installed version by found module version
-			$module->isActive			= TRUE;														//  set active by fallback: not configured -> on (active)
-			$configDictionary			= $module->getConfigAsDictionary();
-			if( $configDictionary->has( 'active' ) )											//  module has main switch in config
-				$module->isActive		= $configDictionary->get( 'active' );					//  set active by default main switch config value
-
-/*			This snippet from source library is not working in local installation.
-			$icon	= $entry->getPath().'/'.$moduleId;
-			if( file_exists( $icon.'.png' ) )
-				$module->icon	= 'data:image/png;base64,'.base64_encode( FileReader::load( $icon.'.png' ) );
-			else if( file_exists( $icon.'.ico' ) )
-				$module->icon	= 'data:image/x-icon;base64,'.base64_encode( FileReader::load( $icon.'.ico' ) );*/
-
+			$module			= self::readModuleFile( $moduleFile, $moduleId, $this->modulePath );
 			$this->modules[$moduleId]	= $module;
 		}
 		ksort( $this->modules );

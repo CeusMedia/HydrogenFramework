@@ -117,7 +117,8 @@ class LogicPoolTest extends TestCase
 	protected function setUp(): void
 	{
 		$this->baseTestPath	= dirname( __DIR__, 2 ).'/';
-		$this->logic	= new LogicPool( new Environment( ['pathApp' => $this->baseTestPath.'assets/app/'] ) );
+		$this->env		= new Environment( ['pathApp' => $this->baseTestPath.'assets/app/'] );
+		$this->logic	= new LogicPool( $this->env );
 
 		Loader::create( 'php', $this->baseTestPath.'assets/app/classes' )->register();
 	}

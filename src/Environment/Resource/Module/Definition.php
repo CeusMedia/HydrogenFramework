@@ -111,6 +111,18 @@ class Definition
 	protected ?Dictionary $configAsDictionary	= NULL;
 
 	/**
+	 *	Static constructor.
+	 *	@param		string			$id			Module ID
+	 *	@param		string			$version	Version of module
+	 *	@param		string			$file		Path to XML file holding the module definition
+	 *	@param		string|NULL		$uri		Path to module (=folder of module file)
+	 */
+	public static function create( string $id, string $version, string $file, ?string $uri = NULL ): self
+	{
+		return new self( $id, $version, $file, $uri );
+	}
+
+	/**
 	 *	Constructor.
 	 *	@param		string			$id			Module ID
 	 *	@param		string			$version	Version of module
@@ -126,6 +138,20 @@ class Definition
 		$this->files		= new Files();
 		$this->relations	= new Relations();
 		$this->install		= new Installation();
+	}
+
+	/**
+	 *	@param		Hook		$hook
+	 *	@return		self
+	 */
+	public function addHook( Hook $hook ): self
+	{
+		if( !array_key_exists( $hook->resource, $this->hooks ) )
+			$this->hooks[$hook->resource]	= [];
+		if( !array_key_exists( $hook->event, $this->hooks[$hook->resource] ) )
+			$this->hooks[$hook->resource][$hook->event]	= [];
+		$this->hooks[$hook->resource][$hook->event][]	= $hook;
+		return $this;
 	}
 
 	/**

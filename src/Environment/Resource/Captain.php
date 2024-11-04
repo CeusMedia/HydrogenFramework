@@ -139,8 +139,11 @@ class Captain
 			return FALSE;
 
 		$this->openHooks[$resource.'::'.$event]	= microtime( TRUE );
-		if( $this->logCalls )
-			error_log( microtime( TRUE ).' '.$resource.'>'.$event."\n", 3, 'logs/hook_calls.log' );
+		if( $this->logCalls ){
+			$message	= microtime( TRUE ).' '.$resource.'>'.$event.PHP_EOL;
+			$logFile	= $this->env->path.$this->env->getPath( 'logs' ).'hook_calls.log';
+			error_log( $message, 3, $logFile );
+		}
 
 		$hooks	= $this->collectHooks( $resource, $event );
 		return $this->fetchCollectedResourceEventHooks( $hooks, $context, $payload );
@@ -236,7 +239,7 @@ class Captain
 	protected function fetchCollectedResourceEventHooks( array $hooks, object $context, array & $payload): bool
 	{
  		$result = NULL;
-		$regexMethod = "/^([a-z0-9_]+)::([a-z0-9_]+)$/i";
+		$regexMethod = "/^([a-z0-9_\\\]+)::([a-z0-9_]+)$/i";
 		foreach( $hooks as $levelHooks ){
 			foreach( $levelHooks as $hook ){
 				if( 0 === strlen( $hook->function ) )

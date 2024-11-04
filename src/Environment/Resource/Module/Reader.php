@@ -30,6 +30,7 @@ namespace CeusMedia\HydrogenFramework\Environment\Resource\Module;
 
 use CeusMedia\Common\Exception\Conversion as ConversionException;
 use CeusMedia\Common\Exception\IO as IoException;
+use CeusMedia\Common\XML\Element;
 use CeusMedia\Common\XML\Element as XmlElement;
 use CeusMedia\Common\XML\ElementReader as XmlReader;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Author as AuthorDefinition;
@@ -75,6 +76,20 @@ class Reader
 		if( !file_exists( $filePath ) )
 			throw new RuntimeException( 'Module file "'.$filePath.'" is not existing' );
 		$xml	= XmlReader::readFile( $filePath );
+		return self::fromXml( $xml, $id, $filePath );
+	}
+
+	/**
+	 *	Load module data object from module XML structure statically.
+	 *	@static
+	 *	@access		public
+	 *	@param		Element		$xml			XML structure of module file
+	 *	@param		string		$id				Module ID
+	 *	@param		string		$filePath
+	 *	@return		Definition					Module data object
+	 */
+	public static function fromXml( Element $xml, string $id, string $filePath ): Definition
+	{
 		$object	= new Definition( $id, (string) $xml->version, $filePath );
 		self::decorateObjectWithBasics( $object, $xml );
 		self::decorateObjectWithFrameworks( $object, $xml );
