@@ -102,11 +102,6 @@ class Console extends Environment
 		], array_values( $additionalResources ) ), $keepAppAlive );									//  add additional resources and carry exit flag
 	}
 
-	public function getLanguage(): LanguageResource
-	{
-		return $this->language;
-	}
-
 	public function getRequest(): ArgumentParser
 	{
 		return $this->request;
@@ -136,17 +131,6 @@ class Console extends Environment
 		$this->path		= $this->config->get( 'app.base.path' );								//  note absolute working path
 	}
 
-//	protected function initConfiguration(){
-//		$this->config	= new Dictionary();
-//	}
-
-	protected function initLanguage(): self
-	{
-		$this->language		= new LanguageResource( $this );
-		$this->runtime->reach( 'env: language' );
-		return $this;
-	}
-
 	protected function initMessenger(): self
 	{
 		$this->messenger	= new ConsoleMessenger( $this );
@@ -161,7 +145,7 @@ class Console extends Environment
 	}
 
 	/**
-	 * Setup a "session", which is persistent storage for this run only.
+	 *	Set up a "session", which is persistent storage for this run only.
 	 */
 	protected function initSession(): self
 	{

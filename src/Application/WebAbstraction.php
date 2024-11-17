@@ -73,8 +73,21 @@ abstract class WebAbstraction implements ApplicationInterface
 		/** @var WebEnvironment $env */
 		$this->env	= $env;
 
-		if( static::$modulesNeeded )																	//  needed modules are defined
+		if( static::$modulesNeeded )																//  needed modules are defined
 			$this->checkNeededModules();															//  check for missing modules
+
+
+		if( $this->env->getConfig()->get( 'system.compat.oldCommon', FALSE ) )			//  look into config for compat flag
+			require_once 'vendor/ceus-media/common/src/compat8.php';								//  ... for CeusMedia::Common 0.8.x without namespaces
+	}
+
+	/**
+	 *	Returns the environment, set or created on construction.
+	 *	@return		Environment		Environment, set or created on construction
+	 */
+	public function getEnvironment() : Environment
+	{
+		return $this->env;
 	}
 
 	/**
