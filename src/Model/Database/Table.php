@@ -26,9 +26,10 @@
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-namespace CeusMedia\HydrogenFramework;
+namespace CeusMedia\HydrogenFramework\Model\Database;
 
 use CeusMedia\Database\PDO\Table as DatabaseTable;
+use CeusMedia\HydrogenFramework\Environment;
 
 use RuntimeException;
 

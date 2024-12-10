@@ -278,6 +278,7 @@ class Captain
 					$stdout		= (string) ob_get_clean();
 					$this->handleStdoutOfResourceEventHookCall( $stdout, $resource, $event, $module );
 				} catch( Exception $e ){
+					$stdout		= (string) ob_get_clean();
 					$messageParams	= [$module->id, $resource, $event, $e->getMessage()];
 					$this->handleExceptionOfResourceEventHookCall( $e, $resource, $event, $module );
 					if( $this->env->has( 'messenger' ) ){

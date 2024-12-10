@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
 
 /**
  *	Base class for model entity classes.
@@ -8,6 +8,8 @@
  *	@link			https://github.com/CeusMedia/Common
  */
 namespace CeusMedia\HydrogenFramework;
+
+use CeusMedia\Common\ADT\Collection\Dictionary;
 
 class Entity
 {
@@ -22,10 +24,27 @@ class Entity
 	}
 
 	/**
-	 *	@param		array		$data
+	 *	@param		Dictionary		$dictionary
+	 *	@return		static
 	 */
-	public function __construct( array $data = [] )
+	public static function fromDictionary( Dictionary $dictionary ): static
 	{
+		$className	= static::class;
+		return new $className( $dictionary );
+	}
+
+	/**
+	 *	@param		Dictionary|array<string,string|int|float|NULL>		$data
+	 */
+	public function __construct( Dictionary|array $data = [] )
+	{
+		if( $data instanceof Dictionary )
+			$data	= $data->getAll();
+
+		/**
+		 * @var string $key
+		 * @var string|int|float|NULL $value
+		 */
 		foreach( $data as $key => $value )
 			if( property_exists( $this, $key ) )
 				$this->set( $key, $value );

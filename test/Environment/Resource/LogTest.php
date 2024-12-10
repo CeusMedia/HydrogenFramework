@@ -24,9 +24,11 @@ class LogTest extends TestCase
 
 	protected Log $log;
 
-	public function testFlattenMessage(): void
+	protected string $pathLogs;
+
+/*	public function testFlattenMessage(): void
 	{
-	}
+	}*/
 
 	/**
 	 *	@covers		::log
@@ -38,7 +40,7 @@ class LogTest extends TestCase
 	public function testLog_useStrategyAppDefault(): void
 	{
 		$this->log->setStrategies( [Log::STRATEGY_APP_DEFAULT] );
-		$fileName	= $this->baseTestPath.'assets/app/logs/app.log';
+		$fileName	= $this->pathLogs.'app.log';
 		unlink( $fileName );
 		self::assertFileDoesNotExist( $fileName );
 
@@ -59,7 +61,7 @@ class LogTest extends TestCase
 	public function testLog_useStrategyAppTypes(): void
 	{
 		$this->log->setStrategies( [Log::STRATEGY_APP_TYPED] );
-		$fileName	= $this->baseTestPath.'assets/app/logs/app.info.log';
+		$fileName	= $this->pathLogs.'app.info.log';
 		unlink( $fileName );
 		self::assertFileDoesNotExist( $fileName );
 
@@ -84,7 +86,7 @@ class LogTest extends TestCase
 			->addHook( new ModuleHookDefinition( __NAMESPACE__.'\\TestLogHook::onLog', 'Env:Custom', 'log' ) )
 		);
 
-		$fileName	= $this->baseTestPath.'assets/app/logs/hook.log';
+		$fileName	= $this->pathLogs.'hook.log';
 		unlink( $fileName );
 		self::assertFileDoesNotExist( $fileName );
 
@@ -110,9 +112,9 @@ class LogTest extends TestCase
 			->addHook( new ModuleHookDefinition( __NAMESPACE__.'\\TestLogHook::onFailToLog', 'Env:Custom', 'log' ) )
 		);
 
-		$fileNameFail		= $this->baseTestPath.'assets/app/logs/hook.log';
-		$fileNameDefault	= $this->baseTestPath.'assets/app/logs/app.log';
-		$fileNameException	= $this->baseTestPath.'assets/app/logs/app.exception.log';
+		$fileNameFail		= $this->pathLogs.'hook.log';
+		$fileNameDefault	= $this->pathLogs.'app.log';
+		$fileNameException	= $this->pathLogs.'app.exception.log';
 
 		unlink( $fileNameFail );
 		unlink( $fileNameDefault );
@@ -147,10 +149,10 @@ class LogTest extends TestCase
 			->addHook( new ModuleHookDefinition( __NAMESPACE__.'\\TestLogHook::onFailToLog', 'Env:Custom', 'log' ) )
 		);
 
-		$fileNameFail	= $this->baseTestPath.'assets/app/logs/hook.log';
-		$fileNameDefault	= $this->baseTestPath.'assets/app/logs/app.log';
-		$fileNameRecover	= $this->baseTestPath.'assets/app/logs/app.info.log';
-		$fileNameException	= $this->baseTestPath.'assets/app/logs/app.exception.log';
+		$fileNameFail	= $this->pathLogs.'hook.log';
+		$fileNameDefault	= $this->pathLogs.'app.log';
+		$fileNameRecover	= $this->pathLogs.'app.info.log';
+		$fileNameException	= $this->pathLogs.'app.exception.log';
 
 		unlink( $fileNameFail );
 		unlink( $fileNameRecover );
@@ -187,7 +189,7 @@ class LogTest extends TestCase
 			->addHook( new ModuleHookDefinition( __NAMESPACE__.'\\TestLogHook::onLog', 'Env', 'log' ) )
 		);
 
-		$fileName	= $this->baseTestPath.'assets/app/logs/hook.log';
+		$fileName	= $this->pathLogs.'hook.log';
 		unlink( $fileName );
 		self::assertFileDoesNotExist( $fileName );
 
@@ -214,10 +216,10 @@ class LogTest extends TestCase
 			->addHook( new ModuleHookDefinition( __NAMESPACE__.'\\TestLogHook::onFailToLog', 'Env', 'log' ) )
 		);
 
-		$fileNameFail	= $this->baseTestPath.'assets/app/logs/hook.log';
-		$fileNameDefault	= $this->baseTestPath.'assets/app/logs/app.log';
-		$fileNameRecover	= $this->baseTestPath.'assets/app/logs/app.info.log';
-		$fileNameException	= $this->baseTestPath.'assets/app/logs/app.exception.log';
+		$fileNameFail	= $this->pathLogs.'hook.log';
+		$fileNameDefault	= $this->pathLogs.'app.log';
+		$fileNameRecover	= $this->pathLogs.'app.info.log';
+		$fileNameException	= $this->pathLogs.'app.exception.log';
 
 		unlink( $fileNameFail );
 		unlink( $fileNameRecover );
@@ -249,7 +251,7 @@ class LogTest extends TestCase
 	public function testLogException(): void
 	{
 		$this->log->setStrategies( [Log::STRATEGY_APP_DEFAULT] );
-		$fileName	= $this->baseTestPath.'assets/app/logs/app.log';
+		$fileName	= $this->pathLogs.'app.log';
 		unlink( $fileName );
 		self::assertFileDoesNotExist( $fileName );
 
@@ -261,7 +263,7 @@ class LogTest extends TestCase
 
 
 		$this->log->setStrategies( [Log::STRATEGY_APP_TYPED] );
-		$fileName	= $this->baseTestPath.'assets/app/logs/app.exception.log';
+		$fileName	= $this->pathLogs.'app.exception.log';
 		unlink( $fileName );
 		self::assertFileDoesNotExist( $fileName );
 
@@ -286,7 +288,7 @@ class LogTest extends TestCase
 		$this->log->setStrategies( [Log::STRATEGY_CUSTOM_CALLBACK] );
 		$this->log->setCustomerLogCallback( [$this, 'callbackCustomerCallbackStrategy'] );
 
-		$fileNameCustom	= $this->baseTestPath.'assets/app/logs/custom.log';
+		$fileNameCustom	= $this->pathLogs.'custom.log';
 		unlink( $fileNameCustom );
 		self::assertFileDoesNotExist( $fileNameCustom );
 
@@ -308,7 +310,7 @@ class LogTest extends TestCase
 		$this->log->setStrategies( [Log::STRATEGY_CUSTOM_CALLBACK] );
 		$this->log->setCustomerLogCallback( [$this, 'callbackCustomerCallbackStrategy_fail'] );
 
-		$fileNameCustom	= $this->baseTestPath.'assets/app/logs/custom.log';
+		$fileNameCustom	= $this->pathLogs.'custom.log';
 		unlink( $fileNameCustom );
 		self::assertFileDoesNotExist( $fileNameCustom );
 
@@ -331,8 +333,8 @@ class LogTest extends TestCase
 		$this->log->setStrategies( [Log::STRATEGY_CUSTOM_CALLBACK, Log::STRATEGY_APP_DEFAULT] );
 		$this->log->setCustomerLogCallback( [$this, 'callbackCustomerCallbackStrategy_fail'] );
 
-		$fileNameCustom		= $this->baseTestPath.'assets/app/logs/custom.log';
-		$fileNameRecover	= $this->baseTestPath.'assets/app/logs/app.log';
+		$fileNameCustom		= $this->pathLogs.'custom.log';
+		$fileNameRecover	= $this->pathLogs.'app.log';
 		unlink( $fileNameCustom );
 		unlink( $fileNameRecover );
 		self::assertFileDoesNotExist( $fileNameCustom );
@@ -349,6 +351,9 @@ class LogTest extends TestCase
 	{
 		parent::setUp();
 		$this->log		= new Log( $this->env );
+		$this->pathLogs	= $this->baseTestPath.'assets/app/logs/';
+		if( !file_exists( $this->pathLogs ) )
+			mkdir( $this->pathLogs );
 
 //		Loader::create( 'php', $this->baseTestPath.'assets/app/classes' )->register();
 	}
