@@ -64,7 +64,7 @@ class Site extends WebAbstraction implements ApplicationInterface
 	public function run(): ?int
 	{
 		$displayErrors	= $this->env->getConfig()->get( 'system.display.errors' );				//  get error mode from config
-		$displayErrors	= is_null($displayErrors) || $displayErrors;								//  if not set: enable error display by default
+		$displayErrors	= is_null( $displayErrors ) || $displayErrors;								//  if not set: enable error display by default
 		error_reporting( $displayErrors ? E_ALL : 0 );									//  set error reporting
 		try{
 			$this->respond( $this->main() );														//	send rendered result of dispatched controller action

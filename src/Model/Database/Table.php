@@ -28,9 +28,11 @@
  */
 namespace CeusMedia\HydrogenFramework\Model\Database;
 
-use CeusMedia\Database\PDO\Table as DatabaseTable;
+use CeusMedia\Database\PDO\Connection as PdoConnection;
+use CeusMedia\Database\PDO\Table as PdoDatabaseTable;
 use CeusMedia\HydrogenFramework\Environment;
 
+use PDO;
 use RuntimeException;
 
 /**
@@ -42,10 +44,32 @@ use RuntimeException;
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class Model extends DatabaseTable
+class Table extends PdoDatabaseTable
 {
 	/**	@var	Environment				$env			Application Environment Object */
 	protected Environment $env;
+
+	protected ?string $className		= NULL;
+
+	public function __construct( Environment $env )
+	{
+		$this->setEnv( $env );
+		$connection	= $this->env->getDatabase();
+
+		if( NULL !== $connection && method_exists( $connection, 'getConnection' ) )
+			$connection	= $connection->getConnection();
+
+		if( !$connection instanceof PdoConnection )
+			throw new RuntimeException( 'Set up database is not a fitting PDO connection' );
+
+		parent::__construct( $connection );
+		if( PDO::FETCH_CLASS === $this->fetchMode ){
+			if( '' === ( $this->className ?? '' ) )
+				throw new RuntimeException( 'Cannot set set mode FETCH_CLASS without entity class name' );
+			$this->setFetchEntityClass( $this->className );
+		}
+		$this->cacheKey	= 'db.'.$this->prefix.$this->name.'.';
+	}
 
 	//  --  PROTECTED  --  //
 
@@ -59,7 +83,6 @@ class Model extends DatabaseTable
 	protected function setEnv( Environment $env ): self
 	{
 		$this->env		= $env;
-
 		$database		= $env->getDatabase();
 		if( NULL === $database )
 			throw new RuntimeException( 'Database resource needed for '.static::class );
@@ -69,3 +92,4 @@ class Model extends DatabaseTable
 		return $this;
 	}
 }
+

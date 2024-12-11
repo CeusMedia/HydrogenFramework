@@ -28,9 +28,7 @@
  */
 namespace CeusMedia\HydrogenFramework;
 
-use CeusMedia\Database\PDO\Table as DatabaseTable;
-
-use RuntimeException;
+use CeusMedia\HydrogenFramework\Model\Database\Table as DatabaseTableModel;
 
 /**
  *	Generic Model Class of Framework Hydrogen.
@@ -41,30 +39,6 @@ use RuntimeException;
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class Model extends DatabaseTable
+class Model extends DatabaseTableModel
 {
-	/**	@var	Environment				$env			Application Environment Object */
-	protected Environment $env;
-
-	//  --  PROTECTED  --  //
-
-	/**
-	 *	Sets Environment of Controller by copying Framework Member Variables.
-	 *	@access		protected
-	 *	@param		Environment			$env			Application Environment Object
-	 *	@return		self
-	 *	@throws		RuntimeException	if no database resource is available in given environment
-	 */
-	protected function setEnv( Environment $env ): self
-	{
-		$this->env		= $env;
-
-		$database		= $env->getDatabase();
-		if( NULL === $database )
-			throw new RuntimeException( 'Database resource needed for '.static::class );
-		if( method_exists( $database, 'getPrefix' ) )
-			$this->prefix	= $database->getPrefix();
-
-		return $this;
-	}
 }

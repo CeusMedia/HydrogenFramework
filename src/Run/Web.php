@@ -47,7 +47,7 @@ class Web
 
 	public function handleErrorAsException( int $errno, string $errMsg, string $errFile, int $errLine, array $errContext ): ?bool
 	{
-		if( error_reporting() === 0 )											// error was suppressed with the @-operator
+		if( 0 === error_reporting() )											// error was suppressed with the @-operator
 			return FALSE;
 		throw new ErrorException( $errMsg, 0, $errno, $errFile, $errLine );
 	}
