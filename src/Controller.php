@@ -136,7 +136,7 @@ class Controller
 		catch( Exception $e ){
 			$payload	= ['exception' => $e];
 			$this->callHook( 'App', 'onException', $this, $payload );
-			throw new RuntimeException( $e->getMessage(), $e->getCode(), $e );
+			throw new RuntimeException( $e->getMessage(), (int) $e->getCode(), $e );
 		}
 		$env->getRuntime()->reach( 'CMF_Controller('.static::class.'): done' );				//  log time of construction
 	}
