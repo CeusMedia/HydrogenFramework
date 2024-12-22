@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace CeusMedia\HydrogenFrameworkTest\Environment\Resource;
+namespace CeusMedia\HydrogenFrameworkUnitTest\Environment\Resource;
 
 use CeusMedia\Common\Loader;
 use CeusMedia\HydrogenFramework\Environment;

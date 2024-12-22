@@ -38,7 +38,7 @@
   "autoload": {
     "psr-4": {
       "CeusMedia\\HydrogenFramework\\": "src/",
-      "CeusMedia\\HydrogenFrameworkTest\\": "test/"
+      "CeusMedia\\HydrogenFrameworkUnitTest\\": "test/Unit/"
     }
   },
   "minimum-stability": "dev",

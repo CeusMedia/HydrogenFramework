@@ -1,6 +1,6 @@
 <?php
 return;
-if( !@include_once dirname( __DIR__ ).'/vendor/autoload.php' )
+if( !@include_once dirname( __DIR__, 2 ) . '/vendor/autoload.php')
 	die( 'You need to "composer install" for having full unit test support.' );
 
 if( !class_exists( 'PHPUnit_Framework_TestCase' ) ){

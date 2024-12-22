@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace CeusMedia\HydrogenFrameworkTest\Environment;
+namespace CeusMedia\HydrogenFrameworkUnitTest\Environment;
 
 use CeusMedia\HydrogenFramework\Environment;
 
@@ -13,7 +13,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
 
 	protected function setUp(): void
 	{
-		$this->baseTestPath	= dirname( __DIR__, 1 ).'/';
+		$this->baseTestPath	= dirname( __DIR__, 2 ) . '/';
 		$this->env		= new Environment( ['pathApp' => $this->baseTestPath.'assets/app/'] );
 		$this->env->setMode( Environment::MODE_TEST );
 		$this->env->getCaptain()->setLogCalls( TRUE );

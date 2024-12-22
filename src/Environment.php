@@ -676,7 +676,7 @@ class Environment implements ArrayAccess
 		$absolutePrefix	= str_starts_with( $configFile, '/' ) ? '' : $this->path;					//  prefix with app path if not already absolute
 		$absolutePath	= $absolutePrefix.$configFile;
 		if( !file_exists( $absolutePath ) ){														//  config file not found
-			$message	= 'Main config file not found (%2$s%1$s)';
+			$message	= 'Main config file (%1$s) not found in %2$s';
 			throw FileNotExistingException::create()												//  quit with exception
 				->setMessage( sprintf( $message, $configFile, $absolutePrefix ) )
 				->setResource( $absolutePath );

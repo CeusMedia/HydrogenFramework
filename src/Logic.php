@@ -126,8 +126,7 @@ class Logic
 	 *	@throws		RuntimeException		if no model class could be found for given short model key
 	 *	@throws		ReflectionException
 	 *	@todo		create model pool environment resource and apply to created shared single instances instead of new instances
-	 *	@todo		change \@return to CMF_Hydrogen_Model after CMF model refactoring
-	 *	@see		duplicate code with CMF_Hydrogen_Controller::getModel
+	 *	@see		duplicate code with Controller::getModel
 	 */
 	protected function getModel( string $key ): object
 	{

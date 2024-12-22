@@ -31,6 +31,7 @@ namespace CeusMedia\HydrogenFramework\Dispatcher;
 use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
 use CeusMedia\Common\Alg\Obj\MethodFactory as MethodFactory;
 use CeusMedia\Common\Net\HTTP\Request as HttpRequest;
+use CeusMedia\HydrogenFramework\Environment;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 use CeusMedia\HydrogenFramework\Controller;
 
@@ -68,6 +69,49 @@ class General
 	protected HttpRequest $request;
 
 	protected array $history				= [];
+
+	/**
+	 *	Generate a list of possible class names.
+	 *	@param		string		$path		Requested path
+	 *	@return		array<string>
+	 */
+
+	public static function getClassNameVariationsByPath( string $path ): array
+	{
+		$list   = [];
+		$parts  = explode( '/', $path );
+		if( 1 === count( $parts ) )
+			return [ucfirst( $path ), strtoupper( $path ), $path];
+
+		$prefix = array_shift( $parts );
+		$vs     = self::getClassNameVariationsByPath( join( '/', $parts ) );
+		foreach( $vs as $v )
+			$list[] = ucfirst( $prefix ).'_'.$v;
+		foreach( $vs as $v )
+			$list[] = strtoupper( $prefix ).'_'.$v;
+		foreach( $vs as $v )
+			$list[] = $prefix.'_'.$v;
+		return $list;
+	}
+
+	/**
+	 *	@param		Environment		$env
+	 *	@param		string			$prefix
+	 *	@param		string			$path
+	 *	@return		object|string
+	 *	@throws		ReflectionException
+	 */
+	public static function getPrefixedClassInstanceByPathOrFirstClassNameGuess( Environment $env, string $prefix, string $path ): object|string
+	{
+		$classNameVariations    = static::getClassNameVariationsByPath( $path );
+		$firstGuess				= $classNameVariations[0];
+		foreach( $classNameVariations as $className ){
+			$instance	= static::getClassInstanceIfAvailable( $env, $prefix.$className );
+			if( NULL !== $instance )
+				return $instance;
+		}
+		return $firstGuess;
+	}
 
 	public function __construct( WebEnvironment $env )
 	{
@@ -115,18 +159,31 @@ class General
 			$action		= trim( $this->request->get( '__action' ) );
 			$arguments	= $this->request->get( '__arguments' );
 
-			$className	= self::getControllerClassFromPath( $controller );							// get controller class name from requested controller path
-			$this->checkClass( $className );
-			$runtime->reach( 'Dispatcher_General::dispatch: check: controller' );
+			$controllerInstanceOrFirstGuess	= static::getPrefixedClassInstanceByPathOrFirstClassNameGuess(
+				$this->env,
+				self::$prefixController,
+				$controller
+			);
+			$runtime->reach( 'Dispatcher_General::dispatch: check controller access' );
 			$this->checkAccess( $controller, $action);
 
-			/** @var Controller $instance */
-			$instance	= ObjectFactory::createObject( $className, array( $this->env ) );			// build controller instance
+			$runtime->reach( 'Dispatcher_General::dispatch: load controller instance' );
+			if( !is_object( $controllerInstanceOrFirstGuess ) ){
+				$message	= 'Invalid Controller "'.$controllerInstanceOrFirstGuess.'"';
+				throw new RuntimeException( $message, 201 );											// break with internal error
+			}
+			$instance	= $controllerInstanceOrFirstGuess;
+			if( !$instance instanceof Controller )
+				throw new RuntimeException(
+					sprintf(
+						'Controller class "%s" is not a Hydrogen controller',
+						$instance::class
+					), 301 );
 			$runtime->reach( 'Dispatcher_General::dispatch: factorized controller' );
 
-			$this->checkClassAction( $className, $instance, $action );
+			$this->checkClassAction( $instance, $action );
 			if( $this->checkClassActionArguments )
-				$this->checkClassActionArguments( $className, $instance, $action, $arguments );
+				$this->checkClassActionArguments( $instance, $action, $arguments );
 			$runtime->reach( 'Dispatcher_General::dispatch: check@'.$controller.'/'.$action );
 
 			$factory	= new MethodFactory( $instance );											// create method factory on controller instance
@@ -143,43 +200,28 @@ class General
 	//  --  PROTECTED  --  //
 
 	/**
-	 *	@param		string		$className
-	 *	@return		bool
-	 */
-	protected function checkClass( string $className ): bool
-	{
-		if( !class_exists( $className ) ){															// class is neither loaded nor loadable
-			$message	= 'Invalid Controller "'.$className.'"';
-			throw new RuntimeException( $message, 201 );											// break with internal error
-		}
-		return TRUE;
-	}
-
-	/**
-	 *	@param		string		$className
 	 *	@param		object		$instance
 	 *	@param		string		$action
 	 *	@return		bool
 	 */
-	protected function checkClassAction( string $className, object $instance, string $action ): bool
+	protected function checkClassAction( object $instance, string $action ): bool
 	{
 		$denied = array( '__construct', '__destruct', 'getView', 'getData' );
 		if( !method_exists( $instance, $action ) || in_array( $action, $denied ) ){					// no action method in controller instance
-			$message	= 'Invalid Action "'.ucfirst( $className ).'::'.$action.'"';
+			$message	= 'Invalid Action "'.$instance::class.'::'.$action.'"';
 			throw new RuntimeException( $message, 211 );											// break with internal error
 		}
 		return TRUE;
 	}
 
 	/**
-	 *	@param		string		$className
 	 *	@param		object		$instance
 	 *	@param		string		$action
 	 *	@param		array		$arguments
 	 *	@return		bool
 	 *	@throws		ReflectionException
 	 */
-	protected function checkClassActionArguments( string $className, object $instance, string $action, array $arguments = [] ): bool
+	protected function checkClassActionArguments( object $instance, string $action, array $arguments = [] ): bool
 	{
 		$numberArgsAtLeast	= 0;
 		$numberArgsTotal	= 0;
@@ -192,11 +234,11 @@ class General
 				$numberArgsAtLeast++;
 		}
 		if( count( $arguments ) < $numberArgsAtLeast ){
-			$message	= 'Not enough arguments for action "'.ucfirst( $className ).'::'.$action.'"';
+			$message	= 'Not enough arguments for action "'.$instance::class.'::'.$action.'"';
 			throw new RuntimeException( $message, 212 );											// break with internal error
 		}
 		if( count( $arguments ) > $numberArgsTotal ){
-			$message	= 'Too much arguments for action "'.ucfirst( $className ).'::'.$action.'"';
+			$message	= 'Too much arguments for action "'.$instance::class.'::'.$action.'"';
 			throw new RuntimeException( $message, 212 );											// break with internal error
 		}
 		return TRUE;
@@ -217,13 +259,10 @@ class General
 		return TRUE;
 	}
 
-	protected static function getControllerClassFromPath( string $path ): string
-	{
-		$parts		= str_replace( '/', ' ', $path );												//  slice into parts
-		$name		= str_replace( ' ', '_', ucwords( $parts ) );									//  glue together capitalized
-		return self::$prefixController.$name;														//  return controller class name
-	}
-
+	/**
+	 *	@param		Controller		$instance
+	 *	@return		void
+	 */
 	protected function noteLastCall( Controller $instance ): void
 	{
 		$session	= $this->env->getSession();
@@ -235,13 +274,31 @@ class General
 		$session->set( 'lastAction', $this->request->get( '__action' ) );
 	}
 
+	/**
+	 *	@return		void
+	 */
 	protected function realizeCall(): void
 	{
-		if( !trim( $this->request->get( '__controller', '' ) ) )
+		if( '' === trim( $this->request->get( '__controller', '' ) ) )
 			$this->request->set( '__controller', $this->defaultController );
-		if( !trim( $this->request->get( '__action', '' ) ) )
+		if( '' === trim( $this->request->get( '__action', '' ) ) )
 			$this->request->set( '__action', $this->defaultAction );
-		if( !$this->request->get( '__arguments' ) )
+		if( [] === $this->request->get( '__arguments', [] ) )
 			$this->request->set( '__arguments', $this->defaultArguments );
+	}
+
+	//  --  NEW DISPATCH STRATEGY  --  //
+
+	/**
+	 *	@param		Environment		$env
+	 *	@param		string			$className
+	 *	@return		?object
+	 *	@throws		ReflectionException
+	 */
+	protected static function getClassInstanceIfAvailable( Environment $env, string $className ): ?object
+	{
+		if( !class_exists( $className ) )
+			return NULL;
+		return ObjectFactory::createObject( $className, [$env] );
 	}
 }

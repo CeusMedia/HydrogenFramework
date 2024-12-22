@@ -2,7 +2,7 @@
 return;
 use CeusMedia\Common\Loader;
 
-$pathLib	= realpath( dirname( __FILE__, 2 ) );
+$pathLib	= realpath( dirname( __FILE__, 3 ) );
 $pathSrc	= realpath( $pathLib . '/src' );
 $pathTest	= realpath( $pathLib . '/test' );
 
@@ -21,7 +21,7 @@ $__config	= parse_ini_file( $pathLib.'/Common.ini', TRUE );
 
 $loaderTest	= new Loader();													//  get new Loader Instance
 $loaderTest->setExtensions( 'php' );											//  set allowed Extension
-$loaderTest->setPath( dirname( __FILE__ ).DIRECTORY_SEPARATOR );				//  set fixed Library Path
+$loaderTest->setPath(initLoaders . phpdirname(__FILE__) . DIRECTORY_SEPARATOR);				//  set fixed Library Path
 $loaderTest->setVerbose( 0 );												//  show autoload attempts
 $loaderTest->setPrefix( 'Test_' );												//  set prefix class prefix
 $loaderTest->registerAutoloader();												//  apply this autoloader

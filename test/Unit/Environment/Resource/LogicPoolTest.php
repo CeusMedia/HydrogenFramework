@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace CeusMedia\HydrogenFrameworkTest\Environment\Resource;
+namespace CeusMedia\HydrogenFrameworkUnitTest\Environment\Resource;
 
 use CeusMedia\Common\Loader;
 use CeusMedia\HydrogenFramework\Environment;
@@ -16,6 +16,7 @@ use Logic_Example;
  */
 class LogicPoolTest extends TestCase
 {
+	protected Environment $env;
 	protected LogicPool $logic;
 	protected string $baseTestPath;
 
@@ -116,7 +117,7 @@ class LogicPoolTest extends TestCase
 
 	protected function setUp(): void
 	{
-		$this->baseTestPath	= dirname( __DIR__, 2 ).'/';
+		$this->baseTestPath	= dirname( __DIR__, 3 ).'/';
 		$this->env		= new Environment( ['pathApp' => $this->baseTestPath.'assets/app/'] );
 		$this->logic	= new LogicPool( $this->env );
 

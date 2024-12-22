@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace CeusMedia\HydrogenFrameworkTest\Environment\Resource;
+namespace CeusMedia\HydrogenFrameworkUnitTest\Environment\Resource;
 
 use CeusMedia\Common\Loader;
 use CeusMedia\HydrogenFramework\Environment;
@@ -9,7 +9,7 @@ use CeusMedia\HydrogenFramework\Environment\Resource\Log;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition as ModuleDefinition;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Hook as ModuleHookDefinition;
 use CeusMedia\HydrogenFramework\Hook;
-use CeusMedia\HydrogenFrameworkTest\Environment\TestCase;
+use CeusMedia\HydrogenFrameworkUnitTest\Environment\TestCase;
 use Exception;
 use RuntimeException;
 

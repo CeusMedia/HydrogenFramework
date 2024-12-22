@@ -34,6 +34,7 @@ use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
 use CeusMedia\Common\Alg\Obj\MethodFactory as MethodFactory;
 use CeusMedia\Common\Alg\Text\CamelCase as CamelCase;
 use CeusMedia\Common\Net\HTTP\Status as HttpStatus;
+use CeusMedia\HydrogenFramework\Dispatcher\General;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition as ModuleDefinition;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 
@@ -109,14 +110,15 @@ class Controller
 	 */
 	public function __construct( WebEnvironment $env, bool $setupView = TRUE )
 	{
-		$env->getRuntime()->reach( 'CMF_Controller('.static::class.')' );
+		$env->getRuntime()->reach( 'Controller('.static::class.')' );
 		static::$moduleId	= trim( static::$moduleId );
 		$this->setEnv( $env );
 
-//		$env->getRuntime()->reach( 'CMF_Controller('.get_class( $this ).'): env set' );
+//		$env->getRuntime()->reach( 'Controller('.static::class.'): env set' );
 		if( $setupView )
-			$this->setupView( !$env->getRequest()->isAjax() );
-		$env->getRuntime()->reach( 'CMF_Controller('.static::class.'): got view object' );
+//			$this->setupView( !$env->getRequest()->isAjax() );
+			$this->setupView( FALSE );
+		$env->getRuntime()->reach( 'Controller('.static::class.'): got view object' );
 
 		/** @var string $controllerName */
 		$controllerName		= preg_replace( "/^Controller_/", "", static::class );				//  get controller name from class name
@@ -138,7 +140,7 @@ class Controller
 			$this->callHook( 'App', 'onException', $this, $payload );
 			throw new RuntimeException( $e->getMessage(), (int) $e->getCode(), $e );
 		}
-		$env->getRuntime()->reach( 'CMF_Controller('.static::class.'): done' );				//  log time of construction
+		$env->getRuntime()->reach( 'Controller('.static::class.'): done' );				//  log time of construction
 	}
 
 	public function getView(): ?View
@@ -158,33 +160,38 @@ class Controller
 	public function renderView(): string
 	{
 		$this->env->getRuntime()->reach( 'Controller::getView: start' );
-		if( !$this->view )
-			throw new RuntimeException( 'No view object created in constructor' );
-		if( !method_exists( $this->view, $this->action ) )
-			throw new RuntimeException( 'View Action "'.$this->action.'" not defined yet', 302 );
 		$language		= $this->env->getLanguage();
 		$this->env->getRuntime()->reach( 'Controller::getView: got language' );
-		if( $language->hasWords( $this->controller ) )
-			$this->view->setData( $language->getWords( $this->controller ), 'words' );
-		$this->env->getRuntime()->reach( 'Controller::getView: set words' );
 
-		$factory	= new MethodFactory( $this->view, $this->action );
-		$result		= $factory->call();
-		if( is_string( $result ) ){
-			$this->env->getRuntime()->reach( 'Controller::getView: Action called' );
+		$result	= NULL;
+		if( NULL !== $this->view ){
+			if( $language->hasWords( $this->controller ) )
+				$this->view->setData( $language->getWords( $this->controller ), 'words' );
+			$this->env->getRuntime()->reach( 'Controller::getView: set words' );
+
+			if( $this->view::class !== View::class ){
+				if( !method_exists( $this->view, $this->action ) )
+					throw new RuntimeException( 'View Action "'.$this->action.'" not defined yet', 302 );
+				$factory	= new MethodFactory( $this->view, $this->action );
+				$result		= $factory->call();
+			}
+			if( is_string( $result ) ){
+				$this->env->getRuntime()->reach( 'Controller::getView: Action called' );
+			}
+			else if( $this->view->hasTemplate( $this->controller, $this->action ) ){
+				$result	= $this->view->loadTemplate( $this->controller, $this->action );
+				$this->env->getRuntime()->reach( 'Controller::getView: loadTemplate' );
+			}
+			else if( $this->view->hasContent( $this->controller, $this->action, 'html/' ) ){
+				$result	= $this->view->loadContent( $this->controller, $this->action );
+				$this->env->getRuntime()->reach( 'Controller::getView: loadContent' );
+			}
+			else{
+				$message	= 'Neither view template nor content file defined for request path "%s/%s"';
+				throw new RuntimeException( sprintf( $message, $this->controller, $this->action ) );
+			}
 		}
-		else if( $this->view->hasTemplate( $this->controller, $this->action ) ){
-			$result	= $this->view->loadTemplate( $this->controller, $this->action );
-			$this->env->getRuntime()->reach( 'Controller::getView: loadTemplate' );
-		}
-		else if( $this->view->hasContent( $this->controller, $this->action, 'html/' ) ){
-			$result	= $this->view->loadContent( $this->controller, $this->action );
-			$this->env->getRuntime()->reach( 'Controller::getView: loadContent' );
-		}
-		else{
-			$message	= 'Neither view template nor content file defined for request path "%s/%s"';
-			throw new RuntimeException( sprintf( $message, $this->controller, $this->action ) );
-		}
+
 		$this->env->getRuntime()->reach( 'Controller::getView: done' );
 		return $result;
 	}
@@ -318,8 +325,7 @@ class Controller
 	 *	@throws		RuntimeException		if no model class could be found for given short model key
 	 *	@throws		ReflectionException
 	 *	@todo		create model pool environment resource and apply to created shared single instances instead of new instances
-	 *	@todo		change \@return to CMF_Hydrogen_Model after CMF model refactoring
-	 *	@see		duplicate code with CMF_Hydrogen_Logic::getModel
+	 *	@see		duplicate code with Logic::getModel
 	 */
 	protected function getModel( string $key ): Model
 	{
@@ -407,11 +413,9 @@ class Controller
 	 *	@param		array		$arguments		List of arguments to add to URL
 	 *	@param		array		$parameters		Map of additional parameters to set in request
 	 *	@return		void
-	 * @noinspection PhpDocMissingThrowsInspection
 	 */
 	protected function redirect( string $controller = 'index', string $action = "index", array $arguments = [], array $parameters = [] ): void
 	{
-		/** @noinspection PhpUnhandledExceptionInspection */
 		Deprecation::getInstance()
 			->setErrorVersion( '0.8.6.4' )
 			->setExceptionVersion( '0.8.9' )
@@ -541,25 +545,30 @@ class Controller
 	 *	Loads View Class of called Controller.
 	 *	@access		protected
 	 *	@param		boolean		$force			Flag: throw exception if view class is missing, default: yes
-	 *	@return		self
+	 *	@return		static						Self controller instance, possibly extended by a view class instance
 	 *	@throws		RuntimeException			in force mode if view class for controller is not existing
 	 *	@throws		RuntimeException			if view class is not inheriting Hydrogen view class
 	 *	@throws		ReflectionException
 	 */
-	protected function setupView( bool $force = TRUE ): self
+	protected function setupView( bool $force = TRUE ): static
 	{
-		$name		= str_replace( ' ', '_', ucwords( str_replace( '/', ' ', $this->controller ) ) );
-		$class		= self::$prefixView.$name;
-		$this->view	= new View( $this->env );
-		if( class_exists( $class ) ){
-			$object		= ObjectFactory::createObject( $class, [&$this->env] );
-			if( !$object instanceof View )
-				throw new RuntimeException( 'View class "'.$name.'" is not a Hydrogen view', 301 );
-			$this->view	= $object;
-			$this->view->addData( 'moduleConfig', $this->moduleConfig );
+		$this->view = new View( $this->env );
+		$this->view->addData( 'moduleConfig', $this->moduleConfig );
+
+		$firstGuessOrInstance	= General::getPrefixedClassInstanceByPathOrFirstClassNameGuess(
+			$this->env,
+			self::$prefixView,
+			$this->controller
+		);
+		if( is_object( $firstGuessOrInstance ) ){
+			$instance	= $firstGuessOrInstance;
+			if( !$instance instanceof View )
+				throw new RuntimeException( 'View class "'.$instance::class.'" is not a Hydrogen view', 301 );
+			$this->view = $instance;
+			return $this;
 		}
-		else if( $force )
-			throw new RuntimeException( 'View "'.$name.'" is missing', 301 );
-		return $this;
+		if( $force )
+			throw new RuntimeException( 'View "'.$firstGuessOrInstance.'" is missing' );
+        return $this;
 	}
 }
