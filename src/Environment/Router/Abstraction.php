@@ -46,6 +46,8 @@ abstract class Abstraction implements RouterInterface
 	/**	@var	Environment		$env		Environment object */
 	protected Environment $env;
 
+	protected int $counter	= 0;
+
 	public function __construct( Environment $env )
 	{
 		$this->env	= $env;
@@ -62,6 +64,16 @@ abstract class Abstraction implements RouterInterface
 				$uri	= substr( $uri, 2 );
 		}
 		return $this->env->url.$uri;
+	}
+
+	/**
+	 *	Number of attempts to find a suitable controller class.
+	 *	Since last parse call, of course.
+	 *	@return int
+	 */
+	public function getCounter(): int
+	{
+		return $this->counter;
 	}
 
 	public function getRelativeUri( string $controller = NULL, string $action = NULL, array $arguments = [], array $parameters = [], string $fragmentId = NULL ): string
