@@ -78,10 +78,9 @@ class Recursive extends Abstraction implements RouterInterface
 				foreach( $classNameVariations as $classNameVariation ){
 					$className	= 'Controller_'.$classNameVariation;
 					$this->counter++;
-					remark( 'Controller Class: '.$className );
 					if( !class_exists( $className ) )
 						continue;
-//					remark( 'Controller Class: '.$className );
+	//				remark( 'Controller Class: '.$className );
 					$request->set( '__controller', implode( '/', $left ) );
 					if( 0 !== count( $right ) ){
 						if( method_exists( $className, current( $right ) ) ){
