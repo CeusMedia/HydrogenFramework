@@ -30,6 +30,7 @@ namespace CeusMedia\HydrogenFramework\Dispatcher;
 
 use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
 use CeusMedia\Common\Alg\Obj\MethodFactory as MethodFactory;
+use CeusMedia\Common\Alg\Text\CamelCase;
 use CeusMedia\Common\Net\HTTP\Request as HttpRequest;
 use CeusMedia\HydrogenFramework\Environment;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
@@ -55,20 +56,35 @@ class General
 {
 	public static string $prefixController	= "Controller_";
 
+	/** @var array|string[] $skipWordsOnUppercase	List of path parts to skip on uppercase */
+	public static array $skipWordsOnUppercase		= [
+		'add', 'edit', 'index', 'remove',
+		'admin', 'manage', 'work', 'shop',
+		'info', 'file',
+	];
+
+	/** @var positive-int $uppercaseMaxLength		Max length of path part to apply uppercase */
+	public static int $uppercaseMaxLength			= 4;
+
+	/** @var non-empty-string $pathDivider */
+	public static string $pathDivider				= '/';
+
+	/** @var non-empty-string $pathDivider */
+	public static string $camelcaseDivider			= '_';
+
+	/** @var positive-int $maxPathPartLength */
+	public static int $maxPathPartLength			= 32;
+
+
 	public string $defaultController		= 'index';
-
 	public string $defaultAction			= 'index';
-
 	public array $defaultArguments			= [];
-
 	public bool $checkClassActionArguments	= TRUE;
 
 
 	protected WebEnvironment $env;
-
 	protected HttpRequest $request;
-
-	protected array $history				= [];
+	protected array $history						= [];
 
 	/**
 	 *	Generate a list of possible class names.
@@ -76,22 +92,12 @@ class General
 	 *	@return		array<string>
 	 */
 
-	public static function getClassNameVariationsByPath( string $path ): array
+	public static function getClassNameVariationsByPath( string $path, bool $allowUppercase = TRUE, bool $allowLowercase = TRUE, bool $allowCamelCase = TRUE ): array
 	{
-		$list   = [];
-		$parts  = explode( '/', $path );
+		$parts  = explode( self::$pathDivider, trim( $path ) );
 		if( 1 === count( $parts ) )
-			return [ucfirst( $path ), strtoupper( $path ), $path];
-
-		$prefix = array_shift( $parts );
-		$vs     = self::getClassNameVariationsByPath( join( '/', $parts ) );
-		foreach( $vs as $v )
-			$list[] = ucfirst( $prefix ).'_'.$v;
-		foreach( $vs as $v )
-			$list[] = strtoupper( $prefix ).'_'.$v;
-		foreach( $vs as $v )
-			$list[] = $prefix.'_'.$v;
-		return $list;
+			return self::getClassNameVariationsByPathLevel1( $path, $allowUppercase, $allowLowercase, $allowCamelCase );
+		return self::getClassNameVariationsByPathLevelX( $parts, $allowUppercase, $allowLowercase, $allowCamelCase );
 	}
 
 	/**
@@ -104,7 +110,7 @@ class General
 	public static function getPrefixedClassInstanceByPathOrFirstClassNameGuess( Environment $env, string $prefix, string $path ): object|string
 	{
 		$classNameVariations    = static::getClassNameVariationsByPath( $path );
-		$firstGuess				= $classNameVariations[0];
+		$firstGuess				= $classNameVariations[0] ?? '';
 		foreach( $classNameVariations as $className ){
 			$instance	= static::getClassInstanceIfAvailable( $env, $prefix.$className );
 			if( NULL !== $instance )
@@ -197,7 +203,61 @@ class General
 		return $view;
 	}
 
+
 	//  --  PROTECTED  --  //
+
+
+	protected static function getClassNameVariationsByPathLevel1( string $path, bool $allowUppercase = TRUE, bool $allowLowercase = TRUE, bool $allowCamelCase = TRUE ): array
+	{
+		if( '' === trim( $path ) )
+			return [];
+		if( preg_match( '/^\d+$/', $path ) )
+			return [];
+		if( strlen( $path ) > self::$maxPathPartLength )
+			return [];
+
+		$list	= [];
+		if( $allowCamelCase && str_contains( $path, self::$camelcaseDivider ) )
+			$list[]	= CamelCase::toPascalCase( str_replace( self::$camelcaseDivider, ' ', $path ) );
+		else
+			$list[]	= ucfirst( $path );
+		if( $allowUppercase )
+			if( strlen( $path ) <= self::$uppercaseMaxLength )
+				if( !in_array( $path, self::$skipWordsOnUppercase ) )
+					$list[]	= strtoupper( $path );
+		if( $allowLowercase )
+			$list[]	= $path;
+		return array_unique( $list );
+	}
+
+	protected static function getClassNameVariationsByPathLevelX( array $parts, bool $allowUppercase = TRUE, bool $allowLowercase = TRUE, bool $allowCamelCase = TRUE ): array
+	{
+		$prefix = trim( array_shift( $parts ) );
+		if( preg_match( '/^\d+$/', $prefix ) )
+			return [];
+
+		$prefixVariations	= self::getClassNameVariationsByPathLevel1(
+			$prefix,
+			$allowUppercase,
+			$allowLowercase,
+			$allowCamelCase
+		);
+		$classVariations    = self::getClassNameVariationsByPath(
+			join( self::$pathDivider, $parts ),
+			$allowUppercase,
+			$allowLowercase,
+			$allowCamelCase
+		);
+		if( [] === $classVariations )
+			return $prefixVariations;
+
+		$list	= [];
+		foreach( $prefixVariations as $prefixVariation )
+			foreach( $classVariations as $v )
+				$list[] = $prefixVariation.'_'.$v;
+
+		return $list;
+	}
 
 	/**
 	 *	@param		object		$instance

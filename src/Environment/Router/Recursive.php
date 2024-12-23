@@ -27,6 +27,7 @@
 namespace CeusMedia\HydrogenFramework\Environment\Router;
 
 use CeusMedia\Common\Net\HTTP\Request as HttpRequest;
+use CeusMedia\HydrogenFramework\Dispatcher\General;
 use CeusMedia\HydrogenFramework\Environment\RouterInterface;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 
@@ -69,16 +70,19 @@ class Recursive extends Abstraction implements RouterInterface
 		$parts	= explode( '/', $path );
 		$left	= $parts;
 		$right	= [];
-		if( strlen( trim( $path ) ) ){
+		$this->counter	= 0;
+		if( '' !== trim( $path ) ){
 			while( count( $left ) ){
 				$class	= [];
-				foreach( $left as $part )
-					$class[]	= ucfirst( $part );
-				$className	= 'Controller_'.implode( '_', $class );
-				if( class_exists( $className ) ){
-	//				remark( 'Controller Class: '.$className );
-					$controller	= implode( '/', $left );
-					$request->set( '__controller', $controller );
+				$classNameVariations	= General::getClassNameVariationsByPath( join( '/', $left ), TRUE, FALSE );
+				foreach( $classNameVariations as $classNameVariation ){
+					$className	= 'Controller_'.$classNameVariation;
+					$this->counter++;
+					remark( 'Controller Class: '.$className );
+					if( !class_exists( $className ) )
+						continue;
+//					remark( 'Controller Class: '.$className );
+					$request->set( '__controller', implode( '/', $left ) );
 					if( 0 !== count( $right ) ){
 						if( method_exists( $className, current( $right ) ) ){
 	//						remark( 'Controller Method: '.$right[0] );
@@ -88,7 +92,7 @@ class Recursive extends Abstraction implements RouterInterface
 	//					if( $right )
 	//						remark( 'Arguments: '.implode( ', ', $right ) );
 					}
-					break;
+					break 2;
 				}
 				array_unshift( $right, array_pop( $left ) ?? '_undefined' );
 			}

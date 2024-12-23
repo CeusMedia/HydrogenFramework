@@ -46,24 +46,175 @@ class GeneralTest extends TestCase
 		self::assertEquals( 'HTML', $result );
 	}
 
-	public function testGetClassNameVariationsByPath(): void
+	public function testGetClassNameVariationsByPath_Level1(): void
 	{
 		$list	= General::getClassNameVariationsByPath( 'test' );
 		self::assertIsArray( $list );
 		self::assertEquals( ['Test', 'TEST', 'test'], $list );
 
+		$list	= General::getClassNameVariationsByPath( 'test', TRUE, FALSE );
+		self::assertIsArray( $list );
+		self::assertEquals( ['Test', 'TEST'], $list );
+
+		$list	= General::getClassNameVariationsByPath( 'test', FALSE, FALSE );
+		self::assertIsArray( $list );
+		self::assertEquals( ['Test'], $list );
+	}
+
+	public function testGetClassNameVariationsByPath_Level1Empty(): void
+	{
+		$list	= General::getClassNameVariationsByPath( '' );
+		self::assertIsArray( $list );
+		self::assertEquals( [], $list );
+	}
+
+	public function testGetClassNameVariationsByPath_Level1TooLong(): void
+	{
+		General::$maxPathPartLength	= 24;
+		$list	= General::getClassNameVariationsByPath( 'TooLongToBeAValidPathPart' );
+		self::assertIsArray( $list );
+		self::assertEquals( [], $list );
+	}
+
+	public function testGetClassNameVariationsByPath_Level1SkipNumbers(): void
+	{
+		$list	= General::getClassNameVariationsByPath( 'test/1' );
+		self::assertIsArray( $list );
+		self::assertEquals( ['Test', 'TEST', 'test'], $list );
+
+		$list	= General::getClassNameVariationsByPath( 'test/1', TRUE, FALSE );
+		self::assertIsArray( $list );
+		self::assertEquals( ['Test', 'TEST'], $list );
+
+		$list	= General::getClassNameVariationsByPath( 'test/1', FALSE, FALSE );
+		self::assertIsArray( $list );
+		self::assertEquals( ['Test'], $list );
+	}
+
+	public function testGetClassNameVariationsByPath_Level1SkipWordsOnUppercase(): void
+	{
+		$list	= General::getClassNameVariationsByPath( 'add', FALSE, FALSE );
+		self::assertIsArray( $list );
+		self::assertEquals( ['Add'], $list );
+
+		$list	= General::getClassNameVariationsByPath( 'add', TRUE, FALSE );
+		self::assertIsArray( $list );
+		self::assertEquals( ['Add'], $list );
+	}
+
+	public function testGetClassNameVariationsByPath_Level1CamelCase(): void
+	{
+		$list	= General::getClassNameVariationsByPath( 'topic_test', FALSE, FALSE, TRUE );
+		self::assertIsArray( $list );
+		self::assertEquals( ['TopicTest'], $list );
+	}
+
+	public function testGetClassNameVariationsByPath_Level2(): void
+	{
 		$list	= General::getClassNameVariationsByPath( 'topic/test' );
 		self::assertIsArray( $list );
 		self::assertEquals( [
 			'Topic_Test',
-    		'Topic_TEST',
-    		'Topic_test',
-    		'TOPIC_Test',
-    		'TOPIC_TEST',
-    		'TOPIC_test',
-    		'topic_Test',
-    		'topic_TEST',
-    		'topic_test',
+			'Topic_TEST',
+			'Topic_test',
+			'topic_Test',
+			'topic_TEST',
+			'topic_test',
+		], $list );
+
+		$list	= General::getClassNameVariationsByPath( 'topic/test', TRUE, FALSE );
+		self::assertIsArray( $list );
+		self::assertEquals( [
+			'Topic_Test',
+			'Topic_TEST',
+		], $list );
+
+		$list	= General::getClassNameVariationsByPath( 'topic/test', FALSE, FALSE );
+		self::assertIsArray( $list );
+		self::assertEquals( [
+			'Topic_Test',
+		], $list );
+	}
+
+	public function testGetClassNameVariationsByPath_Level2AlternativePathDivider(): void
+	{
+		General::$pathDivider	= '.';
+
+		$list		= General::getClassNameVariationsByPath( 'topic.test', FALSE, FALSE );
+		self::assertIsArray( $list );
+		self::assertEquals( ['Topic_Test'], $list );
+
+		$list		= General::getClassNameVariationsByPath( 'topic.test.add', FALSE, FALSE );
+		self::assertIsArray( $list );
+		self::assertEquals( ['Topic_Test_Add'], $list );
+	}
+
+	public function testGetClassNameVariationsByPath_Level2TooLong(): void
+	{
+		General::$maxPathPartLength	= 24;
+
+		$list	= General::getClassNameVariationsByPath( 'Valid/TooLongToBeAValidPathPart' );
+		self::assertIsArray( $list );
+		self::assertEquals( ['Valid'], $list );
+
+		$list	= General::getClassNameVariationsByPath( 'TooLongToBeAValidPathPart/Valid' );
+		self::assertIsArray( $list );
+		self::assertEquals( [], $list );
+	}
+
+	public function testGetClassNameVariationsByPath_Level2SkipNumbers(): void
+	{
+		$list		= General::getClassNameVariationsByPath( 'topic/test/1', FALSE, FALSE );
+		self::assertIsArray( $list );
+		self::assertEquals( ['Topic_Test'], $list );
+
+		$list	= General::getClassNameVariationsByPath( 'topic/1/test', FALSE, FALSE );
+		self::assertIsArray( $list );
+		self::assertEquals( ['Topic'], $list );
+
+		$list	= General::getClassNameVariationsByPath( 'topic/1/test/1', FALSE, FALSE );
+		self::assertIsArray( $list );
+		self::assertEquals( ['Topic'], $list );
+	}
+
+	public function testGetClassNameVariationsByPath_Level2SkipWordsOnUppercase(): void
+	{
+		$list	= General::getClassNameVariationsByPath( 'test/add', FALSE, FALSE );
+		self::assertIsArray( $list );
+		self::assertEquals( ['Test_Add'], $list );
+
+		$list	= General::getClassNameVariationsByPath( 'test/add', TRUE, FALSE );
+		self::assertIsArray( $list );
+		self::assertEquals( ['Test_Add', 'TEST_Add'], $list );
+	}
+
+	public function testGetClassNameVariationsByPath_Level2CamelCase(): void
+	{
+		$list	= General::getClassNameVariationsByPath( 'topic_test/add', FALSE, FALSE, TRUE );
+		self::assertIsArray( $list );
+		self::assertEquals( ['TopicTest_Add'], $list );
+
+		$list	= General::getClassNameVariationsByPath( 'topic_test/multiple_add', FALSE, FALSE, TRUE );
+		self::assertIsArray( $list );
+		self::assertEquals( ['TopicTest_MultipleAdd'], $list );
+	}
+
+	public function testGetClassNameVariationsByPath_Level2WithAll(): void
+	{
+		General::$pathDivider			= ':';
+		General::$camelcaseDivider		= '.';
+		$list	= General::getClassNameVariationsByPath( 'topic.test:html:multiple.add:1:2', TRUE, FALSE, TRUE );
+		self::assertIsArray( $list );
+		self::assertEquals( [
+			'TopicTest_Html_MultipleAdd',
+			'TopicTest_HTML_MultipleAdd',
+		], $list );
+
+		General::$uppercaseMaxLength	= 3;
+		$list	= General::getClassNameVariationsByPath( 'topic.test:html:multiple.add:1:2', TRUE, FALSE, TRUE );
+		self::assertIsArray( $list );
+		self::assertEquals( [
+			'TopicTest_Html_MultipleAdd',
 		], $list );
 	}
 
@@ -102,5 +253,8 @@ class GeneralTest extends TestCase
 		$this->env->getRequest()->set( '__action', '' );
 
 		Loader::create( 'php', $this->baseTestPath.'assets/app/classes' )->register();
+
+		General::$pathDivider		= '/';
+		General::$maxPathPartLength	= 32;
 	}
 }
