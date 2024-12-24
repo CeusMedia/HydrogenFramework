@@ -156,7 +156,7 @@ class General
 	public function dispatch(): string
 	{
 		$runtime	= $this->env->getRuntime();
-		$runtime->reach( 'Dispatcher_General::dispatch' );
+		$runtime->reach( 'GeneralDispatcher::dispatch' );
 		do{
 			$this->realizeCall();
 			$this->checkForLoop();
@@ -170,36 +170,36 @@ class General
 				self::$prefixController,
 				$controller
 			);
-			$runtime->reach( 'Dispatcher_General::dispatch: check controller access' );
+			$runtime->reach( 'GeneralDispatcher::dispatch: check controller access' );
 			$this->checkAccess( $controller, $action);
 
-			$runtime->reach( 'Dispatcher_General::dispatch: load controller instance' );
+			$runtime->reach( 'GeneralDispatcher::dispatch: load controller instance' );
 			if( !is_object( $controllerInstanceOrFirstGuess ) ){
 				$message	= 'Invalid Controller "'.$controllerInstanceOrFirstGuess.'"';
 				throw new RuntimeException( $message, 201 );											// break with internal error
 			}
 			$instance	= $controllerInstanceOrFirstGuess;
-			if( !$instance instanceof Controller )
+			if( !$instance instanceof Controller && !$instance instanceof Controller\Ajax )
 				throw new RuntimeException(
 					sprintf(
 						'Controller class "%s" is not a Hydrogen controller',
 						$instance::class
 					), 301 );
-			$runtime->reach( 'Dispatcher_General::dispatch: factorized controller' );
+			$runtime->reach( 'GeneralDispatcher::dispatch: factorized controller' );
 
 			$this->checkClassAction( $instance, $action );
 			if( $this->checkClassActionArguments )
 				$this->checkClassActionArguments( $instance, $action, $arguments );
-			$runtime->reach( 'Dispatcher_General::dispatch: check@'.$controller.'/'.$action );
+			$runtime->reach( 'GeneralDispatcher::dispatch: check@'.$controller.'/'.$action );
 
 			$factory	= new MethodFactory( $instance );											// create method factory on controller instance
 			$factory->callMethod( $action, $arguments );											// call action method in controller class with arguments
 			$this->noteLastCall( $instance );
 		}
 		while( $instance->redirect );
-		$runtime->reach( 'Dispatcher_General::dispatch: done' );
+		$runtime->reach( 'GeneralDispatcher::dispatch: done' );
 		$view	= $instance->renderView();
-		$runtime->reach( 'Dispatcher_General::dispatch: view' );
+		$runtime->reach( 'GeneralDispatcher::dispatch: view' );
 		return $view;
 	}
 

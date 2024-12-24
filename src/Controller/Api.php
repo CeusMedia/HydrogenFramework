@@ -13,7 +13,7 @@ use JsonException;
 use ReflectionException;
 use Throwable;
 
-class Api
+abstract class Api
 {
 	public static array $supportedCompressions	= ['gzip', 'deflate'];
 
@@ -167,8 +167,11 @@ class Api
 			$response['dev']	= $dev;
 		$mimeType	= $this->evaluateMimeType( $mimeType );
 		try{
-			$response	= $this->encodeResponseByMimeType( $response, $mimeType );
-			return $this->respond( $response, $statusCode, $mimeType );
+			return $this->respond(
+				$this->encodeResponseByMimeType( $response, $mimeType ),
+				$statusCode,
+				$mimeType
+			);
 		}
 		catch( Exception ){
 			return $this->respondError( $message, $code, 500, 'text/plain' );
@@ -195,7 +198,7 @@ class Api
 			'line'		=> $exception->getLine(),
 		];
 		$dev	= (string) ob_get_clean();
-		if( ob_get_level() && strlen( trim( $dev ) ) )
+		if( ob_get_level() && '' !== trim( $dev ) )
 			$response['dev']	= $dev;
 		$json	= json_encode( $response, JSON_THROW_ON_ERROR );
 		return $this->respond( $json, $statusCode, $mimeType );
