@@ -35,6 +35,8 @@ use CeusMedia\Common\Net\HTTP\Request as HttpRequest;
 use CeusMedia\HydrogenFramework\Environment;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 use CeusMedia\HydrogenFramework\Controller;
+use CeusMedia\HydrogenFramework\Controller\Abstraction as ControllerAbstraction;
+use CeusMedia\HydrogenFramework\Controller\Ajax as AjaxController;
 
 use ReflectionException;
 use RuntimeException;
@@ -196,8 +198,10 @@ class General
 			$factory->callMethod( $action, $arguments );											// call action method in controller class with arguments
 			$this->noteLastCall( $instance );
 		}
-		while( $instance->redirect );
+		while( $instance->redirect ?? FALSE );
 		$runtime->reach( 'GeneralDispatcher::dispatch: done' );
+		if( $instance instanceof AjaxController )
+			return '';
 		$view	= $instance->renderView();
 		$runtime->reach( 'GeneralDispatcher::dispatch: view' );
 		return $view;
@@ -320,10 +324,10 @@ class General
 	}
 
 	/**
-	 *	@param		Controller		$instance
+	 *	@param		ControllerAbstraction		$instance
 	 *	@return		void
 	 */
-	protected function noteLastCall( Controller $instance ): void
+	protected function noteLastCall( ControllerAbstraction $instance ): void
 	{
 		$session	= $this->env->getSession();
 		if( $this->request->getMethod() != 'GET' )

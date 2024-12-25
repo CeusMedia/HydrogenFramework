@@ -21,7 +21,7 @@ use Throwable;
 /**
  *	General (and therefore abstract) AJAX controller.
  */
-abstract class Ajax
+abstract class Ajax extends Abstraction
 {
 	public static array $supportedCompressions	= ['gzip', 'deflate'];
 

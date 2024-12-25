@@ -57,7 +57,7 @@ use RuntimeException;
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-abstract class Web
+abstract class Web extends Abstraction
 {
 	public const RESTART_FROM_IGNORE		= 0;
 	public const RESTART_FROM_POP			= 1;
@@ -66,15 +66,6 @@ abstract class Web
 	public const RESTART_FROM_SET			= 8;
 	public const RESTART_FROM_PUSH			= 16;
 
-	public static string $moduleId			= '';
-	public static string $prefixModel		= 'Model_';
-	public static string $prefixView		= 'View_';
-
-	/**	@var	bool						$redirect		Flag for Redirection */
-	public bool $redirect					= FALSE;
-
-	/**	@var	string						$alias			Optional alternative path for restarting */
-	public string $alias					= '';
 
 	/**	@var	WebEnvironment				$env			Application Environment Object */
 	protected WebEnvironment $env;
@@ -82,23 +73,14 @@ abstract class Web
 	/**	@var	View|NULL					$view			View instance for controller */
 	protected ?View $view					= NULL;
 
-	/**	@var	Dictionary					$moduleConfig	Map of module configuration pairs */
-	protected Dictionary $moduleConfig;
+	/**	@var	bool						$redirect		Flag for Redirection */
+	public bool $redirect					= FALSE;
 
 	/**	@var	string						$defaultPath	Default controller URI path */
 	protected string $defaultPath;
 
 	/**	@var	string						$path			Preferred controller URI path */
 	protected string $path;
-
-	/**	@var	string						$controller		Name of called Controller */
-	protected string $controller			= '';
-
-	/**	@var	string						$action			Name of called Action */
-	protected string $action				= '';
-
-	/**	@var	bool						$logRestarts	Flag: Log redirections */
-	protected bool $logRestarts				= FALSE;
 
 	/**
 	 *	Constructor.
@@ -196,19 +178,7 @@ abstract class Web
 		}
 
 		$this->env->getRuntime()->reach( 'Controller::getView: done' );
-		return $result;
-	}
-
-	/**
-	 *	Set activity of logging of restarts.
-	 *	@access		public
-	 *	@param		boolean		$log		Flag: Activate logging of restarts (default)
-	 *	@return		self
-	 */
-	public function setLogRestarts( bool $log = TRUE ): self
-	{
-		$this->logRestarts	= $log;
-		return $this;
+		return $result ?? '';
 	}
 
 	//  --  PROTECTED  --  //
@@ -222,31 +192,6 @@ abstract class Web
 	 */
 	protected function __onInit(): void
 	{
-	}
-
-	/**
-	 *	@param		string		$key
-	 *	@param		mixed		$value
-	 *	@param		string|NULL	$topic
-	 *	@return		self
-	 */
-	protected function addData( string $key, mixed $value, string $topic = NULL ): self
-	{
-		$this->view?->setData( [$key => $value], $topic );
-		return $this;
-	}
-
-	/**
-	 *	@param		string		$resource
-	 *	@param		string		$event
-	 *	@param		object|NULL	$context
-	 *	@param		array		$payload
-	 *	@return		bool|NULL
-	 *	@throws		ReflectionException
-	 */
-	protected function callHook( string $resource, string $event, ?object $context, array & $payload ): ?bool
-	{
-		return $this->env->getCaptain()->callHook( $resource, $event, $context ?? $this, $payload );
 	}
 
 	/**
@@ -349,7 +294,7 @@ abstract class Web
 	 *	Loads View Class of called Controller.
 	 *	@access		protected
 	 *	@param		string|NULL		$section	Section in locale file
-	 *	@param		string|NULL		$topic		Locale file key, eg. test/my, default: current controller
+	 *	@param		string|NULL		$topic		Locale file key, e.g. test/my, default: current controller
 	 *	@return		array
 	 */
 	protected function getWords( string $section = NULL, string $topic = NULL ): array

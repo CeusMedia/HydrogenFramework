@@ -13,7 +13,7 @@ use JsonException;
 use ReflectionException;
 use Throwable;
 
-abstract class Api
+abstract class Api extends Abstraction
 {
 	public static array $supportedCompressions	= ['gzip', 'deflate'];
 

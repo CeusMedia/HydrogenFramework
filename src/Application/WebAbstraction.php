@@ -132,6 +132,22 @@ abstract class WebAbstraction implements ApplicationInterface
 	}
 
 	/**
+	 *	@param		string		$default		Master template file, default: master.php
+	 *	@param		string		$hookEvent		default: getMasterTemplate
+	 *	@return		string
+	 */
+	protected function realizeMasterOrErrorTemplateFile( string $default, string $hookEvent ): string
+	{
+		$payload	= ['templateFile' => ''];
+		$this->env->getCaptain()->callHook( 'App', $hookEvent, $this, $payload );
+		return match( $payload['templateFile'] ){
+			'','default','inherit'	=> $default,
+			'theme'					=> $this->env->getPage()->getThemePath().$default,
+			default					=> $payload['templateFile'],
+		};
+	}
+
+	/**
 	 *	Display report of missing modules as HTML.
 	 *	This method can be customized in applications.
 	 *	@access		protected
@@ -175,28 +191,13 @@ abstract class WebAbstraction implements ApplicationInterface
 	 *	Collates View Components and puts out Master View.
 	 *	@access		protected
 	 *	@param		string		$templateFile		Master template file, default: master.php
+	 *	@param		string		$hookEvent			default: getMasterTemplate
 	 *	@return		string
 	 *	@throws		ReflectionException
 	 */
-	protected function view( string $templateFile = "master.php" ): string
+	protected function view( string $templateFile = 'master.php', string $hookEvent = 'getMasterTemplate' ): string
 	{
-		$payload	= ['templateFile' => ''];
-		$this->env->getCaptain()->callHook( 'App', 'getMasterTemplate', $this, $payload );
-		$masterTemplate	= $payload['templateFile'];
-
-		switch( $masterTemplate ){
-			case '':
-			case 'default':
-			case 'inherit':
-				$templateFile	= 'master.php';
-				break;
-			case 'theme':
-				$pathTheme		= $this->env->getPage()->getThemePath();
-				$templateFile	= $pathTheme.'master.php';
-				break;
-			default:
-				$templateFile	= $masterTemplate;
-		}
+		$templateFile	= $this->realizeMasterOrErrorTemplateFile( $templateFile, $hookEvent );
 
 		$view	= new View( $this->env );
 		return $view->loadTemplateFile( $templateFile, $this->components );

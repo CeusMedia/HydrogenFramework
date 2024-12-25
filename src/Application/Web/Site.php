@@ -73,6 +73,7 @@ class Site extends WebAbstraction implements ApplicationInterface
 			return 0;
 		}
 		catch( Exception $e ){
+
 			HtmlExceptionPage::display( $e );
 			return 1;
 		}
@@ -165,35 +166,46 @@ class Site extends WebAbstraction implements ApplicationInterface
 	{
 		ob_start();
 		$request	= $this->env->getRequest();
-		$content	= $this->control();																//  dispatch and run request
 
-		if( $request->isAjax() || $request->has( '__contentOnly' ) )							//  this is an AJAX request
-			return $content;																		//  deliver content only
-
-		$data		 = array(
-			'page'			=> $this->env->getPage(),												//  HTML
-			'config'		=> $this->env->getConfig(),												//  configuration object
-			'request'		=> $request,															//  request object
-			'content'		=> $content,															//  rendered response page view content
-			'runtime'		=> $this->env->getRuntime(),											//  system clock for performance measure
-			'clock'			=> $this->env->getRuntime(),											//  legacy: alias for runtime @todo remove
-			'dev'			=> ob_get_clean(),														//  warnings, notices or development messages
-		);
-
+		$data		= [
+			'page'		=> $this->env->getPage(),													//  HTML
+			'config'	=> $this->env->getConfig(),													//  configuration object
+			'request'	=> $request,																//  request object
+		];
 		if( $this->env->has( 'messenger' ) )
 			$data['messenger']	= $this->env->getMessenger();										//  UI messages for user
-		if( $this->env->has( 'language' ) ){													//  language support is available
+
+		if( $this->env->has( 'language' ) ){														//  language support is available
 			$data['language']	= $this->env->getLanguage()->getLanguage();							//  note document language
 			$data['words']		= $this->env->getLanguage()->getWords( 'main', FALSE, FALSE );		//  note main UI word pairs
 		}
+		try{
+			$content	= $this->control();															//  dispatch and run request
+			if( $request->isAjax() || $request->has( '__contentOnly' ) )							//  this is an AJAX request
+				return $content;																	//  deliver content only
+
+			$data['content']	= $content;															//  rendered response page view content
+			$templateFile	= 'master.php';
+			$templateHook	= 'getMasterTemplate';
+		}
+		catch( \Throwable $e ){
+			$this->env->getLog()?->logException( $e );
+			$templateFile	= 'error.php';
+			$templateHook	= 'getErrorTemplate';
+		}
+		$data	= array_merge( $data, [
+			'runtime'		=> $this->env->getRuntime(),										//  system clock for performance measure
+			'clock'			=> $this->env->getRuntime(),										//  legacy: alias for runtime @todo remove
+			'dev'			=> ob_get_clean(),													//  warnings, notices or development messages
+		] );
 		if( $this->env->has( 'database' ) ){													//  database support is available
 			/** @var PDO $database */
 			$database	= $this->env->getDatabase();
-			$data['dbQueries']		= $database->numberExecutes;									//  note number of SQL queries executed
-			$data['dbStatements']	= $database->numberStatements;									//  note number of SQL statements sent
+			$data['dbQueries']		= $database->numberExecutes;								//  note number of SQL queries executed
+			$data['dbStatements']	= $database->numberStatements;								//  note number of SQL statements sent
 		}
-		$this->setViewComponents( $data );															//  set up information resources for main template
-		return $this->view();																		//  render and return main template to constructor
+		$this->setViewComponents( $data );														//  set up information resources for main template
+		return $this->view( $templateFile, $templateHook );										//  render and return main template to constructor
 	}
 
 	/**

@@ -4,7 +4,7 @@ namespace CeusMedia\HydrogenFramework\Controller;
 
 use CeusMedia\HydrogenFramework\Environment\Console as ConsoleEnvironment;
 
-abstract class Console
+abstract class Console extends Abstraction
 {
 	/** @var ConsoleEnvironment $env */
 	protected ConsoleEnvironment $env;
