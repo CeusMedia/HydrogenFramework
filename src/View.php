@@ -275,7 +275,7 @@ class View
 	{
 		$loader	= new ContentHelper( $this->env );
 		$loader->setFileKey( $fileKey );
-		$loader->setData( array_merge( $this->data, $data ) );
+		$loader->setData( $data );
 		return $loader->render();
 	}
 
