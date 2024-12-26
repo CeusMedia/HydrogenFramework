@@ -30,6 +30,7 @@ namespace CeusMedia\HydrogenFramework\View\Helper;
 
 use CeusMedia\Common\ADT\Collection\Dictionary as Dictionary;
 use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
+use CeusMedia\Common\Exception\Deprecation;
 use CeusMedia\HydrogenFramework\Environment as Environment;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 use CeusMedia\HydrogenFramework\View;
@@ -39,6 +40,7 @@ use Exception;
 use InvalidArgumentException;
 use ReflectionException;
 use RuntimeException;
+use Throwable;
 
 /**
  *	Generic View Class of Framework Hydrogen.
@@ -138,7 +140,7 @@ class Template
 	 */
 	public function & getData( string $key = NULL, mixed $autoSetTo = NULL ): mixed
 	{
-		if( NULL === $key )
+		if(!$key )
 			return $this->data;
 		if( !isset( $this->data[$key] ) && !is_null( $autoSetTo ) )
 			$this->addData( $key, $autoSetTo );
@@ -309,6 +311,48 @@ class Template
 		}
 		return (string) $content;
 	}
+
+	/**
+	 *	ATTENTION: This is for legay only.
+	 *  Needed to support templates which, load sub templates using $this->loadTemplateFile()
+	 *
+	 *	Tries to load several content files and maps them by prefixed IDs.
+	 *	@access		public
+	 *	@param		array		$keys		List of file keys (without .html extension)
+	 *	@param		string		$path		Path to files within locales, like "html/controller/action/"
+	 *	@return		array<string,string>	Prefixed map of collected file contents mapped by prefixed IDs
+	 *	@throws		ReflectionException
+	 */
+	public function populateTexts( array $keys, string $path, array $data = [], string $prefix = "text" ): array
+	{
+		$this->env->getLog()?->logException( Deprecation::create()
+			->setMessage( 'Calling this->populateTexts in templates is deprecated')
+			->setDescription( 'A template file still has old syntax to populate texts.' )
+			->setSuggestion( 'Replace by $view->populateTexts()' )
+		);
+		if( NULL === $this->view )
+			return [];
+		return $this->view->populateTexts( $keys, $path, $data, $prefix );
+	}
+
+	protected function loadContentFile( string $fileKey, array $data = [], string $path = NULL ): string
+	{
+		$this->env->getLog()?->logException( Deprecation::create()
+			->setMessage( 'Calling this->loadContentFile in templates is deprecated')
+			->setDescription( 'A template file still has old syntax to load nested templates.' )
+			->setSuggestion( 'Replace by $view->loadContentFile()' )
+		);
+		if( NULL === $this->view )
+			return '';
+		try{
+			return $this->view->loadContentFile( $fileKey, $data, $path );
+		}
+		catch( Throwable $e ){
+			$this->env->getLog()?->logException( $e );
+		}
+		return '';
+	}
+
 
 	//  --  PRIVATE  --  //
 

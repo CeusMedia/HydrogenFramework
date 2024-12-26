@@ -189,7 +189,7 @@ class Site extends WebAbstraction implements ApplicationInterface
 			$templateHook	= 'getMasterTemplate';
 		}
 		catch( \Throwable $e ){
-			$this->env->getLog()?->logException( $e );
+			$this->env->getLog()?->logException( $e, $this );
 			$data['e']		= $e;
 			$templateFile	= 'error.php';
 			$templateHook	= 'getErrorTemplate';
