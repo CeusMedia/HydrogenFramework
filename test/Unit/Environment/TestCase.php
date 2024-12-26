@@ -14,7 +14,11 @@ class TestCase extends \PHPUnit\Framework\TestCase
 	protected function setUp(): void
 	{
 		$this->baseTestPath	= dirname( __DIR__, 2 ) . '/';
-		$this->env		= new Environment( ['pathApp' => $this->baseTestPath.'assets/app/'] );
+		$this->env		= new Environment( [
+			'pathApp'	=> '',
+			'uri'		=> $this->baseTestPath.'assets/app/',
+			'isTest'	=> TRUE,
+		] );
 		$this->env->setMode( Environment::MODE_TEST );
 		$this->env->getCaptain()->setLogCalls( TRUE );
 

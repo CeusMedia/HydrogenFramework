@@ -95,7 +95,7 @@ class Log
 	public function __construct( Environment $env )
 	{
 		$this->env	= $env;
-		$this->path	= $env->path.$env->getPath( 'logs' );
+		$this->path	= $env->uri.$env->getPath( 'logs' );
 	}
 
 	/**

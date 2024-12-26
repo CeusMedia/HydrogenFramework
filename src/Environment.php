@@ -191,7 +191,7 @@ class Environment implements ArrayAccess
 
 		$this->options		= $options;																//  store given environment options
 		$this->path			= rtrim( $options['pathApp'] ?? getCwd(), '/' ) . '/';	//  detect application path
-		$this->uri			= getCwd().'/';															//  detect application base URI
+		$this->uri			= rtrim( $options['uri'] ?? getCwd(), '/' ) . '/';															//  detect application base URI
 
 		date_default_timezone_set( @date_default_timezone_get() );									//  avoid having no timezone set
 		if( !empty( static::$timezone ) )															//  a timezone has be set externally before
@@ -206,7 +206,7 @@ class Environment implements ArrayAccess
 		$this->initModules();																		//  setup module support
 		$this->initDatabase();																		//  setup database connection
 		$this->initCache();																			//  setup cache support
-		$this->initLanguage();
+//		$this->initLanguage();
 
 		if( NULL !== $this->log ){
 			$strategies	= [LogResource::STRATEGY_MODULE_HOOKS, ...$this->log->getStrategies()];		//  prepend hook based logging strategy
@@ -551,7 +551,7 @@ class Environment implements ArrayAccess
 			$this->modules->callHook( 'Env', 'init', $this );										//  call related module event hooks
 	}
 
-	protected function detectMode(): self
+	protected function detectMode(): static
 	{
 		/** @var array $modes */
 		$modes	= preg_split( '/[_.:;>#@\/-]/', strtolower( $this->config->get( 'app.mode', 'production' ) ) );
@@ -582,10 +582,10 @@ class Environment implements ArrayAccess
 	 *	Initialize remote access control list if roles module is installed.
 	 *	Calls hook and applies return class name. Otherwise, use all-public handler.
 	 *	@access		protected
-	 *	@return		self
+	 *	@return		static
 	 *	@throws		ReflectionException
 	 */
-	protected function initAcl(): self
+	protected function initAcl(): static
 	{
 		$type		= AllPublicAclResource::class;
 		if( $this->hasModules() ){																	//  module support and modules available
@@ -628,11 +628,11 @@ class Environment implements ArrayAccess
 	}
 
 	/**
-	 *	@return		self
+	 *	@return		static
 	 *	@throws		ReflectionException
 	 *	@throws		\Psr\SimpleCache\InvalidArgumentException
 	 */
-	protected function initCache(): self
+	protected function initCache(): static
 	{
 		$this->cache	= SimpleCacheFactory::createStorage('Noop' );
 		$this->modules->callHook( 'Env', 'initCache', $this );						//  call related module event hooks
@@ -640,7 +640,7 @@ class Environment implements ArrayAccess
 		return $this;
 	}
 
-	protected function initCaptain(): self
+	protected function initCaptain(): static
 	{
 		$this->captain	= new CaptainResource( $this );
 		$this->runtime->reach( 'env: initCaptain', 'Finished setup of event handler.' );
@@ -648,10 +648,10 @@ class Environment implements ArrayAccess
 	}
 
 	/**
-	 *	@return		self
+	 *	@return		static
 	 *	@throws		Exception
 	 */
-	protected function initClock(): self
+	protected function initClock(): static
 	{
 		Deprecation::getInstance()
 			->setErrorVersion( '0.8.7.9' )
@@ -664,18 +664,18 @@ class Environment implements ArrayAccess
 	/**
 	 *	Sets up configuration resource reading main config file and module config files.
 	 *	@access		protected
-	 *	@return		self
+	 *	@return		static
 	 *	@throws		FileNotExistingException
 	 *	@throws		RuntimeException
 	 */
-	protected function initConfiguration(): self
+	protected function initConfiguration(): static
 	{
 		$configPath	= static::$defaultPaths['config'];
 		$configFile	= $configPath.static::$configFile;												//  get config file @todo remove this old way
 		if( '' !== trim( $this->options['configFile'] ?? '' ) )								//  get config file from options @todo enforce this new way
 			$configFile	= $this->options['configFile'];												//  get config file from options
 
-		$absolutePrefix	= str_starts_with( $configFile, '/' ) ? '' : $this->path;					//  prefix with app path if not already absolute
+		$absolutePrefix	= str_starts_with( $configFile, '/' ) ? '' : $this->uri;					//  prefix with app path if not already absolute
 		$absolutePath	= $absolutePrefix.$configFile;
 		if( !file_exists( $absolutePath ) ){														//  config file not found
 			$message	= 'Main config file (%1$s) not found in %2$s';
@@ -701,11 +701,11 @@ class Environment implements ArrayAccess
 	 *	Calls hook Env::initDatabase to get resource.
 	 *	Calls hook Database::init if resource is available and retrieved
 	 *	@access		protected
-	 *	@return		self
+	 *	@return		static
 	 *	@todo		implement database connection pool/manager
 	 *	@throws		ReflectionException
 	 */
-	protected function initDatabase(): self
+	protected function initDatabase(): static
 	{
 		$data	= ['managers' => []];
 		$this->captain->callHook( 'Env', 'initDatabase', $this, $data );									//  call events hooked to database init
@@ -719,12 +719,12 @@ class Environment implements ArrayAccess
 
 	/**
 	 *	@access		protected
-	 *	@return		self
+	 *	@return		static
 	 *	@todo		why not keep the resource object instead of reflected class list? would need refactoring of resource and related modules, thou...
 	 *	@todo		extract to resource module: question is where to store the resource? in env again?
 	 *	@todo		to be deprecated in 0.9: please use module Resource_Disclosure instead
 	 */
-	protected function initDisclosure(): self
+	protected function initDisclosure(): static
 	{
 		$disclosure			= new DisclosureResource( [] );
 		$this->disclosure	= $disclosure->reflect( 'classes/Controller/', ['classPrefix' => 'Controller_'] );
@@ -734,26 +734,26 @@ class Environment implements ArrayAccess
 
 	/**
 	 *	@access		protected
-	 *	@return		self
+	 *	@return		static
 	 *	@todo  		extract to resource module
 	 *	@todo  		extract to resource module: question is where to store the resource? in env again?
 	 *	@todo  		to be deprecated in 0.9: please use module Resource_Disclosure instead
 	 */
-	protected function initLog(): self
+	protected function initLog(): static
 	{
 		$this->log	= new LogResource( $this );
 		$this->log->setStrategies( [LogResource::STRATEGY_APP_DEFAULT] );
 		return $this;
 	}
 
-	protected function initLanguage(): self
+	protected function initLanguage(): static
 	{
 		$this->language		= new LanguageResource( $this );
 		$this->runtime->reach( 'env: language' );
 		return $this;
 	}
 
-	protected function initLogic(): self
+	protected function initLogic(): static
 	{
 		$this->logic		= new LogicPoolResource( $this );
 		$this->runtime->reach( 'env: logic', 'Finished setup of logic pool.' );
@@ -762,13 +762,13 @@ class Environment implements ArrayAccess
 
 	/**
 	 *	@access		protected
-	 *	@return		self
+	 *	@return		static
 	 *	@throws		ReflectionException
 	 *	@throws		FileNotExistingException	if strict and file is not existing or given path is not a file
 	 *	@throws		IoException					if strict and file is not readable
 	 *	@todo		remove support for base_config::module.acl.public
 	 */
-	protected function initModules(): self
+	protected function initModules(): static
 	{
 		$this->runtime->reach( 'env: initModules: start', 'Started setup of modules.' );
 		$public	= [];
@@ -823,13 +823,13 @@ class Environment implements ArrayAccess
 		return $this;
 	}
 
-	protected function initPhp(): self
+	protected function initPhp(): static
 	{
 		$this->php	= new PhpResource( $this );
 		return $this;
 	}
 
-	protected function initRuntime(): self
+	protected function initRuntime(): static
 	{
 		$this->runtime	= new RuntimeResource( $this );
 		$this->runtime->reach( 'env: initRuntime', 'Finished setup of profiler.' );

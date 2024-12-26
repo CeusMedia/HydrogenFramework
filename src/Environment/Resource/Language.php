@@ -1,4 +1,5 @@
-<?php
+<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
+
 /**
  *	Language Class of Framework Hydrogen.
  *
@@ -77,9 +78,9 @@ class Language
 		$this->env			= $env;
 		$config				= $env->getConfig();
 
-		$this->filePath		= $env->path.'locales/';													//  assume default folder name
+		$this->filePath		= $env->uri.'locales/';													//  assume default folder name
 		if( $config->has( 'path.locales' ) )														//  a locales folder has been configured
-			$this->filePath	= $env->path.$config->get( 'path.locales' );								//  take the configured folder name
+			$this->filePath	= $env->uri.$config->get( 'path.locales' );								//  take the configured folder name
 		if( !file_exists( $this->filePath ) ){														//  locales folder is not existing
 			$message	= sprintf( 'Locales folder "%s" is missing', $this->filePath );
 			throw new RuntimeException( $message );													//  quit with exception
@@ -94,18 +95,18 @@ class Language
 
 		if( $this->env->has( 'session' ) ){
 			$session	= $this->env->getSession();
-			$switchTo	= $this->env->getRequest()->get( 'switchLanguageTo' );
+			$switchTo	= $this->env->getRequest()?->get( 'switchLanguageTo' );
 			if( $switchTo && in_array( $switchTo, $this->languages ) ){
-				$session->set( 'language', $switchTo );
+				$session?->set( 'language', $switchTo );
 				if( !empty( $_SERVER['HTTP_REFERER'] ) ){
 					$referer = $_SERVER['HTTP_REFERER'];
-					if( !preg_match( '/switchLanguageTo/', $referer ) ){
+					if( !str_contains( $referer, 'switchLanguageTo' ) ){
 						header( 'Location: '.$referer );
 						exit;
 					}
 				}
 			}
-			if( $session->get( 'language' ) )
+			if( $session?->get( 'language' ) )
 				$language	= $session->get( 'language' );
 		}
 		$this->setLanguage( $language ?? '' );
@@ -222,7 +223,7 @@ class Language
 	 *	@throws		RuntimeException if language file is not existing (and strict is on)
 	 *	@todo		improve error handling
 	 */
-	public function load( string $topic, bool $strict = FALSE, bool $force = FALSE )
+	public function load( string $topic, bool $strict = FALSE, bool $force = FALSE ): array
 	{
 		if( !strlen( trim( $topic ) ) )
 			throw new InvalidArgumentException( "Topic cannot be empty" );

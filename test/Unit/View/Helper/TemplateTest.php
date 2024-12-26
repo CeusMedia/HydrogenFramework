@@ -58,7 +58,8 @@ class TemplateTest extends TestCase
 	{
 		$this->baseTestPath	= dirname( __DIR__, 3 ).'/';
 		$this->env		= new Environment( [
-			'pathApp'	=> $this->baseTestPath.'assets/app/',
+			'pathApp'	=> '',
+			'uri'		=> $this->baseTestPath.'assets/app/',
 			'isTest'	=> TRUE,
 		] );
 		$this->helper	= new TemplateHelper( $this->env );

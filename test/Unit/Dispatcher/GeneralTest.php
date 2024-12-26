@@ -246,7 +246,8 @@ class GeneralTest extends TestCase
 	{
 		$this->baseTestPath	= dirname( __DIR__, 2 ).'/';
 		$this->env		= new WebEnvironment( [
-			'pathApp'	=> $this->baseTestPath.'assets/app/',
+			'pathApp'	=> '',
+			'uri'		=> $this->baseTestPath.'assets/app/',
 			'isTest'	=> TRUE,
 		] );
 		$this->env->getRequest()->set( '__controller', '' );

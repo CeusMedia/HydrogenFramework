@@ -83,7 +83,7 @@ class Template
 		if( '' === trim( $this->pathTemplates ) )
 			$this->pathTemplates	= './';
 		if( !str_starts_with( $this->pathTemplates, '/' ) )
-			$this->pathTemplates	= $this->env->path.$this->pathTemplates;
+			$this->pathTemplates	= $this->env->uri.$this->pathTemplates;
 		if( !file_exists( $this->pathTemplates ) )													//  templates folder is not existing
 			throw new RuntimeException( 'Templates folder "'.$this->pathTemplates.'" is missing' );	//  quit with exception
 		$this->__onInit();

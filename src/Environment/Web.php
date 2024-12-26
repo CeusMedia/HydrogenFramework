@@ -45,6 +45,7 @@ use CeusMedia\HydrogenFramework\Environment\Resource\Messenger as MessengerResou
 use CeusMedia\HydrogenFramework\Environment\Resource\Page as PageResource;
 
 use Exception;
+use Psr\SimpleCache\InvalidArgumentException;
 use ReflectionException;
 use RuntimeException;
 
@@ -123,12 +124,13 @@ class Web extends Environment
 	 *	@access		public
 	 *	@param		array		$options
 	 *	@return		void
+	 *	@throws		InvalidArgumentException
 	 */
 	public function __construct( array $options = [] )
 	{
 		try{
 			parent::__construct( $options, FALSE );
-			$this->detectSelf( ! (bool) ( $options['isTest'] ?? FALSE ) );
+			$this->detectSelf( !( $options['isTest'] ?? FALSE ) );
 			$this->initSession();																	//  setup session support
 			$this->initMessenger();																	//  setup user interface messenger
 			$this->initCookie();																	//  setup cookie support
@@ -258,7 +260,7 @@ class Web extends Environment
 	 *	Redirects by requesting a URI.
 	 *	Attention: This *WILL* effect the URL displayed in browser / need request clients (eG. cURL) to allow forwarding.
 	 *
-	 *	By default, redirect URIs are request path within the current application, eg. "./[CONTROLLER]/[ACTION]"
+	 *	By default, redirect URIs are request path within the current application, e.g. "./[CONTROLLER]/[ACTION]"
 	 *	ATTENTION: For browser compatibility local paths should start with "./"
 	 *
 	 *	If seconds parameter is set to TRUE, redirects to a path inside the current controller.
@@ -283,7 +285,7 @@ class Web extends Environment
 	 *	@todo		implement handling of FROM request parameter, see controller constants
 	 *	@todo		concept and implement anti-loop {@see http://dev.(ceusmedia.de)/cmKB/?MTI}
 	 */
-	public function restart( ?string $uri = '', ?int $status = NULL, bool $allowForeignHost = FALSE, int $modeFrom = 0 )
+	public function restart( ?string $uri = '', ?int $status = NULL, bool $allowForeignHost = FALSE, int $modeFrom = 0 ): void
 	{
 		$base	= '';
 		if( !str_starts_with( $uri ?? '', 'http' ) ){												//  URI is not starting with HTTP scheme
@@ -366,16 +368,17 @@ class Web extends Environment
 		$this->path		= preg_replace( "@^/$@", "", $path )."/";					//  note requested working path
 		$this->url		= $this->scheme.'://'.$hostWithPort.$this->path;							//  note calculated base application URI
 		$this->uri		= $this->root.$this->path;													//  note calculated absolute base application path
+		if( '' !== ( $this->options['uri'] ?? '' ) )
+			$this->uri		= $this->options['uri'];													//  note calculated absolute base application path
 		$this->runtime->reach( 'env: self detection' );
 	}
 
 	/**
 	 *	Sets up configuration resource reading main config file and module config files.
 	 *	@access		protected
-	 *	@return		self
-	 *	@throws		EnvironmentException
+	 *	@return		static
 	 */
-	protected function initConfiguration(): self
+	protected function initConfiguration(): static
 	{
 		parent::initConfiguration();
 
@@ -401,10 +404,10 @@ class Web extends Environment
 	/**
 	 *	Initialize cookie resource instance.
 	 *	@access		protected
-	 *	@return		self
+	 *	@return		static
 	 *	@throws		RuntimeException			if cookie resource has not been initialized before
 	 */
-	protected function initCookie(): self
+	protected function initCookie(): static
 	{
 		if( !$this->url )
 			throw new RuntimeException( 'URL not detected yet, run detectSelf beforehand' );
@@ -418,13 +421,13 @@ class Web extends Environment
 
 	/**
 	 *	@param		bool|NULL		$enabled		NULL means "autodetect" and defaults to yes, if response shall be HTML
-	 *	@return		self
+	 *	@return		static
 	 */
-	protected function initMessenger( ?bool $enabled = NULL ): self
+	protected function initMessenger( ?bool $enabled = NULL ): static
 	{
-		if( NULL === $enabled ) {																	//  auto detect mode
-			$acceptHeader	= (string)getEnv('HTTP_ACCEPT');
-			$enabled = (bool) preg_match("/html/", $acceptHeader);							//  enabled if HTML is requested
+		if( NULL === $enabled ){																	//  auto detect mode
+			$acceptHeader	= (string) getEnv( 'HTTP_ACCEPT' );
+			$enabled		= str_contains( $acceptHeader, 'html' );								//  enabled if HTML is requested
 		}
 		$this->messenger	= new MessengerResource( $this, $enabled );
 		$this->runtime->reach( 'env: messenger' );
@@ -436,9 +439,9 @@ class Web extends Environment
 	 *	@access		protected
 	 *	@param		boolean		$pageJavaScripts	Flag: compress JavaScripts, default: TRUE
 	 *	@param		boolean		$packStyleSheets	Flag: compress Stylesheet, default: TRUE
-	 *	@return		self
+	 *	@return		static
 	 */
-	protected function initPage( bool $pageJavaScripts = TRUE, bool $packStyleSheets = TRUE ): self
+	protected function initPage( bool $pageJavaScripts = TRUE, bool $packStyleSheets = TRUE ): static
 	{
 		$this->page	= new PageResource( $this );
 		$this->page->setPackaging( $pageJavaScripts, $packStyleSheets );
@@ -456,9 +459,9 @@ class Web extends Environment
 	 *	Initialize HTTP request resource instance.
 	 *	Request data will be imported from given web server environment.
 	 *	@access		protected
-	 *	@return		self
+	 *	@return		static
 	 */
-	protected function initRequest(): self
+	protected function initRequest(): static
 	{
 		$this->request		= new HttpRequest();
 		$this->request->fromEnv();
@@ -469,9 +472,9 @@ class Web extends Environment
 	/**
 	 *	Initialize HTTP response resource instance.
 	 *	@access		protected
-	 *	@return		self
+	 *	@return		static
 	 */
-	protected function initResponse(): self
+	protected function initResponse(): static
 	{
 		$this->response	= new HttpResponse();
 		$this->runtime->reach( 'env: response' );
@@ -480,10 +483,10 @@ class Web extends Environment
 
 	/**
 	 *	@param		string|NULL		$routerClass
-	 *	@return		self
+	 *	@return		static
 	 *	@throws		ReflectionException
 	 */
-	protected function initRouter( string $routerClass = NULL ): self
+	protected function initRouter( string $routerClass = NULL ): static
 	{
 		$classRouter	= $routerClass ?: self::$classRouter;
 		/** @var AbstractRouter $router */
@@ -493,7 +496,13 @@ class Web extends Environment
 		return $this;
 	}
 
-	protected function initSession( string $keyPartitionName = NULL, string $keySessionName = NULL ): self
+	/**
+	 *	@param		?string		$keyPartitionName
+	 *	@param		?string		$keySessionName
+	 *	@return		static
+	 *	@throws		ReflectionException
+	 */
+	protected function initSession( string $keyPartitionName = NULL, string $keySessionName = NULL ): static
 	{
 		$partitionName	= md5( (string) getCwd() );
 		$sessionName	= 'sid';
@@ -534,7 +543,7 @@ class Web extends Environment
 		return $this;
 	}
 
-	protected function registerResourceToClose( string $resourceKey ): self
+	protected function registerResourceToClose( string $resourceKey ): static
 	{
 		$this->resourcesToClose[]	= $resourceKey;
 		return $this;

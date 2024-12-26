@@ -141,7 +141,7 @@ class Captain
 		$this->openHooks[$resource.'::'.$event]	= microtime( TRUE );
 		if( $this->logCalls ){
 			$message	= microtime( TRUE ).' '.$resource.'>'.$event.PHP_EOL;
-			$logFile	= $this->env->path.$this->env->getPath( 'logs' ).'hook_calls.log';
+			$logFile	= $this->env->uri.$this->env->getPath( 'logs' ).'hook_calls.log';
 			error_log( $message, 3, $logFile );
 		}
 

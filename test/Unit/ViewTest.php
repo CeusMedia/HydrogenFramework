@@ -93,7 +93,8 @@ class ViewTest extends TestCase
 		$this->baseTestPath	= dirname( __DIR__, 1 ).'/';
 		$this->appPath		= $this->baseTestPath.'assets/app/';
 		$this->env		= new WebEnvironment( [
-			'pathApp'	=> $this->appPath,
+			'pathApp'	=> '',
+			'uri'		=> $this->appPath,
 			'isTest'	=> TRUE,
 		] );
 

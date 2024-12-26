@@ -4,13 +4,13 @@ declare(strict_types=1);
 namespace CeusMedia\HydrogenFrameworkUnitTest\View\Helper;
 
 use CeusMedia\Common\Exception\FileNotExisting as FileNotExistingException;
-use CeusMedia\HydrogenFramework\Environment;
+use CeusMedia\HydrogenFramework\Environment\Console as ConsoleEnvironment;
 use CeusMedia\HydrogenFramework\View\Helper\Content as ContentHelper;
 use PHPUnit\Framework\TestCase;
 
 class ContentTest extends TestCase
 {
-	protected Environment $env;
+	protected ConsoleEnvironment $env;
 	protected string $baseTestPath;
 	protected ContentHelper $helper;
 
@@ -53,8 +53,9 @@ class ContentTest extends TestCase
 	protected function setUp(): void
 	{
 		$this->baseTestPath	= dirname( __DIR__, 3 ).'/';
-		$this->env		= new Environment( [
-			'pathApp'	=> $this->baseTestPath.'assets/app/',
+		$this->env		= new ConsoleEnvironment( [
+			'pathApp'	=> '',
+			'uri'		=> $this->baseTestPath.'assets/app/',
 			'isTest'	=> TRUE,
 		] );
 		$this->helper	= new ContentHelper( $this->env );
