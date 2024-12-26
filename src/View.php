@@ -107,6 +107,7 @@ class View
 		$this->html		= new HtmlElements();
 		$this->time		= new TimeConverter();
 		$this->helpers	= new Dictionary();
+		$this->addData( 'view', $this );
 
 		$env->getRuntime()->reach( 'View('.static::class.')::init done' );
 //		$this->env->getMessenger()->noteNotice( "View::Construct: ".get_class( $this ) );

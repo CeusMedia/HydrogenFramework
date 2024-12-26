@@ -203,20 +203,8 @@ class Template
 		//  old solution, extract to module UI_TemplateAbstraction
 		/*  --  LOAD TEMPLATE AND APPLY DATA  --  */
 		$content	= $this->realizeTemplate( $filePath, $this->data );								//
-		if( $this->renderContent ){
-			$payload	= [
-				'content'	=> $content,
-				'type'		=> 'HTML',
-			];
-			$this->env->getCaptain()->callHook( 'View', 'onRenderContent', $this, $payload );
-			return $payload['content'];
-
-
-			$helper	= new Content( $this->env );
-			$helper->setContent( $content );
-			$helper->setData( $this->data );
-			$content	= $this->renderContent( $content );											//  apply modules to content
-		}
+		if( $this->renderContent )
+			$content	= Content::applyContentProcessors( $this->env, $this, $content );
 		return $content;																			//  return loaded and rendered content
 	}
 
@@ -315,7 +303,7 @@ class Template
 	{
 		$___templateUri	= $filePath;
 		extract( $data );																		//
-		$view		= $___view		= $this;													//
+//		$view		= $___view		= $this;													//
 		$env		= $___env		= $this->env;												//
 		$config		= $___config	= $this->env->getConfig();									//
 		$helpers	= $___helpers	= $this->helpers;											//
