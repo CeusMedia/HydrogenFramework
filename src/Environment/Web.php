@@ -211,7 +211,7 @@ class Web extends Environment
 	 */
 	public function getRequest(): HttpRequest
 	{
-		return $this->request;
+		return $this->request ?? new HttpRequest();
 	}
 
 	/**
@@ -227,11 +227,11 @@ class Web extends Environment
 	/**
 	 *	Returns Session Object.
 	 *	@access		public
-	 *	@return		HttpPartitionSession
+	 *	@return		?HttpPartitionSession
 	 */
-	public function getSession(): HttpPartitionSession
+	public function getSession(): ?HttpPartitionSession
 	{
-		return $this->session;
+		return $this->session ?? NULL;
 	}
 
 	/**

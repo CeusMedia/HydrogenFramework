@@ -111,21 +111,21 @@ class Remote extends Environment
 	/**
 	 *	Returns Request Object.
 	 *	@access		public
-	 *	@return		Dictionary
+	 *	@return		?Dictionary
 	 */
-	public function getRequest(): Dictionary
+	public function getRequest(): ?Dictionary
 	{
-		return $this->request;
+		return $this->request ?? NULL;
 	}
 
 	/**
 	 *	Returns Session Object.
 	 *	@access		public
-	 *	@return		Dictionary
+	 *	@return		?Dictionary
 	 */
-	public function getSession(): Dictionary
+	public function getSession(): ?Dictionary
 	{
-		return $this->session;
+		return $this->session ?? NULL;
 	}
 
 	/**

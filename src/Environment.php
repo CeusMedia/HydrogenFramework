@@ -99,6 +99,7 @@ class Environment implements ArrayAccess
 		'classes'	=> 'classes/',
 		'config'	=> 'config/',
 		'logs'		=> 'logs/',
+		'templates'	=> 'templates/',
 	];
 
 	public static ?string $timezone			= NULL;
@@ -205,6 +206,7 @@ class Environment implements ArrayAccess
 		$this->initModules();																		//  setup module support
 		$this->initDatabase();																		//  setup database connection
 		$this->initCache();																			//  setup cache support
+		$this->initLanguage();
 
 		if( NULL !== $this->log ){
 			$strategies	= [LogResource::STRATEGY_MODULE_HOOKS, ...$this->log->getStrategies()];		//  prepend hook based logging strategy
@@ -452,9 +454,9 @@ class Environment implements ArrayAccess
 		return $resource;
 	}
 
-	public function getRequest(): HttpRequest|Dictionary
+	public function getRequest(): HttpRequest|Dictionary|NULL
 	{
-		return $this->request;
+		return $this->request ?? NULL;
 	}
 
 	/**
@@ -467,9 +469,9 @@ class Environment implements ArrayAccess
 		return $resource;
 	}
 
-	public function getSession(): Dictionary
+	public function getSession(): ?Dictionary
 	{
-		return $this->session;
+		return $this->session ?? NULL;
 	}
 
 	/**
