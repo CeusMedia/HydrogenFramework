@@ -35,12 +35,13 @@ use CeusMedia\Common\Alg\Time\Converter as TimeConverter;
 use CeusMedia\Common\UI\HTML\Elements as HtmlElements;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 use CeusMedia\HydrogenFramework\View\Helper;
-use CeusMedia\TemplateEngine\Template as TemplateEngine;
+use CeusMedia\HydrogenFramework\View\Helper\Content as ContentHelper;
+use CeusMedia\HydrogenFramework\View\Helper\Template as TemplateHelper;
 
-use Exception;
 use InvalidArgumentException;
 use ReflectionException;
 use RuntimeException;
+use Throwable;
 
 /**
  *	Generic View Class of Framework Hydrogen.
@@ -77,9 +78,6 @@ class View
 //	/**	@var	CMM_TEA_Factory			$tea			Instance of TEA (Template Engine Abstraction) Factory (from cmModules) OR empty if TEA is not available */
 //	protected $tea						= NULL;
 
-	/**	@var	string					$pathTemplates	Path to template file, can be set by config::path.templates */
-	protected string $pathTemplates		= 'templates/';
-
 	/**
 	 *	Applies hook View::onRenderContent to already created content
 	 *	@param		WebEnvironment	$env
@@ -89,14 +87,9 @@ class View
 	 *	@return		string
 	 *	@throws		ReflectionException
 	 */
-	public static function renderContentStatic( WebEnvironment $env, object $context, string $content, string $dataType = "HTML" ): string
+	public static function renderContentStatic( WebEnvironment $env, object $context, string $content, string $dataType = 'HTML' ): string
 	{
-		$payload	= [
-			'content'	=> $content,
-			'type'		=> $dataType
-		];
-		$env->getCaptain()->callHook( 'View', 'onRenderContent', $context, $payload );
-		return $payload['content'];
+		return ContentHelper::applyContentProcessors( $env, $context, $content, $dataType );
 	}
 
 	/**
@@ -108,21 +101,14 @@ class View
 	 */
 	public function __construct( WebEnvironment $env )
 	{
-		$env->getRuntime()->reach( 'CMF_View('.static::class.')::init start' );
+		$env->getRuntime()->reach( 'View('.static::class.')::init start' );
 		$this->setEnv( $env );
+
 		$this->html		= new HtmlElements();
 		$this->time		= new TimeConverter();
 		$this->helpers	= new Dictionary();
 
-		if( NULL !== $this->env->getConfig()->get( 'path.templates' ) )
-			$this->pathTemplates	= $this->env->getConfig()->get( 'path.templates' );
-		if( 0 === strlen( trim( $this->pathTemplates ) ) )
-			$this->pathTemplates	= './';
-		if( !str_starts_with( $this->pathTemplates, '/' ) )
-			$this->pathTemplates	= $this->env->uri.$this->pathTemplates;
-		if( !file_exists( $this->pathTemplates ) )													//  templates folder is not existing
-			throw new RuntimeException( 'Templates folder "'.$this->pathTemplates.'" is missing' );	//  quit with exception
-		$env->getRuntime()->reach( 'CMF_Controller('.static::class.')::init done' );
+		$env->getRuntime()->reach( 'View('.static::class.')::init done' );
 //		$this->env->getMessenger()->noteNotice( "View::Construct: ".get_class( $this ) );
 		$this->env->getCaptain()->callHook( 'View', 'onConstruct', $this );
 		$this->__onInit();
@@ -136,7 +122,7 @@ class View
 	 *	@param		string|NULL		$topic			Optional: Topic Name of Data
 	 *	@return		self
 	 */
-	public function addData( string $key, $value, ?string $topic = NULL ): self
+	public function addData( string $key, mixed $value, ?string $topic = NULL ): self
 	{
 		return $this->setData( array( $key => $value ), $topic );
 	}
@@ -159,11 +145,19 @@ class View
 		return $this;
 	}
 
+	/**
+	 *	@param		string			$fileKey
+	 *	@param		string|NULL		$path
+	 *	@return		string
+	 *	@deprecated
+	 *	@todo		remove in 1.0
+	 */
 	public function getContentUri( string $fileKey, string $path = NULL ): string
 	{
-		$path		= preg_replace( '/^(.+)(\/)*$/U', '\\1/', $path ?? '' );
-		$pathLocale	= $this->env->getLanguage()->getLanguagePath();
-		return $pathLocale.$path.$fileKey;
+		Deprecation::getInstance()
+			->setExceptionVersion( '1.0.0' )
+			->message( 'Method View::getContentUri is deprecated' );
+		return '';
 	}
 
 	/**
@@ -171,7 +165,7 @@ class View
 	 *	@param		mixed|NULL		$autoSetTo
 	 *	@return		array|mixed
 	 */
-	public function & getData( string $key = NULL, $autoSetTo = NULL )
+	public function & getData( string $key = NULL, mixed $autoSetTo = NULL )
 	{
 		if( !$key )
 			return $this->data;
@@ -204,6 +198,15 @@ class View
 		return $this->helpers;
 	}
 
+	/**
+	 *	@param		string		$controller
+	 *	@param		string		$action
+	 *	@param		?string		$path
+	 *	@param		string		$extension
+	 *	@return		bool
+	 *	@deprecated	not usable and also not used in modules
+	 *	@todo		remove in 1.0
+	 */
 	public function hasContent( string $controller, string $action, ?string $path = NULL, string $extension = '.html' ): bool
 	{
 		$fileKey	= $controller.'/'.$action.$extension;
@@ -212,8 +215,15 @@ class View
 
 	public function hasContentFile( string $fileKey, ?string $path = NULL ): bool
 	{
-		$uri	= $this->getContentUri( $fileKey, $path );
-		return file_exists( $uri );
+		$helper	= new ContentHelper( $this->env );
+		try{
+			$helper->setFileKey( $fileKey );
+//			$helper->setPath( $path );
+			return $helper->has();
+		}
+		catch( Throwable ){
+			return FALSE;
+		}
 	}
 
 	public function hasData( string $key ): bool
@@ -228,14 +238,14 @@ class View
 
 	public function hasTemplate( string $controller, string $action ): bool
 	{
-		$uri		= $this->getTemplateUri( $controller, $action );
-		return file_exists( $uri );
+		return $this->hasTemplateFile( $controller.'/'.$action.'.php' );
 	}
 
 	public function hasTemplateFile( string $fileKey ): bool
 	{
-		$uri	= $this->getTemplateUriFromFile( $fileKey );
-		return file_exists( $uri );
+		$helper	= new TemplateHelper( $this->env );
+		$helper->setTemplateKey( $fileKey );
+		return $helper->hasTemplate();
 	}
 
 	/**
@@ -245,6 +255,8 @@ class View
 	 *	@param		string		$extension
 	 *	@return		string
 	 *	@throws		ReflectionException
+	 *	@deprecated	not usable and also not used in modules
+	 *	@todo		remove in 1.0
 	 */
 	public function loadContent( string $controller, string $action, array $data = [], string $extension = '.html' ): string
 	{
@@ -261,30 +273,10 @@ class View
 	 */
 	public function loadContentFile( string $fileKey, array $data = [], ?string $path = NULL ): string
 	{
-		if( !is_array( $data ) )																	//  no data given
-			$data	= [];																		//  ensure empty array
-		$uri	= $this->getContentUri( $fileKey, $path );											//  calculate file pathname
-		if( !file_exists( $uri ) )																	//  content file is not existing
-			throw new RuntimeException( 'Locale content file "'.$fileKey.'" is missing.', 321 );	//  throw exception
-//		$data	= array_merge( $this->data, $data );
-
-		//  new solution
-//		$payload	= (object) ['filePath' => $uri, 'data' => $data, 'content' => ''];
-//		$result	= $this->env->getCaptain()->callHook( 'View', 'renderContent', $this, $payload );
-//		if( $result )
-//			return $this->renderContent( $payload->content );										//  return loaded and rendered content
-
-		//  old solution, extract to module UI_TemplateAbstraction
-//		if( 0 && $this->env->getPage()->tea ){														//  template engine abstraction is enabled
-//			$this->env->getPage()->tea->setDefaultType( 'STE' );									//
-//			$template	= $this->env->getPage()->tea->getTemplate( $uri );							//  create template object for content file
-//			$template->setData( $data );															//  set given data
-//			$content	= $template->render();														//  render template
-//		}
-//		else
-			$content	= TemplateEngine::renderFile( $uri, $data );									//  render template with integrated template engine
-
-		return $this->renderContent( $content );												//  apply modules to content
+		$loader	= new ContentHelper( $this->env );
+		$loader->setFileKey( $fileKey );
+		$loader->setData( array_merge( $this->data, $data ) );
+		return $loader->render();
 	}
 
 	/**
@@ -323,9 +315,6 @@ class View
 	public function loadTemplate( string $controller, string $action, array $data = [], bool $renderContent = TRUE ): string
 	{
 		$fileKey	= $controller.'/'.$action.'.php';
-		$uri		= $this->getTemplateUri( $controller, $action );
-		if( !file_exists( $uri ) )
-			throw new RuntimeException( 'Template "'.$controller.'/'.$action.'" is not existing', 311 );
 		return $this->loadTemplateFile( $fileKey, $data, $renderContent );
 	}
 
@@ -338,30 +327,17 @@ class View
 	 */
 	public function loadTemplateFile( string $fileName, array $data = [], bool $renderContent = TRUE ): string
 	{
-		$filePath	= $this->getTemplateUriFromFile( $fileName );
-		if( !file_exists( $filePath ) )
-			throw new RuntimeException( 'Template "'.$filePath.'" is not existing', 311 );
-
-		/*  --  PREPARE DATA BY ASSIGNED AND ADDITIONAL  --  */
-		if( isset( $this->data['this' ] ) )
-			unset( $this->data['this'] );
-		if( isset( $data['this' ] ) )
-			unset( $data['this'] );
-		$data		= array_merge( $this->data, $data );											//
-//		$content	= '';
-
-		//  new solution
-//		$payload	= (object) ['filePath' => $uri, 'data' => $data, 'content' => ''];
-//		$result	= $this->env->getCaptain()->callHook( 'View', 'renderContent', $this, $payload );
-//		if( $result )
-//			return $this->renderContent( $payload->content );										//  return loaded and rendered content
-
-		//  old solution, extract to module UI_TemplateAbstraction
-		/*  --  LOAD TEMPLATE AND APPLY DATA  --  */
-		$content	= $this->realizeTemplate( $filePath, $data );								//
-		if( $renderContent )
-			$content	= $this->renderContent( $content );											//  apply modules to content
-		return $content;																			//  return loaded and rendered content
+		$templateHelper	= new TemplateHelper( $this->env );
+		$templateHelper->setTemplateKey( $fileName );
+		$templateHelper->setRenderContent( $renderContent );
+		$templateHelper->setData( array_merge( $this->data, $data ) );
+		/**
+		 * @var string $name
+		 * @var Helper $helper
+		 */
+		foreach( $this->getHelpers() as $name => $helper )
+			$templateHelper->addHelper( $name, $helper );
+		return $templateHelper->render();
 	}
 
 	/**
@@ -397,24 +373,6 @@ class View
 	{
 	}
 
-	protected function getTemplateUri( string $controller, string $action ): string
-	{
-		$fileKey	= $controller.'/'.$action.'.php';
-		return $this->getTemplateUriFromFile( $fileKey );
-	}
-
-	/**
-	 *	Returns File Name of Template.
-	 *	Uses config::path.templates and defaults to 'templates/'.
-	 *	@access		protected
-	 *	@param		string		$fileKey		File key, like: controller/action.php
-	 *	@return		string
-	 */
-	protected function getTemplateUriFromFile( string $fileKey ): string
-	{
-		return $this->pathTemplates.$fileKey;
-	}
-
 	/**
 	 *	Loads View Class of called Controller.
 	 *	@access		protected
@@ -433,53 +391,6 @@ class View
 			return $this->env->getLanguage()->getWords( $topic );
 		$words	= $this->env->getLanguage()->getSection( $topic, $section );
 		return $asObject ? (object) $words : $words;
-	}
-
-	/**
-	 *	...
-	 *	Check if template file is existing MUST be done beforehand.
-	 *	@param		string		$filePath		Template file path name with templates folder
-	 *	@param		array		$data			Additional template data, appended to assigned view data
-	 *	@return		string		Template content with applied data
-	 *	@throws		ReflectionException
-	 */
-	protected function realizeTemplate( string $filePath, array $data = [] ): string
-	{
-		$payload	= [
-			'filePath'	=> $filePath,
-			'data'			=> [
-				'view'		=> $this,
-				'env'		=> $this->env,
-				'config'	=> $this->env->getConfig(),
-				'request'	=> $this->env->getRequest(),
-				'session'	=> $this->env->getSession(),
-				'helpers'	=> $this->helpers,
-			],
-			'content'		=> '',
-		];
-		$payload['data']	= array_merge( $data, $payload['data'] );
-
-		ob_start();
-		$this->env->getCaptain()->callHook( 'View', 'realizeTemplate', $this, $payload );
-		$content	= $payload['content'];
-
-		if( '' === $content )																	//  no hook realized template
-			$content	= $this->realizeTemplateWithInclude( $filePath, $data );				//  realize with own strategy
-
-		//  handle output buffer of template realization
-		$buffer	= (string) ob_get_clean();														//  get standard output buffer
-		/** @var string $buffer */
-		$buffer	= preg_replace( '/^(<br( ?\/)?>)+/s', '', $buffer );
-		$buffer	= trim( $buffer );
-		if( strlen( $buffer ) ){																//  there is something in buffer
-			if( !is_string( $content ) )														//  the view did not return content
-				$content	= $buffer;															//  use buffer as content
-			else if( $this->env->getMessenger() )												//  otherwise use messenger
-				$this->env->getMessenger()->noteFailure( nl2br( $buffer ) );					//  note as failure
-			else if( !$this->env->getLog()?->log( 'error', $buffer, $this ) )					//  logging failed
-				throw new RuntimeException( $buffer );											//  throw exception
-		}
-		return (string) $content;
 	}
 
 	/**
@@ -504,9 +415,9 @@ class View
 	 *	@return		string
 	 *	@throws		ReflectionException
 	 */
-	public function renderContent( string $content, string $dataType = "HTML" ): string
+	public function renderContent( string $content, string $dataType = 'HTML' ): string
 	{
-		return static::renderContentStatic( $this->env, $this, $content, $dataType );
+		return ContentHelper::applyContentProcessors( $this->env, $this, $content, $dataType );
 	}
 
 	/**
@@ -518,7 +429,7 @@ class View
 	 */
 	public function setData( array $data, ?string $topic = NULL ): self
 	{
-		if( $topic ){
+		if( '' !== ( $topic ?? '' ) ){
 			if( !isset( $this->data[$topic] ) )
 				$this->data[$topic]	= [];
 			foreach( $data as $key => $value )
@@ -566,35 +477,5 @@ class View
 			$this->env->getPage()->setTitle( $words[$section][$key], $modes[$mode] );
 		}
 		return $this;
-	}
-
-	//  --  PRIVATE  --  //
-
-	private function realizeTemplateWithInclude( string $filePath, array $data = [] ): string
-	{
-		$___templateUri	= $filePath;
-		extract( $data );																		//
-		$view		= $___view		= $this;													//
-		$env		= $___env		= $this->env;												//
-		$config		= $___config	= $this->env->getConfig();									//
-		$request	= $___request	= $this->env->getRequest();									//
-		$session	= $___session	= $this->env->getSession();									//
-		$helpers	= $___helpers	= $this->helpers;											//
-
-		try{
-			$content	= include( $___templateUri );											//  render template by include
-			if( $content === FALSE )
-				throw new RuntimeException( 'Template file "'.$___templateUri.'" is not existing' );
-		}
-		catch( Exception $e ){
-			$message	= 'Rendering template file "%1$s" failed: %2$s';
-			$message	= sprintf( $message, $filePath, $e->getMessage() );
-			$this->env->getLog()?->log( 'error', $message, $this );
-			if( !$this->env->getLog()?->logException( $e, $this ) )
-				throw new RuntimeException( $message, 0, $e  );
-			$this->env->getMessenger()?->noteFailure( $message );
-		}
-
-		return (string) $content;
 	}
 }

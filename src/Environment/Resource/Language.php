@@ -77,9 +77,9 @@ class Language
 		$this->env			= $env;
 		$config				= $env->getConfig();
 
-		$this->filePath		= $env->uri.'locales/';													//  assume default folder name
+		$this->filePath		= $env->path.'locales/';													//  assume default folder name
 		if( $config->has( 'path.locales' ) )														//  a locales folder has been configured
-			$this->filePath	= $env->uri.$config->get( 'path.locales' );								//  take the configured folder name
+			$this->filePath	= $env->path.$config->get( 'path.locales' );								//  take the configured folder name
 		if( !file_exists( $this->filePath ) ){														//  locales folder is not existing
 			$message	= sprintf( 'Locales folder "%s" is missing', $this->filePath );
 			throw new RuntimeException( $message );													//  quit with exception
