@@ -31,6 +31,8 @@ namespace CeusMedia\HydrogenFramework\View\Helper;
 use CeusMedia\Common\ADT\Collection\Dictionary as Dictionary;
 use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
 use CeusMedia\HydrogenFramework\Environment as Environment;
+use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
+use CeusMedia\HydrogenFramework\View;
 use CeusMedia\HydrogenFramework\View\Helper;
 
 use Exception;
@@ -67,6 +69,8 @@ class Template
 	/** @var	bool					$renderContent	Flag: inject content blocks of modules */
 	protected bool $renderContent		= TRUE;
 
+	protected ?View $view				= NULL;
+
 	/**
 	 *	Constructor.
 	 *	@access		public
@@ -77,6 +81,8 @@ class Template
 	{
 		$this->env		= $env;
 		$this->helpers	= new Dictionary();
+		/** @var WebEnvironment $env */
+//		$this->view		= new View( $env );
 
 		if( NULL !== $this->env->getConfig()->get( 'path.templates' ) )
 			$this->pathTemplates	= $this->env->getConfig()->get( 'path.templates' );
@@ -190,8 +196,6 @@ class Template
 			throw new RuntimeException( 'Template "'.$filePath.'" is not existing', 311 );
 
 		/*  --  PREPARE DATA BY ASSIGNED AND ADDITIONAL  --  */
-		if( isset( $this->data['this' ] ) )
-			unset( $this->data['this'] );
 //		$content	= '';
 
 		//  new solution
@@ -202,6 +206,7 @@ class Template
 
 		//  old solution, extract to module UI_TemplateAbstraction
 		/*  --  LOAD TEMPLATE AND APPLY DATA  --  */
+
 		$content	= $this->realizeTemplate( $filePath, $this->data );								//
 		if( $this->renderContent )
 			$content	= Content::applyContentProcessors( $this->env, $this, $content );
@@ -242,6 +247,12 @@ class Template
 		return $this;
 	}
 
+	public function setView( View $view ): static
+	{
+		$this->view	= $view;
+		return $this;
+	}
+
 	//  --  PROTECTED  --  //
 
 	/**
@@ -266,6 +277,7 @@ class Template
 		$payload	= [
 			'filePath'	=> $filePath,
 			'data'			=> [
+				'view'		=> $this->view,
 				'env'		=> $this->env,
 				'config'	=> $this->env->getConfig(),
 				'helpers'	=> $this->helpers,
@@ -274,12 +286,13 @@ class Template
 		];
 		$payload['data']	= array_merge( $data, $payload['data'] );
 
+
 		ob_start();
 		$this->env->getCaptain()->callHook( 'View', 'realizeTemplate', $this, $payload );
 		$content	= $payload['content'];
 
 		if( '' === $content )																	//  no hook realized template
-			$content	= $this->realizeTemplateWithInclude( $filePath, $data );				//  realize with own strategy
+			$content	= $this->realizeTemplateWithInclude( $filePath, $data );			//  realize with own strategy
 
 		//  handle output buffer of template realization
 		$buffer	= (string) ob_get_clean();														//  get standard output buffer
@@ -303,7 +316,7 @@ class Template
 	{
 		$___templateUri	= $filePath;
 		extract( $data );																		//
-//		$view		= $___view		= $this;													//
+		$view		= $___view		= $this->view;													//
 		$env		= $___env		= $this->env;												//
 		$config		= $___config	= $this->env->getConfig();									//
 		$helpers	= $___helpers	= $this->helpers;											//

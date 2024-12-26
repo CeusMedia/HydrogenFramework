@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace CeusMedia\HydrogenFrameworkUnitTest\View\Helper;
 
 use CeusMedia\HydrogenFramework\Environment;
+use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
+use CeusMedia\HydrogenFramework\View;
 use CeusMedia\HydrogenFramework\View\Helper\Template as TemplateHelper;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
@@ -44,9 +46,32 @@ class TemplateTest extends TestCase
 
 	public function testRender(): void
 	{
+		$view	= new View( $this->createWebEnvironment() );
+		$view->addData( 'test', 'UnitTest' );
 		$this->helper->addData( 'test', 'UnitTest' );
 		$this->helper->setTemplateKey( 'test/test.php' );
+		$this->helper->setView( $view );
 		self::assertEquals( 'UnitTest', $this->helper->render() );
+	}
+
+	protected function createEnvironment(): Environment
+	{
+		$baseTestPath= dirname( __DIR__, 3 ).'/';
+		return new Environment( [
+			'pathApp'	=> '',
+			'uri'		=> $baseTestPath.'assets/app/',
+			'isTest'	=> TRUE,
+		] );
+	}
+
+	protected function createWebEnvironment(): WebEnvironment
+	{
+		$baseTestPath	= dirname( __DIR__, 3 ).'/';
+		return new WebEnvironment( [
+			'pathApp'	=> '',
+			'uri'		=> $baseTestPath.'assets/app/',
+			'isTest'	=> TRUE,
+		] );
 	}
 
 	/**
@@ -57,11 +82,7 @@ class TemplateTest extends TestCase
 	protected function setUp(): void
 	{
 		$this->baseTestPath	= dirname( __DIR__, 3 ).'/';
-		$this->env		= new Environment( [
-			'pathApp'	=> '',
-			'uri'		=> $this->baseTestPath.'assets/app/',
-			'isTest'	=> TRUE,
-		] );
+		$this->env		= $this->createEnvironment();
 		$this->helper	= new TemplateHelper( $this->env );
 	}
 }

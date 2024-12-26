@@ -107,7 +107,6 @@ class View
 		$this->html		= new HtmlElements();
 		$this->time		= new TimeConverter();
 		$this->helpers	= new Dictionary();
-		$this->addData( 'view', $this );
 
 		$env->getRuntime()->reach( 'View('.static::class.')::init done' );
 //		$this->env->getMessenger()->noteNotice( "View::Construct: ".get_class( $this ) );
@@ -329,9 +328,10 @@ class View
 	public function loadTemplateFile( string $fileName, array $data = [], bool $renderContent = TRUE ): string
 	{
 		$templateHelper	= new TemplateHelper( $this->env );
+		$templateHelper->setView( $this );
 		$templateHelper->setTemplateKey( $fileName );
 		$templateHelper->setRenderContent( $renderContent );
-		$templateHelper->setData( array_merge( $this->data, $data ) );
+		$templateHelper->setData( array_merge( $this->data, $data, ['view' => $this] ) );
 		/**
 		 * @var string $name
 		 * @var Helper $helper
