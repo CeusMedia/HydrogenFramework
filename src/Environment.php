@@ -197,6 +197,7 @@ class Environment implements ArrayAccess
 		if( !empty( static::$timezone ) )															//  a timezone has be set externally before
 			date_default_timezone_set( static::$timezone );											//  set this timezone
 
+		$this->session	= new Dictionary();
 		$this->initRuntime();																		//  setup runtime clock
 		$this->initConfiguration();																	//  setup configuration
 		$this->initLog();																			//  setup logger
@@ -454,9 +455,9 @@ class Environment implements ArrayAccess
 		return $resource;
 	}
 
-	public function getRequest(): HttpRequest|Dictionary|NULL
+	public function getRequest(): HttpRequest|Dictionary
 	{
-		return $this->request ?? NULL;
+		return $this->request ?? new Dictionary();
 	}
 
 	/**
@@ -469,9 +470,9 @@ class Environment implements ArrayAccess
 		return $resource;
 	}
 
-	public function getSession(): ?Dictionary
+	public function getSession(): Dictionary
 	{
-		return $this->session ?? NULL;
+		return $this->session;
 	}
 
 	/**

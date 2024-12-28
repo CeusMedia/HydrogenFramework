@@ -26,8 +26,12 @@
  */
 namespace CeusMedia\HydrogenFramework\Environment\Router;
 
+use CeusMedia\Common\Net\HTTP\Request as HttpRequest;
 use CeusMedia\HydrogenFramework\Environment;
 use CeusMedia\HydrogenFramework\Environment\RouterInterface;
+use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
+
+use RuntimeException;
 
 /**
  *	...
@@ -92,5 +96,22 @@ abstract class Abstraction implements RouterInterface
 		if( $fragmentId )
 			$uri	.= '#'.$fragmentId;
 		return $uri;
+	}
+
+	protected function getPathFromRequest(): array
+	{
+		if( !$this->env->has( 'request' ) )
+			throw new RuntimeException( 'Routing needs a registered request resource' );
+		/** @var HttpRequest $request */
+		$request	= $this->env->getRequest();
+
+		if( FALSE !== getEnv( 'REDIRECT_URL' ) && $request->has( '__path' ) )
+			self::$pathKey	= '__path';
+
+		$path	= $request->get( self::$pathKey, '' );
+		if( $this->env instanceof WebEnvironment )
+			if( $request instanceof HttpRequest )
+				$path	= $request->getFromSource( self::$pathKey, 'get' ) ?? '';
+		return [$request, trim( $path )];
 	}
 }

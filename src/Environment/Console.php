@@ -102,14 +102,9 @@ class Console extends Environment
 		], array_values( $additionalResources ) ), $keepAppAlive );									//  add additional resources and carry exit flag
 	}
 
-	public function getRequest(): ?ArgumentParser
+	public function getRequest(): ArgumentParser|Dictionary
 	{
-		return $this->request ?? NULL;
-	}
-
-	public function getSession(): ?Dictionary
-	{
-		return $this->session ?? NULL;
+		return $this->request ?? new Dictionary();
 	}
 
 	//  --  PROTECTED  --  //

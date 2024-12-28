@@ -46,31 +46,38 @@ class Single extends Abstraction implements RouterInterface
 	/**
 	 *	@return	void
 	 */
-	public function parseFromRequest()
+	public function parseFromRequest(): void
 	{
-		if( !$this->env->has( 'request' ) )
-			throw new RuntimeException( 'Routing needs a registered request resource' );
-		$request	= $this->env->getRequest();
-
-		if( $request->has( '__path' ) )
-			self::$pathKey	= '__path';
-
-		$path	= $request->get( self::$pathKey );
-		if( $this->env instanceof WebEnvironment )
-			if( $request instanceof HttpRequest )
-				$path		= $request->getFromSource( self::$pathKey, 'get' );
-		if( !trim( $path ) )
+		[$request, $path]	= $this->getPathFromRequest();
+		if( '' === $path )
 			return;
 
+		$facts	= self::parseFromPath( urldecode( $path ) );
+		foreach( ['controller', 'action', 'arguments'] as $key )
+			$request->set( '__'.$key, $facts->$key );
+	}
+
+	/**
+	 *	@param		string		$path
+	 *	@return		object{controller: string, action: string, arguments: array, counter: int}
+	 */
+	protected function parseFromPath( string $path ): object
+	{
+		$facts	= (object) [
+			'controller'	=> '',
+			'action'		=> '',
+			'arguments'		=> [],
+			'counter'		=> 0,
+		];
+
 		$parts	= explode( '/', $path );
-		$request->set( '__controller',	array_shift( $parts ) );
-		$request->set( '__action',		array_shift( $parts ) );
-		$arguments	= [];
+		$facts->controller	= array_shift( $parts );
+		$facts->action		= array_shift( $parts );
 		while( count( $parts ) ){
 			$part = trim( array_shift( $parts ) );
 			if( strlen( $part ) )
-				$arguments[]	= $part;
+				$facts->arguments[]	= $part;
 		}
-		$request->set( '__arguments', $arguments );
+		return $facts;
 	}
 }

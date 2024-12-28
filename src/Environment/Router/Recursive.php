@@ -26,14 +26,8 @@
  */
 namespace CeusMedia\HydrogenFramework\Environment\Router;
 
-use CeusMedia\Common\Net\HTTP\Request as HttpRequest;
 use CeusMedia\HydrogenFramework\Dispatcher\General;
 use CeusMedia\HydrogenFramework\Environment\RouterInterface;
-use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
-
-use RuntimeException;
-
-use function ucfirst;
 
 /**
  *	...
@@ -51,43 +45,62 @@ class Recursive extends Abstraction implements RouterInterface
 	 */
 	public function parseFromRequest(): void
 	{
-		if( !$this->env->has( 'request' ) )
-			throw new RuntimeException( 'Routing needs a registered request resource' );
+		[$request, $path]	= $this->getPathFromRequest();
+		if( '' === $path )
+			return;
 
-		$request	= $this->env->getRequest();
+		$facts	= self::parseFromPath( urldecode( $path ) );
+		foreach( ['controller', 'action', 'arguments'] as $key )
+			$request->set( '__'.$key, $facts->$key );
+		$this->counter	= $facts->counter;
 
-		if( FALSE !== getEnv( 'REDIRECT_URL' ) && $request->has( '__path' ) )
-			self::$pathKey	= '__path';
+/*		remark( "controller: ".$request->get( '__controller' ) );
+		remark( "action: ".$request->get( '__action' ) );
+		remark( "arguments: " );
+		print_m( $request->get( '__arguments' ) );
+		die;*/
 
-		$path	= $request->get( self::$pathKey, '' );
-		if( $this->env instanceof WebEnvironment )
-			if( $request instanceof HttpRequest )
-				$path	= $request->getFromSource( self::$pathKey, 'get' ) ?? '';
+		$message	= '%s: %s attempts to find controller for %s';
+		$this->env->getLog()?->log( 'info', vsprintf( $message, [
+			static::class,
+			$facts->counter,
+			$path
+		] ) );
+	}
 
-		$path	= urldecode( $path );
-		/** @var string $path */
-		$path	= preg_replace( '@^(.*)/?$@U', '\\1', trim( $path ) );
-		$parts	= explode( '/', $path );
-		$left	= $parts;
-		$right	= [];
-		$this->counter	= 0;
+	/**
+	 *	@param		string		$path
+	 *	@return		object{controller: string, action: string, arguments: array, counter: int}
+	 */
+	protected static function parseFromPath( string $path ): object
+	{
+		$facts	= (object) [
+			'controller'	=> '',
+			'action'		=> '',
+			'arguments'		=> [],
+			'counter'		=> 0,
+		];
+
+		$path	= preg_replace( '@^(.*)/?$@U', '\\1', trim( $path ) ) ?? '';	//  secure path
+		$parts	= explode( '/', $path );												//  split into parts
+		$left	= $parts;																		//  start with all parts
+		$right	= [];																			//  prepare list for arguments
 		if( '' !== trim( $path ) ){
 			while( count( $left ) ){
-				$class	= [];
-				$classNameVariations	= General::getClassNameVariationsByPath( join( '/', $left ), TRUE, FALSE );
+				$classNameVariations	= General::getClassNameVariationsByPath( join( '/', $left ), TRUE, FALSE, TRUE, TRUE );
 				foreach( $classNameVariations as $classNameVariation ){
 					$className	= 'Controller_'.$classNameVariation;
-					$this->counter++;
+					$facts->counter++;
 					if( !class_exists( $className ) )
 						continue;
 	//				remark( 'Controller Class: '.$className );
-					$request->set( '__controller', implode( '/', $left ) );
+					$facts->controller	= implode( '/', $left );
 					if( 0 !== count( $right ) ){
 						if( method_exists( $className, current( $right ) ) ){
 	//						remark( 'Controller Method: '.$right[0] );
-							$request->set( '__action', array_shift( $right ) );
+							$facts->action	= array_shift( $right ) ?? '';
 						}
-						$request->set( '__arguments', $right );
+						$facts->arguments	= $right;
 	//					if( $right )
 	//						remark( 'Arguments: '.implode( ', ', $right ) );
 					}
@@ -96,14 +109,10 @@ class Recursive extends Abstraction implements RouterInterface
 				array_unshift( $right, array_pop( $left ) ?? '_undefined' );
 			}
 		}
-		if( !$request->get( '__controller' ) )
+		if( '' === $facts->controller )
 			if( 0 !== count( $right ) )
-				$request->set( '__arguments', $right );
+				$facts->arguments	= $right;
 
-/*		remark( "controller: ".$request->get( '__controller' ) );
-		remark( "action: ".$request->get( '__action' ) );
-		remark( "arguments: " );
-		print_m( $request->get( '__arguments' ) );
-		die;*/
+		return $facts;
 	}
 }

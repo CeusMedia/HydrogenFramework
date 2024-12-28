@@ -95,9 +95,9 @@ class Language
 
 		if( $this->env->has( 'session' ) ){
 			$session	= $this->env->getSession();
-			$switchTo	= $this->env->getRequest()?->get( 'switchLanguageTo' );
+			$switchTo	= $this->env->getRequest()->get( 'switchLanguageTo' );
 			if( $switchTo && in_array( $switchTo, $this->languages ) ){
-				$session?->set( 'language', $switchTo );
+				$session->set( 'language', $switchTo );
 				if( !empty( $_SERVER['HTTP_REFERER'] ) ){
 					$referer = $_SERVER['HTTP_REFERER'];
 					if( !str_contains( $referer, 'switchLanguageTo' ) ){
@@ -106,7 +106,7 @@ class Language
 					}
 				}
 			}
-			if( $session?->get( 'language' ) )
+			if( $session->get( 'language' ) )
 				$language	= $session->get( 'language' );
 		}
 		$this->setLanguage( $language ?? '' );

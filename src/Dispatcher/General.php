@@ -74,8 +74,8 @@ class General
 	/** @var non-empty-string $pathDivider */
 	public static string $camelcaseDivider			= '_';
 
-	/** @var positive-int $maxPathPartLength */
-	public static int $maxPathPartLength			= 32;
+	/** @var int $maxPathPartLength */
+	public static int $maxPathPartLength			= 0;
 
 
 	public string $defaultController		= 'index';
@@ -94,12 +94,20 @@ class General
 	 *	@return		array<string>
 	 */
 
-	public static function getClassNameVariationsByPath( string $path, bool $allowUppercase = TRUE, bool $allowLowercase = TRUE, bool $allowCamelCase = TRUE ): array
+	/**
+	 *	@param		string		$path				Path
+	 *	@param		bool		$allowUppercase		Flag: allow uppercase variants, default: yes
+	 *	@param		bool		$allowLowercase		Flag: allow lowercase variants, default: yes
+	 *	@param		bool		$allowCamelCase		Flag: use camel case instead of ucfirst, default: yes
+	 *	@param		bool		$allowNumbers		Flag: allow integer path parts or skip otherwise, default: no
+	 *	@return		array		List if possible class names
+	 */
+	public static function getClassNameVariationsByPath( string $path, bool $allowUppercase = TRUE, bool $allowLowercase = TRUE, bool $allowCamelCase = TRUE, bool $allowNumbers = FALSE ): array
 	{
 		$parts  = explode( self::$pathDivider, trim( $path ) );
 		if( 1 === count( $parts ) )
-			return self::getClassNameVariationsByPathLevel1( $path, $allowUppercase, $allowLowercase, $allowCamelCase );
-		return self::getClassNameVariationsByPathLevelX( $parts, $allowUppercase, $allowLowercase, $allowCamelCase );
+			return self::getClassNameVariationsByPathLevel1( $path, $allowUppercase, $allowLowercase, $allowCamelCase, $allowNumbers );
+		return self::getClassNameVariationsByPathLevelX( $parts, $allowUppercase, $allowLowercase, $allowCamelCase, $allowNumbers );
 	}
 
 	/**
@@ -160,12 +168,12 @@ class General
 		$runtime	= $this->env->getRuntime();
 		$runtime->reach( 'GeneralDispatcher::dispatch' );
 		do{
-			$this->realizeCall();
+			$this->setDefaults();
 			$this->checkForLoop();
 
 			$controller	= trim( $this->request->get( '__controller' ) );
 			$action		= trim( $this->request->get( '__action' ) );
-			$arguments	= $this->request->get( '__arguments' );
+			$arguments	= $this->request->get( '__arguments', [] );
 
 			$controllerInstanceOrFirstGuess	= static::getPrefixedClassInstanceByPathOrFirstClassNameGuess(
 				$this->env,
@@ -211,13 +219,34 @@ class General
 	//  --  PROTECTED  --  //
 
 
-	protected static function getClassNameVariationsByPathLevel1( string $path, bool $allowUppercase = TRUE, bool $allowLowercase = TRUE, bool $allowCamelCase = TRUE ): array
+	/**
+	 *	@param		Environment		$env
+	 *	@param		string			$className
+	 *	@return		?object
+	 *	@throws		ReflectionException
+	 */
+	protected static function getClassInstanceIfAvailable( Environment $env, string $className ): ?object
+	{
+		if( !class_exists( $className ) )
+			return NULL;
+		return ObjectFactory::createObject( $className, [$env] );
+	}
+
+	/**
+	 *	@param		string		$path				Path
+	 *	@param		bool		$allowUppercase		Flag: allow uppercase variants, default: yes
+	 *	@param		bool		$allowLowercase		Flag: allow lowercase variants, default: yes
+	 *	@param		bool		$allowCamelCase		Flag: use camel case instead of ucfirst, default: yes
+	 *	@param		bool		$allowNumbers		Flag: allow integer path parts or skip otherwise, default: no
+	 *	@return		array		List if possible class names
+	 */
+	protected static function getClassNameVariationsByPathLevel1( string $path, bool $allowUppercase = TRUE, bool $allowLowercase = TRUE, bool $allowCamelCase = TRUE, bool $allowNumbers = FALSE ): array
 	{
 		if( '' === trim( $path ) )
 			return [];
-		if( preg_match( '/^\d+$/', $path ) )
+		if( !$allowNumbers && preg_match( '/^\d+$/', $path ) )
 			return [];
-		if( strlen( $path ) > self::$maxPathPartLength )
+		if( 0 !== self::$maxPathPartLength && strlen( $path ) > self::$maxPathPartLength )
 			return [];
 
 		$list	= [];
@@ -234,23 +263,33 @@ class General
 		return array_unique( $list );
 	}
 
-	protected static function getClassNameVariationsByPathLevelX( array $parts, bool $allowUppercase = TRUE, bool $allowLowercase = TRUE, bool $allowCamelCase = TRUE ): array
+	/**
+	 *	@param		array		$parts				Path parts
+	 *	@param		bool		$allowUppercase		Flag: allow uppercase variants, default: yes
+	 *	@param		bool		$allowLowercase		Flag: allow lowercase variants, default: yes
+	 *	@param		bool		$allowCamelCase		Flag: use camel case instead of ucfirst, default: yes
+	 *	@param		bool		$allowNumbers		Flag: allow integer path parts or skip otherwise, default: no
+	 *	@return		array		List if possible class names
+	 */
+	protected static function getClassNameVariationsByPathLevelX( array $parts, bool $allowUppercase = TRUE, bool $allowLowercase = TRUE, bool $allowCamelCase = TRUE, bool $allowNumbers = FALSE ): array
 	{
 		$prefix = trim( array_shift( $parts ) );
-		if( preg_match( '/^\d+$/', $prefix ) )
+		if( !$allowNumbers && preg_match( '/^\d+$/', $prefix ) )
 			return [];
 
 		$prefixVariations	= self::getClassNameVariationsByPathLevel1(
 			$prefix,
 			$allowUppercase,
 			$allowLowercase,
-			$allowCamelCase
+			$allowCamelCase,
+			$allowNumbers
 		);
 		$classVariations    = self::getClassNameVariationsByPath(
 			join( self::$pathDivider, $parts ),
 			$allowUppercase,
 			$allowLowercase,
-			$allowCamelCase
+			$allowCamelCase,
+			$allowNumbers
 		);
 		if( [] === $classVariations )
 			return $prefixVariations;
@@ -341,7 +380,7 @@ class General
 	/**
 	 *	@return		void
 	 */
-	protected function realizeCall(): void
+	protected function setDefaults(): void
 	{
 		if( '' === trim( $this->request->get( '__controller', '' ) ) )
 			$this->request->set( '__controller', $this->defaultController );
@@ -349,20 +388,5 @@ class General
 			$this->request->set( '__action', $this->defaultAction );
 		if( [] === $this->request->get( '__arguments', [] ) )
 			$this->request->set( '__arguments', $this->defaultArguments );
-	}
-
-	//  --  NEW DISPATCH STRATEGY  --  //
-
-	/**
-	 *	@param		Environment		$env
-	 *	@param		string			$className
-	 *	@return		?object
-	 *	@throws		ReflectionException
-	 */
-	protected static function getClassInstanceIfAvailable( Environment $env, string $className ): ?object
-	{
-		if( !class_exists( $className ) )
-			return NULL;
-		return ObjectFactory::createObject( $className, [$env] );
 	}
 }

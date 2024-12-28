@@ -360,7 +360,7 @@ class LogTest extends TestCase
 
 	public function callbackCustomerCallbackStrategy( $payload )
 	{
-		$filePath	= $this->env->path.$this->env->getPath( 'logs' ).'custom.log';
+		$filePath	= $this->env->uri.$this->env->getPath( 'logs' ).'custom.log';
 		$data		= (object) $payload;
 		$entryLine	= join( ' ', [
 			date( $data->datetime ),
@@ -389,7 +389,7 @@ class TestLogHook extends Hook
 
 	public function onLog(): void
 	{
-		$filePath	= $this->env->path.$this->env->getPath( 'logs' ).'hook.log';
+		$filePath	= $this->env->uri.$this->env->getPath( 'logs' ).'hook.log';
 		$data		= (object) $this->payload;
 		$entryLine	= join( ' ', [
 				date( $data->datetime ),
@@ -401,7 +401,7 @@ class TestLogHook extends Hook
 
 	public function onLogException(): void
 	{
-		$filePath	= $this->env->path.$this->env->getPath( 'logs' ).'hook.exception.log';
+		$filePath	= $this->env->uri.$this->env->getPath( 'logs' ).'hook.exception.log';
 		$data		= (object) $this->payload;
 		$entryLine	= join( ' ', [
 				date( $data->datetime ),

@@ -31,9 +31,10 @@ namespace CeusMedia\HydrogenFramework\Environment;
 use CeusMedia\Common\ADT\Collection\Dictionary;
 use CeusMedia\Common\Loader;
 use CeusMedia\HydrogenFramework\Environment;
-use CeusMedia\HydrogenFramework\Environment\Exception as EnvironmentException;
 use CeusMedia\HydrogenFramework\Environment\Resource\Messenger as BaseMessenger;
 use CeusMedia\HydrogenFramework\Environment\Resource\Remote\Messenger;
+use Psr\SimpleCache\InvalidArgumentException as SimpleCacheInvalidArgumentExceptionAlias;
+use ReflectionException;
 
 /**
  *	Setup for Resource Environment for Hydrogen Applications.
@@ -63,7 +64,8 @@ class Remote extends Environment
 	 *	@access		public
 	 *	@param		array		$options		Map of environment options
 	 *	@return		void
-	 *	@throws		EnvironmentException
+	 *	@throws		ReflectionException
+	 *	@throws		SimpleCacheInvalidArgumentExceptionAlias
 	 */
 	public function __construct( array $options = [] )
 	{
@@ -111,45 +113,45 @@ class Remote extends Environment
 	/**
 	 *	Returns Request Object.
 	 *	@access		public
-	 *	@return		?Dictionary
+	 *	@return		Dictionary
 	 */
-	public function getRequest(): ?Dictionary
+	public function getRequest(): Dictionary
 	{
-		return $this->request ?? NULL;
+		return $this->request ?? new Dictionary();
 	}
 
 	/**
 	 *	Returns Session Object.
 	 *	@access		public
-	 *	@return		?Dictionary
+	 *	@return		Dictionary
 	 */
-	public function getSession(): ?Dictionary
+	public function getSession(): Dictionary
 	{
-		return $this->session ?? NULL;
+		return $this->session;
 	}
 
 	/**
-	 * @return self
+	 * @return static
 	 */
-	protected function initMessenger(): self
+	protected function initMessenger(): static
 	{
 		$this->messenger	= new Messenger( $this );
 		return $this;
 	}
 
 	/**
-	 * @return self
+	 * @return static
 	 */
-	protected function initRequest(): self
+	protected function initRequest(): static
 	{
 		$this->request	= new Dictionary();
 		return $this;
 	}
 
 	/**
-	 * @return self
+	 * @return static
 	 */
-	protected function initSession(): self
+	protected function initSession(): static
 	{
 		$this->session	= new Dictionary();
 		return $this;
