@@ -32,6 +32,7 @@ use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
 use CeusMedia\Common\Alg\Obj\MethodFactory as MethodFactory;
 use CeusMedia\Common\Alg\Text\CamelCase;
 use CeusMedia\Common\Net\HTTP\Request as HttpRequest;
+use CeusMedia\Common\UI\OutputBuffer;
 use CeusMedia\HydrogenFramework\Environment;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 use CeusMedia\HydrogenFramework\Controller;
@@ -160,10 +161,11 @@ class General
 	 *	Tries to create controller instance and call controller action, given by request URL.
 	 *	Returns rendering result of view action.
 	 *	@access		public
+	 *	@param		?OutputBuffer		$devBuffer
 	 *	@return		string
 	 *	@throws		ReflectionException
 	 */
-	public function dispatch(): string
+	public function dispatch( ?OutputBuffer $devBuffer = NULL ): string
 	{
 		$runtime	= $this->env->getRuntime();
 		$runtime->reach( 'GeneralDispatcher::dispatch' );
@@ -189,12 +191,14 @@ class General
 				throw new RuntimeException( $message, 201 );											// break with internal error
 			}
 			$instance	= $controllerInstanceOrFirstGuess;
-			if( !$instance instanceof Controller && !$instance instanceof Controller\Ajax )
-				throw new RuntimeException(
-					sprintf(
-						'Controller class "%s" is not a Hydrogen controller',
-						$instance::class
-					), 301 );
+			if( !$instance instanceof Controller\Web &&
+				!$instance instanceof Controller\Api &&
+				!$instance instanceof Controller\Ajax )
+				throw new RuntimeException( sprintf(
+					'Controller class "%s" is not a Hydrogen controller',
+					$instance::class
+				), 301 );
+
 			$runtime->reach( 'GeneralDispatcher::dispatch: factorized controller' );
 
 			$this->checkClassAction( $instance, $action );
@@ -202,17 +206,21 @@ class General
 				$this->checkClassActionArguments( $instance, $action, $arguments );
 			$runtime->reach( 'GeneralDispatcher::dispatch: check@'.$controller.'/'.$action );
 
+			if( $devBuffer )
+				$instance->setDevBuffer( $devBuffer );
 			$factory	= new MethodFactory( $instance );											// create method factory on controller instance
 			$factory->callMethod( $action, $arguments );											// call action method in controller class with arguments
 			$this->noteLastCall( $instance );
 		}
 		while( $instance->redirect ?? FALSE );
 		$runtime->reach( 'GeneralDispatcher::dispatch: done' );
-		if( $instance instanceof AjaxController )
-			return '';
-		$view	= $instance->renderView();
-		$runtime->reach( 'GeneralDispatcher::dispatch: view' );
-		return $view;
+
+		if( $instance instanceof Controller\Web ){
+			$view	= $instance->renderView();
+			$runtime->reach( 'GeneralDispatcher::dispatch: view' );
+			return $view;
+		}
+		return '';
 	}
 
 

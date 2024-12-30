@@ -1,9 +1,10 @@
 <?php
 
-use CeusMedia\Common\Alg\ID;
-use CeusMedia\HydrogenFramework\Logic;
 
-class Logic_Example extends Logic
+use CeusMedia\Common\Alg\ID;
+use CeusMedia\HydrogenFramework\Logic\Capsuled as CapsuledLogic;
+
+class Logic_Capsuled extends CapsuledLogic
 {
 	public string $uuid;
 

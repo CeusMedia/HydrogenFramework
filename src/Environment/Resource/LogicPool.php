@@ -14,9 +14,10 @@ namespace CeusMedia\HydrogenFramework\Environment\Resource;
 use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
 use CeusMedia\Common\Alg\Text\CamelCase as CamelCase;
 use CeusMedia\HydrogenFramework\Environment;
-use CeusMedia\HydrogenFramework\Logic;
-//use CeusMedia\HydrogenFramework\Logic\Multiple as MultipleLogic;
-//use CeusMedia\HydrogenFramework\Logic\Singleton as SingletonLogic;
+use CeusMedia\HydrogenFramework\Environment\Resource\Logic as LogicResource;
+use CeusMedia\HydrogenFramework\Logic\Abstraction as LogicAbstraction;
+use CeusMedia\HydrogenFramework\Logic\Capsuled as CapsuledLogic;
+use CeusMedia\HydrogenFramework\Logic\Shared as SharedLogic;
 use DomainException;
 use InvalidArgumentException;
 use ReflectionException;
@@ -106,7 +107,7 @@ class LogicPool
 	 *	@param		string|object	$logicClassOrObject	Name of logic class to add
 	 *	@return		self
 	 */
-	public function add( string $key, $logicClassOrObject ): self
+	public function add( string $key, string|object $logicClassOrObject ): self
 	{
 		$this->set( $key, $logicClassOrObject, FALSE );
 		return $this;
@@ -116,34 +117,30 @@ class LogicPool
 	 *	Returns a stored logic object by its pool key
 	 *	@access		public
 	 *	@param		string			$key			Key of logic object
-	 *	@return		object
+	 *	@return		CapsuledLogic|SharedLogic
 	 *	@throws		RuntimeException				if no class or object has been added for given key
 	 *	@throws		DomainException					if class for given key is not existing
 	 *	@throws		ReflectionException
 	 */
-	public function get( string $key ): object
+	public function get( string $key ): CapsuledLogic|SharedLogic|LogicResource
 	{
-		$className = NULL;
-		if( !$this->has( $key ) ){
-			$className		= $this->getClassNameFromKey( $key );
-			if( class_exists( $className ) )
-				$this->add( $key, $className );
-		}
-		if( !$this->has( $key ) ){
-			$message	= 'No logic class/object available for key "'.$key.'"';
-			if( $className !== NULL )
-				$message	= 'No logic class/object available for key "'.$key.'" (classname: '.$className.')';
-			throw new RuntimeException( $message );
+		if( $this->isInstantiated( $key ) ){
+			/** @var CapsuledLogic|SharedLogic $instance */
+			$instance	= $this->pool[$key];
+			return $instance;
 		}
 
-		if( !is_object( $this->pool[$key] ) ){
-			$className	= $this->pool[$key];
-			if( !class_exists( $className ) )
-				throw new DomainException( 'No logic class found for "'.$className.'"' );
-			$this->set( $key, $this->createInstance( $className ) );
-		}
-		/** @var object $instance */
-		$instance	= $this->pool[$key];
+		$className = NULL;
+		if( !$this->has( $key ) )
+			$this->add( $key, $this->getClassNameFromKey( $key ) );
+
+		/** @var string $className */
+		$className	= $this->pool[$key];
+		if( !class_exists( $className ) )
+			throw new DomainException( 'No logic class found for "'.$className.'"' );
+		$instance	= $this->createInstance( $className );
+		if( $instance instanceof SharedLogic )
+			$this->set( $key, $instance );
 		return $instance;
 	}
 
@@ -208,7 +205,7 @@ class LogicPool
 	 *	@return		void
 	 *	@throws		RuntimeException				if no logic is stored for pool key
 	 */
-	public function remove( string $key )
+	public function remove( string $key ): void
 	{
 		if( !$this->has( $key ) )
 			throw new RuntimeException( 'No logic "'.$key.'" available' );
@@ -225,12 +222,15 @@ class LogicPool
 	 *	@throws		RuntimeException					if key is already existing in pool and overriding disabled
 	 *	@throws		InvalidArgumentException			if logic component is neither an instance nor a string
 	 */
-	public function set( string $key, string|object $logicClassOrObject, bool $override = TRUE )
+	public function set( string $key, string|object $logicClassOrObject, bool $override = TRUE ): void
 	{
 		if( $this->has( $key ) && !$override )
 			throw new RuntimeException( 'Logic "'.$key.'" is already in logic pool' );
-		if( !is_string( $logicClassOrObject ) && !is_object( $logicClassOrObject ) )
-			throw new InvalidArgumentException( 'Given logic must be either a logic class or a logic object ('.gettype( $logicClassOrObject ).' given)' );
+		if( is_object( $logicClassOrObject ) ){
+			if( !$logicClassOrObject instanceof LogicAbstraction && !$logicClassOrObject instanceof LogicResource )
+				throw new InvalidArgumentException( 'Given logic is not a framework logic (use shared or capsuled logic)' );
+		}
+
 		$this->pool[$key]	= $logicClassOrObject;
 	}
 
@@ -240,24 +240,25 @@ class LogicPool
 	 *	Creates instance of logic class.
 	 *	@access		protected
 	 *	@param		string			$className			Name of class to create instance for
-	 *	@return		object
+	 *	@return		CapsuledLogic|SharedLogic|LogicResource
 	 *	@throws		InvalidArgumentException			if class is not a subclass of CeusMedia\HydrogenFramework\Logic
 	 *	@throws		ReflectionException
 	 */
-	protected function createInstance( string $className ): object
+	protected function createInstance( string $className ): CapsuledLogic|SharedLogic|LogicResource
 	{
-		if( is_subclass_of( $className, Logic::class ) )
-			return ObjectFactory::createObject( $className, [$this->env] );
+		if( is_subclass_of( $className, LogicAbstraction::class ) ){
+			/** @var CapsuledLogic|SharedLogic $instance */
+			$instance	= ObjectFactory::createObject( $className, [$this->env] );
+			return $instance;
+		}
 
-		// @todo activate this line after deprecation of old logic classes
-//		throw new InvalidArgumentException( 'Given class "'.$className.'" is not a valid logic class' );
-		$arguments	= [$this->env];
-//		if( is_subclass_of( $className, SingletonLogic::class ) )
-//			if( is_callable( [$className, 'getInstance'] ) )
-//				return call_user_func_array( [$className, 'getInstance'], $arguments );
-//		if( is_subclass_of( $className, MultipleLogic::class ) )
-//			return ObjectFactory::createObject( $className, $arguments );
-		return ObjectFactory::createObject( $className, $arguments );
+		if( is_subclass_of( $className, LogicResource::class ) ){
+			/** @var LogicResource $instance */
+			$instance	= ObjectFactory::createObject( $className, [$this->env] );
+			return $instance;
+		}
+
+		throw new InvalidArgumentException( 'Given class "'.$className.'" is not a valid logic class' );
 	}
 
 	/**

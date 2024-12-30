@@ -183,7 +183,7 @@ class JavaScript
 	 *	@static
 	 *	@access		public
 	 *	@param		Environment		$env
-	 *	@return		self						Single instance of this Singleton class
+	 *	@return		self						Instance of this capsuled class
 	 */
 	public static function getInstance( Environment $env ): self
 	{

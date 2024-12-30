@@ -66,11 +66,9 @@ abstract class WebAbstraction implements ApplicationInterface
 	 */
 	public function __construct( ?Environment $env = NULL )
 	{
-		if( NULL === $env ){
-			$env	= ObjectFactory::createObject( static::$classEnvironment );
-		}
-
 		/** @var WebEnvironment $env */
+		$env ?? ObjectFactory::createObject( static::$classEnvironment );
+
 		$this->env	= $env;
 
 		if( static::$modulesNeeded )																//  needed modules are defined
@@ -135,6 +133,7 @@ abstract class WebAbstraction implements ApplicationInterface
 	 *	@param		string		$default		Master template file, default: master.php
 	 *	@param		string		$hookEvent		default: getMasterTemplate
 	 *	@return		string
+	 *	@throws		ReflectionException
 	 */
 	protected function realizeMasterOrErrorTemplateFile( string $default, string $hookEvent ): string
 	{
