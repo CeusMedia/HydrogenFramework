@@ -6,6 +6,7 @@ namespace CeusMedia\HydrogenFramework\Controller;
 use CeusMedia\Common\ADT\Collection\Dictionary;
 use CeusMedia\Common\Alg\Text\CamelCase;
 use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
+use CeusMedia\Common\UI\OutputBuffer;
 use CeusMedia\HydrogenFramework\Environment;
 use CeusMedia\HydrogenFramework\Logic;
 use CeusMedia\HydrogenFramework\Model;
@@ -43,6 +44,14 @@ abstract class Abstraction
 
 	/**	@var	Dictionary					$moduleConfig	Map of module configuration pairs */
 	protected Dictionary $moduleConfig;
+
+	protected ?OutputBuffer $devBuffer		= NULL;
+
+	public function setDevBuffer( OutputBuffer $buffer ): static
+	{
+		$this->devBuffer	= $buffer;
+		return $this;
+	}
 
 	/**
 	 *	Set activity of logging of restarts.
@@ -102,7 +111,7 @@ abstract class Abstraction
 	 */
 	protected function getLogic( string $key ): Logic
 	{
-//		if( is_null( $key ) || !strlen( trim( $key ) ) )
+//		if( !strlen( trim( $key ) ) )
 //			return $this->env->getLogic();
 		if( !isset( $this->env ) || !$this->env instanceof Environment )
 			throw new RuntimeException( 'No environment with logic pool available' );

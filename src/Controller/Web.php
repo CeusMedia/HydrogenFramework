@@ -242,55 +242,6 @@ abstract class Web extends Abstraction
 	}
 
 	/**
-	 *	Tries to find logic class for short logic key and returns instance.
-	 *	This protected method can be used within your custom controller to load logic classes.
-	 *	Example: $this->getLogic( 'mailGroupMember' ) for instance of class 'Logic_Mail_Group_Member'
-	 *
-	 *	If no short logic key is given, the logic pool resource of environment will be returned.
-	 *	So, you can use $this->getLogic() as shortcut for $this->env->getLogic().
-	 *
-	 *	@access		protected
-	 *	@param		string		$key		Key for logic class (ex: 'mailGroupMember' for 'Logic_Mail_Group_Member')
-	 *	@return		Logic					Logic instance or logic pool if no key given
-	 *	@throws		RuntimeException		if no logic class could be found for given short logic key
-	 *	@throws		DomainException
-	 *	@throws		ReflectionException
-	 */
-	protected function getLogic( string $key ): Logic
-	{
-//		if( is_null( $key ) || !strlen( trim( $key ) ) )
-//			return $this->env->getLogic();
-		/** @var Logic $logic */
-		$logic	= $this->env->getLogic()->get( $key );
-		return $logic;
-	}
-
-	/**
-	 *	Tries to find model class for short model key and returns instance.
-	 *	@access		protected
-	 *	@param		string		$key		Key for model class (eG. 'mailGroupMember' for 'Model_Mail_Group_Member')
-	 *	@return		Model					Model instance
-	 *	@throws		RuntimeException		if no model class could be found for given short model key
-	 *	@throws		ReflectionException
-	 *	@todo		create model pool environment resource and apply to created shared single instances instead of new instances
-	 *	@see		duplicate code with Logic::getModel
-	 */
-	protected function getModel( string $key ): Model
-	{
-		if( preg_match( '/^[A-Z][A-Za-z0-9_]+$/', $key ) )
-			$className	= self::$prefixModel.$key;
-		else{
-			$classNameWords	= ucwords( CamelCase::decode( $key ) );
-			$className		= str_replace( ' ', '_', 'Model '.$classNameWords );
-		}
-		if( !class_exists( $className ) )
-			throw new RuntimeException( 'Model class "'.$className.'" not found' );
-		/** @var Model $model */
-		$model	= ObjectFactory::createObject( $className, [$this->env] );
-		return $model;
-	}
-
-	/**
 	 *	Loads View Class of called Controller.
 	 *	@access		protected
 	 *	@param		string|NULL		$section	Section in locale file
@@ -312,6 +263,7 @@ abstract class Web extends Abstraction
 	 *	@param		int|null		$httpStatusCode
 	 *	@return		void
 	 *	@throws		JsonException
+	 *	@todo		add deprecation log entry
 	 */
 	protected function handleJsonResponse(string|bool $status, mixed $data, ?int $httpStatusCode = NULL ): void
 	{
@@ -345,6 +297,7 @@ abstract class Web extends Abstraction
 	 *	@param		int|null		$httpStatusCode
 	 *	@return		void
 	 *	@throws		JsonException
+	 *	@todo		add deprecation log entry
 	 */
 	protected function handleJsonErrorResponse( mixed $data, ?int $httpStatusCode = NULL ): void
 	{

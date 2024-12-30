@@ -30,6 +30,7 @@ namespace CeusMedia\HydrogenFramework\Application\Web;
 
 use CeusMedia\Common\Net\HTTP\Header\Field as HttpHeaderField;
 use CeusMedia\Common\UI\HTML\Exception\Page as HtmlExceptionPage;
+use CeusMedia\Common\UI\OutputBuffer;
 use CeusMedia\HydrogenFramework\ApplicationInterface;
 use CeusMedia\HydrogenFramework\Application\WebAbstraction;
 use CeusMedia\HydrogenFramework\Dispatcher\General as GeneralDispatcher;
@@ -54,6 +55,8 @@ class Site extends WebAbstraction implements ApplicationInterface
 	/**	@var		string			$content			Collected Content to respond */
 	protected string $content		= '';
 
+	protected ?OutputBuffer	$devBuffer	= NULL;
+
 	/**
 	 *	General main application method.
 	 *	You can copy and modify this method in your application to handle exceptions your way.
@@ -63,6 +66,8 @@ class Site extends WebAbstraction implements ApplicationInterface
 	 */
 	public function run(): ?int
 	{
+		$this->devBuffer	= new OutputBuffer();
+
 		$displayErrors	= $this->env->getConfig()->get( 'system.display.errors' );				//  get error mode from config
 		$displayErrors	= is_null( $displayErrors ) || $displayErrors;								//  if not set: enable error display by default
 		error_reporting( $displayErrors ? E_ALL : 0 );									//  set error reporting
@@ -107,7 +112,7 @@ class Site extends WebAbstraction implements ApplicationInterface
 				$dispatcher->defaultController	= $defaultController;
 			if( $defaultAction )
 				$dispatcher->defaultAction		= $defaultAction;
-			$output	= $dispatcher->dispatch();														//  get requested content
+			$output	= $dispatcher->dispatch( $this->devBuffer );														//  get requested content
 			$this->setViewComponents( array(														//  note for main template
 				'controller'	=> $request->get( '__controller' ),							//  called controller
 				'action'		=> $request->get( '__action' )									//  called action
@@ -164,7 +169,6 @@ class Site extends WebAbstraction implements ApplicationInterface
 	 */
 	protected function main(): string
 	{
-		ob_start();
 		$request	= $this->env->getRequest();
 
 		$data		= [
@@ -181,32 +185,35 @@ class Site extends WebAbstraction implements ApplicationInterface
 		}
 		try{
 			$content	= $this->control();															//  dispatch and run request
-			if( $request->isAjax() || $request->has( '__contentOnly' ) )							//  this is an AJAX request
+			if( $request->isAjax() || $request->has( '__contentOnly' ) )						//  this is an AJAX request
 				return $content;																	//  deliver content only
 
 			$data['content']	= $content;															//  rendered response page view content
-			$templateFile	= 'master.php';
-			$templateHook	= 'getMasterTemplate';
+			$templateFile		= 'master.php';
+			$templateHook		= 'getMasterTemplate';
 		}
 		catch( \Throwable $e ){
 			$this->env->getLog()?->logException( $e, $this );
-			$data['e']		= $e;
-			$templateFile	= 'error.php';
-			$templateHook	= 'getErrorTemplate';
+			$data['e']			= $e;
+			$templateFile		= 'error.php';
+			$templateHook		= 'getErrorTemplate';
 		}
-		$data	= array_merge( $data, [
-			'runtime'		=> $this->env->getRuntime(),										//  system clock for performance measure
-			'clock'			=> $this->env->getRuntime(),										//  legacy: alias for runtime @todo remove
-			'dev'			=> ob_get_clean(),													//  warnings, notices or development messages
-		] );
+
 		if( $this->env->has( 'database' ) ){													//  database support is available
 			/** @var PDO $database */
 			$database	= $this->env->getDatabase();
-			$data['dbQueries']		= $database->numberExecutes;								//  note number of SQL queries executed
-			$data['dbStatements']	= $database->numberStatements;								//  note number of SQL statements sent
+			$data['dbQueries']		= $database->numberExecutes;									//  note number of SQL queries executed
+			$data['dbStatements']	= $database->numberStatements;									//  note number of SQL statements sent
 		}
-		$this->setViewComponents( $data );														//  set up information resources for main template
-		return $this->view( $templateFile, $templateHook );										//  render and return main template to constructor
+
+		$this->setViewComponents( array_merge( $data, [												//  set up information resources for main template
+			'runtime'		=> $this->env->getRuntime(),											//  system clock for performance measure
+			'clock'			=> $this->env->getRuntime(),											//  legacy: alias for runtime @todo remove
+			'dev'			=> $this->devBuffer->get(),													//  warnings, notices or development messages
+		] ) );
+		$this->devBuffer->close();
+
+		return $this->view( $templateFile, $templateHook );											//  render and return main template to constructor
 	}
 
 	/**
@@ -220,7 +227,10 @@ class Site extends WebAbstraction implements ApplicationInterface
 	protected function respond( string $body, array $headers = [] ): object
 	{
 		$response	= $this->env->getResponse();
-		$body		= ob_get_clean().$body;
+		if( NULL !== $this->devBuffer && $this->devBuffer->isOpen() ){
+			$body	= $this->devBuffer->get().$body;
+			$this->devBuffer->close();
+		}
 		if( $body )
 			$response->setBody( $body );
 

@@ -12,6 +12,8 @@ use CeusMedia\Common\Net\HTTP\PartitionSession;
 use CeusMedia\Common\Net\HTTP\Request as HttpRequest;
 use CeusMedia\Common\Net\HTTP\Response as HttpResponse;
 use CeusMedia\Common\Net\HTTP\Response\Sender as HttpResponseSender;
+use CeusMedia\Common\UI\OutputBuffer;
+use CeusMedia\Common\XML\Element;
 use CeusMedia\HydrogenFramework\Environment as Environment;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 use Exception;
@@ -23,7 +25,19 @@ use Throwable;
  */
 abstract class Ajax extends Abstraction
 {
+	const RESPONSE_STRATEGY_DEFAULT		= 0;
+	const RESPONSE_STRATEGY_CALLBACK	= 1;
+
+	const RESPONSE_FORMAT_XML			= 0;
+	const RESPONSE_FORMAT_JSON			= 1;
+
 	public static array $supportedCompressions	= ['gzip', 'deflate'];
+
+	public static array $responseCallback			= [];
+
+	public static int $responseStrategy				= self::RESPONSE_STRATEGY_DEFAULT;
+
+	public static int $responseFormat				= self::RESPONSE_FORMAT_JSON;
 
 	protected WebEnvironment $env;
 
@@ -38,6 +52,13 @@ abstract class Ajax extends Abstraction
 	protected bool $exitAfterwards				= TRUE;
 
 	protected bool $sendLengthHeader			= FALSE;
+
+	public static function setResponseStrategy( int $strategy, mixed $callback = NULL ): void
+	{
+		static::$responseStrategy	= $strategy;
+		if( static::RESPONSE_STRATEGY_CALLBACK === $strategy )
+			static::$responseCallback	= $callback;
+	}
 
 	/**
 	 *	Constructor.
@@ -78,9 +99,56 @@ abstract class Ajax extends Abstraction
 	 *	Please note any throwable exception!
 	 *	@access		protected
 	 *	@return		void
+	 *	@codeCoverageIgnore
 	 */
 	protected function __onInit()
 	{
+	}
+
+	protected function renderResponseBody( array $response ): string
+	{
+		return match( self::$responseFormat ){
+			static::RESPONSE_FORMAT_JSON	=> json_encode( $response, JSON_THROW_ON_ERROR ),
+			default							=> $this->transformRecursiveArrayToXmlString( $response ),
+		};
+	}
+
+	/**
+	 *	Sends prepared response string.
+	 *	Exits afterward, if enabled (default: yes).
+	 *
+	 *	ATTENTION:
+	 *	This is the general method which is called by all other respond methods.
+	 *	Please try to use respondData, respondError and respondException instead.
+	 *
+	 *	@access		protected
+	 *	@param		string			$content		Stringified/serialized content to send
+	 *	@param		integer|NULL	$statusCode		HTTP status code of response
+	 *	@param		string|NULL		$mimeType		MIME type to send (default: defaultMimeType)
+	 *	@return		integer			Number of sent bytes, if exitAfterwards is disabled (default: no)
+	 */
+	protected function respond( string $content, int $statusCode = NULL, string $mimeType = NULL ): int
+	{
+		$statusCode	??= 200;
+		$mimeType	??= match( self::$responseFormat ){
+			static::RESPONSE_FORMAT_JSON	=> 'application/json',//'text/json',
+			default							=> 'application/xml',
+		};
+
+		$response	= clone( $this->response );
+		$response->setHeader( 'Content-Type', $mimeType );
+		$response->setBody( $content )->setStatus( $statusCode );
+
+		if( NULL !== $this->devBuffer && $this->devBuffer->isOpen() ){
+			if( $this->devBuffer->has() )
+				$response->addHeaderPair( 'X-Ajax-Dev', base64_encode( trim( $this->devBuffer->get() ) ) );
+			$this->devBuffer->close();
+		}
+
+		return match( static::$responseStrategy ){
+			static::RESPONSE_STRATEGY_CALLBACK	=> call_user_func( static::$responseCallback, $response, self::$responseFormat ),
+			default								=> $this->sendResponseWithDefaultHttpResponseSender( $response ),
+		};
 	}
 
 	/**
@@ -100,11 +168,10 @@ abstract class Ajax extends Abstraction
 			'status'	=> 'data',
 			'data'		=> $data,
 		];
-		$dev	= (string) ob_get_clean();
-		if( ob_get_level() && strlen( trim( $dev ) ) )
-			$response['dev']	= $dev;
-		$json	= json_encode( $response, JSON_THROW_ON_ERROR );
-		return $this->respond( $json, $statusCode, $mimeType );
+		if( NULL !== $this->devBuffer && $this->devBuffer->isOpen() && $this->devBuffer->has() )
+			$response['dev']	= trim( $this->devBuffer->get() );
+
+		return $this->respond( $this->renderResponseBody( $response ), $statusCode, $mimeType );
 	}
 
 	/**
@@ -125,11 +192,10 @@ abstract class Ajax extends Abstraction
 			'code'		=> $code,
 			'message'	=> $message,
 		];
-		$dev	= (string) ob_get_clean();
-		if( ob_get_level() && strlen( trim( $dev ) ) )
-			$response['dev']	= $dev;
-		$json	= json_encode( $response,JSON_THROW_ON_ERROR );
-		return $this->respond( $json, $statusCode, $mimeType );
+		if( NULL !== $this->devBuffer && $this->devBuffer->isOpen() && $this->devBuffer->has() )
+			$response['dev']	= trim( $this->devBuffer->get() );
+
+		return $this->respond( $this->renderResponseBody( $response ), $statusCode, $mimeType );
 	}
 
 	/**
@@ -151,37 +217,48 @@ abstract class Ajax extends Abstraction
 			'file'		=> $exception->getFile(),
 			'line'		=> $exception->getLine(),
 		];
-		$dev	= (string) ob_get_clean();
-		if( ob_get_level() && strlen( trim( $dev ) ) )
-			$response['dev']	= $dev;
-		$json	= json_encode( $response, JSON_THROW_ON_ERROR );
-		return $this->respond( $json, $statusCode, $mimeType );
+		if( NULL !== $this->devBuffer && $this->devBuffer->isOpen() && $this->devBuffer->has() )
+			$response['dev']	= trim( $this->devBuffer->get() );
+
+		return $this->respond( $this->renderResponseBody( $response ), $statusCode, $mimeType );
+	}
+
+	protected function transformRecursiveArrayToXmlString( array $data ): string
+	{
+		$xml = new \SimpleXMLElement( '<root/>' );
+		array_walk_recursive( $data, function( $value, $key ) use ( $xml ){
+			if( !is_array( $xml->{$key} ) )
+				$xml->{$key}	= $value;
+			else
+				$xml->{$key}[]	= $value;
+		} );
+
+		/** @var string $string */
+		$string	= $xml->asXML();
+		return $string;
 	}
 
 	/**
-	 *	Sends prepared response string.
-	 *	Exits afterward, if enabled (default: yes).
-	 *	@access		protected
-	 *	@param		string			$content		Stringified/serialized content to send
-	 *	@param		integer|NULL	$statusCode		HTTP status code of response
-	 *	@param		string|NULL		$mimeType		MIME type to send (default: defaultMimeType)
-	 *	@return		integer			Number of sent bytes, if exitAfterwards is disabled (default: no)
+	 *	@param		HttpResponse		$response
+	 *	@return		int
+	 *	@codeCoverageIgnore
 	 */
-	protected function respond( string $content, int $statusCode = NULL, string $mimeType = NULL ): int
+	private function sendResponseWithDefaultHttpResponseSender( HttpResponse $response ): int
 	{
-		$mimeType	= $mimeType ?: $this->defaultResponseMimeType;
-		$statusCode	= $statusCode ?: 200;
-
-		$this->response->addHeaderPair( 'Content-Type', $mimeType );
-		$this->response->setBody( $content );
-		$this->response->setStatus( $statusCode );
-
-		$dev	= (string) ob_get_clean();
-		if( ob_get_level() && strlen( trim( $dev ) ) )
-			$this->response->addHeaderPair( 'X-Ajax-Dev', base64_encode( $dev ) );
-
+		//  New Code: static call, compact and readable
 		HttpResponseSender::$supportedCompressions	= self::$supportedCompressions;
-		$sender	= new HttpResponseSender( $this->response, $this->request );
-		return $sender->send( $this->sendLengthHeader, $this->exitAfterwards )->getBodyLength();
+		return HttpResponseSender::sendResponseForRequest(
+			$response,
+			$this->request,
+			$this->sendLengthHeader,
+			$this->exitAfterwards && !( $this->env->getMode() & Environment::MODE_TEST )
+		)->getBodyLength();
+
+/*		//  Original Code: dynamic call, okay but not cool
+		HttpResponseSender::$supportedCompressions	= self::$supportedCompressions;
+		$sender			= new HttpResponseSender( $response, $this->request );
+		$exitAfterwards	= $this->exitAfterwards && !( $this->env->getMode() & Environment::MODE_TEST );
+		$response		= $sender->send( $this->sendLengthHeader, $exitAfterwards );
+		return $response->getBodyLength();*/
 	}
 }
