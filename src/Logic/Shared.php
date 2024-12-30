@@ -13,16 +13,10 @@
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
 
-namespace CeusMedia\HydrogenFramework;
+namespace CeusMedia\HydrogenFramework\Logic;
 
-use CeusMedia\Common\ADT\Collection\Dictionary as Dictionary;
-use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
-use CeusMedia\Common\Alg\Text\CamelCase as CamelCase;
-use CeusMedia\HydrogenFramework\Environment\Resource\Captain as CaptainResource;
-use CeusMedia\HydrogenFramework\Environment\Resource\Module\Library\Local as LocalModuleLibraryResource;
-use CeusMedia\HydrogenFramework\Logic\Shared as SharedLogic;
+use CeusMedia\HydrogenFramework\Environment;
 use ReflectionException;
-use RuntimeException;
 
 /**
  *	Basic logic class. Can be extended and uses as business logic layer class.
@@ -35,6 +29,36 @@ use RuntimeException;
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-class Logic extends SharedLogic
+class Shared extends Abstraction
 {
+	/**
+	 *	@param		Environment			$env
+	 *	@return		static
+	 *	@throws		ReflectionException
+	 */
+	public static function getInstance( Environment $env ): static
+	{
+		$logicPool	= $env->getLogic();
+		$className	= static::class;
+		$key		= $logicPool->getKeyFromClassName( $className );
+		if( $logicPool->has( $key ) ){
+			/** @var static $instance */
+			$instance	= $logicPool->get( $key );
+			return $instance;
+		}
+		$instance	= new $className( $env );
+		$logicPool->add( $key, $instance );
+		return $instance;
+	}
+
+	//  --  PROTECTED  --  //
+
+	/**
+	 *	Cloning this logic is not allowed.
+	 *	@return		void
+	 *	@codeCoverageIgnore
+	 */
+	protected function __clone()
+	{
+	}
 }
