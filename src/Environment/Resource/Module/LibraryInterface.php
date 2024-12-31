@@ -24,7 +24,10 @@
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
+
 namespace CeusMedia\HydrogenFramework\Environment\Resource\Module;
+
+use Countable;
 
 /**
  *	Interface for module libraries.
@@ -35,8 +38,10 @@ namespace CeusMedia\HydrogenFramework\Environment\Resource\Module;
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
-interface LibraryInterface
+interface LibraryInterface extends Countable
 {
+	public function count(): int;
+
 	/**
 	 *	Returns a module by its ID if found in source.
 	 *	By default, only active modules are enlisted.

@@ -1,7 +1,26 @@
 <?php /** @noinspection PhpUnused */
 
 /**
- *	...
+ *	A logger factory and log channels depending on configuration.
+ *	Uses several strategies to report to different or multiple log targets.
+ *
+ * 	Strategies defined:
+ *		- APP_DEFAULT		= enqueue to file 'logs/app.log'
+ *		- APP_TYPED			- enqueue to file 'logs/app.TYPE.log' for types as info, note, warn, error or exception
+ *		- MODULE_HOOKS		- call default module hooks for specific handling
+ *		- CUSTOM_HOOKS		- call custom module hooks for specific handling
+ *		- CUSTOM_CALLBACK	- call injected method, for testing
+ *		- MEMORY			- log in memory, for testing
+ *
+ * 	To each channel, you can send messages of these types:
+ *		- DEBUG
+ *		- INFO
+ *		- NOTE
+ *		- WARN
+ *		- ERROR
+ *
+ *	To each channel, you can send exceptions as well.
+ *
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
@@ -23,7 +42,9 @@ use Stringable;
 use Throwable;
 
 /**
- *	...
+ *	A logger factory and log channels depending on configuration.
+ *	Uses several strategies to report to different or multiple log targets.
+ *
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
@@ -33,7 +54,6 @@ use Throwable;
  */
 class Log
 {
-
 	public const TYPE_DEBUG		= 'debug';
 	public const TYPE_INFO		= 'info';
 	public const TYPE_NOTE		= 'note';
@@ -48,11 +68,12 @@ class Log
 		self::TYPE_ERROR,
 	];
 
-	public const STRATEGY_APP_DEFAULT		= 'app-default';
-	public const STRATEGY_APP_TYPED			= 'app-typed';
-	public const STRATEGY_MODULE_HOOKS		= 'module-hooks';
-	public const STRATEGY_CUSTOM_HOOKS		= 'custom-hooks';
-	public const STRATEGY_CUSTOM_CALLBACK	= 'custom-callback';
+	public const STRATEGY_APP_DEFAULT		= 'app-default';		//  enqueue to file 'logs/app.log'
+	public const STRATEGY_APP_TYPED			= 'app-typed';			//  enqueue to file 'logs/app.TYPE.log' for types as info, note, warn, error or exception
+	public const STRATEGY_MODULE_HOOKS		= 'module-hooks';		//  call default module hooks for specific handling
+	public const STRATEGY_CUSTOM_HOOKS		= 'custom-hooks';		//  call custom module hooks for specific handling
+	public const STRATEGY_CUSTOM_CALLBACK	= 'custom-callback';	//  call injected method, for testing
+	public const STRATEGY_MEMORY			= 'memory';				//  log in memory, for testing
 
 	public const STRATEGIES				= [
 		self::STRATEGY_APP_DEFAULT,
@@ -60,7 +81,11 @@ class Log
 		self::STRATEGY_MODULE_HOOKS,
 		self::STRATEGY_CUSTOM_HOOKS,
 		self::STRATEGY_CUSTOM_CALLBACK,
+		self::STRATEGY_MEMORY,
 	];
+
+	/** @var	array				$memoryLog			Public list of log entries of "memory" strategy, for dummy environments and testing  */
+	public array $memoryLog						= [];
 
 	/**	@var	Environment			$env				Environment instance */
 	protected Environment $env;
@@ -222,6 +247,9 @@ class Log
 					break;
 				case self::STRATEGY_APP_DEFAULT:
 					$isHandled	= $this->handleLogWithAppDefault( $data );
+					break;
+				case self::STRATEGY_MEMORY:
+					$isHandled	= $this->handleLogWithMemory( $data );
 					break;
 			}
 			if( $isHandled && in_array( $strategy, $this->lastStrategies ) )
@@ -437,6 +465,17 @@ class Log
 			$message	= json_encode( $message );
 		$entry		= $data['datetime'].' '.$type.' '.$message.PHP_EOL;
 		return error_log( $entry, 3, $this->path.'app.log' );
+	}
+	/**
+	 *	...
+	 *	@access		protected
+	 *	@param		array		$data
+	 *	@return		bool
+	 */
+	protected function handleLogWithMemory( array $data ): bool
+	{
+		$this->memoryLog[]	= $data;
+		return TRUE;
 	}
 
 	/**

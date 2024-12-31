@@ -27,9 +27,12 @@
  */
 namespace CeusMedia\HydrogenFramework\Environment;
 
+use CeusMedia\Common\Alg\ID;
 use CeusMedia\HydrogenFramework\Environment;
 
 use CeusMedia\Common\ADT\Collection\Dictionary as Dictionary;
+use CeusMedia\HydrogenFramework\Environment\Resource\Log as LogResource;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Library\Local as LocalModuleLibraryResource;
 
 /**
  *	Empty environment for remote dummy use.
@@ -49,7 +52,40 @@ class Dummy extends Environment
 	{
 		$this->options		= $options;
 		$this->path			= $options['pathApp'] ?? getCwd().'/';
-		$this->initClock();
-		$this->config		= new Dictionary();											//  create empty configuration object
+		$this->uri			= $options['pathApp'] ?? getCwd().'/';
+
+		$this->initRuntime();																		//  setup runtime clock
+		$this->config		= new Dictionary();														//  create empty configuration object
+		$this->initModules();																		//  setup empty module handler
+		$this->initLog();																			//  setup memory logger
+		$this->initPhp();																			//  setup PHP environment
+		$this->initCaptain();																		//  setup inactive captain (on empty module dictionary)
+		$this->initLogic();																			//  setup logic pool
+		$this->hasDatabase	= FALSE;
+
+		$this->__onInit();																			//  default callback for construction end
+		$this->runtime->reach( 'Environment (Web): construction end' );						//  log time of construction
+	}
+
+	/**
+	 *	Log in memory, only.
+	 *	@return		static
+	 */
+	protected function initLog(): static
+	{
+		$this->log	= new LogResource( $this );
+		$this->log->setStrategies( [LogResource::STRATEGY_MEMORY] );
+		return $this;
+	}
+	/**
+	 *	Sets up a dysfunctional handler for local installed modules.
+	 *	@access		protected
+	 *	@return		static
+	 */
+	protected function initModules(): static
+	{
+		LocalModuleLibraryResource::$relativePathToInstalledModules	= 'NotExistingPath/'.ID::uuid().'/';
+		$this->modules	= new LocalModuleLibraryResource( $this );
+		return $this;
 	}
 }

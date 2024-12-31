@@ -51,6 +51,7 @@ use CeusMedia\HydrogenFramework\Environment\Resource\LogicPool as LogicPoolResou
 use CeusMedia\HydrogenFramework\Environment\Resource\Messenger as MessengerResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Config as ModuleConfig;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Library\Local as LocalModuleLibraryResource;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\LibraryInterface;
 use CeusMedia\HydrogenFramework\Environment\Resource\Php as PhpResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\Runtime as RuntimeResource;
 use CeusMedia\HydrogenFramework\Environment\Remote as RemoteEnvironment;
@@ -154,8 +155,8 @@ class Environment implements ArrayAccess
 	/** @var	MessengerResource|NULL		$messenger		Messenger Object */
 	protected ?MessengerResource $messenger	= NULL;
 
-	/**	@var	LocalModuleLibraryResource	$modules		Handler for local modules */
-	protected LocalModuleLibraryResource	$modules;
+	/**	@var	LibraryInterface			$modules		Handler for installed modules */
+	protected LibraryInterface $modules;
 
 	/**	@var	array						$options		Set options to override static properties */
 	protected array $options				= [];
@@ -182,9 +183,7 @@ class Environment implements ArrayAccess
 	public function __construct( array $options = [], bool $isFinal = TRUE )
 	{
 //		$this->modules->callHook( 'Env', 'constructStart', $this );									//  call module hooks for end of env construction
-		/** @var array $frameworkConfig */
-		$frameworkConfig	= parse_ini_file( dirname( __DIR__ ).'/hydrogen.ini' );
-		$this->version		= $frameworkConfig['version'];
+		$this->detectFrameworkVersion();
 
 		if( !isset( static::$defaultPaths['cache'] ) )
 			static::$defaultPaths['cache']	= sys_get_temp_dir().'/cache/';
@@ -193,9 +192,7 @@ class Environment implements ArrayAccess
 		$this->path			= rtrim( $options['pathApp'] ?? getCwd(), '/' ) . '/';	//  detect application path
 		$this->uri			= rtrim( $options['uri'] ?? getCwd(), '/' ) . '/';															//  detect application base URI
 
-		date_default_timezone_set( @date_default_timezone_get() );									//  avoid having no timezone set
-		if( !empty( static::$timezone ) )															//  a timezone has be set externally before
-			date_default_timezone_set( static::$timezone );											//  set this timezone
+		$this->setTimeZone();
 
 		$this->session	= new Dictionary();
 		$this->initRuntime();																		//  setup runtime clock
@@ -419,11 +416,11 @@ class Environment implements ArrayAccess
 	}
 
 	/**
-	 *	Returns handler for local module library.
+	 *	Returns initially set up handler for (usually local) module library.
 	 *	@access		public
-	 *	@return		LocalModuleLibraryResource
+	 *	@return		LibraryInterface
 	 */
-	public function getModules(): LocalModuleLibraryResource
+	public function getModules(): LibraryInterface
 	{
 		return $this->modules;
 	}
@@ -534,7 +531,127 @@ class Environment implements ArrayAccess
 		return $this->config->has( 'path.'.$key );
 	}
 
+	public function isInDevMode(): bool
+	{
+		return self::MODE_DEV === ( $this->mode & self::MODE_DEV );
+	}
+
+	public function isInLiveMode(): bool
+	{
+		return self::MODE_LIVE === ( $this->mode & self::MODE_LIVE );
+	}
+
+	public function isInStageMode(): bool
+	{
+		return self::MODE_STAGE === ( $this->mode & self::MODE_STAGE );
+	}
+
+	public function isInTestMode(): bool
+	{
+		return self::MODE_TEST === ( $this->mode & self::MODE_TEST );
+	}
+
+	/**
+	 *	@param		mixed		$offset
+	 *	@return		bool
+	 */
+	public function offsetExists( mixed $offset ): bool
+	{
+//		return property_exists( $this, $key );														//  PHP 5.3
+		return isset( $this->{strval( $offset )} );																//  PHP 5.2
+	}
+
+	/**
+	 *	@param		mixed		$offset
+	 *	@return		object|NULL
+	 *	@throws		Exception
+	 */
+	public function offsetGet( mixed $offset ): object|NULL
+	{
+		return $this->get( strval( $offset ) );
+	}
+
+	/**
+	 *	@param		mixed		$offset
+	 *	@param		mixed		$value
+	 *	@return		void
+	 */
+	public function offsetSet( mixed $offset, mixed $value ): void
+	{
+		$this->set( strval( $offset ), $value );
+	}
+
+	public function offsetUnset( mixed $offset ): void
+	{
+		$this->remove( strval( $offset ) );
+	}
+
+	public function remove( string $key ): self
+	{
+		$this->$key	= NULL;
+		return $this;
+	}
+
+	/**
+	 *	@param		string		$key
+	 *	@param		object		$object
+	 *	@return		$this
+	 */
+	public function set( string $key, object $object ): self
+	{
+		if( !is_object( $object ) ){
+			$message	= 'Given resource "%1$s" is not an object';
+			throw new InvalidArgumentException( sprintf( $message, $key ) );
+		}
+		if( !preg_match( '/^\w+$/', $key ) ){
+			$message	= 'Invalid resource key "%1$s"';
+			throw new InvalidArgumentException( sprintf( $message, $key ) );
+		}
+		$this->$key	= $object;
+		return $this;
+	}
+
+	/**
+	 *	Sets environment mode.
+	 *	Disabled for productive environments aka environments in LIVE mode.
+	 *	@param		int		$mode		One of ::MODES
+	 *	@return		static
+	 *	@throws		RuntimeException	if current environments is in LIVE mode
+	 *	@throws		RangeException		if an invalid mode has been given
+	 */
+	public function setMode( int $mode ): static
+	{
+		if( $this->isInLiveMode() )
+			throw new RuntimeException( 'Setting environment mode is disabled on productive environments' );
+		if( !in_array( $mode, self::MODES, TRUE ) )
+			throw new RangeException( 'Invalid mode' );
+		$this->mode	= $mode;
+		return $this;
+	}
+
+	/**
+	 *	Sets configured path in config instance.
+	 *	This will NOT affect config files - only config instance in memory.
+	 *	Returns self for chaining.
+	 *	@access		public
+	 *	@param		string		$key		Path key to set in config instance
+	 *	@param		string		$path		Path to set in config instance
+	 *	@param		boolean		$override	Flag: override path if already existing and strict mode off, default: yes
+	 *	@param		boolean		$strict		Flag: throw exception if already existing, default: yes
+	 *	@return		self
+	 *	@throws		RuntimeException
+	 */
+	public function setPath( string $key, string $path, bool $override = TRUE, bool $strict = TRUE ): self
+	{
+		if( $this->hasPath( $key ) && !$override && $strict )
+			throw new RuntimeException( 'Path "'.$key.'" is already set' );
+		$this->config->set( 'path.'.$key, $path );
+		return $this;
+	}
+
+
 	//  --  PROTECTED  --  //
+
 
 	/**
 	 *	Magic function called at the end of construction.
@@ -550,6 +667,20 @@ class Environment implements ArrayAccess
 	{
 		if( $this->hasModules() )																	//  module support and modules available
 			$this->modules->callHook( 'Env', 'init', $this );										//  call related module event hooks
+	}
+
+	/**
+	 *	Detects version of Hydrogen framework by reading its INI file.
+	 *	Sets found version on environment.
+	 *
+	 *	@return		static
+	 */
+	protected function detectFrameworkVersion(): static
+	{
+		/** @var array $frameworkConfig */
+		$frameworkConfig	= parse_ini_file( dirname( __DIR__ ).'/hydrogen.ini' );
+		$this->version		= $frameworkConfig['version'];
+		return $this;
 	}
 
 	protected function detectMode(): static
@@ -734,11 +865,18 @@ class Environment implements ArrayAccess
 	}
 
 	/**
+	 *	Creates a logger factory and log channels depending on configuration.
+	 *	Uses several strategies to report to different or multiple log targets.
+	 * 	Strategies defined in framework environment resource:
+	 *		- APP_DEFAULT		= enqueue to file 'logs/app.log'
+	 *		- APP_TYPED			- enqueue to file 'logs/app.TYPE.log' for types as info, note, warn, error or exception
+	 *		- MODULE_HOOKS		- call default module hooks for specific handling
+	 *		- CUSTOM_HOOKS		- call custom module hooks for specific handling
+	 *		- CUSTOM_CALLBACK	- call injected method, for testing
+	 *		- MEMORY			- log in memory, for testing
+	 *
 	 *	@access		protected
 	 *	@return		static
-	 *	@todo  		extract to resource module
-	 *	@todo  		extract to resource module: question is where to store the resource? in env again?
-	 *	@todo  		to be deprecated in 0.9: please use module Resource_Disclosure instead
 	 */
 	protected function initLog(): static
 	{
@@ -762,6 +900,7 @@ class Environment implements ArrayAccess
 	}
 
 	/**
+	 *	Sets up a handler for (usually local) module library.
 	 *	@access		protected
 	 *	@return		static
 	 *	@throws		ReflectionException
@@ -837,62 +976,6 @@ class Environment implements ArrayAccess
 		return $this;
 	}
 
-	public function isInDevMode(): bool
-	{
-		return self::MODE_DEV === ( $this->mode & self::MODE_DEV );
-	}
-
-	public function isInLiveMode(): bool
-	{
-		return self::MODE_LIVE === ( $this->mode & self::MODE_LIVE );
-	}
-
-	public function isInStageMode(): bool
-	{
-		return self::MODE_STAGE === ( $this->mode & self::MODE_STAGE );
-	}
-
-	public function isInTestMode(): bool
-	{
-		return self::MODE_TEST === ( $this->mode & self::MODE_TEST );
-	}
-
-	/**
-	 *	@param		mixed		$offset
-	 *	@return		bool
-	 */
-	public function offsetExists( mixed $offset ): bool
-	{
-//		return property_exists( $this, $key );														//  PHP 5.3
-		return isset( $this->{strval( $offset )} );																//  PHP 5.2
-	}
-
-	/**
-	 *	@param		mixed		$offset
-	 *	@return		object|NULL
-	 *	@throws		Exception
-	 */
-	public function offsetGet( mixed $offset ): object|NULL
-	{
-		return $this->get( strval( $offset ) );
-	}
-
-	/**
-	 *	@param		mixed		$offset
-	 *	@param		mixed		$value
-	 *	@return		void
-	 */
-	public function offsetSet( mixed $offset, mixed $value ): void
-	{
-		$this->set( strval( $offset ), $value );
-	}
-
-	public function offsetUnset( mixed $offset ): void
-	{
-		$this->remove( strval( $offset ) );
-	}
-
-
 	/**
 	 *	@param		bool		$force		Flag: save even if already set, default: no
 	 *	@return		void
@@ -908,66 +991,17 @@ class Environment implements ArrayAccess
 		}
 	}
 
-	public function remove( string $key ): self
-	{
-		$this->$key	= NULL;
-		return $this;
-	}
-
 	/**
-	 *	@param		string		$key
-	 *	@param		object		$object
-	 *	@return		$this
-	 */
-	public function set( string $key, object $object ): self
-	{
-		if( !is_object( $object ) ){
-			$message	= 'Given resource "%1$s" is not an object';
-			throw new InvalidArgumentException( sprintf( $message, $key ) );
-		}
-		if( !preg_match( '/^\w+$/', $key ) ){
-			$message	= 'Invalid resource key "%1$s"';
-			throw new InvalidArgumentException( sprintf( $message, $key ) );
-		}
-		$this->$key	= $object;
-		return $this;
-	}
-
-	/**
-	 *	Sets environment mode.
-	 *	Disabled for productive environments aka environments in LIVE mode.
-	 *	@param		int		$mode		One of ::MODES
+	 *	Sets time zone by given static time zone key.
+	 *	Defaults to system time zone.
+	 *
 	 *	@return		static
-	 *	@throws		RuntimeException	if current environments is in LIVE mode
-	 *	@throws		RangeException		if an invalid mode has been given
 	 */
-	public function setMode( int $mode ): static
+	protected function setTimeZone(): static
 	{
-		if( $this->isInLiveMode() )
-			throw new RuntimeException( 'Setting environment mode is disabled on productive environments' );
-		if( !in_array( $mode, self::MODES, TRUE ) )
-			throw new RangeException( 'Invalid mode' );
-		$this->mode	= $mode;
-		return $this;
-	}
-
-	/**
-	 *	Sets configured path in config instance.
-	 *	This will NOT affect config files - only config instance in memory.
-	 *	Returns self for chaining.
-	 *	@access		public
-	 *	@param		string		$key		Path key to set in config instance
-	 *	@param		string		$path		Path to set in config instance
-	 *	@param		boolean		$override	Flag: override path if already existing and strict mode off, default: yes
-	 *	@param		boolean		$strict		Flag: throw exception if already existing, default: yes
-	 *	@return		self
-	 *	@throws		RuntimeException
-	 */
-	public function setPath( string $key, string $path, bool $override = TRUE, bool $strict = TRUE ): self
-	{
-		if( $this->hasPath( $key ) && !$override && $strict )
-			throw new RuntimeException( 'Path "'.$key.'" is already set' );
-		$this->config->set( 'path.'.$key, $path );
+		date_default_timezone_set( @date_default_timezone_get() );									//  avoid having no timezone set
+		if( !empty( static::$timezone ) )															//  a timezone has be set externally before
+			date_default_timezone_set( static::$timezone );											//  set this timezone
 		return $this;
 	}
 }

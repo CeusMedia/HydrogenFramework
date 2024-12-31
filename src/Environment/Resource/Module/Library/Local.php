@@ -55,6 +55,10 @@ use SplFileObject;
  */
 class Local extends AbstractLibrary implements Countable, LibraryInterface
 {
+	public static string $relativePathToInstalledModules	= 'modules/';
+	public static string $relativePathOfCacheFile			= 'modules.cache.serial';
+
+
 	protected Environment $env;
 
 	protected string $modulePath;
@@ -65,7 +69,7 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 
 	public static function readModuleFile( string $filePath, string $moduleId, string $modulesPath ): ModuleDefinition
 	{
-		$module			= ModuleReader::load( $filePath, $moduleId );
+		$module		= ModuleReader::load( $filePath, $moduleId );
 		$module->source				= 'local';													//  set source to local
 		$module->path				= $modulesPath;												//  assume app path as module path
 		$module->isInstalled		= TRUE;														//  module is installed
@@ -97,8 +101,8 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 		$this->env			= $env;
 		$config				= $this->env->getConfig();
 		$defaultPaths		= $this->env::$defaultPaths;
-		$this->modulePath	= $env->uri.$defaultPaths['config'].'modules/';
-		$this->cacheFile	= $env->uri.$defaultPaths['config'].'modules.cache.serial';
+		$this->modulePath	= $env->uri.$defaultPaths['config'].static::$relativePathToInstalledModules;
+		$this->cacheFile	= $env->uri.$defaultPaths['config'].static::$relativePathOfCacheFile;
 		if( $config->get( 'path.module.config' ) )
 			$this->modulePath	= $config->get( 'path.module.config' );
 		$this->env->getRuntime()->reach( 'Resource_Module_Library_Local::construction' );
@@ -170,19 +174,9 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 	 */
 	public function clearCache(): void
 	{
-		$useCache	= $this->env->getConfig()->get( 'system.cache.modules' );
+		$useCache	= (bool) $this->env->getConfig()->get( 'system.cache.modules' );
 		if( $useCache && file_exists( $this->cacheFile ) )
 			@unlink( $this->cacheFile );
-	}
-
-	/**
-	 *	Returns number of found (and active) modules.
-	 *	@æccess		public
-	 *	@return		int			Number of found (and active) modules
-	 */
-	public function count(): int
-	{
-		return count( $this->getAll() );
 	}
 
 	/**

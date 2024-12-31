@@ -48,6 +48,16 @@ abstract class Abstraction implements LibraryInterface
 	protected ?object $scanResult	= NULL;
 
 	/**
+	 *	Returns number of found (and active) modules.
+	 *	@æccess		public
+	 *	@return		int			Number of found (and active) modules
+	 */
+	public function count(): int
+	{
+		return count( $this->getAll() );
+	}
+
+	/**
 	 *	Return module definition by module ID.
 	 *	Returns NULL if module is not installed and strict mode is off.
 	 *	Returns NULL if module is not active and strict mode is off and activeOnly is on.

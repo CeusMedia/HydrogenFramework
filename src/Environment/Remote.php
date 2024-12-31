@@ -85,7 +85,9 @@ class Remote extends Environment
 		$this->initLanguage();
 
 		$this->hasDatabase	= (bool) $this->database;													//  note if database is available
-		$this->__onInit();
+		$this->modules->callHook( 'Env', 'constructEnd', $this );					//  call module hooks for end of env construction
+		$this->__onInit();																		//  default callback for construction end
+		$this->runtime->reach( 'Environment (Remote): construction end' );					//  log time of construction
 	}
 
 	/**

@@ -1,4 +1,5 @@
-<?php
+<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
+
 /**
  *	...
  *	@category		Library
@@ -13,6 +14,7 @@ namespace CeusMedia\HydrogenFramework\Environment\Resource;
 
 use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
 use CeusMedia\Common\Alg\Text\CamelCase as CamelCase;
+use CeusMedia\Common\Exception\Deprecation as DeprecationException;
 use CeusMedia\HydrogenFramework\Environment;
 use CeusMedia\HydrogenFramework\Environment\Resource\Logic as LogicResource;
 use CeusMedia\HydrogenFramework\Logic\Abstraction as LogicAbstraction;
@@ -241,24 +243,28 @@ class LogicPool
 	 *	@access		protected
 	 *	@param		string			$className			Name of class to create instance for
 	 *	@return		CapsuledLogic|SharedLogic|LogicResource
-	 *	@throws		InvalidArgumentException			if class is not a subclass of CeusMedia\HydrogenFramework\Logic
+	 *	@throws		DeprecationException			if class is not a subclass of CeusMedia\HydrogenFramework\Logic\* or CeusMedia\HydrogenFramework\Environment\Resource\Logic
 	 *	@throws		ReflectionException
 	 */
 	protected function createInstance( string $className ): CapsuledLogic|SharedLogic|LogicResource
 	{
+		//  using the newer logic classes structure with abstract class
 		if( is_subclass_of( $className, LogicAbstraction::class ) ){
 			/** @var CapsuledLogic|SharedLogic $instance */
 			$instance	= ObjectFactory::createObject( $className, [$this->env] );
 			return $instance;
 		}
 
+		//  using the older environment resource as base for logic classes
 		if( is_subclass_of( $className, LogicResource::class ) ){
 			/** @var LogicResource $instance */
 			$instance	= ObjectFactory::createObject( $className, [$this->env] );
 			return $instance;
 		}
 
-		throw new InvalidArgumentException( 'Given class "'.$className.'" is not a valid logic class' );
+		throw DeprecationException::create( 'Logic class without inheritance is deprecated' )
+			->setDescription( 'Given class "'.$className.'" is not extending a framework logic class or environment resource (is not a subclass of CeusMedia\HydrogenFramework\Logic\* or CeusMedia\HydrogenFramework\Environment\Resource\Logic)' )
+			->setSuggestion( 'consider to extend shared or capsuled logic from framework in your logic class' );
 	}
 
 	/**

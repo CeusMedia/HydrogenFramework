@@ -67,7 +67,7 @@ abstract class WebAbstraction implements ApplicationInterface
 	public function __construct( ?Environment $env = NULL )
 	{
 		/** @var WebEnvironment $env */
-		$env ?? ObjectFactory::createObject( static::$classEnvironment );
+		$env ??= ObjectFactory::createObject( static::$classEnvironment );
 
 		$this->env	= $env;
 
