@@ -33,6 +33,7 @@ use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
 use CeusMedia\Common\Alg\Text\CamelCase as CamelCase;
 use CeusMedia\Common\Alg\Time\Converter as TimeConverter;
 use CeusMedia\Common\UI\HTML\Elements as HtmlElements;
+use CeusMedia\HydrogenFramework\Environment\Remote as RemoteEnvironment;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 use CeusMedia\HydrogenFramework\View\Helper;
 use CeusMedia\HydrogenFramework\View\Helper\Content as ContentHelper;
@@ -57,8 +58,8 @@ class View
 	/**	@var	array					$data			Collected Data for View */
 	protected array $data				= [];
 
-	/**	@var	WebEnvironment			$env			Environment Object */
-	protected WebEnvironment $env;
+	/**	@var	WebEnvironment|RemoteEnvironment			$env			Environment Object */
+	protected WebEnvironment|RemoteEnvironment $env;
 
 	/**	@var	string|NULL				$controller		Name of called Controller */
 	protected ?string $controller		= NULL;
@@ -95,11 +96,11 @@ class View
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		WebEnvironment		$env			Framework Resource Environment Object
+	 *	@param		WebEnvironment|RemoteEnvironment		$env			Framework Resource Environment Object
 	 *	@return		void
 	 *	@throws		ReflectionException
 	 */
-	public function __construct( WebEnvironment $env )
+	public function __construct( WebEnvironment|RemoteEnvironment $env )
 	{
 		$env->getRuntime()->reach( 'View('.static::class.')::init start' );
 		$this->setEnv( $env );
@@ -446,10 +447,10 @@ class View
 	/**
 	 *	Sets Environment of Controller by copying Framework Member Variables.
 	 *	@access		protected
-	 *	@param		WebEnvironment		$env			Framework Resource Environment Object
+	 *	@param		WebEnvironment|RemoteEnvironment		$env			Framework Resource Environment Object
 	 *	@return		self
 	 */
-	protected function setEnv( WebEnvironment $env ): self
+	protected function setEnv( WebEnvironment|RemoteEnvironment $env ): self
 	{
 		$this->env			= $env;
 		$this->controller	= $this->env->getRequest()->get( '__controller' );

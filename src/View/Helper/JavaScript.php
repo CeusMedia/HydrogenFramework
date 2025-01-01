@@ -179,7 +179,7 @@ class JavaScript
 	}
 
 	/**
-	 *	Returns a single instance of this Singleton class.
+	 *	Returns an instance of this capsuled class.
 	 *	@static
 	 *	@access		public
 	 *	@param		Environment		$env
