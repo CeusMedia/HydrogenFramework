@@ -44,6 +44,7 @@ use CeusMedia\HydrogenFramework\Environment\Resource\Acl\Abstraction;
 use CeusMedia\HydrogenFramework\Environment\Resource\Acl\Abstraction as AbstractAclResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\Acl\AllPublic as AllPublicAclResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\Captain as CaptainResource;
+use CeusMedia\HydrogenFramework\Environment\Resource\Configuration as ConfigurationResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\Disclosure as DisclosureResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\Language as LanguageResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\Log as LogResource;
@@ -113,10 +114,10 @@ class Environment implements ArrayAccess
 	public PhpResource $php;
 
 	/**	@var	string						$uri			Application URI (absolute local path) */
-	public string $uri;
+	public string $uri		= '';
 
 	/**	@var	string						$url			Application URI */
-	public string $url;
+	public string $url		= '';
 
 	/** @var	string						$version		Framework version */
 	public string $version;
@@ -131,8 +132,8 @@ class Environment implements ArrayAccess
 	/**	@var	CaptainResource				$captain		Instance of captain */
 	protected CaptainResource $captain;
 
-	/**	@var	Dictionary					$config			Configuration Object */
-	protected Dictionary $config;
+	/**	@var	ConfigurationResource		$config			Configuration Object */
+	protected ConfigurationResource $config;
 
 	/**	@var	object|NULL					$database		Database Connection Object */
 	protected ?object $database				= NULL;
@@ -197,6 +198,7 @@ class Environment implements ArrayAccess
 		$this->session	= new Dictionary();
 		$this->initRuntime();																		//  setup runtime clock
 		$this->initConfiguration();																	//  setup configuration
+		$this->detectMode();
 		$this->initLog();																			//  setup logger
 		$this->initPhp();																			//  setup PHP environment
 		$this->initCaptain();																		//  setup captain
@@ -344,9 +346,9 @@ class Environment implements ArrayAccess
 	/**
 	 *	Returns Configuration Object.
 	 *	@access		public
-	 *	@return		Dictionary
+	 *	@return		ConfigurationResource
 	 */
-	public function getConfig(): Dictionary
+	public function getConfig(): ConfigurationResource
 	{
 		return $this->config;
 	}
@@ -802,28 +804,8 @@ class Environment implements ArrayAccess
 	 */
 	protected function initConfiguration(): static
 	{
-		$configPath	= static::$defaultPaths['config'];
-		$configFile	= $configPath.static::$configFile;												//  get config file @todo remove this old way
-		if( '' !== trim( $this->options['configFile'] ?? '' ) )								//  get config file from options @todo enforce this new way
-			$configFile	= $this->options['configFile'];												//  get config file from options
-
-		$absolutePrefix	= str_starts_with( $configFile, '/' ) ? '' : $this->uri;					//  prefix with app path if not already absolute
-		$absolutePath	= $absolutePrefix.$configFile;
-		if( !file_exists( $absolutePath ) ){														//  config file not found
-			$message	= 'Main config file (%1$s) not found in %2$s';
-			throw FileNotExistingException::create()												//  quit with exception
-				->setMessage( sprintf( $message, $configFile, $absolutePrefix ) )
-				->setResource( $absolutePath );
-		}
-		$data	= parse_ini_file( $absolutePath );													//  parse configuration file (without section support)
-		if( FALSE === $data )
-			throw new RuntimeException( 'Reading config file failed.' );					//  quit with exception
-
-		ksort( $data );
-		$this->config	= new Dictionary( $data );													//  create dictionary from array
-
-		$this->realizeDefaultPathsInConfigResource();
-		$this->detectMode();
+		$this->config	= new ConfigurationResource( $this, $this->options );
+		$this->config->loadFile( $this->options['configFile'] ?? NULL );
 		$this->runtime->reach( 'env: config', 'Finished setup of base app configuration.' );
 		return $this;
 	}
@@ -974,21 +956,6 @@ class Environment implements ArrayAccess
 		$this->runtime	= new RuntimeResource( $this );
 		$this->runtime->reach( 'env: initRuntime', 'Finished setup of profiler.' );
 		return $this;
-	}
-
-	/**
-	 *	@param		bool		$force		Flag: save even if already set, default: no
-	 *	@return		void
-	 */
-	protected function realizeDefaultPathsInConfigResource( bool $force = FALSE ): void
-	{
-		foreach( static::$defaultPaths as $key => $value ){											//  iterate default paths
-			if( !$this->config->has( 'path.'.$key ) || $force ){								//  path is not set in config
-				if( 0 !== strlen( trim( $value ?? '' ) ) )
-					$value	= rtrim( trim( $value ), '/' ).'/';
-				$this->config->set( 'path.'.$key, $value );											//  set path in config (in memory)
-			}
-		}
 	}
 
 	/**

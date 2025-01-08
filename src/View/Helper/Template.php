@@ -377,6 +377,7 @@ class Template
 			if( !$this->env->getLog()?->logException( $e, $this ) )
 				throw new RuntimeException( $message, 0, $e  );
 			$this->env->getMessenger()?->noteFailure( $message );
+			return '';
 		}
 
 		return (string) $content;

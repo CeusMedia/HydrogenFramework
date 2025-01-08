@@ -182,6 +182,12 @@ class General
 				self::$prefixController,
 				$controller
 			);
+
+			if( is_object( $controllerInstanceOrFirstGuess ) ){
+				/** @var string $controller */
+				$controller	= preg_replace( '/^Controller_/', '', $controllerInstanceOrFirstGuess::class );
+				$controller	= str_replace( '_', '/', strtolower( $controller ) );
+			}
 			$runtime->reach( 'GeneralDispatcher::dispatch: check controller access' );
 			$this->checkAccess( $controller, $action);
 
@@ -200,7 +206,6 @@ class General
 				), 301 );
 
 			$runtime->reach( 'GeneralDispatcher::dispatch: factorized controller' );
-
 			$this->checkClassAction( $instance, $action );
 			if( $this->checkClassActionArguments )
 				$this->checkClassActionArguments( $instance, $action, $arguments );
