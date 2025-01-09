@@ -55,7 +55,7 @@ class Dummy extends Environment
 		$this->uri			= $options['pathApp'] ?? getCwd().'/';
 
 		$this->initRuntime();																		//  setup runtime clock
-		$this->config		= new Dictionary();														//  create empty configuration object
+		$this->config		= new Environment\Resource\Configuration( $this );						//  create empty configuration object
 		$this->initModules();																		//  setup empty module handler
 		$this->initLog();																			//  setup memory logger
 		$this->initPhp();																			//  setup PHP environment

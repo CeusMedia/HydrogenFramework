@@ -1,19 +1,28 @@
-<?php
+<?php /** @noinspection ALL */
 declare(strict_types=1);
 
 namespace CeusMedia\HydrogenFramework\Environment\Resource;
 
 use CeusMedia\Common\ADT\Collection\Dictionary;
+use CeusMedia\Common\Exception\FileNotExisting as FileNotExistingException;
 use CeusMedia\HydrogenFramework\Environment;
+use RuntimeException;
 
 class Configuration extends Dictionary
 {
 	protected Environment $env;
 
+	/**
+	 *	@param		Environment		$env
+	 *	@return		Dictionary
+	 *	@todo		why not returning dictionary directly by <code>return $instance->loadFile()->getAll( '', TRUE );</code>?
+	 */
 	public static function loadDefaultFileAsDictionary( Environment $env ): Dictionary
 	{
-		$instance = new self();
-		return new Dictionary( $instance->loadDefaultFile()->getAll() );
+		$instance = new self( $env );
+		/** @var array $configArray */
+		$configArray	= $instance->loadFile()->getAll();
+		return new Dictionary( $configArray );
 	}
 
 	public function __construct( Environment $env )

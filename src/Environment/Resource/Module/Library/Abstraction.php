@@ -26,10 +26,13 @@
  */
 namespace CeusMedia\HydrogenFramework\Environment\Resource\Module\Library;
 
+use CeusMedia\HydrogenFramework\Environment as Environment;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition as ModuleDefinition;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\LibraryInterface;
 
+use DomainException;
 use RangeException;
+use ReflectionException;
 use RuntimeException;
 
 /**
@@ -43,9 +46,64 @@ use RuntimeException;
  */
 abstract class Abstraction implements LibraryInterface
 {
+	protected Environment $env;
+
 	protected array $modules		= [];
 
 	protected ?object $scanResult	= NULL;
+
+	/**
+	 *	Trigger an event hooked by modules on load.
+	 *	Events are defined by a resource key (= a scope) and an event key (= a trigger key).
+	 *	Example: resource "Auth" and event "onLogout" will call all hook class methods, defined in
+	 *	module definitions by <code><hook resource="Auth" event"onLogout">MyModuleHook::onAuthLogout</hook></code>.
+	 *
+	 *	There are 2 ways of carrying data between the hooked callback method and the calling object: context and payload.
+	 *
+	 * 	The context can provide a prepared data object or the calling object itself to the hook callback method.
+	 *	The hook can read from and write into this given context object.
+	 *
+	 * 	The more strict way is to use a prepared payload list reference, which is a prepared array.
+	 *	The payload list is an array (map) to work on within the hook callback method.
+	 *	The calling object method can interpret/use the payload changes afterward.
+	 *
+	 *	@see		\CeusMedia\HydrogenFramework\Environment\Resource\Captain#callHook() Call hook in captain resource
+	 *	@param		string		$resource		Name of resource (e.G. Page or View)
+	 *	@param		string		$event			Name of hook event (e.G. onBuild or onRenderContent)
+	 *	@param		object|NULL	$context		Context object, will be available inside hook as $context
+	 *	@param		array|NULL	$payload		Map of hook payload data, will be available inside hook as $payload
+	 *	@return		bool|NULL					TRUE if hook is chain-breaking, FALSE if hook is disabled or non-chain-breaking, NULL if no modules installed or no hooks defined
+	 *	@throws		RuntimeException			if given static class method is not existing
+	 *	@throws		RuntimeException			if method call produces stdout output, for example warnings and notices
+	 *	@throws		RuntimeException			if method call is throwing an exception
+	 *	@throws		DomainException
+	 *	@throws		ReflectionException
+	 *	@todo		remove, since calling hooks is captains work, only - the library implementation should not be able to do this
+	 */
+	public function callHook( string $resource, string $event, ?object $context = NULL, array & $payload = NULL ): ?bool
+	{
+		$payload	??= [];
+		return $this->env->getCaptain()->callHook( $resource, $event, $context ?? $this, $payload );
+	}
+
+	/**
+	 *	...
+	 *	@access		public
+	 *	@param		string		$resource		Name of resource (e.G. Page or View)
+	 *	@param		string		$event			Name of hook event (e.G. onBuild or onRenderContent)
+	 *	@param		object|NULL	$context		Context object, will be available inside hook as $context
+	 *	@param		array		$payload		Map of hook payload data, will be available inside hook as $payload and $data
+	 *	@return		bool|NULL					Number of called hooks for event
+	 *	@throws		RuntimeException			if given static class method is not existing
+	 *	@throws		RuntimeException			if method call produces stdout output, for example warnings and notices
+	 *	@throws		RuntimeException			if method call is throwing an exception
+	 *	@throws		ReflectionException
+	 *	@todo		remove, since calling hooks is captains work, only - the library implementation should not be able to do this
+	 */
+	public function callHookWithPayload( string $resource, string $event, ?object $context = NULL, array & $payload = [] ): ?bool
+	{
+		return $this->env->getCaptain()->callHook( $resource, $event, $context ?? $this, $payload );
+	}
 
 	/**
 	 *	Returns number of found (and active) modules.
@@ -100,6 +158,29 @@ abstract class Abstraction implements LibraryInterface
 			if( $module->isActive )
 				$modules[$module->id]	= $module;
 		return $modules;
+	}
+
+	/**
+	 *	Returns module providing class of given controller, if resolvable.
+	 *	@access		public
+	 *	@param		string			$controller			Name of controller class to get module for
+	 *	@return		ModuleDefinition|NULL
+	 *	@todo		this is broken by supporting uppercase parts in controller class name, provided by general dispatcher
+	 *	@todo		move this method to dispatcher and adjust call in page resource
+	 */
+	public function getModuleFromControllerClassName( string $controller ): ?ModuleDefinition
+	{
+		$controllerPathName	= "Controller/".str_replace( "_", "/", $controller );
+		/** @var ModuleDefinition $module */
+		foreach( $this->env->getModules()->getAll() as $module ){
+			foreach( $module->files->classes as $file ){
+				$path	= pathinfo( $file->file, PATHINFO_DIRNAME ).'/';
+				$base	= pathinfo( $file->file, PATHINFO_FILENAME );
+				if( $path.$base === $controllerPathName )
+					return $module;
+			}
+		}
+		return NULL;
 	}
 
 	/**

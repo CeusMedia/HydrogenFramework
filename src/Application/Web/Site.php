@@ -209,9 +209,9 @@ class Site extends WebAbstraction implements ApplicationInterface
 		$this->setViewComponents( array_merge( $data, [												//  set up information resources for main template
 			'runtime'		=> $this->env->getRuntime(),											//  system clock for performance measure
 			'clock'			=> $this->env->getRuntime(),											//  legacy: alias for runtime @todo remove
-			'dev'			=> $this->devBuffer->get(),													//  warnings, notices or development messages
+			'dev'			=> $this->devBuffer?->get(),											//  warnings, notices or development messages
 		] ) );
-		$this->devBuffer->close();
+		$this->devBuffer?->close();
 
 		return $this->view( $templateFile, $templateHook );											//  render and return main template to constructor
 	}

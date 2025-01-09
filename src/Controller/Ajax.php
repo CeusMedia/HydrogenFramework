@@ -145,8 +145,10 @@ abstract class Ajax extends Abstraction
 			$this->devBuffer->close();
 		}
 
+		/** @var callable $callback */
+		$callback	= static::$responseCallback;
 		return match( static::$responseStrategy ){
-			static::RESPONSE_STRATEGY_CALLBACK	=> call_user_func( static::$responseCallback, $response, self::$responseFormat ),
+			static::RESPONSE_STRATEGY_CALLBACK	=> call_user_func( $callback, $response, self::$responseFormat ),
 			default								=> $this->sendResponseWithDefaultHttpResponseSender( $response ),
 		};
 	}

@@ -27,6 +27,7 @@
 
 namespace CeusMedia\HydrogenFramework\Environment\Resource\Module;
 
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition as ModuleDefinition;
 use Countable;
 
 /**
@@ -40,6 +41,58 @@ use Countable;
  */
 interface LibraryInterface extends Countable
 {
+	/**
+	 *	Trigger an event hooked by modules on load.
+	 *
+	 *	Events are defined by a resource key (= a scope) and an event key (= a trigger key).
+	 *	Example: resource "Auth" and event "onLogout" will call all hook class methods, defined in
+	 *	module definitions by <code><hook resource="Auth" event"onLogout">MyModuleHook::onAuthLogout</hook></code>.
+	 *
+	 *	There are 2 ways of carrying data between the hooked callback method and the calling object: context and payload.
+	 *
+	 * 	The context can provide a prepared data object or the calling object itself to the hook callback method.
+	 *	The hook can read from and write into this given context object.
+	 *
+	 * 	The more strict way is to use a prepared payload list reference, which is a prepared array.
+	 *	The payload list is an array (map) to work on within the hook callback method.
+	 *	The calling object method can interpret/use the payload changes afterward.
+	 *
+	 *	@access		public
+	 *	@param		string		$resource		Name of resource (e.G. Page or View)
+	 *	@param		string		$event			Name of hook event (e.G. onBuild or onRenderContent)
+	 *	@param		object|NULL	$context		Context object, will be available inside hook as $context
+	 *	@return		bool|NULL					TRUE if hook is chain-breaking, FALSE if hook is disabled or non-chain-breaking, NULL if no modules installed or no hooks defined
+	 *	@todo		remove arguments #3 and #4 after updating all calls in all modules (v1.0.1)
+	 *	@todo		remove, since calling hooks is captains work, only - the library implementation should not be able to do this
+	 */
+	public function callHook( string $resource, string $event, ?object $context = NULL, array & $payload = [] ): ?bool;
+
+	/**
+	 *	Trigger an event hooked by modules on load.
+	 *
+	 *	Events are defined by a resource key (= a scope) and an event key (= a trigger key).
+	 *	Example: resource "Auth" and event "onLogout" will call all hook class methods, defined in
+	 *	module definitions by <code><hook resource="Auth" event"onLogout">MyModuleHook::onAuthLogout</hook></code>.
+	 *
+	 *	There are 2 ways of carrying data between the hooked callback method and the calling object: context and payload.
+	 *
+	 * 	The context can provide a prepared data object or the calling object itself to the hook callback method.
+	 *	The hook can read from and write into this given context object.
+	 *
+	 * 	The more strict way is to use a prepared payload list reference, which is a prepared array.
+	 *	The payload list is an array (map) to work on within the hook callback method.
+	 *	The calling object method can interpret/use the payload changes afterward.
+	 *
+	 *	@access		public
+	 *	@param		string		$resource		Name of resource (e.G. Page or View)
+	 *	@param		string		$event			Name of hook event (e.G. onBuild or onRenderContent)
+	 *	@param		object|NULL	$context		Context object, will be available inside hook as $context
+	 *	@param		array		$payload		Map of hook payload data, will be available inside hook as $payload and $data
+	 *	@return		bool|NULL					TRUE if hook is chain-breaking, FALSE if hook is disabled or non-chain-breaking, NULL if no modules installed or no hooks defined
+	 *	@todo		remove, since calling hooks is captains work, only - the library implementation should not be able to do this
+	 */
+	public function callHookWithPayload( string $resource, string $event, ?object $context = NULL, array & $payload = [] ): ?bool;
+
 	public function count(): int;
 
 	/**
@@ -61,6 +114,16 @@ interface LibraryInterface extends Countable
 	 *	@return		array
 	 */
 	public function getAll( bool $activeOnly = TRUE ): array;
+
+	/**
+	 *	Returns module providing class of given controller, if resolvable.
+	 *	@access		public
+	 *	@param		string			$controller			Name of controller class to get module for
+	 *	@return		ModuleDefinition|NULL
+	 *	@todo		this is broken by supporting uppercase parts in controller class name, provided by general dispatcher
+	 *	@todo		move this method to dispatcher and adjust call in page resource
+	 */
+	public function getModuleFromControllerClassName( string $controller ): ?ModuleDefinition;
 
 	/**
 	 *	Indicates whether source has a module by a given module ID.

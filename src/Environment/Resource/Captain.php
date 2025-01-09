@@ -116,6 +116,38 @@ class Captain
 	}
 
 	/**
+	 *	Trigger an event hooked by modules on load.
+	 *	Events are defined by a resource key (= a scope) and an event key (= a trigger key).
+	 *	Example: resource "Auth" and event "onLogout" will call all hook class methods, defined in
+	 *	module definitions by <code><hook resource="Auth" event"onLogout">MyModuleHook::onAuthLogout</hook></code>.
+	 *
+	 *	There are 2 ways of carrying data between the hooked callback method and the calling object: context and payload.
+	 *
+	 * 	The context can provide a prepared data object or the calling object itself to the hook callback method.
+	 *	The hook can read from and write into this given context object.
+	 *
+	 * 	The more strict way is to use a prepared payload list reference, which is a prepared array.
+	 *	The payload list is an array (map) to work on within the hook callback method.
+	 *	The calling object method can interpret/use the payload changes afterward.
+	 *
+	 *	@param		string		$resource		Name of resource (e.G. Page or View)
+	 *	@param		string		$event			Name of hook event (e.G. onBuild or onRenderContent)
+	 *	@param		object|NULL	$context		Context object, will be available inside hook as $context
+	 *	@param		array|NULL	$payload		Map of hook payload data, will be available inside hook as $payload
+	 *	@return		bool|NULL					TRUE if hook is chain-breaking, FALSE if hook is disabled or non-chain-breaking, NULL if no modules installed or no hooks defined
+	 *	@throws		RuntimeException			if given static class method is not existing
+	 *	@throws		RuntimeException			if method call produces stdout output, for example warnings and notices
+	 *	@throws		RuntimeException			if method call is throwing an exception
+	 *	@throws		DomainException
+	 *	@throws		ReflectionException
+	 */
+	public function callHook( string $resource, string $event, ?object $context = NULL, array & $payload = NULL ): ?bool
+	{
+		$payload	??= [];
+		return $this->callHookWithPayload( $resource, $event, $context ?? $this, $payload );
+	}
+
+	/**
 	 *	...
 	 *	@access		public
 	 *	@param		string		$resource		Name of resource (e.G. Page or View)
@@ -129,11 +161,11 @@ class Captain
 	 *	@throws		DomainException
 	 *	@throws		ReflectionException
 	 */
-	public function callHook( string $resource, string $event, object $context, array & $payload = [] ): ?bool
+	public function callHookWithPayload( string $resource, string $event, object $context, array & $payload = [] ): ?bool
 	{
 		if( !$this->env->hasModules() )
 			return NULL;
-		if( array_key_exists( $resource."::".$event, $this->disabledHooks ) )					//  skip disabled hook 
+		if( array_key_exists( $resource."::".$event, $this->disabledHooks ) )					//  skip disabled hook
 			return FALSE;
 		if( array_key_exists( $resource.'::'.$event, $this->openHooks ) )						//  avoid recursion
 			return FALSE;

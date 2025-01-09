@@ -82,7 +82,7 @@ class Environment implements ArrayAccess
 	public const MODE_UNKNOWN	= 0;
 	public const MODE_DEV		= 1;
 	public const MODE_TEST		= 2;
-	public const MODE_STAGE	= 4;
+	public const MODE_STAGE		= 4;
 	public const MODE_LIVE		= 8;
 
 	public const MODES			= [
@@ -114,10 +114,10 @@ class Environment implements ArrayAccess
 	public PhpResource $php;
 
 	/**	@var	string						$uri			Application URI (absolute local path) */
-	public string $uri		= '';
+	public string $uri						= '';
 
 	/**	@var	string						$url			Application URI */
-	public string $url		= '';
+	public string $url						= '';
 
 	/** @var	string						$version		Framework version */
 	public string $version;
@@ -215,7 +215,7 @@ class Environment implements ArrayAccess
 
 		if( !$isFinal )
 			return;
-		$this->modules->callHook( 'Env', 'constructEnd', $this );									//  call module hooks for end of env construction
+		$this->captain->callHook( 'Env', 'constructEnd', $this );									//  call module hooks for end of env construction
 		$this->__onInit();																			//  default callback for construction end
 	}
 
@@ -724,7 +724,7 @@ class Environment implements ArrayAccess
 		$type		= AllPublicAclResource::class;
 		if( $this->hasModules() ){																	//  module support and modules available
 			$payload	= ['className' => NULL];
-			$isHandled	= $this->modules->callHookWithPayload( 'Env', 'initAcl', $this, $payload );			//  call related module event hooks
+			$isHandled	= $this->getCaptain()->callHook( 'Env', 'initAcl', $this, $payload );	//  call related module event hooks
 			if( $isHandled && NULL !== $payload['className'] )
 				$type	= $payload['className'];
 		}
@@ -796,7 +796,7 @@ class Environment implements ArrayAccess
 	}
 
 	/**
-	 *	Sets up configuration resource reading main config file and module config files.
+	 *	Sets up configuration resource and loads main config file.
 	 *	@access		protected
 	 *	@return		static
 	 *	@throws		FileNotExistingException
@@ -804,7 +804,7 @@ class Environment implements ArrayAccess
 	 */
 	protected function initConfiguration(): static
 	{
-		$this->config	= new ConfigurationResource( $this, $this->options );
+		$this->config	= new ConfigurationResource( $this );
 		$this->config->loadFile( $this->options['configFile'] ?? NULL );
 		$this->runtime->reach( 'env: config', 'Finished setup of base app configuration.' );
 		return $this;

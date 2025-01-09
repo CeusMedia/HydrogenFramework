@@ -59,8 +59,6 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 	public static string $relativePathOfCacheFile			= 'modules.cache.serial';
 
 
-	protected Environment $env;
-
 	protected string $modulePath;
 
 	protected array $modules			= [];
@@ -126,48 +124,6 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 	}
 
 	/**
-	 *	...
-	 *	@access		public
-	 *	@param		string		$resource		Name of resource (e.G. Page or View)
-	 *	@param		string		$event			Name of hook event (e.G. onBuild or onRenderContent)
-	 *	@param		object		$context		Context object, will be available inside hook as $context
-	 *	@return		integer						Number of called hooks for event
-	 *	@throws		RuntimeException			if given static class method is not existing
-	 *	@throws		RuntimeException			if method call produces stdout output, for example warnings and notices
-	 *	@throws		RuntimeException			if method call is throwing an exception
-	 *	@throws		ReflectionException
-	 */
-	public function callHook( string $resource, string $event, object $context ): int
-	{
-		$captain	= $this->env->getCaptain();
-		$payload	= [];
-		$countHooks	= $captain->callHook( $resource, $event, $context, $payload );
-		return (int) $countHooks;
-	}
-
-	/**
-	 *	...
-	 *	@access		public
-	 *	@param		string		$resource		Name of resource (e.G. Page or View)
-	 *	@param		string		$event			Name of hook event (e.G. onBuild or onRenderContent)
-	 *	@param		object		$context		Context object, will be available inside hook as $context
-	 *	@param		array		$payload		Map of hook payload data, will be available inside hook as $payload and $data
-	 *	@return		integer						Number of called hooks for event
-	 *	@throws		RuntimeException			if given static class method is not existing
-	 *	@throws		RuntimeException			if method call produces stdout output, for example warnings and notices
-	 *	@throws		RuntimeException			if method call is throwing an exception
-	 *	@throws		ReflectionException
-	 *	@todo		check if this is needed anymore and remove otherwise
-	 */
-	public function callHookWithPayload( string $resource, string $event, object $context, array & $payload ): int
-	{
-		$captain	= $this->env->getCaptain();
-		$countHooks	= $captain->callHook( $resource, $event, $context, $payload );
-//		remark( 'Library_Local@'.$event.': '.$countHooks );
-		return (int) $countHooks;
-	}
-
-	/**
 	 *	Removes module cache file if enabled in base config.
 	 *	@access		public
 	 *	@return		void
@@ -177,27 +133,6 @@ class Local extends AbstractLibrary implements Countable, LibraryInterface
 		$useCache	= (bool) $this->env->getConfig()->get( 'system.cache.modules' );
 		if( $useCache && file_exists( $this->cacheFile ) )
 			@unlink( $this->cacheFile );
-	}
-
-	/**
-	 *	Returns module providing class of given controller, if resolvable.
-	 *	@access		public
-	 *	@param		string			$controller			Name of controller class to get module for
-	 *	@return		ModuleDefinition|NULL
-	 */
-	public function getModuleFromControllerClassName( string $controller ): ?ModuleDefinition
-	{
-		$controllerPathName	= "Controller/".str_replace( "_", "/", $controller );
-		/** @var ModuleDefinition $module */
-		foreach( $this->env->getModules()->getAll() as $module ){
-			foreach( $module->files->classes as $file ){
-				$path	= pathinfo( $file->file, PATHINFO_DIRNAME ).'/';
-				$base	= pathinfo( $file->file, PATHINFO_FILENAME );
-				if( $path.$base === $controllerPathName )
-					return $module;
-			}
-		}
-		return NULL;
 	}
 
 	public function getPath(): string

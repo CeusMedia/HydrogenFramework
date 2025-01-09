@@ -476,7 +476,8 @@ class View
 		$words	= $this->getData( 'words', [] );
 		if( isset( $words[$section][$key] ) ){
 			$modes	= [-1 => 'prepend', 0 => 'set', 1 => 'append'];
-			$this->env->getPage()->setTitle( $words[$section][$key], $modes[$mode] );
+			if( $this->env instanceof WebEnvironment )
+				$this->env->getPage()->setTitle( $words[$section][$key], $modes[$mode] );
 		}
 		return $this;
 	}

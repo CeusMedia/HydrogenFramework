@@ -112,7 +112,7 @@ class Page extends HtmlPage
 
 		if( strlen( $title	= $config->get( 'app.name' ) ) )
 			$this->setTitle( $title );
-		$this->env->getModules()->callHook( 'Page', 'init', $this );								//  call related module event hooks
+		$this->env->getCaptain()->callHook( 'Page', 'init', $this );					//  call related module event hooks
 	}
 
 	/**
@@ -259,7 +259,7 @@ class Page extends HtmlPage
 			if( !$settings[$module->id] )
 				unset( $settings[$module->id] );
 		}
-		$modules->callHook( 'Page', 'applyModules', $this );										//  call related module event hooks
+		$this->env->getCaptain()->callHook( 'Page', 'applyModules', $this );										//  call related module event hooks
 
 		if( $this->env instanceof WebEnvironment ){
 			$settings['Env']	= [
@@ -291,6 +291,7 @@ class Page extends HtmlPage
 
 		$modules			= $this->env->getModules();												//  get installed modules
 		$controllerClass	= str_replace( ' ', '_', ucwords( str_replace( '/', ' ', $controller ) ) );
+
 		$module				= $modules->getModuleFromControllerClassName( $controllerClass );		//  try to get module of controller
 		if( $module ){																				//  module has been identified
 			$moduleKey		= str_replace( '_', '', $module->id );
@@ -302,7 +303,7 @@ class Page extends HtmlPage
 		$this->addBodyClass( 'site-'.$controllerKey.'-'.$actionKey );
 
 		$payload	= ['content' => $this->getBody()];
-		$modules->callHookWithPayload( 'Page', 'build', $this, $payload );									//  call related module event hooks
+		$this->env->getCaptain()->callHook( 'Page', 'build', $this, $payload );	//  call related module event hooks
 		$this->setBody( $payload['content'] );
 
 		if( $this->packStyleSheets && $this->env->getRequest()->has( 'flushStyleCache') ){
@@ -332,7 +333,7 @@ class Page extends HtmlPage
 			foreach( explode( " ", trim( $bodyAttributes['class'] ) ) as $class )
 				$classes[]	= $class;
 		$bodyAttributes['class']	= join( ' ', $classes );
-		$this->env->getModules()->callHook( 'App', 'respond', $this );						//  call related module event hooks
+		$this->env->getCaptain()->callHook( 'App', 'respond', $this );						//  call related module event hooks
 		return parent::build( $bodyAttributes, $htmlAttributes );
 	}
 

@@ -57,7 +57,6 @@ use SplFileObject;
  */
 class Source extends AbstractLibrary implements LibraryInterface
 {
-	protected Environment $env;
 	protected array $modules		= [];
 	protected Definition $source;
 
