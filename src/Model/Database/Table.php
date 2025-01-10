@@ -54,15 +54,24 @@ class Table extends PdoDatabaseTable
 	public function __construct( Environment $env )
 	{
 		$this->setEnv( $env );
-		$connection	= $this->env->getDatabase();
 
-		if( NULL !== $connection && method_exists( $connection, 'getConnection' ) )
-			$connection	= $connection->getConnection();
+		$database		= $env->getDatabase();
+		if( NULL === $database )
+			throw new RuntimeException( 'Database resource needed for '.static::class );
 
+		if( !method_exists( $database, 'getConnection' ) )
+			throw new RuntimeException( 'Database resource needed to implement getConnection' );
+
+		/** @var object $connection */
+		$connection	= $database->getConnection();
 		if( !$connection instanceof PdoConnection )
 			throw new RuntimeException( 'Set up database is not a fitting PDO connection' );
 
-		parent::__construct( $connection );
+		if( method_exists( $connection, 'getPrefix' ) )
+			$this->prefix	= $connection->getPrefix();
+
+		parent::__construct( $database->getConnection(), $this->prefix );
+
 		if( PDO::FETCH_CLASS === $this->fetchMode ){
 			if( '' === ( $this->className ?? '' ) )
 				throw new RuntimeException( 'Cannot set set mode FETCH_CLASS without entity class name' );
@@ -83,12 +92,6 @@ class Table extends PdoDatabaseTable
 	protected function setEnv( Environment $env ): self
 	{
 		$this->env		= $env;
-		$database		= $env->getDatabase();
-		if( NULL === $database )
-			throw new RuntimeException( 'Database resource needed for '.static::class );
-		if( method_exists( $database, 'getPrefix' ) )
-			$this->prefix	= $database->getPrefix();
-
 		return $this;
 	}
 }
