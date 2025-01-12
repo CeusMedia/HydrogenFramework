@@ -40,11 +40,20 @@ namespace CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition;
 
 class Relation
 {
+	public const TYPE_UNKNOWN		= 0;
+	public const TYPE_MODULE		= 1;
+	public const TYPE_PACKAGE		= 2;
+
+	public const TYPES				= [
+		self::TYPE_MODULE,
+		self::TYPE_PACKAGE,
+	];
+
 	/**	@var		string			$id */
 	public string $id;
 
-	/**	@var		string			$type */
-	public string $type;
+	/**	@var		int				$type */
+	public int $type;
 
 	/**	@var		string			$source */
 	public string $source;
@@ -57,12 +66,12 @@ class Relation
 
 	/**
 	 *	@param		string			$id
-	 *	@param		string			$type
+	 *	@param		int				$type
 	 *	@param		string			$source
 	 *	@param		string			$version
 	 *	@param		string			$relation
 	 */
-	public function __construct( string $id, string $type, string $source, string $version, string $relation )
+	public function __construct( string $id, int $type, string $source, string $version, string $relation )
 	{
 		$this->relation	= $relation;
 		$this->type		= $type;
