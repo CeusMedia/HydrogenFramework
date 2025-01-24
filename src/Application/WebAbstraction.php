@@ -47,20 +47,22 @@ use ReflectionException;
  */
 abstract class WebAbstraction implements ApplicationInterface
 {
-	/**	@var	string				$classEnvironment		Class Name of Application Environment to build */
-	public static string $classEnvironment					= WebEnvironment::class;
+	/**	@var	string			$classEnvironment	Class Name of Application Environment to build */
+	public static string $classEnvironment			= WebEnvironment::class;
 
-	public static array $modulesNeeded						= [];
+	/**	@var	array			$modulesNeeded */
+	public static array $modulesNeeded				= [];
 
-	protected array $components			= [];
+	/**	@var	array			$components */
+	protected array $components						= [];
 
-	/**	@var	WebEnvironment		$env					Application Environment Object */
+	/**	@var	WebEnvironment	$env				Application Environment Object */
 	protected WebEnvironment $env;
 
 	/**
 	 *	Constructor.
 	 *	@access		public
-	 *	@param		Environment|NULL		$env				Framework Environment
+	 *	@param		Environment|NULL		$env	Framework Environment
 	 *	@return		void
 	 *	@throws		ReflectionException
 	 */
@@ -71,11 +73,10 @@ abstract class WebAbstraction implements ApplicationInterface
 
 		$this->env	= $env;
 
-		if( static::$modulesNeeded )																//  needed modules are defined
+		if( [] !== static::$modulesNeeded )															//  needed modules are defined
 			$this->checkNeededModules();															//  check for missing modules
 
-
-		if( $this->env->getConfig()->get( 'system.compat.oldCommon', FALSE ) )			//  look into config for compat flag
+		if( $env->getConfig()->get( 'system.compat.oldCommon', FALSE ) )				//  look into config for compat flag
 			require_once 'vendor/ceus-media/common/src/compat8.php';								//  ... for CeusMedia::Common 0.8.x without namespaces
 	}
 
@@ -162,7 +163,7 @@ abstract class WebAbstraction implements ApplicationInterface
 		$instanceId	= $config->get( 'app.setup.instanceId' );
 		$baseUrl	= $config->get( 'app.setup.url' );
 		$baseUrl	.= 'admin/module/installer/view/';
-		$list	= [];
+		$list		= [];
 		foreach( $modules as $moduleId ){
 			$url	= $baseUrl.$moduleId.'?selectInstanceId='.$instanceId;
 			$list[]	= '<li><a href="'.$url.'">'.$moduleId.'</a></li>';
@@ -179,10 +180,9 @@ abstract class WebAbstraction implements ApplicationInterface
 	 */
 	protected function setViewComponents( array $components = [] ): self
 	{
-		foreach( $components as $key => $component ){
+		foreach( $components as $key => $component )
 			if( !array_key_exists( $key, $this->components ) )
 				$this->components[$key]	= $component;
-		}
 		return $this;
 	}
 
@@ -197,8 +197,7 @@ abstract class WebAbstraction implements ApplicationInterface
 	protected function view( string $templateFile = 'master.php', string $hookEvent = 'getMasterTemplate' ): string
 	{
 		$templateFile	= $this->realizeMasterOrErrorTemplateFile( $templateFile, $hookEvent );
-
-		$view	= new View( $this->env );
+		$view			= new View( $this->env );
 		return $view->loadTemplateFile( $templateFile, $this->components );
 	}
 }

@@ -21,7 +21,9 @@ use RuntimeException;
 abstract class Abstraction
 {
 	public static string $moduleId			= '';
+
 	public static string $prefixModel		= 'Model_';
+
 	public static string $prefixView		= 'View_';
 
 	/**	@var	string						$alias			Optional alternative path for restarting */

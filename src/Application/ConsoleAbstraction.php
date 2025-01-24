@@ -45,13 +45,14 @@ use ReflectionException;
  */
 abstract class ConsoleAbstraction implements ApplicationInterface
 {
-	/**	@var		string								$classEnvironment		Class Name of Application Environment to build */
-	public static string $classEnvironment				= ConsoleEnvironment::class;
+	/**	@var		string						$classEnvironment		Class Name of Application Environment to build */
+	public static string $classEnvironment		= ConsoleEnvironment::class;
 
-	/**	@var		ConsoleEnvironment					$env					Application Environment Object */
+	/**	@var		array						$modulesNeeded */
+	public static array $modulesNeeded			= [];
+
+	/**	@var		ConsoleEnvironment			$env					Application Environment Object */
 	protected ConsoleEnvironment $env;
-
-	public static array $modulesNeeded					= [];
 
 	/**
 	 *	@param		Environment|null $env
@@ -59,10 +60,9 @@ abstract class ConsoleAbstraction implements ApplicationInterface
 	 */
 	public function __construct( ?Environment $env = NULL )
 	{
-		if( NULL === $env )
-			$env	= ObjectFactory::createObject( static::$classEnvironment );
-
 		/** @var ConsoleEnvironment $env */
+		$env ??= ObjectFactory::createObject( static::$classEnvironment );
+
 		$this->env	= $env;
 
 		if( static::$modulesNeeded )																//  needed modules are defined

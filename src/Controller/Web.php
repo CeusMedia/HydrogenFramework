@@ -107,12 +107,12 @@ abstract class Web extends Abstraction
 
 		/** @var string $controllerName */
 		$controllerName		= preg_replace( "/^Controller_/", "", static::class );				//  get controller name from class name
-		$this->defaultPath	= strtolower( str_replace( '_', '/', $controllerName ) );				//  to guess default controller URI path
+		$this->defaultPath	= strtolower( str_replace( '_', '/', $controllerName ) );	//  to guess default controller URI path
 		$this->path			= $this->defaultPath;													//  and note this as controller path
 
 		$data				= ['controllerName' => $controllerName, 'path' => ''];					//  with cut controller name
-		$this->callHook( 'Controller', 'onDetectPath', $this, $data );								//  to get preferred controller URI path
-		if( strlen( trim( $data['path'] ) ) !== 0 )
+		$this->callHook( 'Controller', 'onDetectPath', $this, $data );		//  to get preferred controller URI path
+		if( '' !== trim( $data['path'] ) )
 			$this->path		= $data['path'];														//  and set if has been resolved
 
 //		$arguments		= array_slice( func_get_args(), 1 );										//  collect additional arguments for extended logic classes
@@ -128,6 +128,9 @@ abstract class Web extends Abstraction
 		$env->getRuntime()->reach( 'Controller('.static::class.'): done' );				//  log time of construction
 	}
 
+	/**
+	 *	@return		View|NULL
+	 */
 	public function getView(): ?View
 	{
 		return $this->view;
@@ -211,18 +214,18 @@ abstract class Web extends Abstraction
 	}
 
 	/**
-	 *	@param		mixed|NULL		$input
-	 *	@return		mixed|null
+	 *	@param		?mixed		$input
+	 *	@return		?array
 	 *	@todo		remove if not used, purpose unclear
 	 */
-	protected function compactFilterInput( mixed $input ): mixed
+	protected function compactFilterInput( mixed $input ): ?array
 	{
 		if( is_object( $input ) || is_resource( $input ) || is_null( $input ) )						//  input is of invalid type
 			return NULL;																			//  break with empty result
 		if( is_array( $input ) ){																	//  input is an array
 			foreach( $input as $nr => $chunk ){														//  iterate map pairs
 				$chunk	= $this->compactFilterInput( $chunk );										//  compact map pair data chunk
-				if( !( is_array( $chunk ) && count( $chunk ) ) && !strlen( $chunk ) )				//  chunk is empty
+				if( NULL === $chunk )																//  chunk is empty
 					unset( $input[$nr] );															//  remove chunk pair from map
 			}
 		}
@@ -264,6 +267,7 @@ abstract class Web extends Abstraction
 	 *	@return		void
 	 *	@throws		JsonException
 	 *	@todo		add deprecation log entry
+	 *	@deprecated	not needed, since AJAX controller is available
 	 */
 	protected function handleJsonResponse(string|bool $status, mixed $data, ?int $httpStatusCode = NULL ): void
 	{
@@ -298,6 +302,7 @@ abstract class Web extends Abstraction
 	 *	@return		void
 	 *	@throws		JsonException
 	 *	@todo		add deprecation log entry
+	 *	@deprecated	not needed, since AJAX controller is available
 	 */
 	protected function handleJsonErrorResponse( mixed $data, ?int $httpStatusCode = NULL ): void
 	{
@@ -336,7 +341,7 @@ abstract class Web extends Abstraction
 	 *	Attention: This *WILL* effect the URL displayed in browser / need request clients (eG. cURL) to allow forwarding.
 	 *
 	 *	Alias for restart with parameters $allowForeignHost set to TRUE and $withinModule to FALSE.
-	 *	Similar to: $this->restart( 'http://foreign.tld/', FALSE, NULL, TRUE );
+	 *	Similar to: $this->restart( 'https://foreign.tld/', FALSE, NULL, TRUE );
 	 *
 	 *	HTTP status will be 200 or second parameter.
 	 *
@@ -366,8 +371,8 @@ abstract class Web extends Abstraction
 	 *	If third parameter is set to a valid HTTP status code, the code and its HTTP status text will be set for response.
 	 *
 	 *	If forth parameter is set to TRUE, redirects to URIs outside the current domain are allowed.
-	 *	This would look like this: $this->restart( 'http://foreign.tld/', FALSE, NULL, TRUE );
-	 *	There is a shorter alias: $this->relocate( 'http://foreign.tld/' );
+	 *	This would look like this: $this->restart( 'https://foreign.tld/', FALSE, NULL, TRUE );
+	 *	There is a shorter alias: $this->relocate( 'https://foreign.tld/' );
 	 *
 	 *	@access		protected
 	 *	@param		string|NULL		$uri				URI to request
@@ -384,13 +389,13 @@ abstract class Web extends Abstraction
 	protected function restart( ?string $uri = NULL, bool $withinModule = FALSE, ?int $status = NULL, bool $allowForeignHost = FALSE, int $modeFrom = 0 ): void
 	{
 		$mode	= 'ext';
-		if( !str_starts_with( $uri ?? '', 'http' ) ){														//  URI is not starting with HTTP scheme
+		if( !str_starts_with( $uri ?? '', 'http' ) ){												//  URI is not starting with HTTP scheme
 			$mode	= 'int';
 			if( $withinModule ){																	//  redirection is within module
 				$mode	= 'mod';
-				$controller	= $this->env->getRequest()->get( '__controller', '' );				//  get current controller
+				$controller	= $this->env->getRequest()->get( '__controller', '' );		//  get current controller
 				$controller	= $this->alias ?: $controller;							//
-				$uri		= $controller.( strlen( $uri ?? '' ) ? '/'.$uri : '' );						//
+				$uri		= $controller.( strlen( $uri ?? '' ) ? '/'.$uri : '' );			//
 			}
 		}
 		if( $this->logRestarts )
@@ -445,10 +450,10 @@ abstract class Web extends Abstraction
 	/**
 	 *	Loads View Class of called Controller.
 	 *	@access		protected
-	 *	@param		boolean		$force			Flag: throw exception if view class is missing, default: yes
-	 *	@return		static						Self controller instance, possibly extended by a view class instance
-	 *	@throws		RuntimeException			in force mode if view class for controller is not existing
-	 *	@throws		RuntimeException			if view class is not inheriting Hydrogen view class
+	 *	@param		boolean		$force		Flag: throw exception if view class is missing, default: yes
+	 *	@return		static					Self controller instance, possibly extended by a view class instance
+	 *	@throws		RuntimeException		in force mode if view class for controller is not existing
+	 *	@throws		RuntimeException		if view class is not inheriting Hydrogen view class
 	 *	@throws		ReflectionException
 	 */
 	protected function setupView( bool $force = TRUE ): static

@@ -1,4 +1,5 @@
 <?php /** @noinspection PhpMultipleClassDeclarationsInspection */
+declare(strict_types=1);
 
 /**
  *	Base class for model entity classes.
@@ -7,6 +8,7 @@
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/Common
  */
+
 namespace CeusMedia\HydrogenFramework;
 
 use ArrayAccess;
@@ -16,7 +18,12 @@ use CeusMedia\Common\Exception\Runtime;
 use ReflectionProperty;
 
 /**
- * @implements ArrayAccess<string, mixed>
+ *	Base class for model entity classes.
+ *	@category		Library
+ *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
+ *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
+ *	@link			https://github.com/CeusMedia/Common
+ *	@implements		ArrayAccess<string, mixed>
  */
 class Entity implements ArrayAccess
 {
@@ -50,8 +57,9 @@ class Entity implements ArrayAccess
 	{
 		/** @var array $array */
 		$array	= ( $data instanceof Dictionary ) ? $data->getAll() : $data;
-		$array	= array_merge( self::$presetValues, $array );
 
+		self::presetStaticValues( $array );
+		self::presetDynamicValues( $array );
 		self::checkMandatoryFields( $array );
 		self::checkValues( $array );
 
@@ -65,14 +73,16 @@ class Entity implements ArrayAccess
 
 	/**
 	 *	@param		string		$key
-	 *	@return		int|float|string|array|object|NULL
+	 *	@return		bool|int|float|string|array|object|NULL
 	 */
-	public function get( string $key ): int|float|string|array|object|NULL
+	public function get( string $key ): bool|int|float|string|array|object|NULL
 	{
 		return self::isPublicProperty( $key ) ? $this->$key : NULL;
 	}
 
 	/**
+	 *	Indicates whether a field key is backed by a (public) property and its value has been set.
+	 *	Attention: Returns FALSE if value is NULL, even if property exists and is public.
 	 *	@param		string		$key
 	 *	@return		bool
 	 */
@@ -82,11 +92,54 @@ class Entity implements ArrayAccess
 	}
 
 	/**
-	 *	@param		string								$key
-	 *	@param		int|float|string|array|object|NULL	$value
+	 *	Implements ArrayAccess interface.
+	 *	@param		mixed		$offset		ArrayAccess offset string
+	 *	@return		bool
+	 */
+	public function offsetExists( mixed $offset ): bool
+	{
+		return $this->has( $offset );
+	}
+
+	/**
+	 *	Implements ArrayAccess interface.
+	 *	@param		mixed		$offset		ArrayAccess offset string
+	 *	@return		mixed
+	 */
+	public function offsetGet( mixed $offset ): mixed
+	{
+		return $this->get( $offset );
+	}
+
+	/**
+	 *	Implements ArrayAccess interface.
+	 *	@param		mixed		$offset		ArrayAccess offset string
+	 *	@param		mixed		$value		Value to set
+	 *	@return		void
+	 */
+	public function offsetSet( mixed $offset, mixed $value ): void
+	{
+		if( NULL === $offset )
+			throw Runtime::create( 'Key must not be null' );
+		$this->set( $offset, $value );
+	}
+
+	/**
+	 *	Implements ArrayAccess interface.
+	 *	@param		mixed		$offset		ArrayAccess offset string
+	 *	@return		void
+	 */
+	public function offsetUnset( mixed $offset ): void
+	{
+		$this->set( $offset );
+	}
+
+	/**
+	 *	@param		string									$key
+	 *	@param		bool|int|float|string|array|object|NULL	$value
 	 *	@return		self
 	 */
-	public function set( string $key, int|float|string|array|object|null $value ): self
+	public function set( string $key, bool|int|float|string|array|object $value = NULL ): self
 	{
 		if( property_exists( $this, $key ) )
 			$this->$key	= $value;
@@ -94,13 +147,23 @@ class Entity implements ArrayAccess
 	}
 
 	/**
+	 *	Returns map of fields (public properties) as array.
 	 *	@return		array
 	 */
 	public function toArray(): array
 	{
-		return array_map( function( $value ){
-			return $value;
-		}, get_object_vars( $this ) );
+		return array_filter( get_object_vars( $this ), function ($key){
+			return static::isPublicProperty( $key );
+		}, ARRAY_FILTER_USE_KEY );
+	}
+
+	/**
+	 *	Returns map of fields (public properties) as dictionary.
+	 *	@return		Dictionary
+	 */
+	public function toDictionary(): Dictionary
+	{
+		return new Dictionary( $this->toArray() );
 	}
 
 
@@ -114,10 +177,23 @@ class Entity implements ArrayAccess
 				throw MissingException::create( 'Missing data for key "'.$key.'"' );
 	}
 
+	/**
+	 *	Checks sanity of values.
+	 *	Method is empty by default, can be extended for custom handling on your entities.
+	 *	Throw explanatory exceptions on failure.
+	 *	@param		array		$data		Reference to data array to work on
+	 *	@return		void
+	 */
 	protected static function checkValues( array $data ): void
 	{
 	}
 
+	/**
+	 *	Indicates whether a field (or column) name leads to a public member / property.
+	 *	Is used by several methods to enable reading from and writing to entity property.
+	 *	@param		string		$key
+	 *	@return		bool
+	 */
 	protected static function isPublicProperty( string $key ): bool
 	{
 		if( !property_exists( static::class, $key ) )
@@ -126,25 +202,28 @@ class Entity implements ArrayAccess
 		return $reflection->isPublic();
 	}
 
-	public function offsetExists( mixed $offset ): bool
+	/**
+	 *	Applies preset values dynamically created on construction.
+	 *	Method is empty by default, can be extended for custom handling on your entities.
+	 *	Apply your changes directly to the given array reference.
+	 *	@param		array		$array		Reference to data array to work on
+	 *	@return		void
+	 */
+	protected static function presetDynamicValues( array & $array ): void
 	{
-		return $this->has( $offset );
 	}
 
-	public function offsetGet( mixed $offset ): mixed
+	/**
+	 *	Applies preset fixed values on construction.
+	 *	Method extends given array by statically defined preset values.
+	 *	Sets fields only, if not set in given array.
+	 *	Method can be extended for custom handling on your entities.
+	 *	Apply your changes directly to the given array reference.
+	 *	@param		array		$array		Reference to data array to work on
+	 *	@return		void
+	 */
+	protected static function presetStaticValues( array & $array ): void
 	{
-		return $this->get( $offset );
-	}
-
-	public function offsetSet( mixed $offset, mixed $value ): void
-	{
-		if( NULL === $offset )
-			throw Runtime::create( 'Key must not be null' );
-		$this->set( $offset, $value );
-	}
-
-	public function offsetUnset( mixed $offset ): void
-	{
-		$this->set( $offset, NULL );
+		$array	= array_merge( self::$presetValues, $array );
 	}
 }

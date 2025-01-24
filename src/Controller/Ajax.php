@@ -12,8 +12,6 @@ use CeusMedia\Common\Net\HTTP\PartitionSession;
 use CeusMedia\Common\Net\HTTP\Request as HttpRequest;
 use CeusMedia\Common\Net\HTTP\Response as HttpResponse;
 use CeusMedia\Common\Net\HTTP\Response\Sender as HttpResponseSender;
-use CeusMedia\Common\UI\OutputBuffer;
-use CeusMedia\Common\XML\Element;
 use CeusMedia\HydrogenFramework\Environment as Environment;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 use Exception;
@@ -33,11 +31,11 @@ abstract class Ajax extends Abstraction
 
 	public static array $supportedCompressions	= ['gzip', 'deflate'];
 
-	public static array $responseCallback			= [];
+	public static array $responseCallback		= [];
 
-	public static int $responseStrategy				= self::RESPONSE_STRATEGY_DEFAULT;
+	public static int $responseStrategy			= self::RESPONSE_STRATEGY_DEFAULT;
 
-	public static int $responseFormat				= self::RESPONSE_FORMAT_JSON;
+	public static int $responseFormat			= self::RESPONSE_FORMAT_JSON;
 
 	protected WebEnvironment $env;
 

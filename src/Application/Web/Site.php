@@ -37,6 +37,7 @@ use CeusMedia\HydrogenFramework\Dispatcher\General as GeneralDispatcher;
 use CeusMedia\HydrogenFramework\Environment\Resource\Database\PDO;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 use Exception;
+use Throwable;
 
 /**
  *	Application class for an MVC website.
@@ -52,7 +53,7 @@ class Site extends WebAbstraction implements ApplicationInterface
 {
 	public static bool $checkClassActionArguments	= TRUE;
 
-	/**	@var		string			$content			Collected Content to respond */
+	/**	@var		string			$content		Collected Content to respond */
 	protected string $content		= '';
 
 	protected ?OutputBuffer	$devBuffer	= NULL;
@@ -70,7 +71,7 @@ class Site extends WebAbstraction implements ApplicationInterface
 
 		$displayErrors	= $this->env->getConfig()->get( 'system.display.errors' );				//  get error mode from config
 		$displayErrors	= is_null( $displayErrors ) || $displayErrors;								//  if not set: enable error display by default
-		error_reporting( $displayErrors ? E_ALL : 0 );									//  set error reporting
+		error_reporting( $displayErrors ? E_ALL : 0 );										//  set error reporting
 		try{
 			$this->respond( $this->main() );														//	send rendered result of dispatched controller action
 			$this->logOnComplete();																	//  handle logging after responding
@@ -78,7 +79,6 @@ class Site extends WebAbstraction implements ApplicationInterface
 			return 0;
 		}
 		catch( Exception $e ){
-
 			HtmlExceptionPage::display( $e );
 			return 1;
 		}
@@ -112,11 +112,11 @@ class Site extends WebAbstraction implements ApplicationInterface
 				$dispatcher->defaultController	= $defaultController;
 			if( $defaultAction )
 				$dispatcher->defaultAction		= $defaultAction;
-			$output	= $dispatcher->dispatch( $this->devBuffer );														//  get requested content
-			$this->setViewComponents( array(														//  note for main template
+			$output	= $dispatcher->dispatch( $this->devBuffer );									//  get requested content
+			$this->setViewComponents( [																//  note for main template
 				'controller'	=> $request->get( '__controller' ),							//  called controller
 				'action'		=> $request->get( '__action' )									//  called action
-			) );
+			] );
 		}
 /*		catch( ErrorException $e ){
 			if( getEnv( 'HTTP_HOST' ) ){
@@ -179,9 +179,10 @@ class Site extends WebAbstraction implements ApplicationInterface
 		if( $this->env->has( 'messenger' ) )
 			$data['messenger']	= $this->env->getMessenger();										//  UI messages for user
 
-		if( $this->env->has( 'language' ) ){														//  language support is available
-			$data['language']	= $this->env->getLanguage()->getLanguage();							//  note document language
-			$data['words']		= $this->env->getLanguage()->getWords( 'main', FALSE, FALSE );		//  note main UI word pairs
+		if( $this->env->has( 'language' ) ){													//  language support is available
+			$language			= $this->env->getLanguage();
+			$data['language']	= $language->getLanguage();											//  note document language
+			$data['words']		= $language->getWords( 'main', FALSE, FALSE );		//  note main UI word pairs
 		}
 		try{
 			$content	= $this->control();															//  dispatch and run request
@@ -192,7 +193,7 @@ class Site extends WebAbstraction implements ApplicationInterface
 			$templateFile		= 'master.php';
 			$templateHook		= 'getMasterTemplate';
 		}
-		catch( \Throwable $e ){
+		catch( Throwable $e ){
 			$this->env->getLog()?->logException( $e, $this );
 			$data['e']			= $e;
 			$templateFile		= 'error.php';
