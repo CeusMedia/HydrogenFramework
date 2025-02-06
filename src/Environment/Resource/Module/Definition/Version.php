@@ -20,7 +20,7 @@
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module.Definition
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2024 Christian Würker (ceusmedia.de)
+ *	@copyright		2024-2025 Christian Würker (ceusmedia.de)
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -33,7 +33,7 @@ namespace CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition;
  *	@category		Library
  *	@package		CeusMedia.HydrogenFramework.Environment.Resource.Module.Definition
  *	@author			Christian Würker <christian.wuerker@ceusmedia.de>
- *	@copyright		2024 Christian Würker (ceusmedia.de)
+ *	@copyright		2024-2025 Christian Würker (ceusmedia.de)
  *	@license		https://www.gnu.org/licenses/gpl-3.0.txt GPL 3
  *	@link			https://github.com/CeusMedia/HydrogenFramework
  */
@@ -48,7 +48,7 @@ class Version
 	/**	@var		string|NULL		$available */
 	public ?string $available		= NULL;
 
-	/**	@var		array			$log */
+	/**	@var		array<object{version: string, note: string}>	$log */
 	public array $log				= [];
 
 	/**
@@ -59,7 +59,12 @@ class Version
 		$this->current	= $current;
 	}
 
-	public function addLog( string $message, string $version ): self
+	/**
+	 *	@param		string		$message
+	 *	@param		string		$version
+	 *	@return		static
+	 */
+	public function addLog( string $message, string $version ): static
 	{
 		$this->log[]	= (object) [
 			'note'		=> $message,

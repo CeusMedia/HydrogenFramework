@@ -36,6 +36,7 @@ use CeusMedia\TemplateEngine\Template as TemplateEngine;
 
 use InvalidArgumentException;
 use ReflectionException;
+use Throwable;
 
 /**
  *	Generic View Class of Framework Hydrogen.
@@ -48,17 +49,17 @@ use ReflectionException;
  */
 class Content
 {
-	/**	@var	array					$data			Collected Data for View */
-	protected array $data				= [];
+	/**	@var	array						$data			Collected Data for View */
+	protected array $data					= [];
 
-	/**	@var	Environment				$env			Environment Object */
+	/**	@var	Environment					$env			Environment Object */
 	protected Environment $env;
 
-	/**	@var	string					$fileKey		Key of content file */
-	protected string $fileKey			= '';
+	/**	@var	string						$fileKey		Key of content file */
+	protected string $fileKey				= '';
 
-	protected string $content	= '';
-	protected string $dataType	= 'HTML';
+	protected string $content				= '';
+	protected string $dataType				= 'HTML';
 
 	protected bool $useContentProcessors	= TRUE;
 	protected bool $useTemplateEngines		= TRUE;
@@ -70,7 +71,6 @@ class Content
 	 *	@param		string			$content		Already created content to apply hook to
 	 *	@param		string			$dataType
 	 *	@return		string
-	 *	@throws		ReflectionException
 	 */
 	public static function applyContentProcessors( Environment $env, object $context, string $content, string $dataType = 'HTML' ): string
 	{
@@ -78,7 +78,12 @@ class Content
 			'content'	=> $content,
 			'type'		=> $dataType
 		];
-		$env->getCaptain()->callHook( 'View', 'onRenderContent', $context, $payload );
+		try{
+			$env->getCaptain()->callHook( 'View', 'onRenderContent', $context, $payload );
+		}
+		catch( Throwable $e ){
+			$env->getLog()?->logException( $e );
+		}
 		return $payload['content'];
 	}
 
@@ -100,11 +105,11 @@ class Content
 	 *	@param		string			$key
 	 *	@param		mixed			$value
 	 *	@param		string|NULL		$topic			Optional: Topic Name of Data
-	 *	@return		self
+	 *	@return		static
 	 */
-	public function addData( string $key, mixed $value, ?string $topic = NULL ): self
+	public function addData( string $key, mixed $value, ?string $topic = NULL ): static
 	{
-		return $this->setData( array( $key => $value ), $topic );
+		return $this->setData( [$key => $value], $topic );
 	}
 
 	/**
@@ -114,7 +119,7 @@ class Content
 	 */
 	public function & getData( string $key = NULL, mixed $autoSetTo = NULL ): mixed
 	{
-		if( !$key )
+		if( NULL === $key )
 			return $this->data;
 		if( !isset( $this->data[$key] ) && !is_null( $autoSetTo ) )
 			$this->addData( $key, $autoSetTo );
@@ -123,29 +128,36 @@ class Content
 		throw new InvalidArgumentException( 'No view data by key "'.htmlentities( $key, ENT_QUOTES, 'UTF-8' ).'"' );
 	}
 
+	/**
+	 *	@param		?string		$path
+	 *	@return		bool
+	 */
 	public function has( ?string $path = NULL ): bool
 	{
 		$uri	= $this->getContentUri( $this->fileKey, $path );
 		return file_exists( $uri );
 	}
 
+	/**
+	 *	@param		string		$key
+	 *	@return		bool
+	 */
 	public function hasData( string $key ): bool
 	{
 		return isset( $this->data[$key] );
 	}
 
 	/**
-	 *	@param		string|NULL		$path
 	 *	@return		string
 	 *	@throws		ReflectionException
 	 */
-	public function render( ?string $path = NULL ): string
+	public function render(): string
 	{
 		$content	= $this->content;
 		if( $this->useTemplateEngines )															//  apply data to content
 			$content	= TemplateEngine::renderString( $content, $this->data );
 		if( $this->useContentProcessors )														//  apply modules to content
-			$content	= self::applyContentProcessors( $this->env, $this, $content, $this->dataType );
+			$content	= static::applyContentProcessors( $this->env, $this, $content, $this->dataType );
 		return $content;
 	}
 
@@ -177,11 +189,11 @@ class Content
 	/**
 	 *	Sets Data of View.
 	 *	@access		public
-	 *	@param		array			$data			Array of Data for View
-	 *	@param		string|NULL		$topic			Optional: Topic Name of Data
-	 *	@return		self
+	 *	@param		array		$data		Array of Data for View
+	 *	@param		?string		$topic		Optional: Topic Name of Data
+	 *	@return		static
 	 */
-	public function setData( array $data, ?string $topic = NULL ): self
+	public function setData( array $data, ?string $topic = NULL ): static
 	{
 		if( '' !== ( $topic ?? '' ) ){
 			if( !isset( $this->data[$topic] ) )
@@ -196,6 +208,10 @@ class Content
 		return $this;
 	}
 
+	/**
+	 *	@param		string		$type
+	 *	@return		static
+	 */
 	public function setDataType( string $type = 'HTML' ): static
 	{
 		$this->dataType	= $type;
@@ -231,6 +247,11 @@ class Content
 	{
 	}
 
+	/**
+	 *	@param		string		$fileKey
+	 *	@param		?string		$path
+	 *	@return		string
+	 */
 	protected function getContentUri( string $fileKey, string $path = NULL ): string
 	{
 		$path		= preg_replace( '/^(.+)(\/)*$/U', '\\1/', $path ?? '' );

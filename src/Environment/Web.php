@@ -500,7 +500,6 @@ class Web extends Environment
 	 *	@param		?string		$keyPartitionName
 	 *	@param		?string		$keySessionName
 	 *	@return		static
-	 *	@throws		ReflectionException
 	 */
 	protected function initSession( string $keyPartitionName = NULL, string $keySessionName = NULL ): static
 	{

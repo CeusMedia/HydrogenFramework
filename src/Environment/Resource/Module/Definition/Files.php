@@ -39,24 +39,24 @@ namespace CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition;
  */
 class Files
 {
-	/** @var array $classes */
+	/** @var array<File> $classes */
 	public array $classes		= [];
 
-	/** @var array $locales */
+	/** @var array<File> $locales */
 	public array $locales		= [];
 
-	/** @var array $templates */
+	/** @var array<File> $templates */
 	public array $templates		= [];
 
-	/** @var array $styles */
+	/** @var array<File> $styles */
 	public array $styles		= [];
 
-	/** @var array $scripts */
+	/** @var array<File> $scripts */
 	public array $scripts		= [];
 
-	/** @var array $images */
+	/** @var array<File> $images */
 	public array $images		= [];
 
-	/** @var array $files */
+	/** @var array<File> $files */
 	public array $files			= [];
 }

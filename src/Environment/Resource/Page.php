@@ -197,50 +197,50 @@ class Page extends HtmlPage
 			];
 			/** @var FileComponent $style */
 			foreach( $module->files->styles as $style ){											//  iterate module style files
-				if( !empty( $style->load ) && $style->load == "auto" ){								//  style file is to be loaded always
+				if( !empty( $style->load ) && 'auto' === $style->load ){							//  style file is to be loaded always
 					$source	= !empty( $style->source ) ? $style->source : NULL;						//  get source attribute if possible
-					$level	= self::interpretLoadLevel( $style->level ?? Captain::LEVEL_MID );		//  get load level (top, mid, end), default: mid
+					$level	= self::interpretLoadLevel( $style->level ?? Captain::LEVEL_MID );	//  get load level (top, mid, end), default: mid
 					if( preg_match( "/^[a-z]+:\/\/.+$/", $style->file ) )					//  style file is absolute URL
-						$this->css->get( 'theme' )->addUrl( $style->file, $level );							//  add style file URL
-					else if( $source == 'primer' )													//  style file is in primer theme
+						$this->css->get( 'theme' )->addUrl( $style->file, $level );					//  add style file URL
+					else if( 'primer' === $source )													//  style file is in primer theme
 						$this->addPrimerStyle( $style->file, $level );								//  load style file from primer theme folder
-					else if( $source == 'common' )													//  style file is in common theme
+					else if( 'common' === $source )													//  style file is in common theme
 						$this->addCommonStyle( $style->file, $level );								//  load style file from common theme folder
-					else if( $source == 'lib' ){													//  style file is in styles library, which is enabled by configured path
+					else if( 'lib' === $source ){													//  style file is in styles library, which is enabled by configured path
 						if( !strlen( trim( $pathStylesLib ) ) )
 							throw new RuntimeException( 'Path to style library "path.styles.lib" is not configured' );
-						$this->css->get( 'lib' )->addUrl( $pathStylesLib.$style->file, $level );				//  load style file from styles library
+						$this->css->get( 'lib' )->addUrl( $pathStylesLib.$style->file, $level );	//  load style file from styles library
 					}
-					else if( $source == 'scripts-lib' && $pathScriptsLib ){							//  style file is in scripts library, which is enabled by configured path
+					else if( 'scripts-lib' === $source && $pathScriptsLib ){						//  style file is in scripts library, which is enabled by configured path
 						if( !strlen( trim( $pathScriptsLib ) ) )
 							throw new RuntimeException( 'Path to script library "path.scripts.lib" is not configured' );
-						$this->css->get( 'primer' )->addUrl( $pathScriptsLib.$style->file, $level );			//  load style file from scripts library
+						$this->css->get( 'primer' )->addUrl( $pathScriptsLib.$style->file, $level );	//  load style file from scripts library
 					}
-					else if( $source == 'theme' || !$source )										//  style file is in custom theme
+					else if( 'theme' === $source || !$source )										//  style file is in custom theme
 						$this->addThemeStyle( $style->file, $level );								//  load style file from custom theme folder
 					else																			//  style file is in an individual source folder within themes folder
-						$this->css->get( 'primer' )->addUrl( /*$path.$source.'/'.*/$style->file );				//  load style file /*from source folder within themes folder*/
+						$this->css->get( 'primer' )->addUrl( /*$path.$source.'/'.*/$style->file );	//  load style file /*from source folder within themes folder*/
 				}
 			}
 			/** @var FileComponent $script */
 			foreach( $module->files->scripts as $script ){											//  iterate module script files
-				if( !empty( $script->load ) && $script->load == "auto" ){							//  script file is to be loaded always
+				if( !empty( $script->load ) && 'auto' === $script->load ){							//  script file is to be loaded always
 					$source	= empty( $script->source ) ? 'local' : $script->source;
-					$level	= self::interpretLoadLevel( $script->level ?? Captain::LEVEL_MID );		//  get load level (top, mid, end, ready), default: mid
+					$level	= self::interpretLoadLevel( $script->level ?? Captain::LEVEL_MID );	//  get load level (top, mid, end, ready), default: mid
 					$top	= !empty( $script->top ) || $level === Captain::LEVEL_TOP;				//  get flag attribute for appending on top
-					if( $source == 'lib' ){															//  script file is in script library
+					if( 'lib' === $source ){														//  script file is in script library
 						if( $top )																	//
-							$this->addJavaScript( $pathScriptsLib.$script->file );					//
+							$this->addJavaScript( $pathScriptsLib.$script->file );				//
 						else																		//
-							$this->js->addUrl( $pathScriptsLib.$script->file/*, $level*/ );			//  load script file from script library
+							$this->js->addUrl( $pathScriptsLib.$script->file/*, $level*/ );		//  load script file from script library
 					}
-					else if( $source == 'local' ){													//  script file is in app scripts folder
+					else if( 'local' === $source ){													//  script file is in app scripts folder
 						if( $top )																	//
-							$this->addJavaScript( $pathScripts.$script->file );						//
+							$this->addJavaScript( $pathScripts.$script->file );					//
 						else																		//
-							$this->js->addUrl( $pathScripts.$script->file/*, $level*/ );			//  load script file from app scripts folder
+							$this->js->addUrl( $pathScripts.$script->file/*, $level*/ );		//  load script file from app scripts folder
 					}
-					else if( $source == 'url' ){													//  script file is absolute URL
+					else if( 'url' === $source ){													//  script file is absolute URL
 						if( !preg_match( "/^[a-z]+:\/\/.+$/", $script->file ) ){
 							$msg	= 'Invalid script URL: '.$script->file;
 							throw new InvalidArgumentException( $msg );
@@ -252,14 +252,14 @@ class Page extends HtmlPage
 			/** @var ConfigComponent $pair */
 			foreach( $module->config as $pair ){													//  iterate module configuration pairs
 				if( !empty( $pair->protected ) && $pair->protected !== 'yes' ){
-					$value	= $config->get( strtolower( $module->id ).'.'.$pair->key );				//  get (user modified) module setting value
-					$settings[$module->id][str_replace( '.', '_', $pair->key )]	= $value;			//  note module setting
+					$value	= $config->get( strtolower( $module->id ).'.'.$pair->key );		//  get (user modified) module setting value
+					$settings[$module->id][str_replace( '.', '_', $pair->key )]	= $value;	//  note module setting
 				}
 			}
 			if( !$settings[$module->id] )
 				unset( $settings[$module->id] );
 		}
-		$this->env->getCaptain()->callHook( 'Page', 'applyModules', $this );										//  call related module event hooks
+		$this->env->getCaptain()->callHook( 'Page', 'applyModules', $this );			//  call related module event hooks
 
 		if( $this->env instanceof WebEnvironment ){
 			$settings['Env']	= [

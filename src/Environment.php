@@ -38,8 +38,8 @@ use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
 use CeusMedia\Common\Exception\Deprecation as DeprecationException;
 use CeusMedia\Common\Exception\FileNotExisting as FileNotExistingException;
 use CeusMedia\Common\Exception\IO as IoException;
+use CeusMedia\Common\Net\HTTP\PartitionSession;
 use CeusMedia\Common\Net\HTTP\Request as HttpRequest;
-use CeusMedia\HydrogenFramework\Environment\Exception as EnvironmentException;
 use CeusMedia\HydrogenFramework\Environment\Resource\Acl\Abstraction;
 use CeusMedia\HydrogenFramework\Environment\Resource\Acl\Abstraction as AbstractAclResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\Acl\AllPublic as AllPublicAclResource;
@@ -85,7 +85,7 @@ class Environment implements ArrayAccess
 	public const MODE_STAGE		= 4;
 	public const MODE_LIVE		= 8;
 
-	public const MODES			= [
+	public const MODES		= [
 		self::MODE_UNKNOWN,
 		self::MODE_DEV,
 		self::MODE_TEST,
@@ -145,7 +145,7 @@ class Environment implements ArrayAccess
 	protected ?LogResource $log				= NULL;
 
 	/**	@var	array						$disclosure		Map of classes ready to reflect */
-	protected $disclosure;
+	protected array $disclosure				= [];
 
 	/**	@var	LogicPoolResource			$logic			Pool for logic class instances */
 	protected LogicPoolResource $logic;
@@ -353,6 +353,9 @@ class Environment implements ArrayAccess
 		return $this->config;
 	}
 
+	/**
+	 *	@return		object|NULL
+	 */
 	public function getDatabase(): ?object
 	{
 		return $this->database;
@@ -382,6 +385,9 @@ class Environment implements ArrayAccess
 		return $this->language;
 	}
 
+	/**
+	 *	@return		LogResource|NULL
+	 */
 	public function getLog(): ?LogResource
 	{
 		return $this->log;
@@ -454,6 +460,9 @@ class Environment implements ArrayAccess
 		return $resource;
 	}
 
+	/**
+	 *	@return		HttpRequest|Dictionary
+	 */
 	public function getRequest(): HttpRequest|Dictionary
 	{
 		return $this->request ?? new Dictionary();
@@ -469,7 +478,10 @@ class Environment implements ArrayAccess
 		return $resource;
 	}
 
-	public function getSession(): Dictionary
+	/**
+	 *	@return		PartitionSession|Dictionary
+	 */
+	public function getSession(): PartitionSession|Dictionary
 	{
 		return $this->session;
 	}
@@ -663,7 +675,6 @@ class Environment implements ArrayAccess
 	 *	@access		protected
 	 *	@return		void
 	 *	@throws		RuntimeException
-	 *	@throws		ReflectionException
 	 */
 	protected function __onInit(): void
 	{
@@ -783,7 +794,7 @@ class Environment implements ArrayAccess
 
 	/**
 	 *	@return		static
-	 *	@throws		Exception
+	 *	@throws		DeprecationException
 	 */
 	protected function initClock(): static
 	{

@@ -36,6 +36,7 @@ use CeusMedia\HydrogenFramework\Application\WebAbstraction;
 use CeusMedia\HydrogenFramework\Dispatcher\General as GeneralDispatcher;
 use CeusMedia\HydrogenFramework\Environment\Resource\Database\PDO;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
+use Error;
 use Exception;
 use Throwable;
 
@@ -132,7 +133,7 @@ class Site extends WebAbstraction implements ApplicationInterface
 				exit;
 			}
 		}*/
-		catch( Exception $e ){
+		catch( Error|Exception $e ){
 			$captain	= $this->env->getCaptain();
 			$payload	= ['exception' => $e];
 			$captain->callHook( 'App', 'onException', $this, $payload );
