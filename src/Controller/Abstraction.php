@@ -160,6 +160,8 @@ abstract class Abstraction
 	 */
 	protected function getWords( string $section = NULL, string $topic = NULL ): array
 	{
+		if( !property_exists( $this, 'env' ) )
+			return [];
 		if( empty( $topic )/* && $this->env->getLanguage()->hasWords( $this->controller )*/ )
 			$topic = $this->controller;
 		if( empty( $section ) )
