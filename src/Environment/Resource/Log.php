@@ -54,13 +54,13 @@ use Throwable;
  */
 class Log
 {
-	public const TYPE_DEBUG		= 'debug';
-	public const TYPE_INFO		= 'info';
-	public const TYPE_NOTE		= 'note';
-	public const TYPE_WARN		= 'warn';
-	public const TYPE_ERROR		= 'error';
+	public const string TYPE_DEBUG		= 'debug';
+	public const string TYPE_INFO		= 'info';
+	public const string TYPE_NOTE		= 'note';
+	public const string TYPE_WARN		= 'warn';
+	public const string TYPE_ERROR		= 'error';
 
-	public const TYPES			= [
+	public const array TYPES			= [
 		self::TYPE_DEBUG,
 		self::TYPE_INFO,
 		self::TYPE_NOTE,
@@ -68,14 +68,14 @@ class Log
 		self::TYPE_ERROR,
 	];
 
-	public const STRATEGY_APP_DEFAULT		= 'app-default';		//  enqueue to file 'logs/app.log'
-	public const STRATEGY_APP_TYPED			= 'app-typed';			//  enqueue to file 'logs/app.TYPE.log' for types as info, note, warn, error or exception
-	public const STRATEGY_MODULE_HOOKS		= 'module-hooks';		//  call default module hooks for specific handling
-	public const STRATEGY_CUSTOM_HOOKS		= 'custom-hooks';		//  call custom module hooks for specific handling
-	public const STRATEGY_CUSTOM_CALLBACK	= 'custom-callback';	//  call injected method, for testing
-	public const STRATEGY_MEMORY			= 'memory';				//  log in memory, for testing
+	public const string STRATEGY_APP_DEFAULT		= 'app-default';		//  enqueue to file 'logs/app.log'
+	public const string STRATEGY_APP_TYPED			= 'app-typed';			//  enqueue to file 'logs/app.TYPE.log' for types as info, note, warn, error or exception
+	public const string STRATEGY_MODULE_HOOKS		= 'module-hooks';		//  call default module hooks for specific handling
+	public const string STRATEGY_CUSTOM_HOOKS		= 'custom-hooks';		//  call custom module hooks for specific handling
+	public const string STRATEGY_CUSTOM_CALLBACK	= 'custom-callback';	//  call injected method, for testing
+	public const string STRATEGY_MEMORY			= 'memory';				//  log in memory, for testing
 
-	public const STRATEGIES				= [
+	public const array STRATEGIES				= [
 		self::STRATEGY_APP_DEFAULT,
 		self::STRATEGY_APP_TYPED,
 		self::STRATEGY_MODULE_HOOKS,

@@ -64,20 +64,20 @@ use RuntimeException;
  */
 class Captain
 {
-	public const LEVEL_UNKNOWN		= 0;
-	public const LEVEL_TOP			= 1;
-	public const LEVEL_START		= 1;
-	public const LEVEL_HIGHEST		= 2;
-	public const LEVEL_HIGH			= 3;
-	public const LEVEL_HIGHER		= 4;
-	public const LEVEL_MID			= 5;
-	public const LEVEL_LOWER		= 6;
-	public const LEVEL_LOW			= 7;
-	public const LEVEL_LOWEST		= 8;
-	public const LEVEL_BOTTOM		= 9;
-	public const LEVEL_END			= 9;
+	public const int LEVEL_UNKNOWN		= 0;
+	public const int LEVEL_TOP			= 1;
+	public const int LEVEL_START		= 1;
+	public const int LEVEL_HIGHEST		= 2;
+	public const int LEVEL_HIGH			= 3;
+	public const int LEVEL_HIGHER		= 4;
+	public const int LEVEL_MID			= 5;
+	public const int LEVEL_LOWER		= 6;
+	public const int LEVEL_LOW			= 7;
+	public const int LEVEL_LOWEST		= 8;
+	public const int LEVEL_BOTTOM		= 9;
+	public const int LEVEL_END			= 9;
 
-	public const LEVELS	= [
+	public const array LEVELS	= [
 		self::LEVEL_UNKNOWN,
 		self::LEVEL_TOP,
 		self::LEVEL_START,

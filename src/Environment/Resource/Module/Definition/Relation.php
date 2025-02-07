@@ -40,11 +40,11 @@ namespace CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition;
 
 class Relation
 {
-	public const TYPE_UNKNOWN		= 0;
-	public const TYPE_MODULE		= 1;
-	public const TYPE_PACKAGE		= 2;
+	public const int TYPE_UNKNOWN		= 0;
+	public const int TYPE_MODULE		= 1;
+	public const int TYPE_PACKAGE		= 2;
 
-	public const TYPES				= [
+	public const array TYPES				= [
 		self::TYPE_MODULE,
 		self::TYPE_PACKAGE,
 	];
