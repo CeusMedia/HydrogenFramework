@@ -31,8 +31,11 @@ namespace CeusMedia\HydrogenFramework\Environment;
 use CeusMedia\Common\ADT\Collection\Dictionary;
 use CeusMedia\Common\Loader;
 use CeusMedia\HydrogenFramework\Environment;
+use CeusMedia\HydrogenFramework\Environment\Features\RequestByFake as RequestByFakeFeature;
+use CeusMedia\HydrogenFramework\Environment\Features\SessionByDictionary as SessionByDictionaryFeature;
+use CeusMedia\HydrogenFramework\Environment\Resource\Log as LogResource;
 use CeusMedia\HydrogenFramework\Environment\Resource\Messenger as BaseMessenger;
-use CeusMedia\HydrogenFramework\Environment\Resource\Remote\Messenger;
+use CeusMedia\HydrogenFramework\Environment\Resource\Remote\Messenger as RemoteMessenger;
 use Psr\SimpleCache\InvalidArgumentException as SimpleCacheInvalidArgumentExceptionAlias;
 use ReflectionException;
 
@@ -50,14 +53,11 @@ use ReflectionException;
  */
 class Remote extends Environment
 {
+	use RequestByFakeFeature;
+	use SessionByDictionaryFeature;
+
 	/**	@var	boolean		$hasDatabase		Flag: indicates availability of a database connection */
 	public bool $hasDatabase		= FALSE;
-
-	/**	@var	Dictionary					$request		Request Object */
-	private Dictionary $request;
-
-	/**	@var	Dictionary					$session		Session Object */
-	private Dictionary $session;
 
 	/**
 	 *	Constructor.
@@ -67,9 +67,10 @@ class Remote extends Environment
 	 *	@throws		ReflectionException
 	 *	@throws		SimpleCacheInvalidArgumentExceptionAlias
 	 */
-	public function __construct( array $options = [] )
+	public function __construct( array $options = [], bool $isFinal = TRUE )
 	{
-		parent::__construct( $options, FALSE );
+//		parent::__construct( $options, FALSE );
+		$this->runBaseEnvConstruction( $options, FALSE );
 //		self::$defaultPaths	= Environment::$defaultPaths;
 		$this->options	= $options;
 		$this->path		= $options['pathApp'] ?? getCwd() . '/';
@@ -113,49 +114,48 @@ class Remote extends Environment
 	}
 
 	/**
-	 *	Returns Request Object.
-	 *	@access		public
-	 *	@return		Dictionary
-	 */
-	public function getRequest(): Dictionary
-	{
-		return $this->request ?? new Dictionary();
-	}
-
-	/**
-	 *	Returns Session Object.
-	 *	@access		public
-	 *	@return		Dictionary
-	 */
-	public function getSession(): Dictionary
-	{
-		return $this->session;
-	}
-
-	/**
 	 * @return static
 	 */
 	protected function initMessenger(): static
 	{
-		$this->messenger	= new Messenger( $this );
+		$this->messenger	= new RemoteMessenger( $this );
 		return $this;
 	}
 
 	/**
-	 * @return static
+	 *	@param		array		$options 			@todo: doc
+	 *	@param		boolean		$isFinal			Flag: there is no extending environment class, default: TRUE
+	 *	@return		void
+	 *	@throws		ReflectionException
+	 *	@throws		\Psr\SimpleCache\InvalidArgumentException
 	 */
-	protected function initRequest(): static
+	protected function runBaseEnvConstruction( array $options = [], bool $isFinal = TRUE ): void
 	{
-		$this->request	= new Dictionary();
-		return $this;
-	}
+//		$this->modules->callHook( 'Env', 'constructStart', $this );									//  call module hooks for end of env construction
+		$this->detectFrameworkVersion();
 
-	/**
-	 * @return static
-	 */
-	protected function initSession(): static
-	{
-		$this->session	= new Dictionary();
-		return $this;
+		$this->options		= $options;																//  store given environment options
+		$this->path			= rtrim( $options['pathApp'] ?? getCwd(), '/' ) . '/';	//  detect application path
+		$this->uri			= rtrim( $options['uri'] ?? getCwd(), '/' ) . '/';															//  detect application base URI
+
+		$this->setTimeZone();
+
+		$this->initSession();
+		$this->initRuntime();																		//  setup runtime clock
+		$this->initConfiguration();																	//  setup configuration
+		$this->detectMode();
+		$this->initLog();																			//  setup logger
+		$this->initPhp();																			//  setup PHP environment
+		$this->initCaptain();																		//  setup captain
+		$this->initLogic();																			//  setup logic pool
+		$this->initModules();																		//  setup module support
+		$this->initDatabase();																		//  setup database connection
+		$this->initCache();																			//  setup cache support
+//		$this->initLanguage();
+
+		if( !$isFinal )
+			return;
+		$this->captain->callHook( 'Env', 'constructEnd', $this );									//  call module hooks for end of env construction
+		$this->__onInit();																			//  default callback for construction end
 	}
 }

@@ -27,12 +27,13 @@
  */
 namespace CeusMedia\HydrogenFramework\Environment;
 
-use CeusMedia\Common\Alg\ID;
 use CeusMedia\HydrogenFramework\Environment;
 
-use CeusMedia\Common\ADT\Collection\Dictionary as Dictionary;
+use CeusMedia\HydrogenFramework\Environment\Features\ConfigByDummy as ConfigByDummyFeature;
+use CeusMedia\HydrogenFramework\Environment\Features\ModulesByFake as ModulesByFakeFeature;
+//use CeusMedia\HydrogenFramework\Environment\Features\RequestByFake as RequestByFakeFeature;
+//use CeusMedia\HydrogenFramework\Environment\Features\SessionByDictionary as SessionByDictionaryFeature;
 use CeusMedia\HydrogenFramework\Environment\Resource\Log as LogResource;
-use CeusMedia\HydrogenFramework\Environment\Resource\Module\Library\Local as LocalModuleLibraryResource;
 
 /**
  *	Empty environment for remote dummy use.
@@ -46,16 +47,27 @@ use CeusMedia\HydrogenFramework\Environment\Resource\Module\Library\Local as Loc
  */
 class Dummy extends Environment
 {
+	use ConfigByDummyFeature;
+	use ModulesByFakeFeature;
+//	use RequestByFakeFeature;
+//	use SessionByDictionaryFeature;
+
 	public bool $hasDatabase		= FALSE;
 
-	public function __construct( array $options = [] )
+	/**
+	 * @param array $options
+	 * @todo is session feature needed? ATM it is not called
+	 */
+	public function __construct( array $options = [], bool $isFinale = FALSE )
 	{
+		static::$defaultLoggingStrategies	= [LogResource::STRATEGY_MEMORY];
+
 		$this->options		= $options;
 		$this->path			= $options['pathApp'] ?? getCwd().'/';
 		$this->uri			= $options['pathApp'] ?? getCwd().'/';
 
 		$this->initRuntime();																		//  setup runtime clock
-		$this->config		= new Environment\Resource\Configuration( $this );						//  create empty configuration object
+		$this->initConfig();																		//  setup runtime clock
 		$this->initModules();																		//  setup empty module handler
 		$this->initLog();																			//  setup memory logger
 		$this->initPhp();																			//  setup PHP environment
@@ -68,24 +80,14 @@ class Dummy extends Environment
 	}
 
 	/**
-	 *	Log in memory, only.
-	 *	@return		static
+	 *	@param		array		$options 			@todo: doc
+	 *	@param		boolean		$isFinal			Flag: there is no extending environment class, default: TRUE
+	 *	@return		void
 	 */
-	protected function initLog(): static
+	protected function runBaseEnvConstruction( array $options = [], bool $isFinal = TRUE ): void
 	{
-		$this->log	= new LogResource( $this );
-		$this->log->setStrategies( [LogResource::STRATEGY_MEMORY] );
-		return $this;
-	}
-	/**
-	 *	Sets up a dysfunctional handler for local installed modules.
-	 *	@access		protected
-	 *	@return		static
-	 */
-	protected function initModules(): static
-	{
-		LocalModuleLibraryResource::$relativePathToInstalledModules	= 'NotExistingPath/'.ID::uuid().'/';
-		$this->modules	= new LocalModuleLibraryResource( $this );
-		return $this;
+		//	Right now, there is no need to call the base environment construction
+		//  @see this method in all other environment implementations
+		//
 	}
 }

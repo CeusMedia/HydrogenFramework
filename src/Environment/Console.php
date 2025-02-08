@@ -2,13 +2,13 @@
 
 namespace CeusMedia\HydrogenFramework\Environment;
 
-use CeusMedia\Common\ADT\Collection\Dictionary as Dictionary;
-use CeusMedia\Common\CLI\ArgumentParser as ArgumentParser;
 use CeusMedia\HydrogenFramework\Environment;
-use CeusMedia\HydrogenFramework\Environment\Resource\Console\Messenger as ConsoleMessenger;
-use CeusMedia\HydrogenFramework\Environment\Resource\Language as LanguageResource;
+use CeusMedia\HydrogenFramework\Environment\Features\MessengerByCli as MessengerByCliFeature;
+use CeusMedia\HydrogenFramework\Environment\Features\RequestByCli as RequestByCliFeature;
+use CeusMedia\HydrogenFramework\Environment\Features\SelfDetectionByCli as SelfDetectionByCliFeature;
+use CeusMedia\HydrogenFramework\Environment\Features\SessionByDictionary as SessionByDictionaryFeature;
 use Exception;
-use RuntimeException;
+use ReflectionException;
 
 /**
  *	...
@@ -31,26 +31,10 @@ use RuntimeException;
  */
 class Console extends Environment
 {
-	/**	@var	string					$host		Detected HTTP host */
-	public string $host;
-
-	/**	@var	int						$port		Detected HTTP port */
-	public int $port;
-
-	/**	@var	string					$scheme		Detected  */
-	public string $scheme;
-
-	/**	@var	string|NULL				$path		Detected HTTP path */
-	public ?string $path				= NULL;
-
-	/**	@var	string					$url		Detected application base URL */
-	public string $url					= '';
-
-	/**	@var	ArgumentParser			$request	Console Request Object */
-	protected ArgumentParser $request;
-
-	/** @var	Dictionary				$session	Session Storage Object */
-	protected Dictionary $session;
+	use MessengerByCliFeature;
+	use RequestByCliFeature;
+	use SelfDetectionByCliFeature;
+	use SessionByDictionaryFeature;
 
 	/**
 	 *	Constructor, sets up Resource Environment.
@@ -61,7 +45,8 @@ class Console extends Environment
 	{
 //		ob_start();
 		try{
-			parent::__construct( $options, FALSE );													//  construct parent but dont call __onInit
+//			parent::__construct( $options, FALSE );													//  construct parent but dont call __onInit
+			$this->runBaseEnvConstruction( $options, FALSE );										//  construct parent but dont call __onInit
 			$this->detectSelf();
 			$this->initMessenger();																	//  setup user interface messenger
 			$this->initRequest();																	//  setup console request handler
@@ -102,49 +87,44 @@ class Console extends Environment
 		], array_values( $additionalResources ) ), $keepAppAlive );									//  add additional resources and carry exit flag
 	}
 
-	public function getRequest(): ArgumentParser|Dictionary
-	{
-		return $this->request ?? new Dictionary();
-	}
-
 	//  --  PROTECTED  --  //
 
+
 	/**
+	 *	@param		array		$options 			@todo: doc
+	 *	@param		boolean		$isFinal			Flag: there is no extending environment class, default: TRUE
 	 *	@return		void
+	 *	@throws		ReflectionException
+	 *	@throws		\Psr\SimpleCache\InvalidArgumentException
 	 */
-	protected function detectSelf(): void
+	protected function runBaseEnvConstruction( array $options = [], bool $isFinal = TRUE ): void
 	{
-		$this->url = $this->config->get( 'app.url', '' );											//  get application URL from config
-		if( !$this->url )																			//  application URL not set
-			$this->url = $this->config->get( 'app.base.url', '' );									//  get application base URL from config
-		if( in_array( $this->url,[NULL, FALSE, ''] ) )												//  application base URL not set
-			throw new RuntimeException( 'Please define app.base.url in config.ini, first!' );		//  quit with exception
+//		$this->modules->callHook( 'Env', 'constructStart', $this );									//  call module hooks for end of env construction
+		/** @noinspection DuplicatedCode */
+		$this->detectFrameworkVersion();
 
-		$this->scheme	= (string) parse_url( $this->url, PHP_URL_SCHEME );				//  note used URL scheme
-		$this->host		= (string) parse_url( $this->url, PHP_URL_HOST );					//  note requested HTTP host name
-		$this->port		= (int) parse_url( $this->url, PHP_URL_PORT );					//  note requested HTTP port
-		$this->path		= $this->config->get( 'app.base.path' );								//  note absolute working path
-	}
+		$this->options		= $options;																//  store given environment options
+		$this->path			= rtrim( $options['pathApp'] ?? getCwd(), '/' ) . '/';	//  detect application path
+		$this->uri			= rtrim( $options['uri'] ?? getCwd(), '/' ) . '/';															//  detect application base URI
 
-	protected function initMessenger(): self
-	{
-		$this->messenger	= new ConsoleMessenger( $this );
-		return $this;
-	}
+		$this->setTimeZone();
 
-	protected function initRequest(): self
-	{
-		$this->request	= new ArgumentParser();
-		$this->request->parseArguments();
-		return $this;
-	}
+		$this->initSession();
+		$this->initRuntime();																		//  setup runtime clock
+		$this->initConfiguration();																	//  setup configuration
+		$this->detectMode();
+		$this->initLog();																			//  setup logger
+		$this->initPhp();																			//  setup PHP environment
+		$this->initCaptain();																		//  setup captain
+		$this->initLogic();																			//  setup logic pool
+		$this->initModules();																		//  setup module support
+		$this->initDatabase();																		//  setup database connection
+		$this->initCache();																			//  setup cache support
+//		$this->initLanguage();
 
-	/**
-	 *	Set up a "session", which is persistent storage for this run only.
-	 */
-	protected function initSession(): self
-	{
-		$this->session	= new Dictionary();
-		return $this;
+		if( !$isFinal )
+			return;
+		$this->captain->callHook( 'Env', 'constructEnd', $this );									//  call module hooks for end of env construction
+		$this->__onInit();																			//  default callback for construction end
 	}
 }

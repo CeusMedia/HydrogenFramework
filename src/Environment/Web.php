@@ -28,26 +28,26 @@
  */
 namespace CeusMedia\HydrogenFramework\Environment;
 
-use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
-use CeusMedia\Common\Net\HTTP\Cookie as HttpCookie;
-use CeusMedia\Common\Net\HTTP\Request as HttpRequest;
-use CeusMedia\Common\Net\HTTP\Response as HttpResponse;
-use CeusMedia\Common\Net\HTTP\PartitionSession as HttpPartitionSession;
 use CeusMedia\Common\Net\HTTP\Status as HttpStatus;
 use CeusMedia\Common\UI\HTML\Exception\Page as HtmlExceptionPage;
 use CeusMedia\Common\UI\HTML\Tag as HtmlTag;
 use CeusMedia\Common\UI\HTML\PageFrame as HtmlPageFrame;
 use CeusMedia\HydrogenFramework\Environment;
-use CeusMedia\HydrogenFramework\Environment\Exception as EnvironmentException;
-use CeusMedia\HydrogenFramework\Environment\Router\Single as SingleRouter;
-use CeusMedia\HydrogenFramework\Environment\Router\Abstraction as AbstractRouter;
-use CeusMedia\HydrogenFramework\Environment\Resource\Messenger as MessengerResource;
-use CeusMedia\HydrogenFramework\Environment\Resource\Page as PageResource;
+use CeusMedia\HydrogenFramework\Environment\Features\Cache as CacheFeature;
+use CeusMedia\HydrogenFramework\Environment\Features\ConfigByIni as ConfigByIniFeature;
+use CeusMedia\HydrogenFramework\Environment\Features\Cookie as CookieFeature;
+use CeusMedia\HydrogenFramework\Environment\Features\Page as PageFeature;
+use CeusMedia\HydrogenFramework\Environment\Features\MessengerBySession as MessengerBySessionFeature;
+use CeusMedia\HydrogenFramework\Environment\Features\RequestByHttp as RequestByHttpFeature;
+use CeusMedia\HydrogenFramework\Environment\Features\ResponseByHttp as ResponseByHttpFeature;
+use CeusMedia\HydrogenFramework\Environment\Features\Router as RouterFeature;
+use CeusMedia\HydrogenFramework\Environment\Features\SelfDetectionByHttp as SelfDetectionByHttpFeature;
+use CeusMedia\HydrogenFramework\Environment\Features\SessionByHttpPartition as SessionFeature;
 
 use Exception;
-use Psr\SimpleCache\InvalidArgumentException;
+use InvalidArgumentException;
+use Psr\SimpleCache\InvalidArgumentException as SimpleCacheInvalidArgumentException;
 use ReflectionException;
-use RuntimeException;
 
 /**
  *	Setup for Resource Environment for Hydrogen Applications.
@@ -61,7 +61,16 @@ use RuntimeException;
  */
 class Web extends Environment
 {
-	public static string $classRouter		= SingleRouter::class;
+	use CacheFeature;
+	use ConfigByIniFeature;
+	use CookieFeature;
+	use PageFeature;
+	use RequestByHttpFeature;
+	use ResponseByHttpFeature;
+	use MessengerBySessionFeature;
+	use RouterFeature;
+	use SelfDetectionByHttpFeature;
+	use SessionFeature;
 
 	public static string $configKeyBaseHref	= 'app.base.url';
 
@@ -78,45 +87,6 @@ class Web extends Environment
 		'templates'	=> 'templates/',
 	];
 
-	/**	@var	string					$host		Detected HTTP host */
-	public string $host;
-
-	/**	@var	string					$port		Detected HTTP port */
-	public string $port;
-
-	/**	@var	string|NULL				$path		Detected HTTP path */
-	public ?string $path				= NULL;
-
-	/**	@var	string					$root		Detected  */
-	public string $root;
-
-	/**	@var	string					$scheme		Detected  */
-	public string $scheme;
-
-	/**	@var	string					$uri		Detected  */
-	public string $uri;
-
-	/**	@var	string					$url		Detected application base URL */
-	public string $url;
-
-	/**	@var	HttpRequest				$request	HTTP Request Object */
-	private HttpRequest $request;
-
-	/**	@var	HttpResponse			$response	HTTP Response Object */
-	protected HttpResponse $response;
-
-	/**	@var	AbstractRouter			$router		Router Object */
-	protected AbstractRouter $router;
-
-	/**	@var	HttpPartitionSession	$session	Session Object */
-	private HttpPartitionSession $session;
-
-	/**	@var	HttpCookie				$cookie		Cookie Object */
-	protected HttpCookie $cookie;
-
-	/**	@var	PageResource			$page		Page Object */
-	protected PageResource $page;
-
 	protected array $resourcesToClose	= [];
 
 	/**
@@ -125,11 +95,13 @@ class Web extends Environment
 	 *	@param		array		$options
 	 *	@return		void
 	 *	@throws		InvalidArgumentException
+	 *	@throws		SimpleCacheInvalidArgumentException
 	 */
-	public function __construct( array $options = [] )
+	public function __construct( array $options = [], bool $isFinal = TRUE )
 	{
 		try{
-			parent::__construct( $options, FALSE );
+//			parent::__construct( $options, FALSE );
+			$this->runBaseEnvConstruction( $options, $isFinal && FALSE );
 			$this->detectSelf( !( $options['isTest'] ?? FALSE ) );
 			$this->initSession();																	//  setup session support
 			$this->initMessenger();																	//  setup user interface messenger
@@ -171,69 +143,6 @@ class Web extends Environment
 			'messenger',																			//  application message handler
 			'language',																				//  language handler
 		], array_values( $additionalResources ) ), $keepAppAlive );									//  add additional resources and carry exit flag
-	}
-
-	/**
-	 *	Returns Cookie Object.
-	 *	@access		public
-	 *	@return		HttpCookie
-	 *	@throws		RuntimeException		if cookie support has not been initialized
-	 */
-	public function getCookie(): HttpCookie
-	{
-		if( !is_object( $this->cookie ) )
-			throw new RuntimeException( 'Cookie resource not initialized within environment' );
-		return $this->cookie;
-	}
-
-	/**
-	 *	Get resource to communicate with chat server.
-	 *	@access		public
-	 *	@return		PageResource
-	 */
-	public function getPage(): PageResource
-	{
-		return $this->page;
-	}
-
-	/**
-	 *	Returns Router Object.
-	 *	@access		public
-	 *	@return		AbstractRouter
-	 */
-	public function getRouter(): AbstractRouter
-	{
-		return $this->router;
-	}
-
-	/**
-	 *	Returns Request Object.
-	 *	@access		public
-	 *	@return		HttpRequest
-	 */
-	public function getRequest(): HttpRequest
-	{
-		return $this->request ?? new HttpRequest();
-	}
-
-	/**
-	 *	Returns HTTP Response Object.
-	 *	@access		public
-	 *	@return		HttpResponse
-	 */
-	public function getResponse(): HttpResponse
-	{
-		return $this->response;
-	}
-
-	/**
-	 *	Returns Session Object.
-	 *	@access		public
-	 *	@return		HttpPartitionSession
-	 */
-	public function getSession(): HttpPartitionSession
-	{
-		return $this->session;
 	}
 
 	/**
@@ -324,56 +233,6 @@ class Web extends Environment
 	//  --  PROTECTED  --  //
 
 	/**
-	 *	Detects basic environmental web and local information.
-	 *	Notes global scheme, host, relative application path and absolute application URL.
-	 *	Notes local document root path, relative application path and absolute application URI.
-	 *	@access		protected
-	 *	@param		boolean		$strict			Flag: strict mode: throw exceptions
-	 *	@return		void
-	 *	@throws		EnvironmentException	if strict mode and application has been executed outside a valid web server environment or no HTTP host has been provided by web server
-	 *	@throws		EnvironmentException	if strict mode and no document root path has been provided by web server
-	 *	@throws		EnvironmentException	if strict mode and no script file path has been provided by web server
-	 */
-	protected function detectSelf( bool $strict = TRUE ): void
-	{
-		if( $strict ){
-			if( !getEnv( 'HTTP_HOST' ) ){														//  application has been executed outside a valid web server environment or no HTTP host has been provided by web server
-				throw new EnvironmentException(
-					'This application needs to be executed within by a web server'
-				);
-			}
-			if( !getEnv( 'DOCUMENT_ROOT' ) ){													//  no document root path has been provided by web server
-				throw new EnvironmentException(
-					'Your web server needs to provide a document root path'
-				);
-			}
-			if( !getEnv( 'SCRIPT_NAME' ) ){													//  no script file path has been provided by web server
-				throw new EnvironmentException(
-					'Your web server needs to provide the running scripts file path'
-				 );
-			}
-		}
-
-		$this->scheme	= getEnv( "HTTPS" ) ? 'https' : 'http';								//  note used URL scheme
-		$defaultPort	= $this->scheme === 'https' ? 443 : 80;										//  default port depends on HTTP scheme
-		$serverPort		= (int) getEnv( 'SERVER_PORT' );
-		$serverHost		= (string) getEnv( 'HTTP_HOST' );
-		$this->host		= (string) preg_replace( "/:\d{2,5}$/", '', $serverHost );	//  note requested HTTP host name without port
-		$this->port		= $serverPort === $defaultPort ? '' : (string) $serverPort;					//  note requested HTTP port
-		$hostWithPort	= $this->host.( $this->port ? ':'.$this->port : '' );						//  append port if different from default port
-		$this->root		= (string) getEnv( 'DOCUMENT_ROOT' );									//  note document root of web server or virtual host
-		$path			= dirname( (string) getEnv( 'SCRIPT_NAME' ) );
-		if( $this->options['pathApp'] ?? '' )
-			$path		= $this->options['pathApp'];
-		$this->path		= preg_replace( "@^/$@", "", $path )."/";					//  note requested working path
-		$this->url		= $this->scheme.'://'.$hostWithPort.$this->path;							//  note calculated base application URI
-		$this->uri		= $this->root.$this->path;													//  note calculated absolute base application path
-		if( '' !== ( $this->options['uri'] ?? '' ) )
-			$this->uri		= $this->options['uri'];													//  note calculated absolute base application path
-		$this->runtime->reach( 'env: self detection' );
-	}
-
-	/**
 	 *	Sets up configuration resource reading main config file and module config files.
 	 *	@access		protected
 	 *	@return		static
@@ -401,150 +260,45 @@ class Web extends Environment
 		return $this;
 	}
 
-	/**
-	 *	Initialize cookie resource instance.
-	 *	@access		protected
-	 *	@return		static
-	 *	@throws		RuntimeException			if cookie resource has not been initialized before
-	 */
-	protected function initCookie(): static
-	{
-		if( !$this->url )
-			throw new RuntimeException( 'URL not detected yet, run detectSelf beforehand' );
-		$this->cookie	= new HttpCookie(
-			(string) parse_url( $this->url, PHP_URL_PATH ),
-			(string) parse_url( $this->url, PHP_URL_HOST ),
-			(bool) getEnv( 'HTTPS' )
-		);
-		return $this;
-	}
-
-	/**
-	 *	@param		bool|NULL		$enabled		NULL means "autodetect" and defaults to yes, if response shall be HTML
-	 *	@return		static
-	 */
-	protected function initMessenger( ?bool $enabled = NULL ): static
-	{
-		if( NULL === $enabled ){																	//  auto detect mode
-			$acceptHeader	= (string) getEnv( 'HTTP_ACCEPT' );
-			$enabled		= str_contains( $acceptHeader, 'html' );								//  enabled if HTML is requested
-		}
-		$this->messenger	= new MessengerResource( $this, $enabled );
-		$this->runtime->reach( 'env: messenger' );
-		return $this;
-	}
-
-	/**
-	 *	Initialize page frame resource.
-	 *	@access		protected
-	 *	@param		boolean		$pageJavaScripts	Flag: compress JavaScripts, default: TRUE
-	 *	@param		boolean		$packStyleSheets	Flag: compress Stylesheet, default: TRUE
-	 *	@return		static
-	 */
-	protected function initPage( bool $pageJavaScripts = TRUE, bool $packStyleSheets = TRUE ): static
-	{
-		$this->page	= new PageResource( $this );
-		$this->page->setPackaging( $pageJavaScripts, $packStyleSheets );
-		$this->page->setBaseHref( $this->getBaseUrl( self::$configKeyBaseHref ) );
-		$this->page->applyModules();
-
-		$words		= $this->getLanguage()->getWords( 'main', FALSE );
-		if( isset( $words['main']['title'] ) )
-			$this->page->setTitle( $words['main']['title'] );
-		$this->runtime->reach( 'env: page' );
-		return $this;
-	}
-
-	/**
-	 *	Initialize HTTP request resource instance.
-	 *	Request data will be imported from given web server environment.
-	 *	@access		protected
-	 *	@return		static
-	 */
-	protected function initRequest(): static
-	{
-		$this->request		= new HttpRequest();
-		$this->request->fromEnv();
-		$this->runtime->reach( 'env: request' );
-		return $this;
-	}
-
-	/**
-	 *	Initialize HTTP response resource instance.
-	 *	@access		protected
-	 *	@return		static
-	 */
-	protected function initResponse(): static
-	{
-		$this->response	= new HttpResponse();
-		$this->runtime->reach( 'env: response' );
-		return $this;
-	}
-
-	/**
-	 *	@param		string|NULL		$routerClass
-	 *	@return		static
-	 *	@throws		ReflectionException
-	 */
-	protected function initRouter( string $routerClass = NULL ): static
-	{
-		$classRouter	= $routerClass ?: self::$classRouter;
-		/** @var AbstractRouter $router */
-		$router			= ObjectFactory::createObject( $classRouter, array( $this ) );
-		$this->router	= $router;
-		$this->runtime->reach( 'env: router' );
-		return $this;
-	}
-
-	/**
-	 *	@param		?string		$keyPartitionName
-	 *	@param		?string		$keySessionName
-	 *	@return		static
-	 */
-	protected function initSession( string $keyPartitionName = NULL, string $keySessionName = NULL ): static
-	{
-		$partitionName	= md5( (string) getCwd() );
-		$sessionName	= 'sid';
-		if( $keyPartitionName && $this->config->get( $keyPartitionName ) )
-			$partitionName	= $this->config->get( $keyPartitionName );
-		if( $keySessionName && $this->config->get( $keySessionName ) )
-			$sessionName	= $this->config->get( $keySessionName );
-
-		$this->session	= new HttpPartitionSession(
-			$partitionName,
-			$sessionName
-		);
-		$this->runtime->reach( 'env: session: construction' );
-
-		// @todo check if this old workaround public URL paths extended by module is still needed and remove
-		$isInside	= (int) $this->session->get( 'auth_user_id' );
-		$inside		= explode( ',', $this->config->get( 'module.acl.inside', '' ) );		//  get current inside link list
-		$outside	= explode( ',', $this->config->get( 'module.acl.outside', '' ) );		//  get current outside link list
-		foreach( $this->modules->getAll() as $module ){
-			foreach( $module->links as $link ){														//  iterate module links
-				$link->path	= $link->path ?: 'index/index';
-				if( $link->access == "inside" ){													//  link is inside public
-					$path	= str_replace( '/', '_', $link->path );					//  get link path
-					if( !in_array( $path, $inside ) )												//  link is not in public link list
-						$inside[]	= $path;														//  add link to public link list
-				}
-				if( $link->access == "outside" ){													//  link is outside public
-					$path	= str_replace( '/', '_', $link->path );					//  get link path
-					if( !in_array( $path, $inside ) )												//  link is not in public link list
-						$outside[]	= $path;														//  add link to public link list
-				}
-			}
-		}
-		$this->config->set( 'module.acl.inside', implode( ',', array_unique( $inside ) ) );	//  save public link list
-		$this->config->set( 'module.acl.outside', implode( ',', array_unique( $outside ) ) );	//  save public link list
-		$this->modules->callHook( 'Session', 'init', $this->session );
-		$this->runtime->reach( 'env: session: init done' );
-		return $this;
-	}
-
 	protected function registerResourceToClose( string $resourceKey ): static
 	{
 		$this->resourcesToClose[]	= $resourceKey;
 		return $this;
+	}
+
+	/**
+	 *	@param		array		$options 			@todo: doc
+	 *	@param		boolean		$isFinal			Flag: there is no extending environment class, default: TRUE
+	 *	@return		void
+	 *	@throws		ReflectionException
+	 *	@throws		SimpleCacheInvalidArgumentException
+	 */
+	protected function runBaseEnvConstruction( array $options = [], bool $isFinal = TRUE ): void
+	{
+//		$this->modules->callHook( 'Env', 'constructStart', $this );									//  call module hooks for end of env construction
+		$this->detectFrameworkVersion();
+
+		$this->options		= $options;																//  store given environment options
+		$this->path			= rtrim( $options['pathApp'] ?? getCwd(), '/' ) . '/';	//  detect application path
+		$this->uri			= rtrim( $options['uri'] ?? getCwd(), '/' ) . '/';		//  detect application base URI
+
+		$this->setTimeZone();
+		$this->initRuntime();																		//  setup runtime clock
+		$this->initConfiguration();																	//  setup configuration
+		$this->initCaptain();																		//  setup captain
+		$this->initModules();																		//  setup module support
+		$this->initSession();
+		$this->detectMode();
+		$this->initLog();																			//  setup logger
+		$this->initPhp();																			//  setup PHP environment
+		$this->initLogic();																			//  setup logic pool
+		$this->initDatabase();																		//  setup database connection
+		$this->initCache();																			//  setup cache support
+//		$this->initLanguage();
+
+		if( !$isFinal )
+			return;
+		$this->captain->callHook( 'Env', 'constructEnd', $this );						//  call module hooks for end of env construction
+		$this->__onInit();																			//  default callback for construction end
 	}
 }
