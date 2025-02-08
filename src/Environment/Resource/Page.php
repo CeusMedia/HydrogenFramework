@@ -110,7 +110,8 @@ class Page extends HtmlPage
 			$this->js->setRevision( $config->get( 'app.revision' ) );
 		}
 
-		if( strlen( $title	= $config->get( 'app.name' ) ) )
+		$title	= trim( (string) $config->get( 'app.name', '' ) );
+		if( '' !== $title )
 			$this->setTitle( $title );
 		$this->env->getCaptain()->callHook( 'Page', 'init', $this );					//  call related module event hooks
 	}

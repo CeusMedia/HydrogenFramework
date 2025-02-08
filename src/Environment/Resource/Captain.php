@@ -17,6 +17,7 @@ namespace CeusMedia\HydrogenFramework\Environment\Resource;
 use CeusMedia\Common\Alg\Obj\Factory;
 use CeusMedia\HydrogenFramework\Environment;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition as ModuleDefinition;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Hook as ModuleHookDefinition;
 use CeusMedia\HydrogenFramework\Hook;
 use DomainException;
 use Exception;
@@ -163,7 +164,7 @@ class Captain
 	 */
 	public function callHookWithPayload( string $resource, string $event, object $context, array & $payload = [] ): ?bool
 	{
-		if( !$this->env->hasModules() )
+		if( !$this->env->hasModules() && [] === $this->customHooks )
 			return NULL;
 		if( array_key_exists( $resource."::".$event, $this->disabledHooks ) )					//  skip disabled hook
 			return FALSE;
@@ -225,6 +226,19 @@ class Captain
 		return $this;
 	}
 
+	/** @var array<string,array<string,array<ModuleHookDefinition>>> $customHooks */
+	protected array $customHooks	= [];
+
+	public function registerCustomHook( ModuleHookDefinition $hook ): static
+	{
+		if( !array_key_exists( $hook->resource, $this->customHooks ) )
+			$this->customHooks[$hook->resource]	= [];
+		if( !array_key_exists( $hook->event, $this->customHooks[$hook->resource] ) )
+			$this->customHooks[$hook->resource][$hook->event]	= [];
+		$this->customHooks[$hook->resource][$hook->event][] = $hook;
+		return $this;
+	}
+
 	/**
 	 *	...
 	 *	@access		public
@@ -253,6 +267,23 @@ class Captain
 				];
 			}
 		}
+
+		$customHooks	= $this->customHooks[$resource][$event] ?? [];
+		foreach( $customHooks as $hook ){
+			$hooks[$hook->level][] = (object) [
+				'moduleId'	=> 'Fake_'.uniqid( '', true ),
+				'event'		=> $event,
+				'resource'	=> $resource,
+				'function'	=> $hook->callback,
+			];
+		}
+
+		if( FALSE && 'App' === $resource && 'respond' === $event ){
+			print_m(['resource' => $resource, 'event' => $event, 'hooks' => $hooks, 'customHooks' => $customHooks] );
+			die;
+
+		}
+
 		return array_filter( array_map( static function( $levelHooks ){
 			return 0 !== count( $levelHooks ) ? $levelHooks : NULL;
 		}, $hooks ) );
@@ -276,8 +307,6 @@ class Captain
 			foreach( $levelHooks as $hook ){
 				if( 0 === strlen( $hook->function ) )
 					continue;
-				/** @var ModuleDefinition $module */
-				$module		= $this->env->getModules()->get( $hook->moduleId );
 				$resource	= $hook->resource;
 				$event		= $hook->event;
 				$function	= $hook->function;
@@ -296,9 +325,13 @@ class Captain
 
 					/** @var Hook $hookObject */
 					$hookObject	= Factory::createObject( $callback[0], [$this->env, $context] );
-					$hookObject->setModule( $module )->setPayload( $payload );
+					$hookObject->setPayload( $payload );
+
+					/** @var ?ModuleDefinition $module */
+					$module		= $this->env->getModules()->get( $hook->moduleId, TRUE, FALSE );
 					if( NULL !== $module )
 						$hookObject->setModule( $module );
+
 					$result		= $hookObject->fetch( $callback[1] );
 					$payload	= $hookObject->getPayload();
 
@@ -311,8 +344,8 @@ class Captain
 					$this->handleStdoutOfResourceEventHookCall( $stdout, $resource, $event, $module );
 				} catch( Exception $e ){
 					$stdout		= (string) ob_get_clean();
-					$messageParams	= [$module->id, $resource, $event, $e->getMessage()];
-					$this->handleExceptionOfResourceEventHookCall( $e, $resource, $event, $module );
+					$messageParams	= [$module?->id ?? 'unknown', $resource, $event, $e->getMessage()];
+					$this->handleExceptionOfResourceEventHookCall( $e, $resource, $event, $module ?? NULL );
 					if( $this->env->has( 'messenger' ) ){
 						$this->env->getMessenger()?->noteFailure( vsprintf(
 							'Call on event %s@%s hooked by module %s failed: %s',
@@ -335,18 +368,18 @@ class Captain
 	 *	@param		Exception			$e
 	 *	@param		string				$resource
 	 *	@param		string				$event
-	 *	@param		ModuleDefinition	$module
+	 *	@param		?ModuleDefinition	$module
 	 *	@return		void
 	 *	@throws		ReflectionException
 	 */
-	protected function handleExceptionOfResourceEventHookCall( Exception $e, string $resource, string $event, ModuleDefinition $module ): void
+	protected function handleExceptionOfResourceEventHookCall( Exception $e, string $resource, string $event, ?ModuleDefinition $module ): void
 	{
 		$this->env->getLog()?->logException( $e );
 
 //		$message	= 'Hook %1$s::%2$s@%3$s failed: %4$s';
 //		$message	= 'Call on resource event hook %3$s@%2$s, hooked by module %1$s, failed: %4$s';
 		$message	= 'Fetching resource event hook %1$s>>%2$s>>%3$s failed: %4$s';
-		$message	= sprintf( $message, $module->id, $resource, $event, $e->getMessage() );
+		$message	= sprintf( $message, $module?->id ?? 'unknown', $resource, $event, $e->getMessage() );
 		if( !$this->env->has( 'messenger' ) )
 			throw new RuntimeException( $message, 0, $e );
 		$this->env->getMessenger()?->noteFailure( $message );
@@ -358,12 +391,12 @@ class Captain
 	 *	@param		string				$stdout
 	 *	@param		string				$resource
 	 *	@param		string				$event
-	 *	@param		ModuleDefinition	$module
+	 *	@param		?ModuleDefinition	$module
 	 *	@return		void
 	 *	@throws		RuntimeException	if environment has no messenger
 	 *	@throws		ReflectionException
 	 */
-	protected function handleStdoutOfResourceEventHookCall( string $stdout, string $resource, string $event, ModuleDefinition $module ): void
+	protected function handleStdoutOfResourceEventHookCall( string $stdout, string $resource, string $event, ?ModuleDefinition $module ): void
 	{
 		if( 0 === strlen( trim( $stdout ) ) )
 			return;
@@ -376,7 +409,7 @@ class Captain
 			throw new RuntimeException( $stdout );
 		$this->env->getMessenger()?->noteNotice( vsprintf(
 			'Call on event %2$s@%1$s hooked by module %3$s reported: <xmp>%4$s</xmp>',
-			[$resource, $event, $module->id, $stdout]
+			[$resource, $event, $module?->id ?? 'unknown', $stdout]
 		) );
 	}
 }

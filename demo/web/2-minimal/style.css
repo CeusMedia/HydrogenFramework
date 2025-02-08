@@ -4,8 +4,8 @@ body {
 	}
 
 div#ticksContainer {
-	height: 300px;
-	overflow-y: auto;
+/*	height: 500px;
+	overflow-y: auto;*/
 	}
 table#ticksTable {
 	border-collapse: collapse;

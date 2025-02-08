@@ -233,10 +233,15 @@ class Site extends WebAbstraction implements ApplicationInterface
 			$body	= $this->devBuffer->get().$body;
 			$this->devBuffer->close();
 		}
-		if( $body )
-			$response->setBody( $body );
+		$payload	= [
+			'body'		=> $body,
+			'headers'	=> $headers
+		];
+		$this->env->getCaptain()->callHookWithPayload( 'App', 'sendResponse:before', $this, $payload );
 
-		foreach( $headers as $key => $value ){
+		$response->setBody( $payload['body'] );
+
+		foreach( $payload['headers'] as $key => $value ){
 			if( $value instanceof HttpHeaderField )
 				$response->addHeader( $value );
 			else
