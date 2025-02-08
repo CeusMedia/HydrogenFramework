@@ -59,23 +59,23 @@ class Web
 		if( !file_exists( $pathVendor ) )
 		 	die( 'Please install first, using composer!' );
 		require_once $pathVendor.'autoload.php';
-		require_once $pathVendor.'ceus-media/common/src/compat8.php';
+//		require_once $pathVendor.'ceus-media/common/src/compat8.php';
 
 		if( NULL !== $this->defaultTimezone )
 			date_default_timezone_set( $this->defaultTimezone );				//  set default time zone
 
 		if( NULL !== $this->configFile )										//  an alternative config file has been set
-			WebEnvironment::$configFile   = $this->configFile;							//  set alternative config file in environment
+			WebEnvironment::$configFile   = $this->configFile;					//  set alternative config file in environment
 
 		if( NULL !== $this->classRouter )										//  an alternative router class has been set
-			WebEnvironment::$classRouter  = $this->classRouter;							//  set alternative router class in environment
+			WebEnvironment::$classRouter  = $this->classRouter;					//  set alternative router class in environment
 
 		if( 0 !== count( $this->paths ) )
 			WebEnvironment::$defaultPaths	= $this->paths + WebEnvironment::$defaultPaths;
 
 		$classExt	= $this->classFileExtension;
 		$classPath	= WebEnvironment::$defaultPaths['classes'];
-		Loader::registerNew( $classExt, NULL, $classPath );							//  register autoloader for project classes
+		Loader::create( $classExt, $classPath )->register();					//  register autoloader for project classes
 	}
 
 	private function setupErrorHandling(): void

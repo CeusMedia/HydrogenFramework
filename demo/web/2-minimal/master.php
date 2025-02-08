@@ -1,10 +1,21 @@
 <?php
 
+use CeusMedia\HydrogenFramework\Environment\Resource\Page as PageResource;
+use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
+
+/** @var WebEnvironment $env */
+/** @var PageResource $page */
+/** @var string $content */
+/** @var ?string $dev */
+
 $page->addBody( $content );
 
 //  --  add external resources
 $page->addStylesheet( 'style.css' );
 //$page->addJavaScript( 'javascript.js' );
+
+//  --  gimmick: show total render time (=runtime until now in ms)
+$page->addBody( '<br/>Render time: '.$env->getRuntime()->get( 3, 1 ).'ms' );
 
 //  --  gimmick: show runtime ticks caught by profiler
 $list	= [];
@@ -26,7 +37,7 @@ $page->addBody( $ticks );
 
 $page->addBody( $dev );
 
-$page->setTitle( $env->config->get( 'app.title' ) );
+$page->setTitle( $env->getConfig()->get( 'app.title' ) );
 $env->getResponse()->addHeaderPair( 'X-Hydrogen-Process-Time', $env->getRuntime()->get( 3, 0 ).'ms' );
 
 return $page->build();

@@ -1,6 +1,7 @@
 <?php
 
-use CeusMedia\Common\CLI;
+use CeusMedia\Common\CLI as Console;
+use CeusMedia\Common\Env as CommonEnv;
 use CeusMedia\Common\Loader;
 use CeusMedia\HydrogenFramework\Environment;
 
@@ -12,17 +13,16 @@ chdir( __DIR__ );
 
 //if( !@include_once dirname( dirname( dirname( dirname( __DIR__ ) ) ) ).'/vendor/autoload.php' )
 //    die( 'You need to "composer install" first.' );
-if( !CLI::checkIsCLi( FALSE ) )
+if( !CommonEnv::isCli() )
 	die( 'Access denied: Execution via CLI, only.' );
 
 Environment::$defaultPaths['config']	= '';
-Loader::registerNew( 'php', '', 'classes/' );
+Loader::create( 'php', __DIR__.'/classes/' )->register();
 
-CLI::out();
-CLI::out( 'Hydrogen CLI Demo: App/Hello' );
-CLI::out();
+Console::out();
+Console::out( 'Hydrogen CLI Demo: App/Hello' );
+Console::out();
 
 $app	= new App();
 $app->run();
 
-die("!");
