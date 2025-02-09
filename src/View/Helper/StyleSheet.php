@@ -78,9 +78,9 @@ class StyleSheet
 	 *	@access		public
 	 *	@param		string			$style		StyleSheet block
 	 *	@param		integer|NULL	$level		Optional: Load level (1-9 or {top(1),mid(=5),end(9)}, default: 5)
-	 *	@return		self
+	 *	@return		static
 	 */
-	public function addStyle( string $style, ?int $level = CaptainResource::LEVEL_MID ): self
+	public function addStyle( string $style, ?int $level = CaptainResource::LEVEL_MID ): static
 	{
 		$level	??= CaptainResource::LEVEL_MID;
 		$this->styles[$level][]		= $style;
@@ -93,9 +93,9 @@ class StyleSheet
 	 *	@param		string			$url		StyleSheet URL
 	 *	@param		integer|NULL	$level		Optional: Load level (1-9 or {top(1),mid(=5),end(9)}, default: 5)
 	 *	@param		array			$attributes	Optional: Additional style tag attributes
-	 *	@return		self
+	 *	@return		static
 	 */
-	public function addUrl( string $url, ?int $level = CaptainResource::LEVEL_MID, array $attributes = [] ): self
+	public function addUrl( string $url, ?int $level = CaptainResource::LEVEL_MID, array $attributes = [] ): static
 	{
 		$level	??= CaptainResource::LEVEL_MID;
 		$this->urls[$level][]	= (object) ['url' => $url, 'attributes' => $attributes];
@@ -105,9 +105,9 @@ class StyleSheet
 	/**
 	 *	Removes all combined styles in file cache.
 	 *	@access		public
-	 *	@return		self
+	 *	@return		static
 	 */
-	public function clearCache(): self
+	public function clearCache(): static
 	{
 		$prefix = preg_replace( "/^([a-z0-9]+)/", "\\1", $this->prefix );
 		$index	= new RegexFileFilter( $this->pathCache, '/^'.$prefix.'\w+\.css$/' );
@@ -157,7 +157,7 @@ class StyleSheet
 		foreach( $this->urls as $map ){
 			foreach( $map as $url ){
 				$clone	= clone( $url );
-				if( !preg_match( "@^[a-z]+://@", $url->url ) )
+				if( 1 !== preg_match( "@^[a-z]+://@", $url->url ) )
 					$clone->url	= $this->pathBase.$url->url;
 				$list[]	= $clone;
 			}
@@ -184,7 +184,7 @@ class StyleSheet
 		];
 
 		$items		= [];
-		if( $urls ){
+		if( [] !== $urls ){
 			if( $this->useCompression ){
 				$items[]	= HtmlTag::create( 'link', NULL, array_merge( $linkAttributes, [
 					'href'		=> $this->getPackageFileName( $forceFresh )
@@ -192,7 +192,7 @@ class StyleSheet
 			}
 			else{
 				foreach( $urls as $url ){
-					if( $this->revision )
+					if( NULL !== $this->revision )
 						$url->url	.= '?r'.$this->revision;
 					$attributes	= array_merge( $linkAttributes, $url->attributes, [
 						'href'		=> $url->url
@@ -201,15 +201,19 @@ class StyleSheet
 				}
 			}
 		}
-		if( $styles ){
+		if( [] !== $styles ){
 			$content	= PHP_EOL.implode( PHP_EOL, $styles ).PHP_EOL.$this->indent;
-			$attributes	= array( 'type' => 'text/css' );
+			$attributes	= ['type' => 'text/css'];
 			$items[]	= HtmlTag::create( 'style', $content, $attributes );
 		}
 		return implode( PHP_EOL.$this->indent, $items );
 	}
 
-	public function setBasePath( string $path ): self
+	/**
+	 *	@param		string		$path
+	 *	@return		static
+	 */
+	public function setBasePath( string $path ): static
 	{
 		$this->pathBase	= $path;
 		return $this;
@@ -219,27 +223,35 @@ class StyleSheet
 	 *	Set path to file cache.
 	 *	@access		public
 	 *	@param		string		$path		Path to file cache
-	 *	@return		self
+	 *	@return		static
 	 */
-	public function setCachePath( string $path ): self
+	public function setCachePath( string $path ): static
 	{
 		$this->pathCache = $path;
 		return $this;
 	}
 
-	public function setCompression( bool $compression ): self
+	public function setCompression( bool $compression ): static
 	{
 		$this->useCompression	= $compression;
 		return $this;
 	}
 
-	public function setPrefix( string $prefix ): self
+	/**
+	 *	@param		string $prefix
+	 *	@return		static
+	 */
+	public function setPrefix( string $prefix ): static
 	{
 		$this->prefix	= $prefix;
 		return $this;
 	}
 
-	public function setSuffix( string $suffix ): self
+	/**
+	 *	@param		string		$suffix
+	 *	@return		static
+	 */
+	public function setSuffix( string $suffix ): static
 	{
 		$this->suffix	= $suffix;
 		return $this;
@@ -249,9 +261,9 @@ class StyleSheet
 	 *	Sets revision for versioning cache.
 	 *	@access		public
 	 *	@param		string		$revision	Revision number or version string
-	 *	@return		self
+	 *	@return		static
 	 */
-	public function setRevision( string $revision ):self
+	public function setRevision( string $revision ): static
 	{
 		$this->revision	= $revision;
 		return $this;
@@ -285,18 +297,18 @@ class StyleSheet
 		$combiner	= new CssCombiner();															//  load CSS combiner for nested CSS files
 		$compressor	= new CssCompressor();															//  load CSS compressor
 		$relocator	= new CssRelocator();															//  load CSS relocator
-		$pathRoot	= (string) getEnv( 'DOCUMENT_ROOT' );										//  get server document root path for CSS relocator
-		$pathSelf	= dirname( (string) getEnv( 'SCRIPT_FILENAME' ) );
+		$pathRoot	= (string) getenv( 'DOCUMENT_ROOT' );										//  get server document root path for CSS relocator
+		$pathSelf	= dirname( (string) getenv( 'SCRIPT_FILENAME' ) );
 		$pathSelf	= str_replace( $pathRoot, '', $pathSelf );								//  get path relative to document root for symbolic link map
 
 		$symlinks	= [];																			//  prepare map of symbolic links for CSS relocator
 		/** @var SplFileInfo $item */
-		foreach( FolderLister::getFolderList( 'themes' ) as $item )									//  iterate theme folders
+		foreach( FolderLister::getFolderList( 'themes' ) as $item )							//  iterate theme folders
 			if( is_link( ( $path = $item->getPathname() ) ) )										//  if theme folder is a link
 				$symlinks['/'.$pathSelf.'/themes/'.$item->getFilename()] = realpath( $path );		//  not symbolic link
 
-		$contents	= [];																		//  prepare empty package content list
-		if( $this->revision )																		//  a revision is set
+		$contents	= [];																			//  prepare empty package content list
+		if( NULL !== $this->revision )																//  a revision is set
 			$contents[]	= "/* @revision ".$this->revision." */\n";									//  add revision header to content list
 
 		foreach( $this->getUrlList() as $url ){														//  iterate collected URLs
@@ -306,12 +318,12 @@ class StyleSheet
 			}
 			$pathFile	= dirname( $url->url ).'/';													//  get path to CSS file within app
 			$content	= FileReader::load( $url->url ) ?? '';										//  read local CSS content
-			$content	= $combiner->combineString( $pathFile, $content, TRUE );					//  insert imported CSS files within CSS content
-			if( preg_match( "/\/[a-z]+/", $content ) )												//  CSS content contains path notations
+			$content	= $combiner->combineString( $pathFile, $content, TRUE );		//  insert imported CSS files within CSS content
+			if( FALSE !== preg_match( "/\/[a-z]+/", $content ) )								//  CSS content contains path notations
 				$content	= $relocator->rewrite( $content, $pathFile, $pathRoot, $symlinks );		//  relocate resources paths in CSS content
 			$contents[]	= $content;																	//  add CSS content after import and relocation
 		}
-		$content	= $compressor->compress( implode( "\n\n", $contents ) );						//  compress collected CSS contents
+		$content	= $compressor->compress( implode( "\n\n", $contents ) );				//  compress collected CSS contents
 		FileWriter::save( $fileCss, $content );														//  save CSS package file
 		return $fileCss;																			//  return CSS package file name
 	}

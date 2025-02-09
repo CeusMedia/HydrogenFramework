@@ -112,7 +112,7 @@ abstract class Api extends Abstraction
 	 */
 	protected function evaluateMimeType( ?string $mimeType = NULL ): string
 	{
-		$mimeType	= $mimeType ?: $this->defaultResponseMimeType;
+		$mimeType	= $mimeType ?? $this->defaultResponseMimeType;
 		if( in_array( $mimeType, $this->supportedMimeTypes, TRUE ) )
 			return $mimeType;
 		return $this->defaultResponseMimeType;
@@ -136,7 +136,7 @@ abstract class Api extends Abstraction
 			'data'		=> $data,
 		];
 		$dev	= (string) ob_get_clean();
-		if( ob_get_level() && strlen( trim( $dev ) ) )
+		if( 0 !== ob_get_level() && '' !== trim( $dev ) )
 			$response['dev']	= $dev;
 
 		$mimeType	= $this->evaluateMimeType( $mimeType );
@@ -163,7 +163,7 @@ abstract class Api extends Abstraction
 			'message'	=> $message,
 		];
 		$dev	= (string) ob_get_clean();
-		if( ob_get_level() && strlen( trim( $dev ) ) )
+		if( 0 !== ob_get_level() && '' !== trim( $dev ) )
 			$response['dev']	= $dev;
 		$mimeType	= $this->evaluateMimeType( $mimeType );
 		try{
@@ -198,7 +198,7 @@ abstract class Api extends Abstraction
 			'line'		=> $exception->getLine(),
 		];
 		$dev	= (string) ob_get_clean();
-		if( ob_get_level() && '' !== trim( $dev ) )
+		if( 0 !== ob_get_level() && '' !== trim( $dev ) )
 			$response['dev']	= $dev;
 		$json	= json_encode( $response, JSON_THROW_ON_ERROR );
 		return $this->respond( $json, $statusCode, $mimeType );
@@ -215,15 +215,15 @@ abstract class Api extends Abstraction
 	 */
 	protected function respond( string $content, int $statusCode = NULL, string $mimeType = NULL ): int
 	{
-		$mimeType	= $mimeType ?: $this->defaultResponseMimeType;
-		$statusCode	= $statusCode ?: 200;
+		$mimeType	= $mimeType ?? $this->defaultResponseMimeType;
+		$statusCode	= $statusCode ?? 200;
 
 		$this->response->addHeaderPair( 'Content-Type', $mimeType );
 		$this->response->setBody( $content );
 		$this->response->setStatus( $statusCode );
 
 		$dev	= (string) ob_get_clean();
-		if( ob_get_level() && strlen( trim( $dev ) ) )
+		if( 0 !== ob_get_level() && '' !== trim( $dev ) )
 			$this->response->addHeaderPair( 'X-API-Dev', base64_encode( $dev ) );
 
 		HttpResponseSender::$supportedCompressions	= self::$supportedCompressions;

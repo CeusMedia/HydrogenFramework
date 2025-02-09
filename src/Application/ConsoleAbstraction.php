@@ -65,10 +65,10 @@ abstract class ConsoleAbstraction implements ApplicationInterface
 
 		$this->env	= $env;
 
-		if( static::$modulesNeeded )																//  needed modules are defined
+		if( [] !== static::$modulesNeeded )															//  needed modules are defined
 			$this->checkNeededModules();															//  check for missing modules
 
-		if( $this->env->getConfig()->get( 'system.compat.oldCommon', FALSE ) )			//  look into config for compat flag
+		if( TRUE === $this->env->getConfig()->get( 'system.compat.oldCommon', FALSE ) )	//  look into config for compat flag
 			require_once 'vendor/ceus-media/common/src/compat8.php';								//  ... for CeusMedia::Common 0.8.x without namespaces
 
 //		$this->env->set( 'request', new Console_Command_ArgumentParser() );
@@ -93,7 +93,7 @@ abstract class ConsoleAbstraction implements ApplicationInterface
 	{
 		$modulesGot	= array_keys( $this->env->getModules()->getAll() );								//  get installed modules
 		$missing	= array_diff( static::$modulesNeeded, $modulesGot );							//  find missing modules
-		if( $missing ){																				//  there are missing modules
+		if( [] !== $missing ){																		//  there are missing modules
 			$this->reportMissingModules( $missing );												//  report missing modules to screen
 			exit;																					//  quit execution
 		}

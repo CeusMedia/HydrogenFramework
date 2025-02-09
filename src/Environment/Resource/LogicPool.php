@@ -279,7 +279,7 @@ class LogicPool
 	 */
 	protected function getClassNameFromKey( string $key ): string
 	{
-		if( preg_match( '/^[A-Z]/', $key ) )
+		if( 1 === preg_match( '/^[A-Z]/', $key ) )
 			return 'Logic_'.$key;
 		$classNameWords	= ucwords( CamelCase::decode( $key ) );
 		return str_replace( ' ', '_', 'Logic '.$classNameWords );

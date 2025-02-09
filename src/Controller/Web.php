@@ -253,9 +253,9 @@ abstract class Web extends Abstraction
 	 */
 	protected function getWords( string $section = NULL, string $topic = NULL ): array
 	{
-		if( empty( $topic )/* && $this->env->getLanguage()->hasWords( $this->controller )*/ )
+		if( NULL === $topic || '' === trim( $topic ) )
 			$topic = $this->controller;
-		if( empty( $section ) )
+		if( NULL === $section || '' === trim( $section ) )
 			return $this->env->getLanguage()->getWords( $topic );
 		return $this->env->getLanguage()->getSection( $topic, $section );
 	}
@@ -272,7 +272,7 @@ abstract class Web extends Abstraction
 	protected function handleJsonResponse(string|bool $status, mixed $data, ?int $httpStatusCode = NULL ): void
 	{
 		$type			= $status;
-		$httpStatusCode	= $httpStatusCode ?: 200;
+		$httpStatusCode	= $httpStatusCode ?? 200;
 		if( in_array( $status, [TRUE, 'data', 'success', 'succeeded'], TRUE ) )
 			$type	= "data";
 		else if( in_array( $status, [FALSE, 'error', 'fail', 'failed'], TRUE ) )
@@ -320,7 +320,7 @@ abstract class Web extends Abstraction
 	 *	@param		array		$parameters		Map of additional parameters to set in request
 	 *	@return		void
 	 */
-	protected function redirect( string $controller = 'index', string $action = "index", array $arguments = [], array $parameters = [] ): void
+	protected function redirect( string $controller = 'index', string $action = 'index', array $arguments = [], array $parameters = [] ): void
 	{
 		Deprecation::getInstance()
 			->setErrorVersion( '0.8.6.4' )
@@ -331,7 +331,7 @@ abstract class Web extends Abstraction
 		$request->set( '__action', $action );
 		$request->set( '__arguments', $arguments );
 		foreach( $parameters as $key => $value )
-			if( !empty( $key ) )
+			if( '' !== trim( $key ) )
 				$request->set( $key, $value );
 		$this->redirect = TRUE;
 	}

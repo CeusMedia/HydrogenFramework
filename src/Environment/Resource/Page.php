@@ -33,18 +33,13 @@ use CeusMedia\Common\UI\HTML\PageFrame as HtmlPage;
 use CeusMedia\Common\UI\HTML\Tag as HtmlTag;
 use CeusMedia\HydrogenFramework\Environment as Environment;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
-use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Config as ConfigComponent;
-use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\File as FileComponent;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition as ModuleDefinition;
 use CeusMedia\HydrogenFramework\View\Helper\StyleCascade;
-use CeusMedia\HydrogenFramework\View\Helper\StyleSheet as CssHelper;
 use CeusMedia\HydrogenFramework\View\Helper\JavaScript as JsHelper;
 
 use InvalidArgumentException;
-use DomainException;
-use RangeException;
 use ReflectionException;
 use RuntimeException;
-use stdClass;
 
 /**
  *	XHTML Page Resource of Framework Hydrogen.
@@ -94,7 +89,7 @@ class Page extends HtmlPage
 		$config			= $env->getConfig();
 		$pathThemes		= rtrim( $config->get( 'path.themes' ), '/' ).'/';
 		$this->pathPrimer	= $pathThemes;
-		if( $config->get( 'layout.primer' ) )
+		if( '' !== trim( $config->get( 'layout.primer', '' ) ) )
 			$this->pathPrimer	= $pathThemes.$config->get( 'layout.primer' ).'/';
 		$this->pathCommon	= $pathThemes.'common/';
 		$this->pathTheme	= $pathThemes.$config->get( 'layout.theme' ).'/';
@@ -104,7 +99,7 @@ class Page extends HtmlPage
 			'theme'		=> $this->pathTheme.'css/',
 			'lib'		=> NULL,
 		] );
-		if( $config->get( 'app.revision' ) ){
+		if( '' !== trim( $config->get( 'app.revision', '' ) ) ){
 			$this->css->get( 'primer' )->setRevision( $config->get( 'app.revision' ) );
 			$this->css->get( 'theme' )->setRevision( $config->get( 'app.revision' ) );
 			$this->js->setRevision( $config->get( 'app.revision' ) );
@@ -124,9 +119,9 @@ class Page extends HtmlPage
 	 */
 	public function addBodyClass( string $class ): self
 	{
-		if( strlen( trim( $class ) ) ){
+		if( '' !== trim( $class ) ){
 			$classFixed	= trim( htmlentities( $class, ENT_QUOTES, 'UTF-8' ) );
-			if( !in_array( $classFixed, $this->bodyClasses ) )
+			if( !in_array( $classFixed, $this->bodyClasses, TRUE ) )
 				$this->bodyClasses[]	= $classFixed;
 		}
 		return $this;
@@ -179,103 +174,19 @@ class Page extends HtmlPage
 	 */
 	public function applyModules(): void
 	{
+		$modules	= $this->env->getModules()->getAll();											//  get list of active modules
+
 		/** @var Dictionary $config */
-		$config		= $this->env->getConfig()->getAll( 'module.', TRUE );			//  dictionary of (user modified) module settings
-		$modules	= $this->env->getModules();														//  get module handler resource
-		if( 0 === $modules->count() )																//  no active modules found
-			return;
+		$config			= $this->env->getConfig()->getAll( 'module.', TRUE );			//  dictionary of (user modified) module settings
+		$pathScripts	= $this->env->getConfig()->get( 'path.scripts', '' );
+		$pathScriptsLib	= $this->env->getConfig()->get( 'path.scripts.lib', '' );
+		$pathStylesLib	= $this->env->getConfig()->get( 'path.styles.lib', '' );
 
-		$pathScripts	= $this->env->getConfig()->get( 'path.scripts' );
-		$pathScriptsLib	= $this->env->getConfig()->get( 'path.scripts.lib' );
-		$pathStylesLib	= $this->env->getConfig()->get( 'path.styles.lib' );
-		$settings		= [];
+		$this->applyModulesStyles( $modules, $pathStylesLib, $pathScriptsLib );
+		$this->applyModulesScripts( $modules, $pathScripts, $pathScriptsLib );
+		$this->applyModulesConfigs( $modules, $config );
 
-		foreach( $modules->getAll() as $module ){													//  iterate installed modules
-			$settings[$module->id]	= [
-//				'_id'		=> $module->id,
-//				'_title'	=> $module->title,
-//				'_version'	=> $module->version,
-			];
-			/** @var FileComponent $style */
-			foreach( $module->files->styles as $style ){											//  iterate module style files
-				if( !empty( $style->load ) && 'auto' === $style->load ){							//  style file is to be loaded always
-					$source	= !empty( $style->source ) ? $style->source : NULL;						//  get source attribute if possible
-					$level	= self::interpretLoadLevel( $style->level ?? Captain::LEVEL_MID );	//  get load level (top, mid, end), default: mid
-					if( preg_match( "/^[a-z]+:\/\/.+$/", $style->file ) )					//  style file is absolute URL
-						$this->css->get( 'theme' )->addUrl( $style->file, $level );					//  add style file URL
-					else if( 'primer' === $source )													//  style file is in primer theme
-						$this->addPrimerStyle( $style->file, $level );								//  load style file from primer theme folder
-					else if( 'common' === $source )													//  style file is in common theme
-						$this->addCommonStyle( $style->file, $level );								//  load style file from common theme folder
-					else if( 'lib' === $source ){													//  style file is in styles library, which is enabled by configured path
-						if( !strlen( trim( $pathStylesLib ) ) )
-							throw new RuntimeException( 'Path to style library "path.styles.lib" is not configured' );
-						$this->css->get( 'lib' )->addUrl( $pathStylesLib.$style->file, $level );	//  load style file from styles library
-					}
-					else if( 'scripts-lib' === $source && $pathScriptsLib ){						//  style file is in scripts library, which is enabled by configured path
-						if( !strlen( trim( $pathScriptsLib ) ) )
-							throw new RuntimeException( 'Path to script library "path.scripts.lib" is not configured' );
-						$this->css->get( 'primer' )->addUrl( $pathScriptsLib.$style->file, $level );	//  load style file from scripts library
-					}
-					else if( 'theme' === $source || !$source )										//  style file is in custom theme
-						$this->addThemeStyle( $style->file, $level );								//  load style file from custom theme folder
-					else																			//  style file is in an individual source folder within themes folder
-						$this->css->get( 'primer' )->addUrl( /*$path.$source.'/'.*/$style->file );	//  load style file /*from source folder within themes folder*/
-				}
-			}
-			/** @var FileComponent $script */
-			foreach( $module->files->scripts as $script ){											//  iterate module script files
-				if( !empty( $script->load ) && 'auto' === $script->load ){							//  script file is to be loaded always
-					$source	= empty( $script->source ) ? 'local' : $script->source;
-					$level	= self::interpretLoadLevel( $script->level ?? Captain::LEVEL_MID );	//  get load level (top, mid, end, ready), default: mid
-					$top	= !empty( $script->top ) || $level === Captain::LEVEL_TOP;				//  get flag attribute for appending on top
-					if( 'lib' === $source ){														//  script file is in script library
-						if( $top )																	//
-							$this->addJavaScript( $pathScriptsLib.$script->file );				//
-						else																		//
-							$this->js->addUrl( $pathScriptsLib.$script->file/*, $level*/ );		//  load script file from script library
-					}
-					else if( 'local' === $source ){													//  script file is in app scripts folder
-						if( $top )																	//
-							$this->addJavaScript( $pathScripts.$script->file );					//
-						else																		//
-							$this->js->addUrl( $pathScripts.$script->file/*, $level*/ );		//  load script file from app scripts folder
-					}
-					else if( 'url' === $source ){													//  script file is absolute URL
-						if( !preg_match( "/^[a-z]+:\/\/.+$/", $script->file ) ){
-							$msg	= 'Invalid script URL: '.$script->file;
-							throw new InvalidArgumentException( $msg );
-						}
-						$this->js->addUrl( $script->file );											//  add script file URL
-					}
-				}
-			}
-			/** @var ConfigComponent $pair */
-			foreach( $module->config as $pair ){													//  iterate module configuration pairs
-				if( !empty( $pair->protected ) && $pair->protected !== 'yes' ){
-					$value	= $config->get( strtolower( $module->id ).'.'.$pair->key );		//  get (user modified) module setting value
-					$settings[$module->id][str_replace( '.', '_', $pair->key )]	= $value;	//  note module setting
-				}
-			}
-			if( !$settings[$module->id] )
-				unset( $settings[$module->id] );
-		}
 		$this->env->getCaptain()->callHook( 'Page', 'applyModules', $this );			//  call related module event hooks
-
-		if( $this->env instanceof WebEnvironment ){
-			$settings['Env']	= [
-				'host'		=> $this->env->host,
-				'port'		=> $this->env->port,
-				'protocol'	=> $this->env->scheme,
-				'domain'	=> $this->env->host.( $this->env->port ? ':'.$this->env->port : '' ),
-				'path'		=> $this->env->path,
-	//			'title'		=> $this->env->title,
-				'secure'	=> getEnv( 'HTTPS' ),
-			];
-			$script		= 'var settings = '.json_encode( $settings ).';';
-			$script		= HtmlTag::create( 'script', "<!--\n".$script."\n-->", ['type' => "text/javascript"] );
-			$this->addHead( $script );
-		}
 	}
 
 	/**
@@ -283,58 +194,16 @@ class Page extends HtmlPage
 	 */
 	public function build( $bodyAttributes = [], $htmlAttributes = [] ): string
 	{
-		$controller			= $this->env->getRequest()->get( '__controller' );
-		$action				= $this->env->getRequest()->get( '__action' );
-		$controllerKey		= str_replace( '/', '-', $controller );
-		$actionKey			= str_replace( '/', '-', $action );										//  @todo to be removed
-		$moduleKeyOld		= join( explode( ' ', ucwords( str_replace( '/', ' ', $controller ) ) ) );		//  @todo to be removed
-		$this->addBodyClass( 'module'.$moduleKeyOld );
-
-		$modules			= $this->env->getModules();												//  get installed modules
-		$controllerClass	= str_replace( ' ', '_', ucwords( str_replace( '/', ' ', $controller ) ) );
-
-		$module				= $modules->getModuleFromControllerClassName( $controllerClass );		//  try to get module of controller
-		if( $module ){																				//  module has been identified
-			$moduleKey		= str_replace( '_', '', $module->id );
-			$this->addBodyClass( 'module'.$moduleKey );
-		}
-
-		$this->addBodyClass( 'controller-'.$controllerKey );
-		$this->addBodyClass( 'action-'.$actionKey );
-		$this->addBodyClass( 'site-'.$controllerKey.'-'.$actionKey );
-
 		$payload	= ['content' => $this->getBody()];
 		$this->env->getCaptain()->callHook( 'Page', 'build', $this, $payload );	//  call related module event hooks
 		$this->setBody( $payload['content'] );
 
-		if( $this->packStyleSheets && $this->env->getRequest()->has( 'flushStyleCache') ){
-			$this->css->get( 'primer' )->clearCache();
-			$this->css->get( 'common' )->clearCache();
-			$this->css->get( 'theme' )->clearCache();
-			$this->css->get( 'lib' )->clearCache();
-		}
-
-		$headStyleBlocks	= [
-			'primer'	=> $this->css->get( 'primer' )->render( $this->packStyleSheets ),
-			'common'	=> $this->css->get( 'common' )->render( $this->packStyleSheets ),
-			'theme'		=> $this->css->get( 'theme' )->render( $this->packStyleSheets ),
-			'lib'		=> $this->css->get( 'lib' )->render( $this->packStyleSheets ),
-		];
-		foreach( $headStyleBlocks as $blocksContent )
-			if( strlen( trim( $blocksContent ) ) !== 0 )
-				$this->addHead( $blocksContent );
-
+		$this->decorateStyles();
+		$this->decorateBodyClasses( $bodyAttributes );
 		$this->addBody( $this->js->render() );
 
-		/*  --  BODY CLASSES  --  */
-		$classes	= [];
-		foreach( $this->bodyClasses as $class )
-			$classes[]	= $class;
-		if( isset( $bodyAttributes['class'] ) && strlen( trim( $bodyAttributes['class'] ) ) )
-			foreach( explode( " ", trim( $bodyAttributes['class'] ) ) as $class )
-				$classes[]	= $class;
-		$bodyAttributes['class']	= join( ' ', $classes );
-		$this->env->getCaptain()->callHook( 'App', 'respond', $this );						//  call related module event hooks
+		// @todo move this call to app! refactor existing hooks in modules on this event
+		$this->env->getCaptain()->callHook( 'App', 'respond', $this );				//  call related module event hooks
 		return parent::build( $bodyAttributes, $htmlAttributes );
 	}
 
@@ -385,10 +254,13 @@ class Page extends HtmlPage
 		$level	= $level == 'head' ? 'top' : $level;
 		$level	= $level == 'tail' ? 'end' : $level;
 		$levelConstants	= new Constant( Captain::class );											//  reflect constants of Captain
-		/** @noinspection PhpUnhandledExceptionInspection */
-		if( $levelConstants->hasValue( strtoupper( $level ), 'LEVEL' ) )
-			/** @noinspection PhpUnhandledExceptionInspection */
-			return $levelConstants->getValue( strtoupper( $level ), 'LEVEL' );
+
+		try{
+			if( $levelConstants->hasValue( strtoupper( $level ), 'LEVEL' ) )
+				return $levelConstants->getValue( strtoupper( $level ), 'LEVEL' );
+		}
+		catch( ReflectionException ){
+		}
 		return Captain::LEVEL_MID;
 	}
 
@@ -441,5 +313,178 @@ class Page extends HtmlPage
 		$this->packJavaScripts	= $packJavaScripts;
 		$this->packStyleSheets	= $packStyleSheets;
 		return $this;
+	}
+
+	//  --  PROTECTED  --  //
+
+	/**
+	 *	@param		ModuleDefinition[]	$modules
+	 *	@param		Dictionary			$config
+	 *	@return		void
+	 */
+	protected function applyModulesConfigs( array $modules, Dictionary $config ): void
+	{
+		$settings	= [];
+		foreach( $modules as $module ){													//  iterate installed modules
+			if( [] === $module->config )
+				continue;
+			$settings[$module->id]	= [
+				//				'_id'		=> $module->id,
+				//				'_title'	=> $module->title,
+				//				'_version'	=> $module->version,
+			];
+			foreach( $module->config as $pair ){													//  iterate module configuration pairs
+				if( 'yes' === $pair->protected )													//  don't carry protected pairs to js
+					continue;
+				$phpKey	= strtolower( $module->id ).'.'.$pair->key;
+				$jsKey	= str_replace( '.', '_', $pair->key );
+				$settings[$module->id][$jsKey]	= $config->get( $phpKey );							//  note module setting
+			}
+		}
+		if( $this->env instanceof WebEnvironment ){
+			$settings['Env']	= [
+				'host'		=> $this->env->host,
+				'port'		=> $this->env->port,
+				'protocol'	=> $this->env->scheme,
+				'domain'	=> $this->env->host.( '' !== trim( $this->env->port ) ? ':'.$this->env->port : '' ),
+				'path'		=> $this->env->path,
+	//			'title'		=> $this->env->title,
+				'secure'	=> getenv( 'HTTPS' ),
+			];
+			$script		= 'var settings = '.json_encode( $settings ).';';
+			$script		= HtmlTag::create( 'script', "<!--\n".$script."\n-->", ['type' => "text/javascript"] );
+			$this->addHead( $script );
+		}
+	}
+
+	/**
+	 *	@param		ModuleDefinition[]	$modules
+	 *	@param		string				$pathScripts
+	 *	@param		string				$pathScriptsLib
+	 *	@return		void
+	 */
+	protected function applyModulesScripts( array $modules, string $pathScripts, string $pathScriptsLib ): void
+	{
+		foreach( $modules as $module ){																//  iterate installed modules
+			foreach( $module->files->scripts as $script ){											//  iterate module script files
+				if( 'auto' !== $script->load )														//  script file is NOT to be loaded always
+					continue;
+
+				$source	= $script->source ?? 'local';
+				$level	= self::interpretLoadLevel( $script->level ?? Captain::LEVEL_MID );	//  get load level (top, mid, end, ready), default: mid
+				$isTopLevel	= Captain::LEVEL_TOP === $level;
+
+				switch( $source ){
+					case 'lib':																		//  script file is in script library
+						$filePath	= $pathScriptsLib.$script->file;
+						if( $isTopLevel )															//
+							$this->addJavaScript( $filePath );										//
+						else																		//
+							// @todo why is level disabled? check if better to enable
+							$this->js->addUrl( $filePath/*, $level*/ );								//  load script file from script library
+						break;
+					case 'local':																	//  script file is in app scripts folder
+						$filePath	= $pathScripts.$script->file;
+						if( $isTopLevel )															//
+							$this->addJavaScript( $filePath );										//
+						else																		//
+							// @todo why is level disabled? check if better to enable
+							$this->js->addUrl( $filePath/*, $level*/ );								//  load script file from app scripts folder
+						break;
+					case 'url':																		//  script file is absolute URL
+						$matchSchema	= preg_match( "/^[a-z]+:\/\/.+$/", $script->file );
+						if( 0 !== ( $matchSchema ?: 0 ) )											//  file is not a URI
+							throw new InvalidArgumentException( 'Invalid script URL: '.$script->file );
+						$this->js->addUrl( $script->file );											//  add script file URL
+						break;
+				}
+			}
+		}
+	}
+
+	/**
+	 *	@param		ModuleDefinition[]	$modules
+	 *	@param		string				$pathStylesLib
+	 *	@param		string				$pathScriptsLib
+	 *	@return		void
+	 */
+	protected function applyModulesStyles( array $modules, string $pathStylesLib, string $pathScriptsLib ): void
+	{
+		foreach( $modules as $module ){																//  iterate installed modules
+			foreach( $module->files->styles as $style ){											//  iterate module style files
+				if( 'auto' === $style->load ){														//  style file is to be loaded always
+					$source	= $style->source;														//  get source attribute if possible
+					$level	= self::interpretLoadLevel( $style->level ?? Captain::LEVEL_MID );	//  get load level (top, mid, end), default: mid
+					if( 0 !== ( preg_match( "/^[a-z]+:\/\/.+$/", $style->file ) ?: 0 ) )		//  style file is absolute URL
+						$this->css->get( 'theme' )->addUrl( $style->file, $level );					//  add style file URL
+					else if( 'primer' === $source )													//  style file is in primer theme
+						$this->addPrimerStyle( $style->file, $level );								//  load style file from primer theme folder
+					else if( 'common' === $source )													//  style file is in common theme
+						$this->addCommonStyle( $style->file, $level );								//  load style file from common theme folder
+					else if( 'lib' === $source ){													//  style file is in styles library, which is enabled by configured path
+						if( '' === trim( $pathStylesLib ) )
+							throw new RuntimeException( 'Path to style library "path.styles.lib" is not configured' );
+						$this->css->get( 'lib' )->addUrl( $pathStylesLib.$style->file, $level );	//  load style file from styles library
+					}
+					else if( 'scripts-lib' === $source ){											//  style file is in scripts library, which is enabled by configured path
+						if( '' === trim( $pathScriptsLib ) )
+							throw new RuntimeException( 'Path to script library "path.scripts.lib" is not configured' );
+						$this->css->get( 'primer' )->addUrl( $pathScriptsLib.$style->file, $level );	//  load style file from scripts library
+					}
+					else if( 'theme' === $source || !$source )										//  style file is in custom theme
+						$this->addThemeStyle( $style->file, $level );								//  load style file from custom theme folder
+					else																			//  style file is in an individual source folder within themes folder
+						$this->css->get( 'primer' )->addUrl( /*$path.$source.'/'.*/$style->file );	//  load style file /*from source folder within themes folder*/
+				}
+			}
+		}
+	}
+
+	protected function decorateBodyClasses( array & $bodyAttributes ): void
+	{
+		$controller			= $this->env->getRequest()->get( '__controller' );
+		$action				= $this->env->getRequest()->get( '__action' );
+		$controllerKey		= str_replace( '/', '-', $controller );
+		$actionKey			= str_replace( '/', '-', $action );										//  @todo to be removed
+		$moduleKeyOld		= join( explode( ' ', ucwords( str_replace( '/', ' ', $controller ) ) ) );		//  @todo to be removed
+		$this->addBodyClass( 'controller-'.$controllerKey );
+		$this->addBodyClass( 'action-'.$actionKey );
+		$this->addBodyClass( 'site-'.$controllerKey.'-'.$actionKey );
+		$this->addBodyClass( 'module'.$moduleKeyOld );
+
+		$modules			= $this->env->getModules();												//  get installed modules
+		$controllerClass	= str_replace( ' ', '_', ucwords( str_replace( '/', ' ', $controller ) ) );
+		$module				= $modules->getModuleFromControllerClassName( $controllerClass );		//  try to get module of controller
+		if( NULL !== $module ){																		//  module has been identified
+			$moduleKey		= str_replace( '_', '', $module->id );
+			$this->addBodyClass( 'module'.$moduleKey );
+		}
+
+		/*  --  BODY CLASSES  --  */
+		$classes	= [];
+		foreach( $this->bodyClasses as $class )
+			$classes[]	= $class;
+		if( isset( $bodyAttributes['class'] ) && strlen( trim( $bodyAttributes['class'] ) ) )
+			foreach( explode( " ", trim( $bodyAttributes['class'] ) ) as $class )
+				$classes[]	= $class;
+		$bodyAttributes['class']	= join( ' ', $classes );
+	}
+
+	/**
+	 *	@return		void
+	 */
+	protected function decorateStyles(): void
+	{
+		$headStyleBlocks	= ['primer', 'common', 'theme','lib'];
+
+		if( $this->packStyleSheets && $this->env->getRequest()->has( 'flushStyleCache') )
+			foreach( $headStyleBlocks as $headStyleBlockKey )
+				$this->css->get( $headStyleBlockKey )->clearCache();
+
+		foreach( $headStyleBlocks as $headStyleBlockKey ){
+			$block	= $this->css->get( $headStyleBlockKey )->render( $this->packStyleSheets );
+			if( '' !== trim( $block ) )
+				$this->addHead( $block );
+		}
 	}
 }

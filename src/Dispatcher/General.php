@@ -211,7 +211,7 @@ class General
 				$this->checkClassActionArguments( $instance, $action, $arguments );
 			$runtime->reach( 'GeneralDispatcher::dispatch: check@'.$controller.'/'.$action );
 
-			if( $devBuffer )
+			if( NULL !== $devBuffer )
 				$instance->setDevBuffer( $devBuffer );
 			$factory	= new MethodFactory( $instance );											// create method factory on controller instance
 			$factory->callMethod( $action, $arguments );											// call action method in controller class with arguments
@@ -257,7 +257,7 @@ class General
 	{
 		if( '' === trim( $path ) )
 			return [];
-		if( !$allowNumbers && preg_match( '/^\d+$/', $path ) )
+		if( !$allowNumbers && 1 === preg_match( '/^\d+$/', $path ) )
 			return [];
 		if( 0 !== self::$maxPathPartLength && strlen( $path ) > self::$maxPathPartLength )
 			return [];
@@ -269,7 +269,7 @@ class General
 			$list[]	= ucfirst( $path );
 		if( $allowUppercase )
 			if( strlen( $path ) <= self::$uppercaseMaxLength )
-				if( !in_array( $path, self::$skipWordsOnUppercase ) )
+				if( !in_array( $path, self::$skipWordsOnUppercase, TRUE ) )
 					$list[]	= strtoupper( $path );
 		if( $allowLowercase )
 			$list[]	= $path;
@@ -287,7 +287,7 @@ class General
 	protected static function getClassNameVariationsByPathLevelX( array $parts, bool $allowUppercase = TRUE, bool $allowLowercase = TRUE, bool $allowCamelCase = TRUE, bool $allowNumbers = FALSE ): array
 	{
 		$prefix = trim( array_shift( $parts ) );
-		if( !$allowNumbers && preg_match( '/^\d+$/', $prefix ) )
+		if( !$allowNumbers && 1 === preg_match( '/^\d+$/', $prefix ) )
 			return [];
 
 		$prefixVariations	= self::getClassNameVariationsByPathLevel1(
@@ -323,7 +323,7 @@ class General
 	protected function checkClassAction( object $instance, string $action ): bool
 	{
 		$denied = array( '__construct', '__destruct', 'getView', 'getData' );
-		if( !method_exists( $instance, $action ) || in_array( $action, $denied ) ){					// no action method in controller instance
+		if( !method_exists( $instance, $action ) || in_array( $action, $denied, TRUE ) ){				// no action method in controller instance
 			$message	= 'Invalid Action "'.$instance::class.'::'.$action.'"';
 			throw new RuntimeException( $message, 211 );											// break with internal error
 		}
@@ -364,7 +364,7 @@ class General
 	{
 		$controller	= $this->request->get( '__controller' );
 		$action		= $this->request->get( '__action' );
-		if( empty( $this->history[$controller][$action] ) )
+		if( !isset( $this->history[$controller][$action] ) )
 			$this->history[$controller][$action]	= 0;
 		if( $this->history[$controller][$action] > 2 ){
 			throw new RuntimeException( 'Too many redirects' );

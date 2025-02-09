@@ -138,7 +138,7 @@ abstract class Abstraction
 		if( !isset( $this->env ) || !$this->env instanceof Environment )
 			throw new RuntimeException( 'No environment available' );
 
-		if( preg_match( '/^[A-Z][A-Za-z0-9_]+$/', $key ) )
+		if( 1 === preg_match( '/^[A-Z][A-Za-z0-9_]+$/', $key ) )
 			$className	= self::$prefixModel.$key;
 		else{
 			$classNameWords	= ucwords( CamelCase::decode( $key ) );
@@ -162,9 +162,9 @@ abstract class Abstraction
 	{
 		if( !property_exists( $this, 'env' ) )
 			return [];
-		if( empty( $topic )/* && $this->env->getLanguage()->hasWords( $this->controller )*/ )
+		if( NULL === $topic || '' === trim( $topic ) )
 			$topic = $this->controller;
-		if( empty( $section ) )
+		if( NULL === $section || '' === trim( $section ) )
 			return $this->env->getLanguage()->getWords( $topic );
 		return $this->env->getLanguage()->getSection( $topic, $section );
 	}
