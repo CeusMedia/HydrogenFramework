@@ -27,7 +27,7 @@
 
 namespace CeusMedia\HydrogenFramework\Environment\Resource\Console;
 
-use CeusMedia\Common\CLI;
+use CeusMedia\Common\CLI as Console;
 use CeusMedia\HydrogenFramework\Environment\Resource\Messenger as MessengerResource;
 use SebastianBergmann\Environment\Console as ConsoleEnvironment;
 
@@ -45,9 +45,9 @@ class Messenger extends MessengerResource
 //	/**	@var	ConsoleEnvironment	$env			Application Environment Object */
 //	protected ConsoleEnvironment $env;
 
-	protected function noteMessage( int $type, string $message )
+	protected function noteMessage( int $type, string $message ): void
 	{
-		CLI::out( $message );
+		Console::out( $message );
 		flush();
 	}
 }

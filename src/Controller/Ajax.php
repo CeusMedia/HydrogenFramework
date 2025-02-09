@@ -23,11 +23,11 @@ use Throwable;
  */
 abstract class Ajax extends Abstraction
 {
-	const RESPONSE_STRATEGY_DEFAULT		= 0;
-	const RESPONSE_STRATEGY_CALLBACK	= 1;
+	public const RESPONSE_STRATEGY_DEFAULT		= 0;
+	public const RESPONSE_STRATEGY_CALLBACK	= 1;
 
-	const RESPONSE_FORMAT_XML			= 0;
-	const RESPONSE_FORMAT_JSON			= 1;
+	public const RESPONSE_FORMAT_XML			= 0;
+	public const RESPONSE_FORMAT_JSON			= 1;
 
 	public static array $supportedCompressions	= ['gzip', 'deflate'];
 
@@ -77,10 +77,9 @@ abstract class Ajax extends Abstraction
 			$this->respondException( $e );
 		}
 
-		if( $this->env->getMode() & Environment::MODE_LIVE ){
-			if( !method_exists( $this->request, 'isAjax' ) || !$this->request->isAjax() )
-				$this->respondError( 400000, 'Access denied for non-AJAX requests', 406 );
-		}
+		if( $this->env->isInLiveMode() && !$this->request->isAjax() )
+			$this->respondError( 400000, 'Access denied for non-AJAX requests', 406 );
+
 		try{
 			$this->__onInit();
 		}
@@ -251,7 +250,7 @@ abstract class Ajax extends Abstraction
 			$response,
 			$this->request,
 			$this->sendLengthHeader,
-			$this->exitAfterwards && !( $this->env->getMode() & Environment::MODE_TEST )
+			$this->exitAfterwards && !$this->env->isInTestMode()
 		)->getBodyLength();
 
 /*		//  Original Code: dynamic call, okay but not cool

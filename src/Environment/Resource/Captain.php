@@ -277,13 +277,6 @@ class Captain
 				'function'	=> $hook->callback,
 			];
 		}
-
-		if( FALSE && 'App' === $resource && 'respond' === $event ){
-			print_m(['resource' => $resource, 'event' => $event, 'hooks' => $hooks, 'customHooks' => $customHooks] );
-			die;
-
-		}
-
 		return array_filter( array_map( static function( $levelHooks ){
 			return 0 !== count( $levelHooks ) ? $levelHooks : NULL;
 		}, $hooks ) );

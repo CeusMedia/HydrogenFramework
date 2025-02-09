@@ -71,7 +71,7 @@ class Site extends WebAbstraction implements ApplicationInterface
 		$this->devBuffer	= new OutputBuffer();
 
 		$displayErrors	= $this->env->getConfig()->get( 'system.display.errors' );				//  get error mode from config
-		$displayErrors	= is_null( $displayErrors ) || $displayErrors;								//  if not set: enable error display by default
+		$displayErrors	= is_null( $displayErrors ) || TRUE === $displayErrors;						//  if not set: enable error display by default
 		error_reporting( $displayErrors ? E_ALL : 0 );										//  set error reporting
 		try{
 			$this->respond( $this->main() );														//	send rendered result of dispatched controller action
@@ -105,13 +105,13 @@ class Site extends WebAbstraction implements ApplicationInterface
 		try{
 			$payload	= ['content' => NULL];
 			$captain->callHook( 'App', 'onDispatch', $this, $payload );
-			if( is_string( $payload['content'] ) && strlen( trim( $payload['content'] ) ) )
+			if( is_string( $payload['content'] ) && '' !== trim( $payload['content'] ?? '' ) )
 				return $payload['content'];
 			$dispatcher	= new GeneralDispatcher( $this->env );
 			$dispatcher->checkClassActionArguments	= self::$checkClassActionArguments;
-			if( $defaultController )
+			if( NULL !== $defaultController && '' !== trim( $defaultController ) )
 				$dispatcher->defaultController	= $defaultController;
-			if( $defaultAction )
+			if( NULL !== $defaultAction && '' !== trim( $defaultAction ) )
 				$dispatcher->defaultAction		= $defaultAction;
 			$output	= $dispatcher->dispatch( $this->devBuffer );									//  get requested content
 			$this->setViewComponents( [																//  note for main template
@@ -138,22 +138,23 @@ class Site extends WebAbstraction implements ApplicationInterface
 			$payload	= ['exception' => $e];
 			$captain->callHook( 'App', 'onException', $this, $payload );
 
-			if( $this->env->getRequest()->has( 'showException' ) ){									//  @todo: you need to secure this view by a configurable run mode etc.
-				$this->env->getResponse()->setBody( HtmlExceptionPage::render( $e ) );			//  fill response with exception page
-				$this->env->getResponse()->setStatus( 500 );										//  indicate HTTP status 500 - internal server error
-				$this->env->getResponse()->send();													//  send response
+			$response	= $this->env->getResponse();
+			if( $this->env->getRequest()->has( 'showException' ) ){							//  @todo: you need to secure this view by a configurable run mode etc.
+				$response->setBody( HtmlExceptionPage::render( $e ) );								//  fill response with exception page
+				$response->setStatus( 500 );													//  indicate HTTP status 500 - internal server error
+				$response->send();																	//  send response
 				exit;																				//  and quit
 			}
-			else if( $this->env->getMessenger() ){
-				$this->env->getMessenger()->noteFailure( $e->getMessage() );						//  fill messenger with exception message
-				$this->env->getResponse()->setStatus( 500 );										//  indicate HTTP status 500 - internal server error
-				$controller	= trim( $request->get( '__controller' ) );
-				if( strlen( $controller ) && $controller !== 'index' ){								//  a controller has been set
-					header( 'Location: '.$this->env->getBaseUrl() );								//  redirect to home
+			else if( $this->env->has( 'messenger' ) ){
+				$this->env->getMessenger()?->noteFailure( $e->getMessage() );						//  fill messenger with exception message
+				$response->setStatus( 500 );													//  indicate HTTP status 500 - internal server error
+				$controller	= trim( $request->get( '__controller' ) ?? '' );
+				if( '' !== $controller && 'index' !== $controller ){								//  a controller has been set
+					header( 'Location: '.$this->env->getBaseUrl() );							//  redirect to home
 					exit;																			//  and quit
 				}
-				$this->env->getResponse()->setBody( 'Error: '.$e->getMessage() );					//  fill response with exception page
-				$this->env->getResponse()->send();													//  send response
+				$response->setBody( 'Error: '.$e->getMessage() );								//  fill response with exception page
+				$response->send();																	//  send response
 				exit;																				//  and quit
 			}
 //			throw new RuntimeException( "Unhandled exception: ".$e->getMessage(), 0, $e );			//  last call: throw exception with unhandled exception nested

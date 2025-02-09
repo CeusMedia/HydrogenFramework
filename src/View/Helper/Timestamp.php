@@ -68,9 +68,9 @@ class Timestamp extends Abstraction
 
 	public function toDate( string $format = NULL, bool $html = FALSE ): string
 	{
-		if( NULL === $this->timestamp || 0 === (int) $this->timestamp )
+		if( NULL === $this->timestamp || 0 === $this->timestamp )
 			return $this->stringEmpty;
-		$format	= $format ?: self::$formatDate;
+		$format	= $format ?? self::$formatDate;
 		$date	= date( $format, $this->timestamp );
 		if( $html )
 			$date	= HtmlTag::create( 'span', $date, ['class' => 'date'] );
@@ -79,9 +79,9 @@ class Timestamp extends Abstraction
 
 	public function toDatetime( string $format = NULL, bool $html = FALSE ): string
 	{
-		if( NULL === $this->timestamp || 0 === (int) $this->timestamp )
+		if( NULL === $this->timestamp || 0 === $this->timestamp )
 			return $this->stringEmpty;
-		$format	= $format ?: self::$formatDatetime;
+		$format	= $format ?? self::$formatDatetime;
 		$date	= date( $format, $this->timestamp );
 		if( $html )
 			$date	= HtmlTag::create( 'span', $date, ['class' => 'datetime'] );
@@ -90,7 +90,7 @@ class Timestamp extends Abstraction
 
 	public function toPhrase( Environment $env, bool $html = FALSE, string $languageTopic = 'main', string $languageSection = 'phrases-time' ): string
 	{
-		if( NULL === $this->timestamp || 0 === (int) $this->timestamp )
+		if( NULL === $this->timestamp || 0 === $this->timestamp )
 			return $this->stringEmpty;
 
 		$words	= $env->getLanguage()->getWords( $languageTopic );
@@ -100,9 +100,9 @@ class Timestamp extends Abstraction
 		$phrase		= $phraser->getPhraseFromTimestamp( $this->timestamp );
 
 		if( $html ){
-			$attr		= array( 'class' => 'phrase' );
+			$attr		= ['class' => 'phrase'];
 			$datetime	= $this->toDatetime();
-			$acronym	= HtmlTag::create( 'abbr', $phrase, array( 'title' => $datetime ) );
+			$acronym	= HtmlTag::create( 'abbr', $phrase, ['title' => $datetime] );
 			$phrase		= HtmlTag::create( 'span', $acronym, $attr );
 		}
 		return $phrase;
@@ -110,9 +110,9 @@ class Timestamp extends Abstraction
 
 	public function toTime( string $format = NULL, bool $html = FALSE ): string
 	{
-		if( NULL === $this->timestamp || 0 === (int) $this->timestamp )
+		if( NULL === $this->timestamp || 0 === $this->timestamp )
 			return $this->stringEmpty;
-		$format	= $format ?: self::$formatTime;
+		$format	= $format ?? self::$formatTime;
 		$time	= date( $format, $this->timestamp );
 		if( $html )
 			$time	= HtmlTag::create( 'span', $time, ['class' => 'time'] );
