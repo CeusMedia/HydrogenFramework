@@ -57,7 +57,8 @@ class Logic
 		$this->env		= $env;
 		$this->config	= $env->getConfig();
 		$this->os		= self::OS_LINUX;															//  set OS to Linux by default
-		$this->os		= preg_match( '/win/i', PHP_OS ) ? self::OS_WINDOWS : $this->os;			//  detect Windows and set OS
+		if( 1 === preg_match( '/win/i', PHP_OS ) ) 								//  detect Windows and set OS
+			$this->os	=  self::OS_WINDOWS;
 
 //		$arguments		= array_slice( func_get_args(), 1 );										//  collect additional arguments for extended logic classes
 //		Alg_Object_MethodFactory::callObjectMethod( $this, '__onInit', $arguments, TRUE, TRUE );	//  invoke possibly extended init method
@@ -75,8 +76,8 @@ class Logic
 		$request	= $this->env->getRequest();														//  shortcut request object
 		$array		= [];
 		if( is_array( $request->get( $key ) ) )
-			foreach( $request->get( $key ) as $key => $value )
-				$array[$key]	= $value;
+			foreach( $request->get( $key ) as $arrayKey => $arrayValue )
+				$array[$arrayKey]	= $arrayValue;
 		return $array;
 	}
 

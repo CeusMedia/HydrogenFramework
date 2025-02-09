@@ -77,18 +77,29 @@ class Entity implements ArrayAccess
 	 */
 	public function get( string $key ): bool|int|float|string|array|object|NULL
 	{
-		return self::isPublicProperty( $key ) ? $this->$key : NULL;
+		if( self::isPublicProperty( $key ) )
+//			/** @not-phpstan-ignore-next-line */
+			return $this->$key;
+		return NULL;
 	}
 
 	/**
 	 *	Indicates whether a field key is backed by a (public) property and its value has been set.
 	 *	Attention: Returns FALSE if value is NULL, even if property exists and is public.
 	 *	@param		string		$key
+	 *	@param		bool		$allowNull		Flag: return positive if value is NULL, default: no
 	 *	@return		bool
+	 *	@todo		think about NULL-behaviour: Dictionary allows NULL-values, this entity not (by default)
 	 */
-	public function has( string $key ): bool
+	public function has( string $key, bool $allowNull = FALSE ): bool
 	{
-		return self::isPublicProperty( $key ) && NULL !== $this->$key;
+		if( !self::isPublicProperty( $key ) )
+			return FALSE;
+
+		if( !$allowNull )
+//			/** @not-phpstan-ignore-next-line */
+			return NULL !== $this->$key;
+		return TRUE;
 	}
 
 	/**
@@ -141,7 +152,8 @@ class Entity implements ArrayAccess
 	 */
 	public function set( string $key, bool|int|float|string|array|object $value = NULL ): self
 	{
-		if( property_exists( $this, $key ) )
+		if( self::isPublicProperty( $key ) )
+//			/** @not-phpstan-ignore-next-line */
 			$this->$key	= $value;
 		return $this;
 	}

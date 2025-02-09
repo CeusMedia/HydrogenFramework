@@ -140,7 +140,7 @@ class Template
 	 */
 	public function & getData( string $key = NULL, mixed $autoSetTo = NULL ): mixed
 	{
-		if(!$key )
+		if( NULL === $key || '' === $key )
 			return $this->data;
 		if( !isset( $this->data[$key] ) && !is_null( $autoSetTo ) )
 			$this->addData( $key, $autoSetTo );
@@ -224,7 +224,7 @@ class Template
 	 */
 	public function setData( array $data, ?string $topic = NULL ): static
 	{
-		if( $topic ){
+		if( NULL !== $topic && '' !== trim( $topic ) ){
 			if( !isset( $this->data[$topic] ) )
 				$this->data[$topic]	= [];
 			foreach( $data as $key => $value )
@@ -237,18 +237,30 @@ class Template
 		return $this;
 	}
 
+	/**
+	 *	@param		bool		$switch
+	 *	@return		static
+	 */
 	public function setRenderContent( bool $switch ): static
 	{
 		$this->renderContent	= $switch;
 		return $this;
 	}
 
+	/**
+	 *	@param		string		$fileKey
+	 *	@return		static
+	 */
 	public function setTemplateKey( string $fileKey ): static
 	{
 		$this->fileKey		= $fileKey;
 		return $this;
 	}
 
+	/**
+	 *	@param		View		$view
+	 *	@return		static
+	 */
 	public function setView( View $view ): static
 	{
 		$this->view	= $view;
@@ -294,26 +306,26 @@ class Template
 		$content	= $payload['content'];
 
 		if( '' === $content )																	//  no hook realized template
-			$content	= $this->realizeTemplateWithInclude( $filePath, $data );			//  realize with own strategy
+			$content	= $this->realizeTemplateWithInclude( $filePath, $data );				//  realize with own strategy
 
 		//  handle output buffer of template realization
 		$buffer	= (string) ob_get_clean();														//  get standard output buffer
 		/** @var string $buffer */
 		$buffer	= preg_replace( '/^(<br( ?\/)?>)+/s', '', $buffer );
 		$buffer	= trim( $buffer );
-		if( strlen( $buffer ) ){																//  there is something in buffer
+		if( '' !== $buffer ){																	//  there is something in buffer
 			if( !is_string( $content ) )														//  the view did not return content
 				$content	= $buffer;															//  use buffer as content
-			else if( $this->env->getMessenger() )												//  otherwise use messenger
+			else if( NULL !== $this->env->getMessenger() )										//  otherwise use messenger
 				$this->env->getMessenger()->noteFailure( nl2br( $buffer ) );					//  note as failure
-			else if( !$this->env->getLog()?->log( 'error', $buffer, $this ) )					//  logging failed
+			else if( !$this->env->getLog()?->log( 'error', $buffer, $this ) )				//  logging failed
 				throw new RuntimeException( $buffer );											//  throw exception
 		}
 		return (string) $content;
 	}
 
 	/**
-	 *	ATTENTION: This is for legay only.
+	 *	ATTENTION: This is for legacy only.
 	 *  Needed to support templates which, load sub templates using $this->loadTemplateFile()
 	 *
 	 *	Tries to load several content files and maps them by prefixed IDs.
@@ -323,10 +335,10 @@ class Template
 	 *	@return		array<string,string>	Prefixed map of collected file contents mapped by prefixed IDs
 	 *	@throws		ReflectionException
 	 */
-	public function populateTexts( array $keys, string $path, array $data = [], string $prefix = "text" ): array
+	public function populateTexts( array $keys, string $path, array $data = [], string $prefix = 'text' ): array
 	{
 		$this->env->getLog()?->logException( Deprecation::create()
-			->setMessage( 'Calling this->populateTexts in templates is deprecated')
+			->setMessage( 'Calling this->populateTexts in templates is deprecated' )
 			->setDescription( 'A template file still has old syntax to populate texts.' )
 			->setSuggestion( 'Replace by $view->populateTexts()' )
 		);
@@ -359,8 +371,8 @@ class Template
 	private function realizeTemplateWithInclude( string $filePath, array $data = [] ): string
 	{
 		$___templateUri	= $filePath;
-		extract( $data );																		//
-		$view		= $___view		= $this->view;													//
+		extract( $data );																//
+		$view		= $___view		= $this->view;												//
 		$env		= $___env		= $this->env;												//
 		$config		= $___config	= $this->env->getConfig();									//
 		$helpers	= $___helpers	= $this->helpers;											//

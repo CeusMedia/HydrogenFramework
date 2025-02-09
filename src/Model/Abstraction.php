@@ -80,7 +80,7 @@ abstract class Abstraction
 	 *	@param		array		$data
 	 *	@return		void
 	 */
-	public function edit( string $id, array $data )
+	public function edit( string $id, array $data ): void
 	{
 		$this->update( $id, $data );
 	}
@@ -192,9 +192,9 @@ abstract class Abstraction
 	 *	@return		void
 	 *	@throws		Exception		if not ID key id set
 	 */
-	protected function __onInit()
+	protected function __onInit(): void
 	{
-		if( !$this->idKey )
+		if( '' === $this->idKey )
 			throw new Exception( sprintf( 'No ID key set for model %s', $this->className ) );
 	}
 }

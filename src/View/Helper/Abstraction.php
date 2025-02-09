@@ -42,18 +42,18 @@ use CeusMedia\HydrogenFramework\View\Helper;
  */
 abstract class Abstraction implements Helper
 {
-	/**	@var	Environment|NULL		$env			Environment Object */
-	protected ?Environment $env			= NULL;
+	/**	@var	Environment|NULL	$env			Environment Object */
+	protected ?Environment $env		= NULL;
 
-	/**	@var		boolean								$needsEnv		Flag: needs Environment to be set */
-	protected		bool $needsEnv						= TRUE;
+	/**	@var	boolean				$needsEnv		Flag: needs Environment to be set */
+	protected bool $needsEnv		= TRUE;
 
 	protected function getWords( string $section, string $topic ): array
 	{
 		if( NULL === $this->env )
 			return [];
 		$words	= $this->env->getLanguage()->getWords( $topic );
-		if( $section && array_key_exists( $section, $words ) )
+		if( '' !== trim( $section ) && array_key_exists( $section, $words ) )
 			return $words[$section];
 		return $words;
 	}
@@ -103,10 +103,10 @@ abstract class Abstraction implements Helper
 	 *	Set environment if needed within this helper.
 	 *	@access		public
 	 *	@param		Environment	$env			Environment Object
-	 *	@return		self
+	 *	@return		static
 	 *	@todo 		remove after helper interface is updated
 	 */
-	public function setEnv( Environment $env ): self
+	public function setEnv( Environment $env ): static
 	{
 		if( $this->needsEnv ){
 			$this->env	= $env;

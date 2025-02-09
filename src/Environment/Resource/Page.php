@@ -89,7 +89,7 @@ class Page extends HtmlPage
 		$config			= $env->getConfig();
 		$pathThemes		= rtrim( $config->get( 'path.themes' ), '/' ).'/';
 		$this->pathPrimer	= $pathThemes;
-		if( $config->get( 'layout.primer' ) )
+		if( '' !== trim( $config->get( 'layout.primer', '' ) ) )
 			$this->pathPrimer	= $pathThemes.$config->get( 'layout.primer' ).'/';
 		$this->pathCommon	= $pathThemes.'common/';
 		$this->pathTheme	= $pathThemes.$config->get( 'layout.theme' ).'/';
@@ -99,7 +99,7 @@ class Page extends HtmlPage
 			'theme'		=> $this->pathTheme.'css/',
 			'lib'		=> NULL,
 		] );
-		if( $config->get( 'app.revision' ) ){
+		if( '' !== trim( $config->get( 'app.revision', '' ) ) ){
 			$this->css->get( 'primer' )->setRevision( $config->get( 'app.revision' ) );
 			$this->css->get( 'theme' )->setRevision( $config->get( 'app.revision' ) );
 			$this->js->setRevision( $config->get( 'app.revision' ) );
@@ -119,9 +119,9 @@ class Page extends HtmlPage
 	 */
 	public function addBodyClass( string $class ): self
 	{
-		if( strlen( trim( $class ) ) ){
+		if( '' !== trim( $class ) ){
 			$classFixed	= trim( htmlentities( $class, ENT_QUOTES, 'UTF-8' ) );
-			if( !in_array( $classFixed, $this->bodyClasses ) )
+			if( !in_array( $classFixed, $this->bodyClasses, TRUE ) )
 				$this->bodyClasses[]	= $classFixed;
 		}
 		return $this;

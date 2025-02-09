@@ -114,47 +114,46 @@ class Messenger
 	public function buildMessages( string $timeFormat = NULL, bool $clear = TRUE, bool $linkResources = FALSE ): string
 	{
 		$messages	= (array) $this->env->getSession()->get( $this->keyMessages );
-		$list		= '';
-		$ids		= [];
-		if( count( $messages ) ){
-			$items	= [];
-			foreach( $messages as $message ){
-				if( $linkResources )																//  realize URLs as links
-					$message['message']	= preg_replace( '/(http.+)("|\'| )/U', '<a href="\\1">\\1</a>\\2', $message['message'] );
+		if( [] === $messages )
+			return '';
 
-				/*  (avoid duplicate messages which were collected during several redirects)  */
-				/** @noinspection PhpUnhandledExceptionInspection */
-				$id	= md5( json_encode( [$message['type'], $message['message']], JSON_THROW_ON_ERROR ) );			//  calculate message ID
-				if( in_array( $id, $ids ) )															//  ID has been calculated before
-					continue;																		//  skip this duplicate message
-				$ids[]	= $id;																		//  note calculated ID
+		$items	= [];
+		$ids	= [];
+		foreach( $messages as $message ){
+			if( $linkResources )																//  realize URLs as links
+				$message['message']	= preg_replace( '/(http.+)("|\'| )/U', '<a href="\\1">\\1</a>\\2', $message['message'] );
 
-				$class		= $this->classes[$message['type']];
-				$span		= HtmlTag::create( 'span', $message['message'], array( 'class' => 'message' ) );
-				if( $timeFormat && !empty( $message['timestamp'] ) ){
-					$time	= $message['timestamp'];
-					$time	= TimeConverter::convertToHuman( $time, $timeFormat );
-					$time	= '['.$time.'] ';
-					$time	= HtmlTag::create( 'span', $time, array( 'class' => 'time' ) );
-					$span	= $time.$span;
-				}
-				// @todo use hook to apply module UI_JS_Messenger
-				if( $this->env->getModules()->has( 'UI_JS_Messenger' ) ){
-					$button		= HtmlTag::create( "div", '<span></span>', array(
-						'class'		=> 'button discard',
-						'onclick'	=> "UI.Messenger.discardMessage($(this).parent());",
-						'alt'		=> 'ausblenden',
-						'title'		=> 'ausblenden',
-					 ) );
-					$span	= $span.$button;
-				}
-				$items[] 	= HtmlElements::ListItem( $span, 0, array( 'class' => $class ) );
+			/*  (avoid duplicate messages which were collected during several redirects)  */
+			/** @noinspection PhpUnhandledExceptionInspection */
+			$id	= md5( json_encode( [$message['type'], $message['message']], JSON_THROW_ON_ERROR ) );			//  calculate message ID
+			if( in_array( $id, $ids, TRUE ) )												//  ID has been calculated before
+				continue;																		//  skip this duplicate message
+			$ids[]	= $id;																		//  note calculated ID
+
+			$class		= $this->classes[$message['type']];
+			$span		= HtmlTag::create( 'span', $message['message'], array( 'class' => 'message' ) );
+			if( NULL !== $timeFormat && isset( $message['timestamp'] ) ){
+				$time	= $message['timestamp'];
+				$time	= TimeConverter::convertToHuman( $time, $timeFormat );
+				$time	= '['.$time.'] ';
+				$time	= HtmlTag::create( 'span', $time, array( 'class' => 'time' ) );
+				$span	= $time.$span;
 			}
-			$list	= HtmlElements::unorderedList( $items );
-			if( $clear )
-				$this->clear();
+			// @todo use hook to apply module UI_JS_Messenger
+			if( $this->env->getModules()->has( 'UI_JS_Messenger' ) ){
+				$button		= HtmlTag::create( "div", '<span></span>', array(
+					'class'		=> 'button discard',
+					'onclick'	=> "UI.Messenger.discardMessage($(this).parent());",
+					'alt'		=> 'ausblenden',
+					'title'		=> 'ausblenden',
+				 ) );
+				$span	= $span.$button;
+			}
+			$items[] 	= HtmlElements::ListItem( $span, 0, array( 'class' => $class ) );
 		}
-		return $list;
+		if( $clear )
+			$this->clear();
+		return HtmlElements::unorderedList( $items );
 	}
 
 	/**
@@ -162,7 +161,7 @@ class Messenger
 	 *	@access		public
 	 *	@return		void
 	 */
-	public function clear()
+	public function clear(): void
 	{
 		$this->env->getSession()->set( $this->keyHeadings, [] );
 		$this->env->getSession()->set( $this->keyMessages, [] );
@@ -202,7 +201,7 @@ class Messenger
 	 *	@param		mixed|NULL	$arg2				Arguments to be set into message
 	 *	@return		void
 	 */
-	public function noteError( string $message, $arg1 = NULL, $arg2 = NULL )
+	public function noteError( string $message, $arg1 = NULL, $arg2 = NULL ): void
 	{
 		$message	= $this->applyParametersToMessage( func_get_args() );
 		$this->noteMessage( 1, $message);
@@ -216,7 +215,7 @@ class Messenger
 	 *	@param		mixed|NULL	$arg2				Arguments to be set into Message
 	 *	@return		void
 	 */
-	public function noteFailure( string $message, $arg1 = NULL, $arg2 = NULL )
+	public function noteFailure( string $message, $arg1 = NULL, $arg2 = NULL ): void
 	{
 		$message	= $this->applyParametersToMessage( func_get_args() );
 		$this->noteMessage( 0, $message);
@@ -230,7 +229,7 @@ class Messenger
 	 *	@param		mixed|NULL	$arg2				Arguments to be set into Message
 	 *	@return		void
 	 */
-	public function noteNotice( string $message, $arg1 = NULL, $arg2 = NULL )
+	public function noteNotice( string $message, $arg1 = NULL, $arg2 = NULL ): void
 	{
 		$message	= $this->applyParametersToMessage( func_get_args() );
 		$this->noteMessage( 2, $message);
@@ -244,7 +243,7 @@ class Messenger
 	 *	@param		mixed|NULL	$arg2				Arguments to be set into Message
 	 *	@return		void
 	 */
-	public function noteSuccess( string $message, $arg1 = NULL, $arg2 = NULL )
+	public function noteSuccess( string $message, $arg1 = NULL, $arg2 = NULL ): void
 	{
 		$message	= $this->applyParametersToMessage( func_get_args() );
 		$this->noteMessage( 3, $message );
@@ -279,12 +278,12 @@ class Messenger
 	 *	@param		string		$message			Message to display
 	 *	@return		void
 	 */
-	protected function noteMessage( int $type, string $message )
+	protected function noteMessage( int $type, string $message ): void
 	{
-		if( $this->enabled ){
-			$messages	= (array) $this->env->getSession()->get( $this->keyMessages );
-			$messages[]	= array( "message" => $message, "type" => $type, "timestamp" => time() );
-			$this->env->getSession()->set( $this->keyMessages, $messages );
-		}
+		if( !$this->enabled )
+			return;
+		$messages	= (array) $this->env->getSession()->get( $this->keyMessages );
+		$messages[]	= ['message' => $message, 'type' => $type, 'timestamp' => time()];
+		$this->env->getSession()->set( $this->keyMessages, $messages );
 	}
 }
