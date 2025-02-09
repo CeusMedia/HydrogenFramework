@@ -40,7 +40,7 @@ use CeusMedia\HydrogenFramework\Environment\Resource\Messenger as BaseMessenger;
  */
 class Messenger extends BaseMessenger
 {
-	protected function noteMessage( int $type, string $message )
+	protected function noteMessage( int $type, string $message ): void
 	{
 //		remark( $message );
 //		flush();

@@ -252,7 +252,7 @@ class Log
 					$isHandled	= $this->handleLogWithMemory( $data );
 					break;
 			}
-			if( $isHandled && in_array( $strategy, $this->lastStrategies ) )
+			if( $isHandled && in_array( $strategy, $this->lastStrategies, TRUE ) )
 				break;
 		}
 		return $isHandled;
@@ -269,7 +269,7 @@ class Log
 	{
 		$isHandled	= FALSE;
 		foreach( $this->strategies as $strategy ){
-			if( in_array( $strategy, $this->failedStrategies ) )
+			if( in_array( $strategy, $this->failedStrategies, TRUE ) )
 				continue;
 			switch( $strategy ){
 				case self::STRATEGY_MODULE_HOOKS:
@@ -288,7 +288,7 @@ class Log
 					$isHandled	= $this->handleExceptionWithAppDefault( $data );
 					break;
 			}
-			if( $isHandled && in_array( $strategy, $this->lastStrategies ) )
+			if( $isHandled && in_array( $strategy, $this->lastStrategies, TRUE ) )
 				break;
 		}
 		$this->failedStrategies	= [];

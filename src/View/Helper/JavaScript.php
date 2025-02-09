@@ -163,15 +163,15 @@ class JavaScript
 	 */
 	public function clearCache(): self
 	{
-		$index			= new FileIterator( $this->pathCache );
-		$lengthPrefix	= strlen( $this->prefix );
-		$lengthSuffix	= strlen( $suffix = $this->suffix.'.js' );
+		$index	= new FileIterator( $this->pathCache );
+		$suffix	= $this->suffix.'.js';
+
 		/** @var SplFileInfo $item */
 		foreach( $index as $item ){
 			$fileName	= $item->getFilename();
-			if( $this->prefix && substr( $fileName, 0, $lengthPrefix ) != $this->prefix )
+			if( '' !== $this->prefix && !str_starts_with( $fileName, $this->prefix ) )
 				continue;
-			if( substr( $fileName, -1 * $lengthSuffix ) != $suffix )
+			if( !str_ends_with( $fileName, $suffix ) )
 				continue;
 			unlink( $item->getPathname() );
 		}
@@ -187,7 +187,7 @@ class JavaScript
 	 */
 	public static function getInstance( Environment $env ): self
 	{
-		if( !self::$instance )
+		if( NULL === self::$instance )
 			self::$instance	= new self( $env );
 		return self::$instance;
 	}
@@ -249,27 +249,27 @@ class JavaScript
 	 *	Sets revision for versioning cache.
 	 *	@access		public
 	 *	@param		string		$revision	Revision number or version string
-	 *	@return		self
+	 *	@return		static
 	 */
-	public function setRevision( string $revision ): self
+	public function setRevision( string $revision ): static
 	{
 		$this->revision	= $revision;
 		return $this;
 	}
 
-	public function setCompression( bool $compression ): self
+	public function setCompression( bool $compression ): static
 	{
 		$this->useCompression	= $compression;
 		return $this;
 	}
 
-	public function setPrefix( string $prefix ): self
+	public function setPrefix( string $prefix ): static
 	{
 		$this->prefix	= $prefix;
 		return $this;
 	}
 
-	public function setSuffix( string $suffix ): self
+	public function setSuffix( string $suffix ): static
 	{
 		$this->suffix	= $suffix;
 		return $this;
@@ -279,9 +279,9 @@ class JavaScript
 	 *	Set path to file cache.
 	 *	@access		public
 	 *	@param		string		$path		Path to file cache
-	 *	@return		self
+	 *	@return		static
 	 */
-	public function setCachePath( string $path ): self
+	public function setCachePath( string $path ): static
 	{
 		$this->pathCache = $path;
 		return $this;
@@ -352,11 +352,10 @@ class JavaScript
 		$fileJs	= $this->getPackageCacheFileName();
 		if( !file_exists( $fileJs ) || $forceFresh ) {
 			$contents	= [];
-			if( $this->revision )
+			if( NULL !== $this->revision )
 				$contents[]	= "/* @revision ".$this->revision." */";
 			foreach( $this->getPlainUrlList() as $url ){
 				if( str_starts_with( $url, 'http' ) ){
-					/** @var string $content */
 					$content	= NetReader::readUrl( $url );
 				}
 				else{
@@ -388,9 +387,9 @@ class JavaScript
 			foreach( $levelScripts as $scripts )
 				foreach( $scripts as $script )
 					$list[]	= preg_replace( "/;+$/", ";", trim( $script ) );
-		if( !count( $list ) )
+		if( [] === $list )
 			return '';
-		$content		= join( "\n", $list );
+		$content	= join( "\n", $list );
 		if( $this->useCompression )
 			$content	= $this->compress( $content );
 		if( $wrapInTag )
@@ -414,7 +413,7 @@ class JavaScript
 					if( !$this->useCompression ){
 						/** @var string $script */
 						$script		= preg_replace( "/;+$/", ";", trim( $script ) );
-						if( preg_match( "/\r?\n/", $script ) ){
+						if( 1 === preg_match( "/\r?\n/", $script ) ){
 							$lines	= (array) preg_split( "/\r?\n/", PHP_EOL.$script.PHP_EOL );
 							$script	= join( PHP_EOL."\t", $lines );
 						}
@@ -423,13 +422,13 @@ class JavaScript
 				}
 			}
 		}
-		if( !count( $list ) )
+		if( [] === $list )
 			return '';
 		$content	= PHP_EOL.trim( join( PHP_EOL, $list ) ).PHP_EOL;
 		if( $this->useCompression )
 			$content	= $this->compress( $content );
 		if( $wrapInTag )
-			$content	= HtmlTag::create( 'script', $content, array( 'type' => 'text/javascript' ) );
+			$content	= HtmlTag::create( 'script', $content, ['type' => 'text/javascript'] );
 		return $content;
 	}
 
@@ -440,11 +439,11 @@ class JavaScript
 	 */
 	protected function renderUrls( bool $forceFresh = FALSE ): string
 	{
-		if( !count( $this->getPlainUrlList() ) )
+		if( [] === $this->getPlainUrlList() )
 			return '';
 		if( $this->useCompression ){
 			$fileJs	= $this->getPackageFileName( $forceFresh );
-			if( $this->revision )
+			if( NULL !== $this->revision )
 				$fileJs	.= '?'.$this->revision;
 			$attributes	= [
 				'type'		=> 'text/javascript',
@@ -456,8 +455,8 @@ class JavaScript
 		else{
 			$list	= [];
 			foreach( $this->getPlainUrlList() as $url ){
-				if( $this->revision )
-					$url	.= ( preg_match( '/\?/', $url ) ? '&amp;' : '?' ).$this->revision;
+				if( NULL !== $this->revision )
+					$url	.= ( str_contains( $url, '?' ) ? '&amp;' : '?' ).$this->revision;
 				$attributes	= [
 					'type'		=> 'text/javascript',
 		//			'language'	=> 'JavaScript',

@@ -76,7 +76,7 @@ abstract class WebAbstraction implements ApplicationInterface
 		if( [] !== static::$modulesNeeded )															//  needed modules are defined
 			$this->checkNeededModules();															//  check for missing modules
 
-		if( $env->getConfig()->get( 'system.compat.oldCommon', FALSE ) )				//  look into config for compat flag
+		if( TRUE === $env->getConfig()->get( 'system.compat.oldCommon', FALSE ) )		//  look into config for compat flag
 			require_once 'vendor/ceus-media/common/src/compat8.php';								//  ... for CeusMedia::Common 0.8.x without namespaces
 	}
 
@@ -108,7 +108,7 @@ abstract class WebAbstraction implements ApplicationInterface
 	{
 		$modulesGot	= array_keys( $this->env->getModules()->getAll() );								//  get installed modules
 		$missing	= array_diff( static::$modulesNeeded, $modulesGot );							//  find missing modules
-		if( $missing ){																				//  there are missing modules
+		if( [] !== $missing ){																		//  there are missing modules
 			$this->reportMissingModules( $missing );												//  report missing modules to screen
 			exit;																					//  quit execution
 		}
@@ -157,7 +157,7 @@ abstract class WebAbstraction implements ApplicationInterface
 	protected function reportMissingModules( array $modules ): void
 	{
 		$config	= $this->env->getConfig();
-		if( !$config->get( 'app.setup.url' ) )
+		if( '' === $config->get( 'app.setup.url', '' ) )
 			print( 'Module(s) missing: <ul><li>'.join( '</li><li>', $modules ).'</li></ul>' );
 
 		$instanceId	= $config->get( 'app.setup.instanceId' );

@@ -168,7 +168,7 @@ class View
 	 */
 	public function & getData( string $key = NULL, mixed $autoSetTo = NULL )
 	{
-		if( !$key )
+		if( NULL === $key || '' === trim( $key ) )
 			return $this->data;
 		if( !isset( $this->data[$key] ) && !is_null( $autoSetTo ) )
 			$this->addData( $key, $autoSetTo );
@@ -350,14 +350,14 @@ class View
 	 *	@return		array<string,string>	Prefixed map of collected file contents mapped by prefixed IDs
 	 *	@throws		ReflectionException
 	 */
-	public function populateTexts( array $keys, string $path, array $data = [], string $prefix = "text" ): array
+	public function populateTexts( array $keys, string $path, array $data = [], string $prefix = 'text' ): array
 	{
 		$list	= [];																				//  prepare empty list
 		$files	= $this->loadContentFiles( $path, $keys, $data );									//  try to load files
 		foreach( $files as $key => $value ){														//  iterate file contents
 			/** @var string $id */
-			$id	= preg_replace( "/[^a-z]/i", " ", $key );							//  replace not allowed characters
-			$id	= $prefix ? $prefix." ".$id : $id;													//  prepend prefix to ID if set
+			$id	= preg_replace( "/[^a-z]/i", ' ', $key );							//  replace not allowed characters
+			$id	= '' !== $prefix ? $prefix.' '.$id : $id;											//  prepend prefix to ID if set
 			$id	= CamelCase::convert( $id, FALSE );									//  build camel-cased ID
 			$list[$id]	= $value;																	//  append content to map
 		}
