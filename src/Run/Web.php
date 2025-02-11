@@ -58,8 +58,6 @@ class Web
 	 	$pathVendor	= rtrim( $this->paths['vendor'] ?? 'vendor', '/' ).'/';
 		if( !file_exists( $pathVendor ) )
 		 	die( 'Please install first, using composer!' );
-		require_once $pathVendor.'autoload.php';
-//		require_once $pathVendor.'ceus-media/common/src/compat8.php';
 
 		if( NULL !== $this->defaultTimezone )
 			date_default_timezone_set( $this->defaultTimezone );				//  set default time zone
