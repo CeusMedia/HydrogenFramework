@@ -45,9 +45,9 @@ abstract class Abstraction
 {
 	protected Environment $env;
 
-	public const ROLE_ACCESS_NONE		= 0;
-	public const ROLE_ACCESS_ACL		= 1;
-	public const ROLE_ACCESS_FULL		= 128;
+	public const int ROLE_ACCESS_NONE	= 0;
+	public const int ROLE_ACCESS_ACL	= 1;
+	public const int ROLE_ACCESS_FULL	= 128;
 
 	protected array $controllerActions	= [];
 	protected array $rights				= [];

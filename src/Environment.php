@@ -79,13 +79,13 @@ use RuntimeException;
  */
 class Environment implements ArrayAccess
 {
-	public const MODE_UNKNOWN	= 0;
-	public const MODE_DEV		= 1;
-	public const MODE_TEST		= 2;
-	public const MODE_STAGE		= 4;
-	public const MODE_LIVE		= 8;
+	public const int MODE_UNKNOWN	= 0;
+	public const int MODE_DEV		= 1;
+	public const int MODE_TEST		= 2;
+	public const int MODE_STAGE		= 4;
+	public const int MODE_LIVE		= 8;
 
-	public const MODES		= [
+	public const array MODES		= [
 		self::MODE_UNKNOWN,
 		self::MODE_DEV,
 		self::MODE_TEST,

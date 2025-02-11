@@ -26,16 +26,16 @@ use InvalidArgumentException;
  */
 class Logic
 {
-	public const OS_UNKNOWN			= 0;
-	public const OS_LINUX			= 1;
-	public const OS_WINDOWS			= 2;
+	public const int OS_UNKNOWN			= 0;
+	public const int OS_LINUX			= 1;
+	public const int OS_WINDOWS			= 2;
 
-	/**	@var	Environment			$env	Environment object */
+	/**	@var	Environment				$env	Environment object */
 	protected Environment $env;
 
 	protected Dictionary $config;
 
-	protected int $os				= self::OS_UNKNOWN;
+	protected int $os					= self::OS_UNKNOWN;
 
 	protected array $timePrefixes		= [
 		'u'		=> 1,

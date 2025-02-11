@@ -39,9 +39,9 @@ namespace CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition;
  */
 class Config
 {
-	public const PROTECTED_NO		= 'no';
-	public const PROTECTED_YES		= 'yes';
-	public const PROTECTED_USER		= 'user';
+	public const string PROTECTED_NO	= 'no';
+	public const string PROTECTED_YES	= 'yes';
+	public const string PROTECTED_USER	= 'user';
 
 	public string $key;
 

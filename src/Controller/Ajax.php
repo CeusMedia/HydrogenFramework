@@ -23,11 +23,11 @@ use Throwable;
  */
 abstract class Ajax extends Abstraction
 {
-	public const RESPONSE_STRATEGY_DEFAULT		= 0;
-	public const RESPONSE_STRATEGY_CALLBACK	= 1;
+	public const int RESPONSE_STRATEGY_DEFAULT	= 0;
+	public const int RESPONSE_STRATEGY_CALLBACK	= 1;
 
-	public const RESPONSE_FORMAT_XML			= 0;
-	public const RESPONSE_FORMAT_JSON			= 1;
+	public const int RESPONSE_FORMAT_XML		= 0;
+	public const int RESPONSE_FORMAT_JSON		= 1;
 
 	public static array $supportedCompressions	= ['gzip', 'deflate'];
 
