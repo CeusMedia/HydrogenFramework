@@ -51,6 +51,10 @@
     ],
     "dev:phpunit": [
       "@dev:install-quiet",
+      "XDEBUG_MODE=debug php vendor/bin/phpunit --configuration tool/config/phpunit.xml --testsuite units --no-coverage --no-logging 2>&1"
+    ],
+    "dev:phpunit-coverage": [
+      "@dev:install-quiet",
       "XDEBUG_MODE=coverage php vendor/bin/phpunit --configuration tool/config/phpunit.xml --testsuite units"
     ],
     "dev:phpstan": [
