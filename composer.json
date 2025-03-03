@@ -45,8 +45,8 @@
   "scripts": {
     "dev:install-quiet": "composer install --quiet",
     "dev:update": "composer update",
-    "incomplete:dev:create-docs": [
-      "@dev:install-quiet",
+    "dev:create-docs": [
+      "@dev:install",
       "php vendor/ceus-media/doc-creator/doc-creator.php --config-file=tool/config/doc.xml"
     ],
     "dev:phpunit": [
@@ -67,6 +67,14 @@
     "dev:phpstan-save": [
       "@dev:install-quiet",
       "vendor/bin/phpstan analyse --configuration tool/config/phpstan.neon --generate-baseline tool/config/phpstan-baseline.neon --verbose"
+    ],
+    "dev:phpunit": [
+      "@dev:install-quiet",
+      "XDEBUG_MODE=debug php vendor/bin/phpunit --configuration tool/config/phpunit.xml --testsuite units --no-coverage --no-logging 2>&1"
+    ],
+    "dev:phpunit-coverage": [
+      "@dev:install-quiet",
+      "XDEBUG_MODE=coverage php vendor/bin/phpunit --configuration tool/config/phpunit.xml --testsuite units"
     ],
     "dev:rector": [
       "@dev:install-quiet",
