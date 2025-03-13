@@ -412,30 +412,31 @@ class Page extends HtmlPage
 	{
 		foreach( $modules as $module ){																//  iterate installed modules
 			foreach( $module->files->styles as $style ){											//  iterate module style files
-				if( 'auto' === $style->load ){														//  style file is to be loaded always
-					$source	= $style->source;														//  get source attribute if possible
-					$level	= self::interpretLoadLevel( $style->level ?? Captain::LEVEL_MID );	//  get load level (top, mid, end), default: mid
-					if( 0 !== ( preg_match( "/^[a-z]+:\/\/.+$/", $style->file ) ?: 0 ) )		//  style file is absolute URL
-						$this->css->get( 'theme' )->addUrl( $style->file, $level );					//  add style file URL
-					else if( 'primer' === $source )													//  style file is in primer theme
-						$this->addPrimerStyle( $style->file, $level );								//  load style file from primer theme folder
-					else if( 'common' === $source )													//  style file is in common theme
-						$this->addCommonStyle( $style->file, $level );								//  load style file from common theme folder
-					else if( 'lib' === $source ){													//  style file is in styles library, which is enabled by configured path
-						if( '' === trim( $pathStylesLib ) )
-							throw new RuntimeException( 'Path to style library "path.styles.lib" is not configured' );
-						$this->css->get( 'lib' )->addUrl( $pathStylesLib.$style->file, $level );	//  load style file from styles library
-					}
-					else if( 'scripts-lib' === $source ){											//  style file is in scripts library, which is enabled by configured path
-						if( '' === trim( $pathScriptsLib ) )
-							throw new RuntimeException( 'Path to script library "path.scripts.lib" is not configured' );
-						$this->css->get( 'primer' )->addUrl( $pathScriptsLib.$style->file, $level );	//  load style file from scripts library
-					}
-					else if( 'theme' === $source || !$source )										//  style file is in custom theme
-						$this->addThemeStyle( $style->file, $level );								//  load style file from custom theme folder
-					else																			//  style file is in an individual source folder within themes folder
-						$this->css->get( 'primer' )->addUrl( /*$path.$source.'/'.*/$style->file );	//  load style file /*from source folder within themes folder*/
+				if( 'auto' !== $style->load )														//  style file is NOT to be loaded always
+					continue;
+
+				$source	= $style->source;															//  get source attribute if possible
+				$level	= self::interpretLoadLevel( $style->level ?? Captain::LEVEL_MID );			//  get load level (top, mid, end), default: mid
+				if( 0 !== ( preg_match( "/^[a-z]+:\/\/.+$/", $style->file ) ?: 0 ) )				//  style file is absolute URL
+					$this->css->get( 'theme' )->addUrl( $style->file, $level );						//  add style file URL
+				else if( 'primer' === $source )														//  style file is in primer theme
+					$this->addPrimerStyle( $style->file, $level );									//  load style file from primer theme folder
+				else if( 'common' === $source )														//  style file is in common theme
+					$this->addCommonStyle( $style->file, $level );									//  load style file from common theme folder
+				else if( 'lib' === $source ){														//  style file is in styles library, which is enabled by configured path
+					if( '' === trim( $pathStylesLib ) )
+						throw new RuntimeException( 'Path to style library "path.styles.lib" is not configured' );
+					$this->css->get( 'lib' )->addUrl( $pathStylesLib.$style->file, $level );		//  load style file from styles library
 				}
+				else if( 'scripts-lib' === $source ){												//  style file is in scripts library, which is enabled by configured path
+					if( '' === trim( $pathScriptsLib ) )
+						throw new RuntimeException( 'Path to script library "path.scripts.lib" is not configured' );
+					$this->css->get( 'primer' )->addUrl( $pathScriptsLib.$style->file, $level );	//  load style file from scripts library
+				}
+				else if( 'theme' === $source || !$source )											//  style file is in custom theme
+					$this->addThemeStyle( $style->file, $level );									//  load style file from custom theme folder
+				else																				//  style file is in an individual source folder within themes folder
+					$this->css->get( 'primer' )->addUrl( /*$path.$source.'/'.*/$style->file );		//  load style file /*from source folder within themes folder*/
 			}
 		}
 	}

@@ -90,11 +90,11 @@ abstract class Abstraction
 	 *	Return list controller actions or matrix of controllers and actions of role.
 	 *	@abstract
 	 *	@public
-	 *	@param		string|NULL		$controller		Controller to list actions for, otherwise return matrix
-	 *	@param		string|NULL		$roleId			Specified role, otherwise current role
-	 *	@return		array							List of actions or matrix of controllers and actions
+	 *	@param		string|NULL			$controller		Controller to list actions for, otherwise return matrix
+	 *	@param		int|string|NULL		$roleId			Specified role, otherwise current role
+	 *	@return		array								List of actions or matrix of controllers and actions
 	 */
-	abstract public function index( ?string $controller = NULL, ?string $roleId = NULL ): array;
+	abstract public function index( ?string $controller = NULL, int|string $roleId = NULL ): array;
 
 	public function getPublicInsideLinks(): array
 	{
@@ -114,12 +114,12 @@ abstract class Abstraction
 	/**
 	 *	Indicates whether a role is system operator and has access to all controller actions.
 	 *	@access		public
-	 *	@param		string		$roleId			Role ID
+	 *	@param		int|string		$roleId			Role ID
 	 *	@return		boolean
 	 */
-	public function hasFullAccess( string $roleId ): bool
+	public function hasFullAccess( int|string $roleId ): bool
 	{
-		if( !$roleId )
+		if( 0 === (int) $roleId )
 			return FALSE;
 		$role	= $this->getRole( $roleId );
 		if( !$role )
@@ -130,10 +130,10 @@ abstract class Abstraction
 	/**
 	 *	Indicates whether a role has no access as all.
 	 *	@access		public
-	 *	@param		string		$roleId			Role ID
+	 *	@param		int|string		$roleId			Role ID
 	 *	@return		boolean
 	 */
-	public function hasNoAccess( string $roleId ): bool
+	public function hasNoAccess( int|string $roleId ): bool
 	{
 		if( !$roleId )
 			return FALSE;
@@ -146,10 +146,10 @@ abstract class Abstraction
 	/**
 	 *	Indicates whether access to a controller action is allowed for a given role.
 	 *	@access		public
-	 *	@param		string		$roleId			Role ID
-	 *	@param		string		$controller		Name of controller
-	 *	@param		string		$action			Name of action
-	 *	@return		integer		Right state
+	 *	@param		int|string		$roleId			Role ID
+	 *	@param		string			$controller		Name of controller
+	 *	@param		string			$action			Name of action
+	 *	@return		integer			Right state
 	 *
 	 *	Return statuses:
 	 *	-2: outside but logged in
@@ -161,14 +161,14 @@ abstract class Abstraction
 	 *	 4: public access if outside
 	 *	 5: public access if inside
 	 */
-	public function hasRight( string $roleId, string $controller = 'index', string $action = 'index' ): int
+	public function hasRight( int|string $roleId, string $controller = 'index', string $action = 'index' ): int
 	{
 		$controller	= strtolower( str_replace( '/', '_', $controller ) );
 		$linkPath	= $controller && $action ? $controller.'_'.$action : '';
 
 		if( in_array( $linkPath, $this->linksPublic ) )
 			return 3;
-		if( $roleId ){
+		if( 0 !== (int) $roleId ){
 			if( in_array( $linkPath, $this->linksPublicInside ) )
 				return 5;
 			if( in_array( $linkPath, $this->linksPublicOutside ) )
@@ -249,23 +249,23 @@ abstract class Abstraction
 	 *	Allows access to a controller action for a role.
 	 *	@abstract
 	 *	@access		public
-	 *	@param		string		$roleId			Role ID
-	 *	@param		string		$controller		Name of Controller
-	 *	@param		string		$action			Name of Action
+	 *	@param		int|string		$roleId			Role ID
+	 *	@param		string			$controller		Name of Controller
+	 *	@param		string			$action			Name of Action
 	 *	@return		integer
 	 */
-	abstract public function setRight( string $roleId, string $controller, string $action ): int;
+	abstract public function setRight( int|string $roleId, string $controller, string $action ): int;
 
 	//  --  PROTECTED  --  //
 
-	abstract protected function getRights( string $roleId ): array;
+	abstract protected function getRights( int|string $roleId ): array;
 
 	/**
 	 *	Returns Role.
 	 *	@abstract
 	 *	@access		protected
-	 *	@param		string		$roleId			Role ID
+	 *	@param		int|string		$roleId			Role ID
 	 *	@return		array|object
 	 */
-	abstract protected function getRole( string $roleId );
+	abstract protected function getRole( int|string $roleId ): object|array;
 }

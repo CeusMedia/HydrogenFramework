@@ -45,10 +45,10 @@ class Server extends Abstraction
 	/**
 	 *	Returns all rights of a role.
 	 *	@access		protected
-	 *	@param		string		$roleId			Role ID
+	 *	@param		int|string		$roleId			Role ID
 	 *	@return		array
 	 */
-	protected function getRights( string $roleId ): array
+	protected function getRights( int|string $roleId ): array
 	{
 		if( $this->hasFullAccess( $roleId ) )
 			return [];
@@ -57,7 +57,7 @@ class Server extends Abstraction
 		if( !isset( $this->rights[$roleId] ) ) {
 			/** @var Resource_JSON_Client $server */
 			$server	= $this->env->get( 'jsonServerClient' );
-			$rights	= $server->getData( 'role', 'getRights', array( $roleId ) );
+			$rights	= $server->getData( 'role', 'getRights', [$roleId] );
 			$this->rights[$roleId]	= [];
 			foreach( $rights as $right ){
 				if( !isset( $this->rights[$roleId][$right->controller] ) )
@@ -72,11 +72,11 @@ class Server extends Abstraction
 	 *	Return list controller actions or matrix of controllers and actions of role.
 	 *	@abstract
 	 *	@public
-	 *	@param		string|NULL		$controller		Controller to list actions for, otherwise return matrix
-	 *	@param		string|NULL		$roleId			Specified role, otherwise current role
-	 *	@return		array							List of actions or matrix of controllers and actions
+	 *	@param		string|NULL			$controller		Controller to list actions for, otherwise return matrix
+	 *	@param		int|string|NULL		$roleId			Specified role, otherwise current role
+	 *	@return		array								List of actions or matrix of controllers and actions
 	 */
-	public function index( string $controller = NULL, ?string $roleId = NULL ): array
+	public function index( string $controller = NULL, int|string $roleId = NULL ): array
 	{
 		throw new Exception( 'Not implemented yet' );
 	}
@@ -84,12 +84,12 @@ class Server extends Abstraction
 	/**
 	 *	Allows access to a controller action for a role.
 	 *	@access		public
-	 *	@param		string		$roleId			Role ID
-	 *	@param		string		$controller		Name of Controller
-	 *	@param		string		$action			Name of Action
+	 *	@param		int|string		$roleId			Role ID
+	 *	@param		string			$controller		Name of Controller
+	 *	@param		string			$action			Name of Action
 	 *	@return		integer
 	 */
-	public function setRight( string $roleId, string $controller, string $action ): int
+	public function setRight( int|string $roleId, string $controller, string $action ): int
 	{
 		if( $this->hasFullAccess( $roleId ) )
 			return -1;
@@ -98,7 +98,7 @@ class Server extends Abstraction
 		$data	= array( 'controller' => $controller, 'action' => $action );
 		/** @var Resource_JSON_Client $server */
 		$server	= $this->env->get( 'jsonServerClient' );
-		return $server->postData( 'role', 'setRight', array( $roleId ), $data );
+		return $server->postData( 'role', 'setRight', [$roleId], $data );
 	}
 
 	//  --  PROTECTED  --  //
@@ -106,10 +106,10 @@ class Server extends Abstraction
 	/**
 	 *	Returns Role.
 	 *	@access		protected
-	 *	@param		string		$roleId			Role ID
+	 *	@param		int|string		$roleId			Role ID
 	 *	@return		array|object
 	 */
-	protected function getRole( string $roleId ): object|array
+	protected function getRole( int|string $roleId ): object|array
 	{
 		/** @var Resource_JSON_Client $server */
 		$server	= $this->env->get( 'jsonServerClient' );

@@ -44,12 +44,12 @@ class AllPublic extends Abstraction
 	/**
 	 *	Indicates whether access to a controller action is allowed for a given role.
 	 *	@access		public
-	 *	@param		string		$roleId			Role ID
-	 *	@param		string		$controller		Name of controller
-	 *	@param		string		$action			Name of action
-	 *	@return		integer		Always returns 1 for "access"
+	 *	@param		int|string		$roleId			Role ID
+	 *	@param		string			$controller		Name of controller
+	 *	@param		string			$action			Name of action
+	 *	@return		integer			Always returns 1 for "access"
 	 */
-	public function hasRight( string $roleId, string $controller = 'index', string $action = 'index' ): int
+	public function hasRight( int|string $roleId, string $controller = 'index', string $action = 'index' ): int
 	{
 		return 1;
 	}
@@ -75,12 +75,12 @@ class AllPublic extends Abstraction
 	/**
 	 *	Allows access to a controller action for a role.
 	 *	@access		public
-	 *	@param		string		$roleId			Role ID
-	 *	@param		string		$controller		Name of Controller
-	 *	@param		string		$action			Name of Action
+	 *	@param		int|string		$roleId			Role ID
+	 *	@param		string			$controller		Name of Controller
+	 *	@param		string			$action			Name of Action
 	 *	@return		integer
 	 */
-	public function setRight( string $roleId, string $controller, string $action ): int
+	public function setRight( int|string $roleId, string $controller, string $action ): int
 	{
 		return 1;
 	}
@@ -90,10 +90,10 @@ class AllPublic extends Abstraction
 	/**
 	 *	Returns all rights of a role.
 	 *	@access		protected
-	 *	@param		string		$roleId			Role ID
+	 *	@param		int|string		$roleId			Role ID
 	 *	@return		array
 	 */
-	protected function getRights( string $roleId ): array
+	protected function getRights( int|string $roleId ): array
 	{
 		return [];
 	}
@@ -101,10 +101,10 @@ class AllPublic extends Abstraction
 	/**
 	 *	Returns all rights of a role.
 	 *	@access		protected
-	 *	@param		string		$roleId			Role ID
+	 *	@param		int|string		$roleId			Role ID
 	 *	@return		array
 	 */
-	protected function getRole( string $roleId ): array
+	protected function getRole( int|string $roleId ): array
 	{
 		return [
 			'roleId'		=> 0,
