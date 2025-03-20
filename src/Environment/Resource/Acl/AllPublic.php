@@ -58,10 +58,10 @@ class AllPublic extends Abstraction
 	 *	Return list controller actions or matrix of controllers and actions of role.
 	 *	@access		public
 	 *	@param		string|NULL		$controller		Controller to list actions for, otherwise return matrix
-	 *	@param		string|NULL		$roleId			Specified role, otherwise current role
+	 *	@param		int|string|NULL	$roleId			Specified role, otherwise current role
 	 *	@return		array							List of actions or matrix of controllers and actions
 	 */
-	public function index( string $controller = NULL, string $roleId = NULL ): array
+	public function index( string $controller = NULL, int|string $roleId = NULL ): array
 	{
 		if( !$this->controllerActions )
 			$this->scanControllerActions();
