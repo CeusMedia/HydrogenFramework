@@ -13,8 +13,6 @@ parameters:
 		- ../../src/Environment/Resource/Acl/Server.php
 		- ../../src/Environment/Resource/Disclosure.php
 		- ../../src/Model/REST/JSON.php
-		- ../../vendor/ceus-media/common/src/compat8.php
-		- ../../vendor/ceus-media/common/src/compat9.php
 	treatPhpDocTypesAsCertain: false
 	reportUnmatchedIgnoredErrors: true
 	ignoreErrors:
