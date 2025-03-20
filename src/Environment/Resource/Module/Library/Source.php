@@ -39,6 +39,7 @@ use CeusMedia\HydrogenFramework\Environment\Resource\Module\Library\Source\Defin
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\LibraryInterface as LibraryInterface;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Library\Abstraction as AbstractLibrary;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Reader as ModuleReader;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition as ModuleDefinition;
 use JsonException;
 
 use Exception;
@@ -114,6 +115,10 @@ class Source extends AbstractLibrary implements LibraryInterface
 		];
 	}
 
+	/**
+	 *	Returns list of modules available in source folder.
+	 *	@return		ModuleDefinition[]
+	 */
 	protected function getModulesFromFolder(): array
 	{
 		if( !file_exists( $this->source->path ) )
@@ -122,6 +127,7 @@ class Source extends AbstractLibrary implements LibraryInterface
 #		if( !file_exists( $this->source->path.'source.xml' ) )
 #			throw new RuntimeException( 'Source XML "'.$this->source->path.'source.xml" is not existing' );
 
+		/** @var array<string,ModuleDefinition> $list */
 		$list	= [];
 		$index	= new RecursiveFileIndex( $this->source->path, 'module.xml' );
 		$this->env->getRuntime()->reach( 'Hydrogen: Environment_Resource_Module_Library_Source::scanFolder: init' );
@@ -194,7 +200,7 @@ class Source extends AbstractLibrary implements LibraryInterface
 
 		if( 200 !== $status )																//  @todo		extend by more HTTP codes, like 30X
 			throw new RuntimeException( 'Source URL "'.$this->source->path.'" is not existing (Code '.$status.')' );
-		if( $reader->getResponseHeader( 'Content-Type' ) !== 'application/json' )
+		if( 'application/json' !== $reader->getResponseHeader( 'Content-Type' ) )
 			throw new RuntimeException( 'Source did not return JSON data' );
 		$modules	= json_decode( $response->getBody() ?? '[]', FALSE, 512, JSON_THROW_ON_ERROR );
 		foreach( $modules as $module ){
