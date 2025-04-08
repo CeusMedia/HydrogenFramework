@@ -58,10 +58,10 @@ class Entity implements ArrayAccess
 		/** @var array $array */
 		$array	= ( $data instanceof Dictionary ) ? $data->getAll() : $data;
 
-		self::presetStaticValues( $array );
-		self::presetDynamicValues( $array );
-		self::checkMandatoryFields( $array );
-		self::checkValues( $array );
+		static::presetStaticValues( $array );
+		static::presetDynamicValues( $array );
+		static::checkMandatoryFields( $array );
+		static::checkValues( $array );
 
 		/**
 		 * @var string $key
@@ -77,7 +77,7 @@ class Entity implements ArrayAccess
 	 */
 	public function get( string $key ): bool|int|float|string|array|object|NULL
 	{
-		if( self::isPublicProperty( $key ) )
+		if( static::isPublicProperty( $key ) )
 //			/** @not-phpstan-ignore-next-line */
 			return $this->$key;
 		return NULL;
@@ -93,7 +93,7 @@ class Entity implements ArrayAccess
 	 */
 	public function has( string $key, bool $allowNull = FALSE ): bool
 	{
-		if( !self::isPublicProperty( $key ) )
+		if( !static::isPublicProperty( $key ) )
 			return FALSE;
 
 		if( !$allowNull )
@@ -148,11 +148,11 @@ class Entity implements ArrayAccess
 	/**
 	 *	@param		string									$key
 	 *	@param		bool|int|float|string|array|object|NULL	$value
-	 *	@return		self
+	 *	@return		static
 	 */
-	public function set( string $key, bool|int|float|string|array|object $value = NULL ): self
+	public function set( string $key, bool|int|float|string|array|object $value = NULL ): static
 	{
-		if( self::isPublicProperty( $key ) )
+		if( static::isPublicProperty( $key ) )
 //			/** @not-phpstan-ignore-next-line */
 			$this->$key	= $value;
 		return $this;
@@ -184,7 +184,7 @@ class Entity implements ArrayAccess
 
 	protected static function checkMandatoryFields( array $data ): void
 	{
-		foreach( self::$mandatoryFields as $key )
+		foreach( static::$mandatoryFields as $key )
 			if( !array_key_exists( $key, $data ) )
 				throw MissingException::create( 'Missing data for key "'.$key.'"' );
 	}
@@ -236,6 +236,6 @@ class Entity implements ArrayAccess
 	 */
 	protected static function presetStaticValues( array & $array ): void
 	{
-		$array	= array_merge( self::$presetValues, $array );
+		$array	= array_merge( static::$presetValues, $array );
 	}
 }
