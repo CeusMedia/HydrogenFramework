@@ -51,6 +51,13 @@ class Entity implements ArrayAccess
 	}
 
 	/**
+	 *	Construction of a new entity.
+	 *	There are two ways:
+	 *	1. by PDO fetch
+	 *	2. by construction arguments, as dictionary or array map
+	 *	On both ways, default values will be set statically and dynamically.
+	 *	Only on manual construction, given data will be checked against a list of
+	 *	mandatory fields and sane values.
 	 *	@param		Dictionary|array<string,string|int|float|NULL>		$data
 	 */
 	public function __construct( Dictionary|array $data = [] )
@@ -60,8 +67,12 @@ class Entity implements ArrayAccess
 
 		static::presetStaticValues( $array );
 		static::presetDynamicValues( $array );
-		static::checkMandatoryFields( $array );
-		static::checkValues( $array );
+
+		//  manual construction -> check sanity of given data
+		if( [] !== $data ){
+			static::checkMandatoryFields( $array );								//  check for mandatory fields
+			static::checkValues( $array );										//  check for sane values
+		}
 
 		/**
 		 * @var string $key
