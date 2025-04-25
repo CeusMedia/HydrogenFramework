@@ -79,6 +79,7 @@ class Remote extends Environment
 
 		self::$configFile	= $this->path."/config/config.ini";
 
+		$this->initConfiguration();
 		$this->initRequest();
 		$this->initSession();
 		$this->initMessenger();																		//  setup user interface messenger
