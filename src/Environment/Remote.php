@@ -84,6 +84,7 @@ class Remote extends Environment
 		$this->initSession();
 		$this->initMessenger();																		//  setup user interface messenger
 		$this->initLanguage();
+		$this->initAcl();
 
 		$this->hasDatabase	= (bool) $this->database;													//  note if database is available
 		$this->modules->callHook( 'Env', 'constructEnd', $this );					//  call module hooks for end of env construction
