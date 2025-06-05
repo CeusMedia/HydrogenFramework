@@ -72,14 +72,14 @@ class Remote extends Environment
 		parent::__construct( $options, FALSE );
 //		self::$defaultPaths	= Environment::$defaultPaths;
 		$this->options	= $options;
-		$this->path		= $options['pathApp'] ?? getCwd() . '/';
-		$this->uri		= $options['pathApp'] ?? getCwd() . '/';											//
+//		$this->path		= $options['pathApp'] ?? getCwd() . '/';
+//		$this->uri		= $options['pathApp'] ?? getCwd() . '/';											//
 
 		Loader::create( 'php', $this->path.'classes/' )->register();					//  enable autoloader for remote app classes
 
 		self::$configFile	= $this->path."/config/config.ini";
 
-		$this->initConfiguration();
+//		$this->initConfiguration();
 		$this->initRequest();
 		$this->initSession();
 		$this->initMessenger();																		//  setup user interface messenger
