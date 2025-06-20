@@ -33,6 +33,7 @@ use CeusMedia\Database\PDO\Table as PdoDatabaseTable;
 use CeusMedia\HydrogenFramework\Environment;
 
 use PDO;
+use ReflectionException;
 use RuntimeException;
 
 /**
@@ -51,16 +52,40 @@ class Table extends PdoDatabaseTable
 
 	protected ?string $className		= NULL;
 
+	protected static array $instances	= [];
+
+	/**
+	 *	Static constructor.
+	 *	Realizes singleton instance per environment URI.
+	 *	@param		Environment		$env
+	 *	@return		static
+	 */
+	public static function getInstance( Environment $env ): static
+	{
+		if( ! isset( self::$instances[$env->uri] ) ){
+			$className	= static::class;
+			self::$instances[$env->uri] = new $className( $env );
+		}
+		return self::$instances[$env->uri];
+	}
+
+	/**
+	 *	Constructor.
+	 *	Returns new instance for environment (not shared).
+	 *	Use of static constructor is advised for performance.
+	 *	@param		Environment		$env
+	 *	@throws		ReflectionException
+	 */
 	public function __construct( Environment $env )
 	{
-		$this->setEnv( $env );
+		$this->env	= $env;
+		$database	= $env->getDatabase();
 
-		$database		= $env->getDatabase();
 		if( NULL === $database )
 			throw new RuntimeException( 'Database resource needed for '.static::class );
 
 		if( !method_exists( $database, 'getConnection' ) )
-			throw new RuntimeException( 'Database resource needed to implement getConnection' );
+			throw new RuntimeException( 'Database resource needs to implement getConnection' );
 
 		/** @var object $connection */
 		$connection	= $database->getConnection();
@@ -78,21 +103,6 @@ class Table extends PdoDatabaseTable
 			$this->setFetchEntityClass( $this->className );
 		}
 		$this->cacheKey	= 'db.'.$this->prefix.$this->name.'.';
-	}
-
-	//  --  PROTECTED  --  //
-
-	/**
-	 *	Sets Environment of Controller by copying Framework Member Variables.
-	 *	@access		protected
-	 *	@param		Environment			$env			Application Environment Object
-	 *	@return		self
-	 *	@throws		RuntimeException	if no database resource is available in given environment
-	 */
-	protected function setEnv( Environment $env ): self
-	{
-		$this->env		= $env;
-		return $this;
 	}
 }
 
