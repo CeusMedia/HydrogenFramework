@@ -58,6 +58,48 @@ class EntityTest extends TestCase
 		$reflectedMethod	= $reflectedClass->getMethod( 'checkMandatoryFields' );
 		$reflectedMethod->invoke( $reflectedClass, [] );
 	}
+
+	public function testPresetStaticValues(): void
+	{
+		$reflectedClass		= new ReflectionClass( TestEntity::class );
+		$reflectedMethod	= $reflectedClass->getMethod( 'presetStaticValues' );
+
+		self::assertSame( [
+			'simpleInteger'	=> 1,
+			'unionType'		=> 2,
+		], $reflectedMethod->invoke( $reflectedClass, [] ) );
+
+		self::assertSame( [
+			'simpleInteger'	=> 1,
+			'unionType'		=> 3,
+		], $reflectedMethod->invoke( $reflectedClass, ['unionType'	=> 3] ) );
+
+		self::assertSame( [
+			'simpleInteger'	=> 10,
+			'unionType'		=> 20,
+		], $reflectedMethod->invoke( $reflectedClass, [
+			'simpleInteger'	=> 10,
+			'unionType'		=> 20,
+		] ) );
+	}
+
+	public function testPresetStaticValues_onConstruct(): void
+	{
+		$entity	= new TestEntity( [] );
+		self::assertEquals( [1, 2], [
+			$entity->get( 'simpleInteger' ),
+			$entity->get( 'unionType' ),
+		] );
+
+		$entity	= new TestEntity( [
+			'simpleInteger'	=> 3,
+			'unionType'		=> 4,
+		] );
+		self::assertEquals( [3, 4], [
+			$entity->get( 'simpleInteger' ),
+			$entity->get( 'unionType' ),
+		] );
+	}
 }
 
 class TestEntity extends Entity
@@ -67,10 +109,15 @@ class TestEntity extends Entity
 
 	protected static array $autoTypeConvertFields	= [
 		'simpleInteger',
-		'unionType',
+//		'unionType',
 	];
 
 	protected static array $mandatoryFields			= [
 		'unionType',
+	];
+
+	protected static array $presetValues	= [
+		'simpleInteger'	=> 1,
+		'unionType'		=> 2,
 	];
 }

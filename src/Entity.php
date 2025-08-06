@@ -75,8 +75,8 @@ class Entity implements ArrayAccess
 		/** @var array $array */
 		$array	= ( $data instanceof Dictionary ) ? $data->getAll() : $data;
 
-		static::presetStaticValues( $array );
-		static::presetDynamicValues( $array );
+		$array	= static::presetStaticValues( $array );
+		$array	= static::presetDynamicValues( $array );
 
 		//  manual construction -> check sanity of given data
 		if( [] !== $data ){
@@ -223,6 +223,7 @@ class Entity implements ArrayAccess
 	}
 
 	/**
+	 *	Apply changes directly to the given array reference.
 	 *	@param		array $array
 	 *	@return		void
 	 *	@throws		ReflectionException		if reflection of entity class property failed
@@ -262,12 +263,12 @@ class Entity implements ArrayAccess
 	/**
 	 *	Applies preset values dynamically created on construction.
 	 *	Method is empty by default, can be extended for custom handling on your entities.
-	 *	Apply your changes directly to the given array reference.
 	 *	@param		array		$array		Reference to data array to work on
-	 *	@return		void
+	 *	@return		array
 	 */
-	protected static function presetDynamicValues( array & $array ): void
+	protected static function presetDynamicValues( array $array ): array
 	{
+		return $array;
 	}
 
 	/**
@@ -275,13 +276,12 @@ class Entity implements ArrayAccess
 	 *	Method extends given array by statically defined preset values.
 	 *	Sets fields only, if not set in given array.
 	 *	Method can be extended for custom handling on your entities.
-	 *	Apply your changes directly to the given array reference.
 	 *	@param		array		$array		Reference to data array to work on
-	 *	@return		void
+	 *	@return		array
 	 */
-	protected static function presetStaticValues( array & $array ): void
+	protected static function presetStaticValues( array $array ): array
 	{
-		$array	= array_merge( static::$presetValues, $array );
+		return array_merge( static::$presetValues, $array );
 	}
 
 
