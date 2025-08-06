@@ -13,9 +13,16 @@ namespace CeusMedia\HydrogenFramework;
 
 use ArrayAccess;
 use CeusMedia\Common\ADT\Collection\Dictionary;
+use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
 use CeusMedia\Common\Exception\Data\Missing as MissingException;
-use CeusMedia\Common\Exception\Runtime;
+use CeusMedia\Common\Exception\NotSupported as NotSupportedException;
+use CeusMedia\Common\Exception\Runtime as RuntimeException;
+use ReflectionClass;
+use ReflectionException;
+use ReflectionIntersectionType;
+use ReflectionNamedType;
 use ReflectionProperty;
+use ReflectionUnionType;
 
 /**
  *	Base class for model entity classes.
@@ -27,8 +34,9 @@ use ReflectionProperty;
  */
 class Entity implements ArrayAccess
 {
-	protected static array $mandatoryFields		= [];
-	protected static array $presetValues		= [];
+	protected static array $mandatoryFields			= [];
+	protected static array $presetValues			= [];
+	protected static array $autoTypeConvertFields	= [];
 
 	/**
 	 *	@param		array		$data
@@ -59,18 +67,21 @@ class Entity implements ArrayAccess
 	 *	Only on manual construction, given data will be checked against a list of
 	 *	mandatory fields and sane values.
 	 *	@param		Dictionary|array<string,string|int|float|NULL>		$data
+	 *	@throws		ReflectionException		if reflection of entity class property failed
+	 *	@throws		NotSupportedException	entity property is typed as union or intersection
 	 */
 	public function __construct( Dictionary|array $data = [] )
 	{
 		/** @var array $array */
 		$array	= ( $data instanceof Dictionary ) ? $data->getAll() : $data;
 
-		static::presetStaticValues( $array );
-		static::presetDynamicValues( $array );
+		$array	= static::presetStaticValues( $array );
+		$array	= static::presetDynamicValues( $array );
 
 		//  manual construction -> check sanity of given data
 		if( [] !== $data ){
 			static::checkMandatoryFields( $array );								//  check for mandatory fields
+			static::convertTypes( $array );									//  convert types if defined and necessary
 			static::checkValues( $array );										//  check for sane values
 		}
 
@@ -142,7 +153,7 @@ class Entity implements ArrayAccess
 	public function offsetSet( mixed $offset, mixed $value ): void
 	{
 		if( NULL === $offset )
-			throw Runtime::create( 'Key must not be null' );
+			throw RuntimeException::create( 'Key must not be null' );
 		$this->set( $offset, $value );
 	}
 
@@ -212,6 +223,30 @@ class Entity implements ArrayAccess
 	}
 
 	/**
+	 *	Apply changes directly to the given array reference.
+	 *	@param		array $array
+	 *	@return		void
+	 *	@throws		ReflectionException		if reflection of entity class property failed
+	 *	@throws		NotSupportedException	entity property is typed as union or intersection
+	 */
+	protected static function convertTypes( array & $array ): void
+	{
+		if( [] === static::$autoTypeConvertFields )
+			return;
+
+		$reflectedClass	= new ReflectionClass( static::class );
+		foreach( static::$autoTypeConvertFields as $key ){
+			if( !isset( $array[$key] ) )
+				continue;
+
+			$reflectedProperty	= $reflectedClass->getProperty( $key );
+			if( !$reflectedProperty->hasType() )
+				continue;
+			$array[$key]	= self::convertTypeAccordingToReflection( $array[$key], $reflectedProperty );
+		}
+	}
+
+	/**
 	 *	Indicates whether a field (or column) name leads to a public member / property.
 	 *	Is used by several methods to enable reading from and writing to entity property.
 	 *	@param		string		$key
@@ -228,12 +263,12 @@ class Entity implements ArrayAccess
 	/**
 	 *	Applies preset values dynamically created on construction.
 	 *	Method is empty by default, can be extended for custom handling on your entities.
-	 *	Apply your changes directly to the given array reference.
 	 *	@param		array		$array		Reference to data array to work on
-	 *	@return		void
+	 *	@return		array
 	 */
-	protected static function presetDynamicValues( array & $array ): void
+	protected static function presetDynamicValues( array $array ): array
 	{
+		return $array;
 	}
 
 	/**
@@ -241,12 +276,54 @@ class Entity implements ArrayAccess
 	 *	Method extends given array by statically defined preset values.
 	 *	Sets fields only, if not set in given array.
 	 *	Method can be extended for custom handling on your entities.
-	 *	Apply your changes directly to the given array reference.
 	 *	@param		array		$array		Reference to data array to work on
-	 *	@return		void
+	 *	@return		array
 	 */
-	protected static function presetStaticValues( array & $array ): void
+	protected static function presetStaticValues( array $array ): array
 	{
-		$array	= array_merge( static::$presetValues, $array );
+		return array_merge( static::$presetValues, $array );
+	}
+
+
+	//  --  PRIVATE  --  //
+
+	/**
+	 *	@param		mixed				$value
+	 *	@param		ReflectionProperty	$reflectedProperty
+	 *	@return		object|mixed
+	 *	@throws		ReflectionException		if reflection of entity class property failed
+	 *	@throws		NotSupportedException	entity property is typed as union or intersection
+	 */
+	private static function convertTypeAccordingToReflection( mixed $value, ReflectionProperty $reflectedProperty ): mixed
+	{
+		$reflectedType		= $reflectedProperty->getType();
+		if( NULL === $reflectedType )
+			return $value;
+
+		if( ReflectionUnionType::class === $reflectedType::class ){
+			throw NotSupportedException::create( 'Union typed auto convert is not supported, yet' );
+/*			foreach( $reflectedType->getTypes() as $tt )
+				if( $tt->getName() === $value )
+					continue 2;
+			foreach( $reflectedType->getTypes() as $tt )
+				...*/
+		}
+
+		if( ReflectionIntersectionType::class === $reflectedType::class ){
+			throw NotSupportedException::create( 'Intersection typed auto convert is not supported, yet' );
+		}
+
+		if( ReflectionNamedType::class === $reflectedType::class ){
+			if( $reflectedType->isBuiltin() ){
+				settype( $value, $reflectedType->getName() );
+				return $value;
+			}
+			$reflectedTypeClass	= $reflectedType->getName();
+			if( class_exists( $reflectedTypeClass ) ){
+				return ObjectFactory::createObject( $reflectedTypeClass, [$value] );
+			}
+		}
+
+		return $value;
 	}
 }
