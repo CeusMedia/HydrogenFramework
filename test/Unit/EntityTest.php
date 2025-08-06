@@ -85,13 +85,13 @@ class EntityTest extends TestCase
 
 	public function testPresetStaticValues_onConstruct(): void
 	{
-		$entity	= new TestEntity( [] );
+		$entity	= new \CeusMedia\HydrogenFrameworkUnitTest\TestEntity( [] );
 		self::assertEquals( [1, 2], [
 			$entity->get( 'simpleInteger' ),
 			$entity->get( 'unionType' ),
 		] );
 
-		$entity	= new TestEntity( [
+		$entity	= new \CeusMedia\HydrogenFrameworkUnitTest\TestEntity( [
 			'simpleInteger'	=> 3,
 			'unionType'		=> 4,
 		] );

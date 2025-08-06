@@ -42,6 +42,7 @@
   },
   "autoload-dev": {
     "psr-4": {
+      "CeusMedia\\HydrogenFrameworkIntegrationTest\\": "test/Integration/",
       "CeusMedia\\HydrogenFrameworkUnitTest\\": "test/Unit/"
     }
   },
