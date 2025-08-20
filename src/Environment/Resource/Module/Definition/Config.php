@@ -61,6 +61,10 @@ class Config
 	/** @var	string|NULL				$title */
 	public ?string $title;
 
+	public string|int|float|bool|NULL $default	= NULL;
+
+	public bool $changed						= FALSE;
+
 	/**
 	 *	@param		string					$key
 	 *	@param		string|int|float|bool	$value

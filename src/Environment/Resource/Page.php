@@ -176,15 +176,12 @@ class Page extends HtmlPage
 	{
 		$modules	= $this->env->getModules()->getAll();											//  get list of active modules
 
-		/** @var Dictionary $config */
-		$config			= $this->env->getConfig()->getAll( 'module.', TRUE );			//  dictionary of (user modified) module settings
 		$pathScripts	= $this->env->getConfig()->get( 'path.scripts', '' );
 		$pathScriptsLib	= $this->env->getConfig()->get( 'path.scripts.lib', '' );
 		$pathStylesLib	= $this->env->getConfig()->get( 'path.styles.lib', '' );
 
 		$this->applyModulesStyles( $modules, $pathStylesLib, $pathScriptsLib );
 		$this->applyModulesScripts( $modules, $pathScripts, $pathScriptsLib );
-		$this->applyModulesConfigs( $modules, $config );
 
 		$this->env->getCaptain()->callHook( 'Page', 'applyModules', $this );			//  call related module event hooks
 	}
@@ -194,6 +191,11 @@ class Page extends HtmlPage
 	 */
 	public function build( $bodyAttributes = [], $htmlAttributes = [] ): string
 	{
+		/** @var Dictionary $config */
+		$config			= $this->env->getConfig()->getAll( 'module.', TRUE );			//  dictionary of (user modified) module settings
+		$modules	= $this->env->getModules()->getAll();											//  get list of active modules
+		$this->applyModulesConfigs( $modules, $config );
+
 		$payload	= ['content' => $this->getBody()];
 		$this->env->getCaptain()->callHook( 'Page', 'build', $this, $payload );	//  call related module event hooks
 		$this->setBody( $payload['content'] );

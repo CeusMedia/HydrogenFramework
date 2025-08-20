@@ -280,9 +280,9 @@ class Entity implements ArrayAccess
 	}
 
 	/**
-	 *	Applies preset values dynamically created on construction.
+	 *	Applies preset values dynamically created on manual construction.
 	 *	Method is empty by default, can be extended for custom handling on your entities.
-	 *	@param		array		$array		Reference to data array to work on
+	 *	@param		array		$array		Data array to work on
 	 *	@return		array
 	 */
 	protected static function presetDynamicValues( array $array ): array
@@ -291,11 +291,11 @@ class Entity implements ArrayAccess
 	}
 
 	/**
-	 *	Applies preset fixed values on construction.
+	 *	Applies preset fixed values on manual construction.
 	 *	Method extends given array by statically defined preset values.
 	 *	Sets fields only, if not set in given array.
 	 *	Method can be extended for custom handling on your entities.
-	 *	@param		array		$array		Reference to data array to work on
+	 *	@param		array		$array		Data array to work on
 	 *	@return		array
 	 */
 	protected static function presetStaticValues( array $array ): array
