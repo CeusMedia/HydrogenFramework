@@ -47,9 +47,7 @@ class Entity implements ArrayAccess
 	public static function fromArray( array $data ): static
 	{
 		$className	= static::class;
-		$instance	= new $className();
-		$instance->importDataFromArray( $data );
-		return $instance;
+		return new $className( $data );
 	}
 
 	/**
@@ -86,7 +84,8 @@ class Entity implements ArrayAccess
 
 		/** @var array $array */
 		$array	= $data instanceof Dictionary ? $data->getAll() : $data;
-		$this->importDataFromArray( $array );
+		if( [] !== $data )
+			$this->importDataFromArray( $array );
 	}
 
 	/**

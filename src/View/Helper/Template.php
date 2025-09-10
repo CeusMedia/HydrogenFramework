@@ -378,7 +378,11 @@ class Template
 		$helpers	= $___helpers	= $this->helpers;											//
 
 		try{
+			ob_start();
 			$content	= include( $___templateUri );											//  render template by include
+			$stdout = ob_get_clean();
+			if( 1 === $content )
+				$content	= $stdout;
 			if( $content === FALSE )
 				throw new RuntimeException( 'Template file "'.$___templateUri.'" is not existing' );
 		}
