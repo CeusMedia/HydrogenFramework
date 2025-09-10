@@ -77,7 +77,7 @@ class Remote extends Environment
 
 		Loader::create( 'php', $this->path.'classes/' )->register();					//  enable autoloader for remote app classes
 
-		self::$configFile	= $this->path."/config/config.ini";
+		self::$configFile	= $this->options['configFile'] ?? self::$configFile;
 
 //		$this->initConfiguration();
 		$this->initRequest();

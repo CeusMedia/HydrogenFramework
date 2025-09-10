@@ -35,7 +35,7 @@ class Configuration extends Dictionary
 	{
 		$configFile		??= $this->env::class::$configFile;
 		$configFolder	??= $this->env::class::$defaultPaths['config'];
-		$configFilePath	= $configFolder.$this->env::class::$configFile;												//  get config file @todo remove this old way
+		$configFilePath	= $configFolder.$configFile;												//  get config file @todo remove this old way
 
 		$absolutePrefix	= str_starts_with( $configFilePath, '/' ) ? '' : $this->env->uri;					//  prefix with app path if not already absolute
 		$absolutePath	= $absolutePrefix.$configFilePath;
