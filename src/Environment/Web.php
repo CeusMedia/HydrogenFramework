@@ -297,27 +297,36 @@ class Web extends Environment
 			$hostTo		= parse_url( $base.$uri, PHP_URL_HOST );						//  requested host domain
 			if( $hostFrom !== $hostTo ){															//  both are not matching
 				$message	= 'Redirection to foreign host is not allowed.';						//  error message
-				if( $this->has( 'messenger' ) ){													//  messenger is available
+				if( $this->has( 'messenger' ) ){												//  messenger is available
 					$this->getMessenger()?->noteFailure( $message );								//  note message
 //	broken			$this->modules->callHook( 'App', 'onException', $this );						//  call module hooks for end of env construction
-					$this->restart( NULL, NULL, TRUE );						//  redirect to start
+					$this->restart( NULL, NULL, TRUE );					//  redirect to start
 				}
 				print( $message );																	//  otherwise print message
 				exit;																				//  and exit
 			}
 		}
-	#	$this->database->close();																	//  close database connection
-	#	$this->session->close();																	//  close session
-		if( $status )																				//  an HTTP status code is to be set
-			HttpStatus::sendHeader( $status );														//  send HTTP status code header
-		header( "Location: ".$base.$uri );													//  send HTTP redirect header
 
-		$link	= HtmlTag::create( 'a', $base.$uri, array( 'href' => $base.$uri ) );
+		$link	= HtmlTag::create( 'a', $base.$uri, ['href' => $base.$uri] );
 		$text	= HtmlTag::create( 'small', 'Redirecting to '.$link.' ...' );
 		$page	= new HtmlPageFrame();
 		$page->addMetaTag( 'http-equiv', 'refresh', '0; '.$base.$uri );
 		$page->addBody( $text );
-		print( $page->build() );
+		$content	= $page->build();
+
+		$payload	= [
+			'status'	=> $status ?? 302,
+			'mimeType'	=> 'text/html',
+			'content'	=> $content,
+		];
+		$this->getCaptain()->callHookWithPayload( 'App', 'sendResponse:after', $this, $payload );
+
+	#	$this->database->close();																	//  close database connection
+	#	$this->session->close();																	//  close session
+		if( NULL !== $status )																		//  an HTTP status code is to be set
+			HttpStatus::sendHeader( $status );														//  send HTTP status code header
+		header( 'Location: '.$base.$uri );													//  send HTTP redirect header
+		print( $content );
 		exit;																						//  and exit application
 	}
 

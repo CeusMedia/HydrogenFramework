@@ -389,13 +389,13 @@ abstract class Web extends Abstraction
 	protected function restart( ?string $uri = NULL, bool $withinModule = FALSE, ?int $status = NULL, bool $allowForeignHost = FALSE, int $modeFrom = 0 ): void
 	{
 		$mode	= 'ext';
-		if( !str_starts_with( $uri ?? '', 'http' ) ){												//  URI is not starting with HTTP scheme
+		if( !str_starts_with( $uri ?? '', 'http' ) ){							//  URI is not starting with HTTP scheme
 			$mode	= 'int';
-			if( $withinModule ){																	//  redirection is within module
-				$mode	= 'mod';
-				$controller	= $this->env->getRequest()->get( '__controller', '' );		//  get current controller
-				$controller	= $this->alias ?: $controller;							//
-				$uri		= $controller.( strlen( $uri ?? '' ) ? '/'.$uri : '' );			//
+			if( $withinModule ){																//  redirection is within module
+				$mode		= 'mod';
+				$controller	= $this->env->getRequest()->get( '__controller', '' );	//  get current controller
+				$controller	= $this->alias ?: $controller;										//
+				$uri		= $controller.( strlen( $uri ?? '' ) ? '/'.$uri : '' );		//
 			}
 		}
 		if( $this->logRestarts )
@@ -418,7 +418,7 @@ abstract class Web extends Abstraction
 	 */
 	protected function setData( array $data, string $topic = '' ): self
 	{
-		$this->view?->setData($data, $topic);
+		$this->view?->setData( $data, $topic);
 		return $this;
 	}
 

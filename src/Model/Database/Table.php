@@ -51,6 +51,30 @@ class Table extends PdoDatabaseTable
 
 	protected ?string $className		= NULL;
 
+	protected static array $instances	= [];
+
+	/**
+	 *	Static constructor.
+	 *	Realizes singleton instance per environment URI.
+	 *	@param		Environment		$env
+	 *	@return		static
+	 */
+	public static function getInstance( Environment $env ): static
+	{
+		if( ! isset( static::$instances[$env->uri] ) ){
+			$className	= static::class;
+			static::$instances[$env->uri] = new $className( $env );
+		}
+		return static::$instances[$env->uri];
+	}
+
+	/**
+	 *	Constructor.
+	 *	Returns new instance for environment (not shared).
+	 *	Use of static constructor is advised for performance.
+	 *	@param		Environment		$env
+	 *	@throws		ReflectionException
+	 */
 	public function __construct( Environment $env )
 	{
 		$this->setEnv( $env );

@@ -246,12 +246,23 @@ abstract class Ajax extends Abstraction
 	{
 		//  New Code: static call, compact and readable
 		HttpResponseSender::$supportedCompressions	= self::$supportedCompressions;
-		return HttpResponseSender::sendResponseForRequest(
+		$nrBytes	= HttpResponseSender::sendResponseForRequest(
 			$response,
 			$this->request,
 			$this->sendLengthHeader,
-			$this->exitAfterwards && !$this->env->isInTestMode()
+			FALSE
 		)->getBodyLength();
+
+		$payload	= [
+			'status'	=> (int) explode( ' ', $response->getStatus(), 2 )[0],
+			'mimeType'	=> $response->getHeader( 'Content-Type', TRUE )->getValue(),
+			'content'	=> $response->getBody(),
+		];
+		$this->env->getCaptain()->callHookWithPayload( 'App', 'sendResponse:after', $this, $payload );
+
+		if( $this->exitAfterwards && !$this->env->isInTestMode() )
+			exit;
+		return $nrBytes;
 
 /*		//  Original Code: dynamic call, okay but not cool
 		HttpResponseSender::$supportedCompressions	= self::$supportedCompressions;
