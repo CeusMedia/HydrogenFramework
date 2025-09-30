@@ -253,6 +253,18 @@ class Site extends WebAbstraction implements ApplicationInterface
 //		$encodings		= $this->env->getRequest()->headers->getField( 'Accept-Encoding' );
 //		$isAjax			= $this->env->request->isAjax();
 		$nrBytes		= $response->send( $compression, TRUE, FALSE );
+
+		$statusCode		= (int) explode( ' ', $response->getStatus(), 2 )[0];
+		$contentType	= $response->getHeader( 'Content-Type', TRUE )->getValue();
+		if( '' === ( $contentType ?? '' ) )
+			$contentType	= 'text/html';
+		$payload	= [
+			'status'	=> $statusCode,
+			'mimeType'	=> $contentType,
+			'content'	=> $response->toString(),
+		];
+		$this->env->getCaptain()->callHook( 'App', 'sendResponse:after', $this, $payload );
+
 		return (object) [
 			'bytesSent'		=> $nrBytes,
 			'compression'	=> $compression,

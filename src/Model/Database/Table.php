@@ -62,11 +62,11 @@ class Table extends PdoDatabaseTable
 	 */
 	public static function getInstance( Environment $env ): static
 	{
-		if( ! isset( self::$instances[$env->uri] ) ){
+		if( ! isset( static::$instances[$env->uri] ) ){
 			$className	= static::class;
-			self::$instances[$env->uri] = new $className( $env );
+			static::$instances[$env->uri] = new $className( $env );
 		}
-		return self::$instances[$env->uri];
+		return static::$instances[$env->uri];
 	}
 
 	/**

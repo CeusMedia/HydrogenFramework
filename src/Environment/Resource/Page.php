@@ -192,10 +192,13 @@ class Page extends HtmlPage
 	public function build( $bodyAttributes = [], $htmlAttributes = [] ): string
 	{
 		/** @var Dictionary $config */
-		$config			= $this->env->getConfig()->getAll( 'module.', TRUE );			//  dictionary of (user modified) module settings
+		$config			= $this->env->getConfig()->getAll( 'module.', TRUE );		//  dictionary of (user modified) module settings
 		$modules	= $this->env->getModules()->getAll();											//  get list of active modules
 		$this->applyModulesConfigs( $modules, $config );
 
+		// call hooks for appending page content
+		// these hooks work on the payload, which is the set page body, but not the page itself
+		// changes made on page content during hook calls will be lost, since payload content will replace page content
 		$payload	= ['content' => $this->getBody()];
 		$this->env->getCaptain()->callHook( 'Page', 'build', $this, $payload );	//  call related module event hooks
 		$this->setBody( $payload['content'] );
@@ -204,8 +207,10 @@ class Page extends HtmlPage
 		$this->decorateBodyClasses( $bodyAttributes );
 		$this->addBody( $this->js->render() );
 
-		// @todo move this call to app! refactor existing hooks in modules on this event
-		$this->env->getCaptain()->callHook( 'App', 'respond', $this );				//  call related module event hooks
+		// finally call hooks right before the page frame will render
+		// these hooks work directly on page, not on payload
+		$this->env->getCaptain()->callHook( 'Page', 'render', $this );				//  call related module event hooks
+
 		return parent::build( $bodyAttributes, $htmlAttributes );
 	}
 

@@ -227,7 +227,18 @@ abstract class Api extends Abstraction
 			$this->response->addHeaderPair( 'X-API-Dev', base64_encode( $dev ) );
 
 		HttpResponseSender::$supportedCompressions	= self::$supportedCompressions;
-		$sender	= new HttpResponseSender( $this->response, $this->request );
-		return $sender->send( $this->sendLengthHeader, $this->exitAfterwards )->getBodyLength();
+		$sender		= new HttpResponseSender( $this->response, $this->request );
+		$nrBytes	= $sender->send( $this->sendLengthHeader, FALSE )->getBodyLength();
+
+		$payload	= [
+			'status'	=> $statusCode,
+			'mimeType'	=> $mimeType,
+			'content'	=> $content ,
+		];
+		$this->env->getCaptain()->callHookWithPayload( 'App', 'sendResponse:after', $this, $payload );
+
+		if( $this->exitAfterwards )
+			exit;
+		return $nrBytes;
 	}
 }
