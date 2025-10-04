@@ -72,11 +72,16 @@ abstract class WebAbstraction implements ApplicationInterface
 		$env ??= ObjectFactory::createObject( static::$classEnvironment );
 
 		$this->env	= $env;
+		$config		= $this->env->getConfig();
+
+		$defaultTimezone	= 'Europe/Berlin';														//  default time zone
+		$defaultTimezone	= $config->get( 'system.timezone', $defaultTimezone );				//  configured or default time zone
+		date_default_timezone_set( $defaultTimezone );												//  set (possibly alternative) time zone
 
 		if( [] !== static::$modulesNeeded )															//  needed modules are defined
 			$this->checkNeededModules();															//  check for missing modules
 
-		if( TRUE === $env->getConfig()->get( 'system.compat.oldCommon', FALSE ) )		//  look into config for compat flag
+		if( TRUE === $config->get( 'system.compat.oldCommon', FALSE ) )					//  look into config for compat flag
 			require_once 'vendor/ceus-media/common/src/compat8.php';								//  ... for CeusMedia::Common 0.8.x without namespaces
 	}
 
