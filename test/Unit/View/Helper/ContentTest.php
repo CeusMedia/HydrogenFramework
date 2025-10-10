@@ -7,6 +7,7 @@ use CeusMedia\Common\Exception\FileNotExisting as FileNotExistingException;
 use CeusMedia\HydrogenFramework\Environment\Console as ConsoleEnvironment;
 use CeusMedia\HydrogenFramework\View\Helper\Content as ContentHelper;
 use PHPUnit\Framework\TestCase;
+use ReflectionException;
 
 class ContentTest extends TestCase
 {
@@ -46,7 +47,7 @@ class ContentTest extends TestCase
 
 	/**
 	 *	@return		void
-	 *	@throws		\ReflectionException
+	 *	@throws		ReflectionException
 	 */
 	public function testRender(): void
 	{

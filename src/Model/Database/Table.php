@@ -64,10 +64,12 @@ class Table extends PdoDatabaseTable
 	{
 		$prefix	= '';
 		$dbc	= $env->getDatabase();
-		if( NULL !== $dbc
-			&& method_exists( $dbc, 'getConnection' )
-			&& method_exists( $env->getDatabase()->getConnection(), 'getPrefix' ) )
-			$prefix	= $env->getDatabase()->getConnection()->getPrefix();
+		if( NULL !== $dbc && method_exists( $dbc, 'getConnection' ) ){
+			/** @var object $connection */
+			$connection	= $dbc->getConnection();
+			if( NULL !== $connection && method_exists( $connection, 'getPrefix' ) )
+				$prefix	= $connection->getPrefix();
+		}
 
 		$id	= $prefix.static::class.'@'.$env->uri;
 		if( ! isset( static::$instances[$id] ) ){

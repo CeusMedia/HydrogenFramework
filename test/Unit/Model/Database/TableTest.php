@@ -5,9 +5,9 @@ namespace CeusMedia\HydrogenFrameworkUnitTest\Model\Database;
 
 use CeusMedia\Database\PDO\Connection as DatabasePdoConnection;
 use CeusMedia\HydrogenFramework\Environment\Console as ConsoleEnvironment;
-use CeusMedia\HydrogenFramework\Environment\Resource\Database\PDO;
 use CeusMedia\HydrogenFramework\Model\Database\Table;
 use PHPUnit\Framework\TestCase;
+use Throwable;
 
 class TableTest extends TestCase
 {
@@ -21,7 +21,7 @@ class TableTest extends TestCase
 			self::assertInstanceOf( TestModel1::class, $m1 );
 			self::assertInstanceOf( TestModel2::class, $m2 );
 		}
-		catch ( \Throwable $e ){
+		catch ( Throwable $e ){
 			self::fail( $e->getMessage() );
 		}
 	}
@@ -43,7 +43,7 @@ class TableTest extends TestCase
 		self::assertEquals( 'test_t3', $m->getName() );
 	}
 
-	public function testGetInstance_exception(): void
+	public function testGetInstance_exception_noDatabaseResource(): void
 	{
 		self::expectException( \RuntimeException::class );
 		WrongModel1::getInstance( new ConsoleEnvironment( [
@@ -53,7 +53,7 @@ class TableTest extends TestCase
 		] ) );
 	}
 
-	public function testGetInstance_exception2(): void
+	public function testGetInstance_exception_getConnectionMissingOnResource(): void
 	{
 		self::expectException( \RuntimeException::class );
 		$env	= new ConsoleEnvironment( [

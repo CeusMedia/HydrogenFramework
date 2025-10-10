@@ -8,6 +8,7 @@
 
 namespace CeusMedia\HydrogenFramework\Controller;
 
+use CeusMedia\Common\Net\HTTP\Header\Field as HttpHeaderField;
 use CeusMedia\Common\Net\HTTP\PartitionSession;
 use CeusMedia\Common\Net\HTTP\Request as HttpRequest;
 use CeusMedia\Common\Net\HTTP\Response as HttpResponse;
@@ -253,9 +254,11 @@ abstract class Ajax extends Abstraction
 			FALSE
 		)->getBodyLength();
 
+		/** @var HttpHeaderField $contentType */
+		$contentType	= $response->getHeader( 'Content-Type', TRUE );
 		$payload	= [
 			'status'	=> (int) explode( ' ', $response->getStatus(), 2 )[0],
-			'mimeType'	=> $response->getHeader( 'Content-Type', TRUE )->getValue(),
+			'mimeType'	=> $contentType->getValue(),
 			'content'	=> $response->getBody(),
 		];
 		$this->env->getCaptain()->callHookWithPayload( 'App', 'sendResponse:after', $this, $payload );

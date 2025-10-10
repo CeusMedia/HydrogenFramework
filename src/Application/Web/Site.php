@@ -255,9 +255,13 @@ class Site extends WebAbstraction implements ApplicationInterface
 		$nrBytes		= $response->send( $compression, TRUE, FALSE );
 
 		$statusCode		= (int) explode( ' ', $response->getStatus(), 2 )[0];
-		$contentType	= $response->getHeader( 'Content-Type', TRUE )->getValue();
-		if( '' === ( $contentType ?? '' ) )
-			$contentType	= 'text/html';
+
+		/** @var array<HttpHeaderField> $contentTypeHeaders */
+		$contentTypeHeaders	= $response->getHeader( 'Content-Type' );
+		$contentType	= 'text/html';
+		if( [] !== $contentTypeHeaders )
+			$contentType	= $contentTypeHeaders[0]->getValue();
+
 		$payload	= [
 			'status'	=> $statusCode,
 			'mimeType'	=> $contentType,
