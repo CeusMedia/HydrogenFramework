@@ -44,12 +44,20 @@ class ContentTest extends TestCase
 		self::assertEquals( ['key1' => 'value1'], $this->helper->getData( 'list' ) );
 	}
 
+	/**
+	 *	@return		void
+	 *	@throws		\ReflectionException
+	 */
 	public function testRender(): void
 	{
 		$expected	= file_get_contents( $this->baseTestPath.'contents/locales/de/test.html' );
 		$this->helper->setData( ['key' => 'value'] );
 		self::assertEquals( $expected, $this->helper->render() );
 	}
+
+	/**
+	 *	@return		void
+	 */
 	protected function setUp(): void
 	{
 		$this->baseTestPath	= dirname( __DIR__, 3 ).'/';

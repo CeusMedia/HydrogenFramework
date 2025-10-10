@@ -62,11 +62,19 @@ class Table extends PdoDatabaseTable
 	 */
 	public static function getInstance( Environment $env ): static
 	{
-		if( ! isset( static::$instances[$env->uri] ) ){
+		$prefix	= '';
+		$dbc	= $env->getDatabase();
+		if( NULL !== $dbc
+			&& method_exists( $dbc, 'getConnection' )
+			&& method_exists( $env->getDatabase()->getConnection(), 'getPrefix' ) )
+			$prefix	= $env->getDatabase()->getConnection()->getPrefix();
+
+		$id	= $prefix.static::class.'@'.$env->uri;
+		if( ! isset( static::$instances[$id] ) ){
 			$className	= static::class;
-			static::$instances[$env->uri] = new $className( $env );
+			static::$instances[$id] = new $className( $env );
 		}
-		return static::$instances[$env->uri];
+		return static::$instances[$id];
 	}
 
 	/**
@@ -89,13 +97,13 @@ class Table extends PdoDatabaseTable
 
 		/** @var object $connection */
 		$connection	= $database->getConnection();
-		if( !$connection instanceof PdoConnection )
+		if( !$connection instanceof PDO )
 			throw new RuntimeException( 'Set up database is not a fitting PDO connection' );
 
 		if( method_exists( $connection, 'getPrefix' ) )
 			$this->prefix	= $connection->getPrefix();
 
-		parent::__construct( $database->getConnection(), $this->prefix );
+		parent::__construct( $connection, $this->prefix );
 
 		if( PDO::FETCH_CLASS === $this->fetchMode ){
 			if( '' === ( $this->className ?? '' ) )
