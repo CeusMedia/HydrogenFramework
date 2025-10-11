@@ -270,17 +270,11 @@ abstract class Ajax extends Abstraction
 			FALSE
 		)->getBodyLength();
 
-<<<<<<< HEAD
-		$payload	= [
-			'status'	=> (int) explode( ' ', $response->getStatus(), 2 )[0],
-			'mimeType'	=> $response->getHeader( 'Content-Type', TRUE )->getValue(),
-=======
 		/** @var HttpHeaderField $contentType */
 		$contentType	= $response->getHeader( 'Content-Type', TRUE );
 		$payload	= [
 			'status'	=> (int) explode( ' ', $response->getStatus(), 2 )[0],
 			'mimeType'	=> $contentType->getValue(),
->>>>>>> 1.0.x
 			'content'	=> $response->getBody(),
 		];
 		$this->env->getCaptain()->callHookWithPayload( 'App', 'sendResponse:after', $this, $payload );
