@@ -72,18 +72,23 @@ class Remote extends Environment
 		parent::__construct( $options, FALSE );
 //		self::$defaultPaths	= Environment::$defaultPaths;
 		$this->options	= $options;
-		$this->path		= $options['pathApp'] ?? getCwd() . '/';
-		$this->uri		= $options['pathApp'] ?? getCwd() . '/';											//
+//		$this->path		= $options['pathApp'] ?? getCwd() . '/';
+//		$this->uri		= $options['pathApp'] ?? getCwd() . '/';											//
 
 		Loader::create( 'php', $this->path.'classes/' )->register();					//  enable autoloader for remote app classes
 
 		self::$configFile	= $this->options['configFile'] ?? self::$configFile;
 
+<<<<<<< HEAD
 		$this->initConfiguration();
+=======
+//		$this->initConfiguration();
+>>>>>>> 1.0.x
 		$this->initRequest();
 		$this->initSession();
 		$this->initMessenger();																		//  setup user interface messenger
 		$this->initLanguage();
+		$this->initAcl();
 
 		$this->hasDatabase	= (bool) $this->database;													//  note if database is available
 		$this->modules->callHook( 'Env', 'constructEnd', $this );					//  call module hooks for end of env construction

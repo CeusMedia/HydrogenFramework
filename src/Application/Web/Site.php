@@ -35,9 +35,9 @@ use CeusMedia\HydrogenFramework\ApplicationInterface;
 use CeusMedia\HydrogenFramework\Application\WebAbstraction;
 use CeusMedia\HydrogenFramework\Dispatcher\General as GeneralDispatcher;
 use CeusMedia\HydrogenFramework\Environment\Resource\Database\PDO;
-use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 use Error;
 use Exception;
+use ReflectionException;
 use Throwable;
 
 /**
@@ -226,6 +226,7 @@ class Site extends WebAbstraction implements ApplicationInterface
 	 *	@param		array		$headers	List of additional headers to be set on response
 	 *	@return		object		Map of final response and number of sent bytes (members: bytesSent, compression, response)
 	 *	@todo		use UI_OutputBuffer
+	 *	@throws		ReflectionException
 	 */
 	protected function respond( string $body, array $headers = [] ): object
 	{
@@ -255,9 +256,13 @@ class Site extends WebAbstraction implements ApplicationInterface
 		$nrBytes		= $response->send( $compression, TRUE, FALSE );
 
 		$statusCode		= (int) explode( ' ', $response->getStatus(), 2 )[0];
-		$contentType	= $response->getHeader( 'Content-Type', TRUE )->getValue();
-		if( '' === ( $contentType ?? '' ) )
-			$contentType	= 'text/html';
+
+		/** @var array<HttpHeaderField> $contentTypeHeaders */
+		$contentTypeHeaders	= $response->getHeader( 'Content-Type' );
+		$contentType	= 'text/html';
+		if( [] !== $contentTypeHeaders )
+			$contentType	= $contentTypeHeaders[0]->getValue();
+
 		$payload	= [
 			'status'	=> $statusCode,
 			'mimeType'	=> $contentType,

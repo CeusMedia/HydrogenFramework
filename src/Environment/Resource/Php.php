@@ -62,7 +62,7 @@ class Php
 	 *	@return		void
 	 *	@throws		RuntimeException
 	 */
-	public function applyConfig()
+	public function applyConfig(): void
 	{
 		$settings	= $this->env->getConfig()->getAll( 'php.', TRUE );				//  get PHP configuration from config file
 		foreach( $settings as $key => $value ){														//  iterate set PHP configuration pairs

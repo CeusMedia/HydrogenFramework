@@ -41,7 +41,6 @@ class Entity implements ArrayAccess
 	/**
 	 *	@param		array		$data
 	 *	@return		static
-	 *	@throws		ReflectionException		if reflection of entity class property failed
 	 *	@throws		NotSupportedException	entity property is typed as union or intersection
 	 */
 	public static function fromArray( array $data ): static
@@ -53,7 +52,6 @@ class Entity implements ArrayAccess
 	/**
 	 *	@param		Dictionary		$dictionary
 	 *	@return		static
-	 *	@throws		ReflectionException		if reflection of entity class property failed
 	 *	@throws		NotSupportedException	entity property is typed as union or intersection
 	 */
 	public static function fromDictionary( Dictionary $dictionary ): static
@@ -84,31 +82,10 @@ class Entity implements ArrayAccess
 
 		/** @var array $array */
 		$array	= $data instanceof Dictionary ? $data->getAll() : $data;
-		if( [] !== $data )
+		if( [] !== $array )																//  starting with given data
 			$this->importDataFromArray( $array );
-	}
-
-	/**
-	 *	@param		array		$array
-	 *	@return		void
-	 *	@throws		ReflectionException		if reflection of entity class property failed
-	 *	@throws		NotSupportedException	entity property is typed as union or intersection
-	 */
-	protected function importDataFromArray( array $array = [] ): void
-	{
-		$array	= static::presetStaticValues( $array );
-		$array	= static::presetDynamicValues( $array );
-
-		static::checkMandatoryFields( $array );								//  check for mandatory fields
-		static::convertTypes( $array );									//  convert types if defined and necessary
-		static::checkValues( $array );										//  check for sane values
-
-		/**
-		 * @var string $key
-		 * @var string|int|float|NULL $value
-		 */
-		foreach( $array as $key => $value )
-			$this->set( $key, $value );
+		else																			//  starting from empty array
+			$this->startEmpty();
 	}
 
 	/**
@@ -219,7 +196,7 @@ class Entity implements ArrayAccess
 	}
 
 
-	//  --  PROTECTED  --  //
+	//  --  PROTECTED - STATIC  --  //
 
 
 	protected static function checkMandatoryFields( array $data ): void
@@ -300,6 +277,61 @@ class Entity implements ArrayAccess
 	protected static function presetStaticValues( array $array ): array
 	{
 		return array_merge( static::$presetValues, $array );
+	}
+
+
+	//  --  PROTECTED  --  //
+
+
+	/**
+	 *	...
+	 *	Will apply preset static values.
+	 *	Will apply preset dynamic values.
+	 *	Will check mandatory fields.
+	 *	Will convert types.
+	 *	Will check values.
+	 *	@param		array		$array
+	 *	@return		void
+	 *	@throws		ReflectionException		if reflection of entity class property failed
+	 *	@throws		NotSupportedException	entity property is typed as union or intersection
+	 */
+	protected function importDataFromArray( array $array = [] ): void
+	{
+		$array	= static::presetStaticValues( $array );
+		$array	= static::presetDynamicValues( $array );
+
+		static::checkMandatoryFields( $array );								//  check for mandatory fields
+		static::convertTypes( $array );									//  convert types if defined and necessary
+		static::checkValues( $array );										//  check for sane values
+
+		/**
+		 * @var string $key
+		 * @var string|int|float|NULL $value
+		 */
+		foreach( $array as $key => $value )
+			$this->set( $key, $value );
+	}
+
+	/**
+	 *	...
+	 *	Will apply preset static values.
+	 *	Will apply preset dynamic values.
+	 *	Will NOT check mandatory fields.
+	 *	Will NOT convert types.
+	 *	Will NOT check values.
+	 *	@return		void
+	 *	@throws		NotSupportedException	entity property is typed as union or intersection
+	 */
+	protected function startEmpty(): void
+	{
+		$array	= static::presetStaticValues( [] );
+		$array	= static::presetDynamicValues( $array );
+		/**
+		 * @var string $key
+		 * @var string|int|float|NULL $value
+		 */
+		foreach( $array as $key => $value )
+			$this->set( $key, $value );
 	}
 
 

@@ -28,11 +28,11 @@
  */
 namespace CeusMedia\HydrogenFramework\Model\Database;
 
-use CeusMedia\Database\PDO\Connection as PdoConnection;
 use CeusMedia\Database\PDO\Table as PdoDatabaseTable;
 use CeusMedia\HydrogenFramework\Environment;
 
 use PDO;
+use ReflectionException;
 use RuntimeException;
 
 /**
@@ -61,11 +61,21 @@ class Table extends PdoDatabaseTable
 	 */
 	public static function getInstance( Environment $env ): static
 	{
-		if( ! isset( static::$instances[$env->uri] ) ){
-			$className	= static::class;
-			static::$instances[$env->uri] = new $className( $env );
+		$prefix	= '';
+		$dbc	= $env->getDatabase();
+		if( NULL !== $dbc && method_exists( $dbc, 'getConnection' ) ){
+			/** @var object $connection */
+			$connection	= $dbc->getConnection();
+			if( NULL !== $connection && method_exists( $connection, 'getPrefix' ) )
+				$prefix	= $connection->getPrefix();
 		}
-		return static::$instances[$env->uri];
+
+		$id	= $prefix.static::class.'@'.$env->uri;
+		if( ! isset( static::$instances[$id] ) ){
+			$className	= static::class;
+			static::$instances[$id] = new $className( $env );
+		}
+		return static::$instances[$id];
 	}
 
 	/**
@@ -77,24 +87,24 @@ class Table extends PdoDatabaseTable
 	 */
 	public function __construct( Environment $env )
 	{
-		$this->setEnv( $env );
+		$this->env	= $env;
+		$database	= $env->getDatabase();
 
-		$database		= $env->getDatabase();
 		if( NULL === $database )
 			throw new RuntimeException( 'Database resource needed for '.static::class );
 
 		if( !method_exists( $database, 'getConnection' ) )
-			throw new RuntimeException( 'Database resource needed to implement getConnection' );
+			throw new RuntimeException( 'Database resource needs to implement getConnection' );
 
 		/** @var object $connection */
 		$connection	= $database->getConnection();
-		if( !$connection instanceof PdoConnection )
+		if( !$connection instanceof PDO )
 			throw new RuntimeException( 'Set up database is not a fitting PDO connection' );
 
 		if( method_exists( $connection, 'getPrefix' ) )
 			$this->prefix	= $connection->getPrefix();
 
-		parent::__construct( $database->getConnection(), $this->prefix );
+		parent::__construct( $connection, $this->prefix );
 
 		if( PDO::FETCH_CLASS === $this->fetchMode ){
 			if( '' === ( $this->className ?? '' ) )
@@ -102,21 +112,6 @@ class Table extends PdoDatabaseTable
 			$this->setFetchEntityClass( $this->className );
 		}
 		$this->cacheKey	= 'db.'.$this->prefix.$this->name.'.';
-	}
-
-	//  --  PROTECTED  --  //
-
-	/**
-	 *	Sets Environment of Controller by copying Framework Member Variables.
-	 *	@access		protected
-	 *	@param		Environment			$env			Application Environment Object
-	 *	@return		self
-	 *	@throws		RuntimeException	if no database resource is available in given environment
-	 */
-	protected function setEnv( Environment $env ): self
-	{
-		$this->env		= $env;
-		return $this;
 	}
 }
 

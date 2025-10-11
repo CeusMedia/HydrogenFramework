@@ -102,9 +102,9 @@ interface LibraryInterface extends Countable
 	 *	@param		string		$moduleId		ID of module to check in source
 	 *	@param		boolean		$activeOnly		Flag: enlist only active modules (default: yes)
 	 *	@param		boolean		$strict			Flag: throw exception if not found (default: yes)
-	 *	@return		object|NULL
+	 *	@return		ModuleDefinition|NULL
 	 */
-	public function get( string $moduleId, bool $activeOnly = TRUE, bool $strict = TRUE ): ?object;
+	public function get( string $moduleId, bool $activeOnly = TRUE, bool $strict = TRUE ): ?ModuleDefinition;
 
 	/**
 	 *	Return a list of all modules found in source.
