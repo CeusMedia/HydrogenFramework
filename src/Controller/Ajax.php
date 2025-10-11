@@ -13,10 +13,11 @@ use CeusMedia\Common\Net\HTTP\PartitionSession;
 use CeusMedia\Common\Net\HTTP\Request as HttpRequest;
 use CeusMedia\Common\Net\HTTP\Response as HttpResponse;
 use CeusMedia\Common\Net\HTTP\Response\Sender as HttpResponseSender;
-use CeusMedia\HydrogenFramework\Environment as Environment;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 use Exception;
 use JsonException;
+use ReflectionException;
+use SimpleXMLElement;
 use Throwable;
 
 /**
@@ -65,6 +66,7 @@ abstract class Ajax extends Abstraction
 	 *	@param		WebEnvironment		$env		Environment object
 	 *	@return		void
 	 *	@throws		JsonException
+	 *	@throws		ReflectionException
 	 */
 	public function __construct( WebEnvironment $env )
 	{
@@ -103,6 +105,11 @@ abstract class Ajax extends Abstraction
 	{
 	}
 
+	/**
+	 *	@param		array		$response
+	 *	@return		string
+	 *	@throws		JsonException
+	 */
 	protected function renderResponseBody( array $response ): string
 	{
 		return match( self::$responseFormat ){
@@ -124,6 +131,7 @@ abstract class Ajax extends Abstraction
 	 *	@param		integer|NULL	$statusCode		HTTP status code of response
 	 *	@param		string|NULL		$mimeType		MIME type to send (default: defaultMimeType)
 	 *	@return		integer			Number of sent bytes, if exitAfterwards is disabled (default: no)
+	 *	@throws		ReflectionException
 	 */
 	protected function respond( string $content, int $statusCode = NULL, string $mimeType = NULL ): int
 	{
@@ -161,6 +169,7 @@ abstract class Ajax extends Abstraction
 	 *	@return		integer			Number of sent bytes, if exitAfterwards is disabled (default: no)
 	 *	@todo		support other serializations, too
 	 *	@throws		JsonException
+	 *	@throws		ReflectionException
 	 */
 	protected function respondData( mixed $data, int $statusCode = 200, ?string $mimeType = NULL ): int
 	{
@@ -184,6 +193,7 @@ abstract class Ajax extends Abstraction
 	 *	@param		string|NULL		$mimeType		MIME type to send (default: defaultMimeType)
 	 *	@return		integer			Number of sent bytes, if exitAfterwards is disabled (default: no)
 	 *	@throws		JsonException
+	 *	@throws		ReflectionException
 	 */
 	protected function respondError( string|int $code, ?string $message = NULL, int $statusCode = 412, ?string $mimeType = NULL ): int
 	{
@@ -207,6 +217,7 @@ abstract class Ajax extends Abstraction
 	 *	@param		string|NULL		$mimeType		MIME type to send (default: defaultMimeType)
 	 *	@return		integer			Number of sent bytes, if exitAfterwards is disabled (default: no)
 	 *	@throws		JsonException
+	 *	@throws		ReflectionException
 	 */
 	protected function respondException( Throwable $exception, int $statusCode = 500, ?string $mimeType = NULL ): int
 	{
@@ -223,9 +234,13 @@ abstract class Ajax extends Abstraction
 		return $this->respond( $this->renderResponseBody( $response ), $statusCode, $mimeType );
 	}
 
+	/**
+	 *	@param		array		$data
+	 *	@return		string
+	 */
 	protected function transformRecursiveArrayToXmlString( array $data ): string
 	{
-		$xml = new \SimpleXMLElement( '<root/>' );
+		$xml = new SimpleXMLElement( '<root/>' );
 		array_walk_recursive( $data, function( $value, $key ) use ( $xml ){
 			if( !is_array( $xml->{$key} ) )
 				$xml->{$key}	= $value;
@@ -241,6 +256,7 @@ abstract class Ajax extends Abstraction
 	/**
 	 *	@param		HttpResponse		$response
 	 *	@return		int
+	 *	@throws		ReflectionException
 	 *	@codeCoverageIgnore
 	 */
 	private function sendResponseWithDefaultHttpResponseSender( HttpResponse $response ): int

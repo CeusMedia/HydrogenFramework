@@ -28,7 +28,6 @@
  */
 namespace CeusMedia\HydrogenFramework\Model\Database;
 
-use CeusMedia\Database\PDO\Connection as PdoConnection;
 use CeusMedia\Database\PDO\Table as PdoDatabaseTable;
 use CeusMedia\HydrogenFramework\Environment;
 

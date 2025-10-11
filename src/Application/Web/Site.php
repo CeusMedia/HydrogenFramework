@@ -35,9 +35,9 @@ use CeusMedia\HydrogenFramework\ApplicationInterface;
 use CeusMedia\HydrogenFramework\Application\WebAbstraction;
 use CeusMedia\HydrogenFramework\Dispatcher\General as GeneralDispatcher;
 use CeusMedia\HydrogenFramework\Environment\Resource\Database\PDO;
-use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 use Error;
 use Exception;
+use ReflectionException;
 use Throwable;
 
 /**
@@ -226,6 +226,7 @@ class Site extends WebAbstraction implements ApplicationInterface
 	 *	@param		array		$headers	List of additional headers to be set on response
 	 *	@return		object		Map of final response and number of sent bytes (members: bytesSent, compression, response)
 	 *	@todo		use UI_OutputBuffer
+	 *	@throws		ReflectionException
 	 */
 	protected function respond( string $body, array $headers = [] ): object
 	{
