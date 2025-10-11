@@ -41,21 +41,28 @@ class Entity implements ArrayAccess
 	/**
 	 *	@param		array		$data
 	 *	@return		static
+	 *	@throws		ReflectionException		if reflection of entity class property failed
+	 *	@throws		NotSupportedException	entity property is typed as union or intersection
 	 */
 	public static function fromArray( array $data ): static
 	{
 		$className	= static::class;
-		return new $className( $data );
+		$instance	= new $className();
+		$instance->importDataFromArray( $data );
+		return $instance;
 	}
 
 	/**
 	 *	@param		Dictionary		$dictionary
 	 *	@return		static
+	 *	@throws		ReflectionException		if reflection of entity class property failed
+	 *	@throws		NotSupportedException	entity property is typed as union or intersection
 	 */
 	public static function fromDictionary( Dictionary $dictionary ): static
 	{
-		$className	= static::class;
-		return new $className( $dictionary );
+		/** @var array $data */
+		$data	= $dictionary->getAll();
+		return self::fromArray( $data );
 	}
 
 	/**
@@ -70,20 +77,32 @@ class Entity implements ArrayAccess
 	 *	@throws		ReflectionException		if reflection of entity class property failed
 	 *	@throws		NotSupportedException	entity property is typed as union or intersection
 	 */
-	public function __construct( Dictionary|array $data = [] )
+ 	public function __construct( Dictionary|array $data = [] )
 	{
-		/** @var array $array */
-		$array	= ( $data instanceof Dictionary ) ? $data->getAll() : $data;
+		$backtrace	= debug_backtrace( DEBUG_BACKTRACE_PROVIDE_OBJECT|DEBUG_BACKTRACE_IGNORE_ARGS, 10 );
+		foreach( $backtrace as $trace )
+			if( 'PDOStatement' === ( $trace['class'] ?? '' ) )
+				return;
 
+		/** @var array $array */
+		$array	= $data instanceof Dictionary ? $data->getAll() : $data;
+		$this->importDataFromArray( $array );
+	}
+
+	/**
+	 *	@param		array		$array
+	 *	@return		void
+	 *	@throws		ReflectionException		if reflection of entity class property failed
+	 *	@throws		NotSupportedException	entity property is typed as union or intersection
+	 */
+	protected function importDataFromArray( array $array = [] ): void
+	{
 		$array	= static::presetStaticValues( $array );
 		$array	= static::presetDynamicValues( $array );
 
-		//  manual construction -> check sanity of given data
-		if( [] !== $data ){
-			static::checkMandatoryFields( $array );								//  check for mandatory fields
-			static::convertTypes( $array );									//  convert types if defined and necessary
-			static::checkValues( $array );										//  check for sane values
-		}
+		static::checkMandatoryFields( $array );								//  check for mandatory fields
+		static::convertTypes( $array );									//  convert types if defined and necessary
+		static::checkValues( $array );										//  check for sane values
 
 		/**
 		 * @var string $key
