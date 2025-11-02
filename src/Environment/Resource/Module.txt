@@ -1,0 +1,84 @@
+- Root-Knoten ist "module"
+- module kann ein Attribute "frameworks" haben, enthalt String
+- das XML-Document validiert gegen "https://schema.ceusmedia.de/dev/1/module.xsd"
+- der Knoten kann folgenden Knoten haben, die Reihenfolge ist egal
+  - title, Pflichtfeld, enthält String
+  - description, enthält String, kann leer sein
+  - category, enthält String
+  - company, optional, enthält String, hat diese Attribute
+    - email, optional, enthält String
+    - site, optional, enthält String
+  - company, optional, enthält String, hat diese Attribute
+    - email, optional, enthält String
+    - site, optional, enthält String
+  - license, optional, enthält String, hat diese Attribute
+    - title, optional, enthält String
+    - source, optional, enthält String
+  - job, optional, kann mehrfach vorkommen, enthält String, hat diese Attribute
+    - id, Pflichtfeld, enthält String
+    - commands, optional, enthält String
+    - arguments, optional, enthält String
+    - mode, optional, enthält String
+    - interval, optional, enthält String
+    - multiple, optional, ist boolean
+    - deprecated, optional, enthält String
+    - disabled, optional, enthält String
+  - author, optional, enthält String, hat diese Attribute
+    - email, optional, enthält String
+    - site, optional, enthält String
+  - version, Pflichtfeld, enthält Versionsnummer nach Schema x.y(.z), kann folgende Attribute haben
+    - install-source, enthält String
+    - install-date, enthält Datetime
+    - install-type, enthält Int
+  - log, kann mehrfach vorkommen, enthält String, hat folgende Attribute:
+    - version, enthält Versionsnummer nach Schema x.y(.z)
+  - files, kann folgende Knoten beinhalten
+    - class, enthält String
+    - template, enthält String
+    - script, enthält String, kann Attribute haben
+      - load, optional, kann sein: "auto"
+      - level, optional, entweder string oder Ganzzahl zwischen 0 und 9
+      - source, optional, enthält String
+    - style, enthält String, kann Attribute haben
+      - load, optional, kann sein: "auto"
+      - level, optional, entweder string oder Ganzzahl zwischen 0 und 9
+      - source, optional, enthält String
+    - image, enthält String, kann Attribute haben
+      - source, optional, enthält String
+      - theme, optional, enthält String
+    - file, optional, enthält String
+  - config, optional, kann mehrfach vorkommen, enthält String, hat diese Attribute
+    - type, enthält String
+    - name, Pflichtfeld, enthält String
+    - title, enthält String
+    - info, optional, enthält String
+    - values, optional, enthält String
+    - protected, optional, enthält String
+    - mandatory, optional, enthält String
+    - access, optional, enthält String
+    - default, optional, enthält String
+    - original, optional, enthält String
+  - relations, optional, maximal 1 mal, kann ein oder mehrmals beinhalten
+    - needs, enthält String, hat folgende Attribute
+      - type, string, kann diese Werte haben: "module, package, extension"
+      - source, optional, enthält String
+      - version, optional, enthält String
+    - supports, das Gleiche wie needs
+  - hook, optional, kann mehrfach vorhanden sein, hat diese Attribute
+    - type, enthält String
+    - resource, enthält String
+    - event, enthält String
+    - level, optional, enthält Integer (0-9)
+  - link, optional, kann mehrfach vorhanden sein, hat diese Attribute
+    - parent, optional, enthält String
+    - access, optional, enthält String
+    - xml:lang, optional, enthält lang aus XML-Namespace
+    - path, optional, enthält String
+    - link, optional, enthält String
+    - rank, optional, enthält Integer
+    - label, optional, enthält String
+    - icon, optional, enthält String
+  - sql, optional, kann mehrfach vorhanden sein, hat diese Attribute
+    - on, enthält String
+    - type, optional, enthält String
+    - version, optional, enthält String oder Versionsnummer nach Schema x.y(.z)

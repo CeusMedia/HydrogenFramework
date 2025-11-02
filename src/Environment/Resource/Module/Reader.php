@@ -43,6 +43,7 @@ use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Job as Jo
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\License as LicenseDefinition;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Link as LinkDefinition;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Relation as RelationDefinition;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Source as SourceDefinition;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\SQL as SqlDefinition;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Version as VersionDefinition;
 
@@ -95,6 +96,7 @@ class Reader
 		self::decorateObjectWithFrameworks( $object, $xml );
 		self::decorateObjectWithLog( $object, $xml );
 		self::decorateObjectWithFiles( $object, $xml );
+		self::decorateObjectWithSources( $object, $xml );
 		self::decorateObjectWithAuthors( $object, $xml );
 		self::decorateObjectWithCompanies( $object, $xml );
 		self::decorateObjectWithLinks( $object, $xml );
@@ -490,9 +492,9 @@ class Reader
 				$object->relations->needs[(string) $moduleName]		= new RelationDefinition(		//  note relation
 					(string) $moduleName,															//  ... with module ID
 					match( $type ){
-						'module'	=> RelationDefinition::TYPE_MODULE,
-						'package'	=> RelationDefinition::TYPE_PACKAGE,
-						default		=> RelationDefinition::TYPE_UNKNOWN,
+						'module'				=> RelationDefinition::TYPE_MODULE,
+						'package', 'composer'	=> RelationDefinition::TYPE_PACKAGE,
+						default					=> RelationDefinition::TYPE_UNKNOWN,
 					},																				//  ... with relation type
 					(string) self::castNodeAttributesToString( $moduleName, 'source' ),		//  ... with module source, if set
 					(string) self::castNodeAttributesToString( $moduleName, 'version' ),	//  ... with version, if set
@@ -505,15 +507,35 @@ class Reader
 				$object->relations->supports[(string) $moduleName]	= new RelationDefinition(		//  note relation
 					(string) $moduleName,															//  ... with module ID
 					match( $type ){
-						'module'	=> RelationDefinition::TYPE_MODULE,
-						'package'	=> RelationDefinition::TYPE_PACKAGE,
-						default		=> RelationDefinition::TYPE_UNKNOWN,
+						'module'				=> RelationDefinition::TYPE_MODULE,
+						'package', 'composer'	=> RelationDefinition::TYPE_PACKAGE,
+						default					=> RelationDefinition::TYPE_UNKNOWN,
 					},																				//  ... with relation type
 					(string) self::castNodeAttributesToString( $moduleName, 'source' ),		//  ... with module source, if set
 					(string) self::castNodeAttributesToString( $moduleName, 'version' ),	//  ... with version, if set
 					'supports'																//  ... as supported
 				);
 			}
+		return TRUE;
+	}
+
+	/**
+	 *	Decorates module object by source information, if set.
+	 *	@access		protected
+	 *	@param		Definition		$object			Data object of module
+	 *	@param		XmlElement		$xml			XML tree object of module created by ::load
+	 *	@return		boolean							TRUE if data object of module has been decorated
+	 */
+	protected static function decorateObjectWithSources( Definition $object, XmlElement $xml ): bool
+	{
+		if( !$xml->source )																		//  no company nodes existing
+			return FALSE;
+		foreach( $xml->company as $company ){														//  iterate company nodes
+			$object->sources[]	= new SourceDefinition(
+				(string) $company,
+				self::castNodeAttributesToString( $company, 'url' )
+			);
+		}
 		return TRUE;
 	}
 

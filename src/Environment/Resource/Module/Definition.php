@@ -39,6 +39,7 @@ use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Job;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Installation;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\License;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Relations;
+use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Source;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\SQL;
 use CeusMedia\HydrogenFramework\Environment\Resource\Module\Definition\Version;
 
@@ -72,6 +73,9 @@ class Definition
 
 	/**	@var ?Deprecation $deprecation */
 	public ?Deprecation $deprecation	= NULL;
+
+	/**	@var array<Source> $sources */
+	public array $sources				= [];
 
 	/**	@var array<Company> $companies */
 	public array $companies				= [];
