@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--suppress XmlDefaultAttributeValue -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:xml="http://www.w3.org/XML/1998/namespace"
+           targetNamespace="https://schema.ceusmedia.de/hydrogen/module-1.0.0.xsd"
+           xmlns="https://schema.ceusmedia.de/hydrogen/module-1.0.0.xsd"
+           version="1.0.0"
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified">
+
+    <!-- Import für xml:lang -->
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace"
+               schemaLocation="https://schema.ceusmedia.de/w3c/xml.xsd"/>
+
+    <!-- ============================================================= -->
+    <!--  Gemeinsame Typen und Hilfstypen                              -->
+    <!-- ============================================================= -->
+
+    <!-- Typen für company und author -->
+    <xs:complexType name="contactElement">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="email" type="xs:string" use="optional"/>
+                <xs:attribute name="site" type="xs:string" use="optional"/>
+                <xs:attribute name="twitter" type="xs:string" use="optional"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <!-- source -->
+    <xs:complexType name="sourceElement">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="url" type="xs:string" use="optional"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <!-- Lizenzen -->
+    <xs:complexType name="licenseElement">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="title" type="xs:string" use="optional"/>
+                <xs:attribute name="source" type="xs:string" use="optional"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <!-- Jobs -->
+    <xs:complexType name="jobElement">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="id" type="xs:string" use="required"/>
+                <xs:attribute name="commands" type="xs:string" use="optional"/>
+                <xs:attribute name="arguments" type="xs:string" use="optional"/>
+                <xs:attribute name="mode" type="xs:string" use="optional"/>
+                <xs:attribute name="interval" type="xs:string" use="optional"/>
+                <xs:attribute name="multiple" type="xs:string" use="optional"/>
+                <xs:attribute name="deprecated" type="xs:string" use="optional"/>
+                <xs:attribute name="disabled" type="xs:string" use="optional"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <!-- Versionsnummer -->
+    <xs:simpleType name="versionType">
+        <xs:union memberTypes="xs:string">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:pattern value="[0-9]+\.[0-9]+(\.[0-9]+)?"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:union>
+    </xs:simpleType>
+
+    <!-- Level: Ganzzahl 0–9 oder beliebiger String -->
+    <xs:simpleType name="levelType">
+        <xs:union memberTypes="xs:string">
+            <xs:simpleType>
+                <xs:restriction base="xs:integer">
+                    <xs:minInclusive value="0"/>
+                    <xs:maxInclusive value="9"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:union>
+    </xs:simpleType>
+
+    <!-- Konfiguration -->
+    <xs:complexType name="configElement">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="name" type="xs:string" use="required"/>
+                <xs:attribute name="type" type="xs:string" use="optional"/>
+                <xs:attribute name="title" type="xs:string" use="optional"/>
+                <xs:attribute name="info" type="xs:string" use="optional"/>
+                <xs:attribute name="values" type="xs:string" use="optional"/>
+                <xs:attribute name="protected" type="xs:string" use="optional"/>
+                <xs:attribute name="mandatory" type="xs:string" use="optional"/>
+                <xs:attribute name="access" type="xs:string" use="optional"/>
+                <xs:attribute name="default" type="xs:string" use="optional"/>
+                <xs:attribute name="original" type="xs:string" use="optional"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <!-- Knoten für diverse Arten von Relation -->
+    <xs:simpleType name="relationType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="module"/>
+            <xs:enumeration value="package"/>
+            <xs:enumeration value="extension"/>
+            <xs:enumeration value="composer"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- Knoten für diverse Arten von SQL -->
+    <xs:simpleType name="sqlType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="install"/>
+            <xs:enumeration value="update"/>
+            <xs:enumeration value="revert"/>
+            <xs:enumeration value="uninstall"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- ============================================================= -->
+    <!--  Komplexe Typen                                               -->
+    <!-- ============================================================= -->
+
+    <!-- Beschreibung -->
+    <xs:complexType name="descriptionElement">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="file" type="xs:string" use="optional"/>
+                <xs:attribute name="format" type="xs:string" use="optional"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <!-- Deprecation Hint -->
+    <xs:complexType name="deprecationElement">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="file" type="xs:string" use="optional"/>
+                <xs:attribute name="format" type="xs:string" use="optional"/>
+                <xs:attribute name="url" type="xs:string" use="optional"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <!-- Version-Knoten -->
+    <xs:complexType name="versionElement">
+        <xs:simpleContent>
+            <xs:extension base="versionType">
+                <xs:attribute name="install-source" type="xs:string" use="optional"/>
+                <xs:attribute name="install-date" type="xs:dateTime" use="optional"/>
+                <xs:attribute name="install-type" type="xs:int" use="optional"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <!-- Log-Knoten -->
+    <xs:complexType name="logElement">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="version" type="versionType" use="required"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <!-- Todo-Knoten -->
+    <xs:complexType name="todoElement">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="format" type="xs:string" use="optional"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <!-- Script/Style/Image/File -->
+    <xs:complexType name="fileElement">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="load" use="optional">
+                    <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                            <xs:enumeration value="auto"/>
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:attribute>
+                <xs:attribute name="level" type="levelType" use="optional"/>
+                <xs:attribute name="source" type="xs:string" use="optional"/>
+                <xs:attribute name="theme" type="xs:string" use="optional"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <!-- Files-Knoten mit flexibler Reihenfolge -->
+    <xs:complexType name="filesElement">
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="class" type="xs:string"/>
+            <xs:element name="template" type="xs:string"/>
+            <xs:element name="locale" type="xs:string"/>
+            <xs:element name="script" type="fileElement"/>
+            <xs:element name="style" type="fileElement"/>
+            <xs:element name="image" type="fileElement"/>
+            <xs:element name="file" type="xs:string"/>
+        </xs:choice>
+    </xs:complexType>
+
+    <!-- Relations -->
+    <xs:complexType name="relationsElement">
+        <xs:sequence>
+            <xs:element name="needs" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:simpleContent>
+                        <xs:extension base="xs:string">
+                            <xs:attribute name="type" type="relationType" use="required"/>
+                            <xs:attribute name="source" type="xs:string"/>
+                            <xs:attribute name="version" type="versionType"/>
+                        </xs:extension>
+                    </xs:simpleContent>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="supports" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:simpleContent>
+                        <xs:extension base="xs:string">
+                            <xs:attribute name="type" type="relationType" use="required"/>
+                            <xs:attribute name="source" type="xs:string"/>
+                            <xs:attribute name="version" type="versionType"/>
+                        </xs:extension>
+                    </xs:simpleContent>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="conflicts" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:simpleContent>
+                        <xs:extension base="xs:string">
+                            <xs:attribute name="type" type="relationType" use="required"/>
+                            <xs:attribute name="source" type="xs:string"/>
+                            <xs:attribute name="version" type="versionType"/>
+                        </xs:extension>
+                    </xs:simpleContent>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- Hook -->
+    <xs:complexType name="hookElement">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="type" type="xs:string" use="required"/>
+                <xs:attribute name="resource" type="xs:string" use="required"/>
+                <xs:attribute name="event" type="xs:string" use="required"/>
+                <xs:attribute name="level" type="xs:int" use="optional"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <!-- Link -->
+    <xs:complexType name="linkElement">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="parent" type="xs:string" use="optional"/>
+                <xs:attribute name="access" type="xs:string" use="optional"/>
+                <xs:attribute ref="xml:lang" use="optional"/>
+                <xs:attribute name="path" type="xs:string" use="optional"/>
+                <xs:attribute name="link" type="xs:string" use="optional"/>
+                <xs:attribute name="rank" type="xs:integer" use="optional"/>
+                <xs:attribute name="label" type="xs:string" use="optional"/>
+                <xs:attribute name="icon" type="xs:string" use="optional"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <!-- SQL -->
+    <xs:complexType name="sqlElement">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="on" type="sqlType" use="optional"/>
+                <xs:attribute name="type" type="xs:string" use="optional"/>
+                <xs:attribute name="version" type="versionType" use="optional"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <!-- ============================================================= -->
+    <!--  Root-Element module                                          -->
+    <!-- ============================================================= -->
+
+    <xs:element name="module">
+        <xs:complexType>
+            <xs:choice maxOccurs="unbounded">
+                <xs:element name="title" type="xs:string"/>
+                <xs:element name="slogan" type="xs:string"/>
+                <xs:element name="version" type="versionElement"/>
+                <xs:element name="description" type="descriptionElement"/>
+                <xs:element name="deprecation" type="deprecationElement"/>
+                <xs:element name="category" type="xs:string"/>
+                <xs:element name="url" type="xs:string"/>
+                <xs:element name="source" type="sourceElement"/>
+                <xs:element name="company" type="contactElement"/>
+                <xs:element name="author" type="contactElement"/>
+                <xs:element name="license" type="licenseElement"/>
+                <xs:element name="job" type="jobElement"/>
+                <xs:element name="log" type="logElement"/>
+                <xs:element name="todo" type="todoElement"/>
+                <xs:element name="files" type="filesElement"/>
+                <xs:element name="config" type="configElement"/>
+                <xs:element name="relations" type="relationsElement"/>
+                <xs:element name="hook" type="hookElement"/>
+                <xs:element name="link" type="linkElement"/>
+                <xs:element name="sql" type="sqlElement"/>
+            </xs:choice>
+            <xs:attribute name="frameworks" type="xs:string" use="optional"/>
+        </xs:complexType>
+    </xs:element>
+
+</xs:schema>
