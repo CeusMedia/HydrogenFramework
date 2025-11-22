@@ -133,7 +133,7 @@ class Site extends WebAbstraction implements ApplicationInterface
 				exit;
 			}
 		}*/
-		catch( Error|Exception $e ){
+		catch( Throwable $e ){
 			$captain	= $this->env->getCaptain();
 			$payload	= ['exception' => $e];
 			$captain->callHook( 'App', 'onException', $this, $payload );

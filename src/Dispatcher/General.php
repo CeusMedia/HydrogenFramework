@@ -37,7 +37,6 @@ use CeusMedia\HydrogenFramework\Environment;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 use CeusMedia\HydrogenFramework\Controller;
 use CeusMedia\HydrogenFramework\Controller\Abstraction as ControllerAbstraction;
-use CeusMedia\HydrogenFramework\Controller\Ajax as AjaxController;
 
 use ReflectionException;
 use RuntimeException;
@@ -115,15 +114,16 @@ class General
 	 *	@param		Environment		$env
 	 *	@param		string			$prefix
 	 *	@param		string			$path
+	 *	@param		bool			$withoutConstruction	Flag: do not call constructor on instance creation
 	 *	@return		object|string
 	 *	@throws		ReflectionException
 	 */
-	public static function getPrefixedClassInstanceByPathOrFirstClassNameGuess( Environment $env, string $prefix, string $path ): object|string
+	public static function getPrefixedClassInstanceByPathOrFirstClassNameGuess( Environment $env, string $prefix, string $path, bool $withoutConstruction = FALSE ): object|string
 	{
 		$classNameVariations    = static::getClassNameVariationsByPath( $path );
 		$firstGuess				= $classNameVariations[0] ?? '';
 		foreach( $classNameVariations as $className ){
-			$instance	= static::getClassInstanceIfAvailable( $env, $prefix.$className );
+			$instance	= static::getClassInstanceIfAvailable( $env, $prefix.$className, $withoutConstruction );
 			if( NULL !== $instance )
 				return $instance;
 		}
@@ -180,7 +180,8 @@ class General
 			$controllerInstanceOrFirstGuess	= static::getPrefixedClassInstanceByPathOrFirstClassNameGuess(
 				$this->env,
 				self::$prefixController,
-				$controller
+				$controller,
+				TRUE
 			);
 
 			if( is_object( $controllerInstanceOrFirstGuess ) ){
@@ -211,6 +212,7 @@ class General
 				$this->checkClassActionArguments( $instance, $action, $arguments );
 			$runtime->reach( 'GeneralDispatcher::dispatch: check@'.$controller.'/'.$action );
 
+			$instance->__construct( $this->env );													//  finally call construction to work with this controller instance
 			if( NULL !== $devBuffer )
 				$instance->setDevBuffer( $devBuffer );
 			$factory	= new MethodFactory( $instance );											// create method factory on controller instance
@@ -235,13 +237,16 @@ class General
 	/**
 	 *	@param		Environment		$env
 	 *	@param		string			$className
+	 *	@param		bool			$withoutConstruction	Flag: do not call constructor on instance creation
 	 *	@return		?object
 	 *	@throws		ReflectionException
 	 */
-	protected static function getClassInstanceIfAvailable( Environment $env, string $className ): ?object
+	protected static function getClassInstanceIfAvailable( Environment $env, string $className, bool $withoutConstruction = FALSE ): ?object
 	{
 		if( !class_exists( $className ) )
 			return NULL;
+		if( $withoutConstruction )
+			return ObjectFactory::createObjectWithoutConstruction( $className );
 		return ObjectFactory::createObject( $className, [$env] );
 	}
 
