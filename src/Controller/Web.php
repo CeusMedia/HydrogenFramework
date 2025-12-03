@@ -215,10 +215,10 @@ abstract class Web extends Abstraction
 
 	/**
 	 *	@param		?mixed		$input
-	 *	@return		?array
+	 *	@return		mixed
 	 *	@todo		remove if not used, purpose unclear
 	 */
-	protected function compactFilterInput( mixed $input ): ?array
+	protected function compactFilterInput( mixed $input ): mixed
 	{
 		if( is_object( $input ) || is_resource( $input ) || is_null( $input ) )						//  input is of invalid type
 			return NULL;																			//  break with empty result
