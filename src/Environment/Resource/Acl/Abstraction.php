@@ -28,6 +28,7 @@
 
 namespace CeusMedia\HydrogenFramework\Environment\Resource\Acl;
 
+use CeusMedia\Common\ADT\Collection\Dictionary;
 use CeusMedia\HydrogenFramework\Environment as Environment;
 use InvalidArgumentException;
 
@@ -69,6 +70,35 @@ abstract class Abstraction
 	}
 
 	/**
+	 *	Returns a dictionary of controller rights by a list of actions.
+	 *	@param		string		$controller
+	 *	@param		array		$actions
+	 *	@return		Dictionary
+	 */
+	public function getControllerActionRightsAsDictionary( string $controller, array $actions = [] ): Dictionary
+	{
+		$data	= [];
+		foreach( $actions as $action )
+			$data[$action]	= $this->has( $controller, $action );
+		return new Dictionary( $data );
+	}
+
+	public function getPublicLinks(): array
+	{
+		return $this->linksPublic;
+	}
+
+	public function getPublicInsideLinks(): array
+	{
+		return $this->linksPublicInside;
+	}
+
+	public function getPublicOutsideLinks(): array
+	{
+		return $this->linksPublicOutside;
+	}
+
+	/**
 	 *	Indicates whether access to a controller action is allowed for role of current user.
 	 *	Needs session resource. Works only if user is logged and assigned role is existing.
 	 *	@access		public
@@ -84,31 +114,6 @@ abstract class Abstraction
 		$right	= $this->hasRight( (string) $roleId, $controller, $action );
 //		remark( 'Controller: '.$controller.' | Action: '.$action.' | Right: '.$right );
 		return $right > 0;
-	}
-
-	/**
-	 *	Return list controller actions or matrix of controllers and actions of role.
-	 *	@abstract
-	 *	@public
-	 *	@param		string|NULL			$controller		Controller to list actions for, otherwise return matrix
-	 *	@param		int|string|NULL		$roleId			Specified role, otherwise current role
-	 *	@return		array								List of actions or matrix of controllers and actions
-	 */
-	abstract public function index( ?string $controller = NULL, int|string $roleId = NULL ): array;
-
-	public function getPublicInsideLinks(): array
-	{
-		return $this->linksPublicInside;
-	}
-
-	public function getPublicOutsideLinks(): array
-	{
-		return $this->linksPublicOutside;
-	}
-
-	public function getPublicLinks(): array
-	{
-		return $this->linksPublic;
 	}
 
 	/**
@@ -151,6 +156,17 @@ abstract class Abstraction
 	 *	@param		string			$action			Name of action
 	 *	@return		integer			Right state
 	 *
+	 *	Check order:
+	 *  1. public link, regardless of any other state
+	 *	2. public outside link if not logged in (=no role known)
+	 *	3. not logged in -> exit here
+	 *	4. public inside link, regardless of role
+	 *	5. public outside link -> deny
+	 * 	6. full access by role -> allow
+	 *	7. no access by role -> deny
+	 *	8. right set by role in ACL backend -> allow
+	 *	9. otherwise -> deny
+	 *
 	 *	Return statuses:
 	 *	-2: outside but logged in
 	 *	-1: no access at all
@@ -168,25 +184,34 @@ abstract class Abstraction
 
 		if( in_array( $linkPath, $this->linksPublic ) )
 			return 3;
-		if( 0 !== (int) $roleId ){
-			if( in_array( $linkPath, $this->linksPublicInside ) )
-				return 5;
-			if( in_array( $linkPath, $this->linksPublicOutside ) )
-				return -2;
-			if( $this->hasFullAccess( $roleId ) )
-				return 2;
-			if( $this->hasNoAccess( $roleId ) )
-				return -1;
-			$rights	= $this->getRights( $roleId );
-			if( isset( $rights[$controller] ) && in_array( $action, $rights[$controller] ) )
-				return 1;
-		}
-		else{
-			if( in_array( $linkPath, $this->linksPublicOutside ) )
-				return 4;
-		}
+
+		if( 0 === (int) $roleId )
+			return in_array( $linkPath, $this->linksPublicOutside ) ? 4 : 0;
+
+		if( in_array( $linkPath, $this->linksPublicInside ) )
+			return 5;
+		if( in_array( $linkPath, $this->linksPublicOutside ) )
+			return -2;
+		if( $this->hasFullAccess( $roleId ) )
+			return 2;
+		if( $this->hasNoAccess( $roleId ) )
+			return -1;
+		$rights	= $this->getRights( $roleId );
+		if( isset( $rights[$controller] ) && in_array( $action, $rights[$controller] ) )
+			return 1;
+
 		return 0;
 	}
+
+	/**
+	 *	Return list controller actions or matrix of controllers and actions of role.
+	 *	@abstract
+	 *	@public
+	 *	@param		string|NULL			$controller		Controller to list actions for, otherwise return matrix
+	 *	@param		int|string|NULL		$roleId			Specified role, otherwise current role
+	 *	@return		array								List of actions or matrix of controllers and actions
+	 */
+	abstract public function index( ?string $controller = NULL, int|string $roleId = NULL ): array;
 
 	/**
 	 *	Sets a list of links with public access.
@@ -258,6 +283,12 @@ abstract class Abstraction
 
 	//  --  PROTECTED  --  //
 
+	/**
+	 *	Return list of controller action rights of role.
+	 *	Must be implemented by ACL strategy / implementation.
+	 *	@param		int|string		$roleId
+	 *	@return		array
+	 */
 	abstract protected function getRights( int|string $roleId ): array;
 
 	/**
