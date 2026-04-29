@@ -209,7 +209,8 @@ class General
 			$runtime->reach( 'GeneralDispatcher::dispatch: factorized controller' );
 			$this->checkClassAction( $instance, $action );
 			if( $this->checkClassActionArguments )
-				$this->checkClassActionArguments( $instance, $action, $arguments );
+				if( 'Controller_Index' !== $instance::class )
+					$this->checkClassActionArguments( $instance, $action, $arguments );
 			$runtime->reach( 'GeneralDispatcher::dispatch: check@'.$controller.'/'.$action );
 
 			$instance->__construct( $this->env );													//  finally call construction to work with this controller instance
