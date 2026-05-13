@@ -75,17 +75,16 @@ class Entity implements ArrayAccess
 	 */
  	public function __construct( Dictionary|array $data = [] )
 	{
-		$backtrace	= debug_backtrace( DEBUG_BACKTRACE_PROVIDE_OBJECT|DEBUG_BACKTRACE_IGNORE_ARGS, 10 );
-		foreach( $backtrace as $trace )
-			if( 'PDOStatement' === ( $trace['class'] ?? '' ) )
-				return;
-
-		/** @var array $array */
-		$array	= $data instanceof Dictionary ? $data->getAll() : $data;
-		if( [] !== $array )																//  starting with given data
+		if( [] === $data ){														//  no arguments or empty list given
+			if( $this->shallBeCreatedByPdo() )									//  if called by PDO fetch ...
+				return;															//  ... do nothing
+			$this->startEmpty();												//  otherwise start from empty array
+		}
+		else{
+			/** @var array $array */
+			$array	= $data instanceof Dictionary ? $data->getAll() : $data;
 			$this->importDataFromArray( $array );
-		else																			//  starting from empty array
-			$this->startEmpty();
+		}
 	}
 
 	/**
@@ -310,6 +309,16 @@ class Entity implements ArrayAccess
 		 */
 		foreach( $array as $key => $value )
 			$this->set( $key, $value );
+	}
+
+	protected function shallBeCreatedByPdo(): bool
+	{
+		$traceFlags	= DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS;
+		$backtrace	= debug_backtrace( $traceFlags, 3 );
+		foreach( $backtrace as $trace )
+			if( 'PDOStatement' === ( $trace['class'] ?? '' ) )
+				return TRUE;
+		return FALSE;
 	}
 
 	/**
