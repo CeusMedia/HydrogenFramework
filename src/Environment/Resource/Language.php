@@ -48,22 +48,25 @@ use DomainException;
  */
 class Language
 {
-	/**	@var		string					$fileExtension	File extension of language files (default: ini) */
+	/**	@var		string					$fileExtension		File extension of language files (default: ini) */
 	static public string $fileExtension		= 'ini';
 
-	/**	@var		array					$data			Array of loaded Language File Definitions */
+	/**	@var		array					$data				Array of loaded Language File Definitions */
 	protected array $data;
 
-	/**	@var		Environment				$env			Application Environment Object */
+	/**	@var		string					$defaultLanguage	Configured default language */
+	protected string $defaultLanguage		= '';
+
+	/**	@var		Environment				$env				Application Environment Object */
 	protected Environment $env;
 
-	/**	@var		string					$filePath		Path to Language Files */
+	/**	@var		string					$filePath			Path to Language Files */
 	protected string $filePath;
 
-	/**	@var		string					$language		Set Language */
+	/**	@var		string					$language			Currently det language, default: default language, may be set by modules or request, later */
 	protected string $language				= '';
 
-	/**	@var		array					$languages		List of allowed Languages */
+	/**	@var		array					$languages			List of allowed Languages */
 	protected array $languages				= [];
 
 	/**
@@ -92,23 +95,15 @@ class Language
 			foreach( FolderLister::getFolderList( $this->filePath ) as $folder )				//  iterate found locale folders
 				$this->languages[]	= $folder->getFilename();										//  save locale folder as language
 		$language			= $config->has( 'locale.default' ) ? $config['locale.default'] : 'en';
+		$this->defaultLanguage	= $language;
 
 		if( $this->env->has( 'session' ) ){
+			$this->applyRequestedLanguageToSession();
 			$session	= $this->env->getSession();
-			$switchTo	= $this->env->getRequest()->get( 'switchLanguageTo' );
-			if( $switchTo && in_array( $switchTo, $this->languages ) ){
-				$session->set( 'language', $switchTo );
-				if( !empty( $_SERVER['HTTP_REFERER'] ) ){
-					$referer = $_SERVER['HTTP_REFERER'];
-					if( !str_contains( $referer, 'switchLanguageTo' ) ){
-						header( 'Location: '.$referer );
-						exit;
-					}
-				}
-			}
 			if( $session->get( 'language' ) )
 				$language	= $session->get( 'language' );
 		}
+
 		$this->setLanguage( $language ?? '' );
 //		@todo remove: title is not longer existing in environment
 //		$words	= $this->getWords( 'main', FALSE );
@@ -173,11 +168,6 @@ class Language
 		return [];
 	}
 
-	public function hasWords( string $topic ): bool
-	{
-		return isset( $this->data[$topic] );
-	}
-
 	/**
 	 *	Returns map of language pairs with a language section of a language topic.
 	 *	@access		public
@@ -199,6 +189,27 @@ class Language
 		if( $force && $this->env->has( 'messenger' ) )
 			$this->env->getMessenger()?->noteFailure( $message );
 		return [];
+	}
+
+	/**
+	 *	Indicates whether words for a topic are available.
+	 *	@access		public
+	 *	@param		string		$topic		Topic of language
+	 *	@return		bool
+	 */
+	public function hasWords( string $topic ): bool
+	{
+		return isset( $this->data[$topic] );
+	}
+
+	/**
+	 *	Indicates whether given language is an allowed language.
+	 *	@access		public
+	 *	@return		bool
+	 */
+	public function isAllowedLanguage( string $language ): bool
+	{
+		return in_array( $language, $this->languages, TRUE );
 	}
 
 	/**
@@ -282,5 +293,27 @@ class Language
 			$this->load( 'main', FALSE );
 		}
 		return $this;
+	}
+
+	//  --  PROTECTED  --  //
+
+	protected function applyRequestedLanguageToSession()
+	{
+		if( !$this->env->has( 'session' ) )
+			return;
+		$session	= $this->env->getSession();
+		$switchTo	= trim( $this->env->getRequest()->get( 'switchLanguageTo', '' ) );
+		if( '' !== $switchTo && in_array( $switchTo, $this->languages ) ){
+			$session->set( 'language', $switchTo );
+			$payload	= ['language' => $switchTo];
+			$this->env->getCaptain()->callHookWithPayload( 'Language', 'changeLanguage', $this, $payload );
+			if( !empty( $_SERVER['HTTP_REFERER'] ) ){
+				$referer = $_SERVER['HTTP_REFERER'];
+				if( !str_contains( $referer, 'switchLanguageTo' ) ){
+					header( 'Location: '.$referer );
+					exit;
+				}
+			}
+		}
 	}
 }

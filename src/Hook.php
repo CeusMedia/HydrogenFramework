@@ -95,6 +95,7 @@ class Hook
 		$this->setEnv( $env );
 		if( NULL !== $context )
 			$this->setContext( $context );
+		$this->__onInit();
 	}
 
 	/**
@@ -183,7 +184,22 @@ class Hook
 		return $this;
 	}
 
+	
 	//  --  PROTECTED  --  //
+
+	
+	/**
+	 *	Magic function called at the end of construction.
+	 *	ATTENTION: In case of overriding, you MUST bubble down using parent::__onInit();
+	 *	Otherwise you will lose the trigger for hook Env::init.
+	 *
+	 *	@access		protected
+	 *	@return		void
+	 *	@codeCoverageIgnore
+	 */
+	protected function __onInit(): void
+	{
+	}
 
 	/**
 	 *	Call hook methods, which are statically defined.

@@ -499,9 +499,7 @@ class Environment implements ArrayAccess
 		if( is_callable( $callable ) )
 			if( is_object( call_user_func( $callable ) ) )
 				return TRUE;
-		if( $this->$key ?? FALSE )
-			return TRUE;
-		return FALSE;
+		return property_exists( $this, $key );
 	}
 
 	/**
