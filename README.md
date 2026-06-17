@@ -3,7 +3,7 @@
 *A PHP application framework using MVC, with design patterns and modules.*
 
 ![Branch](https://img.shields.io/badge/Branch-1.0.x-blue?style=flat-square)
-![Release](https://img.shields.io/badge/Release-1.0.2-blue?style=flat-square)
+![Release](https://img.shields.io/badge/Release-1.0.3a-blue?style=flat-square)
 ![PHP version](https://img.shields.io/badge/PHP-%5E8.1-blue?style=flat-square&color=777BB4)
 ![PHPStan level](https://img.shields.io/badge/PHPStan_level-8-darkgreen?style=flat-square)
 [![Monthly downloads](https://img.shields.io/packagist/dt/ceus-media/hydrogen-framework.svg?style=flat-square)](https://packagist.org/packages/ceus-media/hydrogen-framework)
