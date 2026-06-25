@@ -112,6 +112,16 @@ class Language
 	}
 
 	/**
+	 *	Returns configured default language.
+	 *	@access		public
+	 *	@return		string
+	 */
+	public function getDefaultLanguage(): string
+	{
+		return $this->defaultLanguage;
+	}
+
+	/**
 	 *	Returns selected Language.
 	 *	@access		public
 	 *	@return		string
