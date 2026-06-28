@@ -33,6 +33,7 @@ use CeusMedia\Common\FS\File\Reader as FileReader;
 use CeusMedia\Common\FS\Folder\Lister as FolderLister;
 use CeusMedia\HydrogenFramework\Environment;
 
+use ReflectionException;
 use RuntimeException;
 use InvalidArgumentException;
 use DomainException;
@@ -75,36 +76,25 @@ class Language
 	 *	@access		public
 	 *	@param		Environment			$env			Application Environment Object
 	 *	@return		void
+	 *	@throws		ReflectionException
 	 */
 	public function __construct( Environment $env )
 	{
 		$this->env			= $env;
-		$config				= $env->getConfig();
 
-		$this->filePath		= $env->uri.'locales/';													//  assume default folder name
-		if( $config->has( 'path.locales' ) )														//  a locales folder has been configured
-			$this->filePath	= $env->uri.$config->get( 'path.locales' );								//  take the configured folder name
-		if( !file_exists( $this->filePath ) ){														//  locales folder is not existing
-			$message	= sprintf( 'Locales folder "%s" is missing', $this->filePath );
-			throw new RuntimeException( $message );													//  quit with exception
-		}
-		if( $config->get( 'locale.allowed' ) )														//  allowed languages have been set
-			foreach( explode( ',', $config['locale.allowed'] ) as $language )					//  iterate extracted languages
-				$this->languages[]	= trim( $language );											//  save language without surrounding spaces
-		else																						//  otherwise scan locales folder
-			foreach( FolderLister::getFolderList( $this->filePath ) as $folder )				//  iterate found locale folders
-				$this->languages[]	= $folder->getFilename();										//  save locale folder as language
-		$language			= $config->has( 'locale.default' ) ? $config['locale.default'] : 'en';
-		$this->defaultLanguage	= $language;
+		$this->detectPathToLocales();
+		$this->indexAllowedLanguages();
+		$this->detectDefaultLanguage();
 
-		if( $this->env->has( 'session' ) ){
-			$this->applyRequestedLanguageToSession();
-			$session	= $this->env->getSession();
-			if( $session->get( 'language' ) )
-				$language	= $session->get( 'language' );
+		if( $this->env->has( 'session' ) ){													//  app has session support
+			$this->applyRequestedLanguageToSession() && $this->redirectToReferer();					//  try to save selection and got back
+			$sessionLanguage	= $this->env->getSession()->get( 'language', '' );		//  get currently stored language in session
+			if( '' !== $sessionLanguage && $this->isAllowedLanguage( $sessionLanguage ) )			//  language is valid
+				$language	= $sessionLanguage;														//  take language from session
 		}
 
-		$this->setLanguage( $language ?? '' );
+		$this->setLanguage( $language ?? '' );												//  finally, set evaluated language and load main language file
+
 //		@todo remove: title is not longer existing in environment
 //		$words	= $this->getWords( 'main', FALSE );
 //		if( !empty( $words['main']['title'] ) )
@@ -215,23 +205,12 @@ class Language
 	/**
 	 *	Indicates whether given language is an allowed language.
 	 *	@access		public
+	 *	@param		string		$language		Language to check
 	 *	@return		bool
 	 */
 	public function isAllowedLanguage( string $language ): bool
 	{
 		return in_array( $language, $this->languages, TRUE );
-	}
-
-	/**
-	 *	Returns File Name of Language Topic.
-	 *	@access		protected
-	 *	@param		string		$topic			Topic of Language
-	 *	@return		string
-	 */
-	protected function getFilenameOfLanguage( string $topic ): string
-	{
-		$ext	= strlen( trim( static::$fileExtension ) ) ? '.'.trim( static::$fileExtension ) : '';
-		return $this->filePath.$this->language.'/'.$topic.$ext;
 	}
 
 	/**
@@ -296,7 +275,7 @@ class Language
 	{
 		if( 0 !== count( $this->languages ) ){
 			$language	= strtolower( $language );
-			if( !in_array( $language, $this->languages ) )
+			if( !$this->isAllowedLanguage( $language ) )
 				throw new DomainException( 'Language "'.$language.'" is not supported' );
 			$this->data		= [];
 			$this->language	= $language;
@@ -307,22 +286,102 @@ class Language
 
 	//  --  PROTECTED  --  //
 
-	protected function applyRequestedLanguageToSession()
+	/**
+	 *	Store requested language in session.
+	 *	Call hook Language::changeLanguage (with payload 'language').
+	 *	Indicates whether language has been changed by return value.
+	 *	@return		bool
+	 *	@throws		ReflectionException
+	 */
+	protected function applyRequestedLanguageToSession(): bool
 	{
 		if( !$this->env->has( 'session' ) )
-			return;
-		$session	= $this->env->getSession();
+			return FALSE;
+
 		$switchTo	= trim( $this->env->getRequest()->get( 'switchLanguageTo', '' ) );
-		if( '' !== $switchTo && in_array( $switchTo, $this->languages ) ){
-			$session->set( 'language', $switchTo );
-			$payload	= ['language' => $switchTo];
-			$this->env->getCaptain()->callHookWithPayload( 'Language', 'changeLanguage', $this, $payload );
-			if( !empty( $_SERVER['HTTP_REFERER'] ) ){
-				$referer = $_SERVER['HTTP_REFERER'];
-				if( !str_contains( $referer, 'switchLanguageTo' ) ){
-					header( 'Location: '.$referer );
-					exit;
-				}
+		if( '' === $switchTo || !$this->isAllowedLanguage( $switchTo ) )
+			return FALSE;
+
+		$this->env->getSession()->set( 'language', $switchTo );
+		$payload	= ['language' => $switchTo];
+		$this->env->getCaptain()->callHookWithPayload( 'Language', 'changeLanguage', $this, $payload );
+		return TRUE;
+	}
+
+	/**
+	 *	Read path to locale files, arranged in languages.
+	 *	Takes 'locales/', if not configured.
+	 *	Binds to current env base path.
+	 *	@return		void
+	 *	@throws		RuntimeException		if evaluated path is not existing
+	 */
+	protected function detectPathToLocales(): void
+	{
+		$this->filePath	= $this->env->uri.'locales/';												//  assume default folder name
+		$config			= $this->env->getConfig();
+		if( $config->has( 'path.locales' ) )													//  a locales folder has been configured
+			$this->filePath	= $this->env->uri.$config->get( 'path.locales' );					//  take the configured folder name
+		if( !file_exists( $this->filePath ) ){														//  locales folder is not existing
+			$message	= sprintf( 'Locales folder "%s" is missing', $this->filePath );
+			throw new RuntimeException( $message );													//  quit with exception
+		}
+	}
+
+	/**
+	 *	Reads default language from config.
+	 *	Fallbacks: en? if not allowed --> first of allowed languages
+	 *	@param		string		$fallback		Default: en
+	 *	@return		void
+	 */
+	protected function detectDefaultLanguage( string $fallback = 'en' ): void
+	{
+		$defaultLanguage	= $this->env->getConfig()->get( 'locale.default', $fallback );
+		if( !$this->isAllowedLanguage( $defaultLanguage ) )
+			$defaultLanguage	= current( $this->languages );
+		$this->defaultLanguage	= $defaultLanguage;
+	}
+
+	/**
+	 *	Returns File Name of Language Topic.
+	 *	@access		protected
+	 *	@param		string		$topic			Topic of Language
+	 *	@return		string
+	 */
+	protected function getFilenameOfLanguage( string $topic ): string
+	{
+		$ext	= strlen( trim( static::$fileExtension ) ) ? '.'.trim( static::$fileExtension ) : '';
+		return $this->filePath.$this->language.'/'.$topic.$ext;
+	}
+
+	/**
+	 *	Read allowed languages from config or by existing locale folders.
+	 *	@return void
+	 */
+	protected function indexAllowedLanguages(): void
+	{
+		$configuredLanguages	= $this->env->getConfig()->get( 'locale.allowed', '' );	//  get allowed languages from config
+		if( '' !== $configuredLanguages ){															//  allowed languages have been set
+			$this->languages	= array_map( function( string $language ): string {					//  iterate extracted languages
+				return trim( $language );															//  save language without surrounding spaces
+			}, explode( ',', $configuredLanguages ) );										//  on allowed languages from config
+			return;
+		}
+		foreach( FolderLister::getFolderList( $this->filePath ) as $folder )						//  iterate found locale folders
+			$this->languages[]	= $folder->getFilename();											//  save locale folder as language
+	}
+
+	/**
+	 *	Redirects to former page by referer.
+	 *	Exists app after sending Location header.
+	 *	@return void
+	 */
+	protected function redirectToReferer(): void
+	{
+		if( !empty( $_SERVER['HTTP_REFERER'] ) ){
+			$referer = $_SERVER['HTTP_REFERER'];
+			if( !str_contains( $referer, 'switchLanguageTo' ) ){
+				header( 'Location: '.$referer );
+				exit;
 			}
 		}
 	}
