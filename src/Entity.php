@@ -39,6 +39,7 @@ class Entity implements ArrayAccess
 	protected static array $autoTypeConvertFields	= [];
 
 	/**
+	 *	Creates an entity, set default values and apply given map of properties (=column values).
 	 *	@param		array		$data
 	 *	@return		static
 	 *	@throws		NotSupportedException	entity property is typed as union or intersection
@@ -50,6 +51,20 @@ class Entity implements ArrayAccess
 	}
 
 	/**
+	 *	Creates an entity, set default values and apply all given map of properties (=column values).
+	 *	@param		array		$arrays			List of maps of properties to apply, latest set wins
+	 *	@return		static
+	 *	@throws		NotSupportedException	entity property is typed as union or intersection
+	 */
+	public static function fromArrays( array ...$arrays ): static
+	{
+		$className	= static::class;
+		return new $className( array_merge( ...$arrays ), FALSE );
+	}
+
+	/**
+	 *	Creates an entity, set defaults and apply given dictionary as properties (=column values).
+	 *	Faster than fromArray with empty array, since PDO check is disabled.
 	 *	@param		Dictionary		$dictionary
 	 *	@return		static
 	 *	@throws		NotSupportedException	entity property is typed as union or intersection
@@ -57,8 +72,20 @@ class Entity implements ArrayAccess
 	public static function fromDictionary( Dictionary $dictionary ): static
 	{
 		/** @var array $data */
-		$data	= $dictionary->getAll();
-		return self::fromArray( $data );
+		$data		= $dictionary->getAll();
+		$className	= static::class;
+		return new $className( $data, FALSE );
+	}
+
+	/**
+	 *	Creates an empty entity. Nonetheless, default values will be set.
+	 *	Faster than fromArray with empty array, since PDO check is disabled.
+	 *	@return		static
+	 */
+	public static function fromScratch(): static
+	{
+		$className	= static::class;
+		return new $className( [], FALSE );
 	}
 
 	/**
@@ -70,13 +97,14 @@ class Entity implements ArrayAccess
 	 *	Only on manual construction, given data will be checked against a list of
 	 *	mandatory fields and sane values.
 	 *	@param		Dictionary|array<string,string|int|float|NULL>		$data
+	 *	@param		bool												$dataMayBeFromPdo		Check for PDO origin, default: yes
 	 *	@throws		ReflectionException		if reflection of entity class property failed
 	 *	@throws		NotSupportedException	entity property is typed as union or intersection
 	 */
- 	public function __construct( Dictionary|array $data = [] )
+ 	public function __construct( Dictionary|array $data = [], bool $dataMayBeFromPdo = TRUE )
 	{
 		if( [] === $data ){														//  no arguments or empty list given
-			if( $this->shallBeCreatedByPdo() )									//  if called by PDO fetch ...
+			if( $dataMayBeFromPdo && $this->shallBeCreatedByPdo() )				//  if called by PDO fetch ...
 				return;															//  ... do nothing
 			$this->startEmpty();												//  otherwise start from empty array
 		}
