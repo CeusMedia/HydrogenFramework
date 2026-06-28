@@ -93,7 +93,7 @@ class Language
 				$language	= $sessionLanguage;														//  take language from session
 		}
 
-		$this->setLanguage( $language ?? '' );												//  finally, set evaluated language and load main language file
+		$this->setLanguage( $language ?? $this->defaultLanguage );							//  finally, set evaluated language and load main language file
 
 //		@todo remove: title is not longer existing in environment
 //		$words	= $this->getWords( 'main', FALSE );
