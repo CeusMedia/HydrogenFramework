@@ -53,6 +53,8 @@ abstract class Ajax extends Abstraction
 
 	protected bool $sendLengthHeader			= FALSE;
 
+	protected bool $checkSameOrigin				= TRUE;
+
 	public static function setResponseStrategy( int $strategy, mixed $callback = NULL ): void
 	{
 		static::$responseStrategy	= $strategy;
@@ -83,6 +85,9 @@ abstract class Ajax extends Abstraction
 		if( $this->env->isInLiveMode() && !$this->request->isAjax() )
 			$this->respondError( 400000, 'Access denied for non-AJAX requests', 406 );
 
+		if( $this->env->isInLiveMode() && $this->checkSameOrigin && !$this->isSameOrigin() )
+			$this->respondError( 400000, 'Access denied for remote AJAX requests', 406 );
+
 		try{
 			$this->__onInit();
 		}
@@ -90,6 +95,7 @@ abstract class Ajax extends Abstraction
 			$this->respondException( $e );
 		}
 	}
+
 
 	//  --  PROTECTED  --  //
 
@@ -103,6 +109,46 @@ abstract class Ajax extends Abstraction
 	 */
 	protected function __onInit()
 	{
+	}
+
+	/**
+	 *	Indicates whether request came from own host / domain.
+	 *	Matches scheme, port and host of request origin with base URL.
+	 *	Returns FALSE if no request origin available.
+	 *	Returns NULL if no base URL is configured.
+	 *
+	 *	@return		bool|NULL
+	 */
+	protected function isSameOrigin(): ?bool
+	{
+		$baseUrl	= $this->env->getBaseUrl();
+		if( '' === $baseUrl )													//  no base URL configured
+			return NULL;
+
+		$originUrl	= $_SERVER['HTTP_ORIGIN'] ?? '';
+		if( '' === $originUrl ){												//  no origin header
+			return FALSE;
+		}
+
+		$base	= parse_url( $baseUrl );
+		$origin = parse_url( $originUrl );
+
+		if( FALSE === $base || FALSE === $origin )								//  URL parsing failed
+			return FALSE;
+
+		if( ( $base['scheme'] ?? '' ) !== ( $origin['scheme'] ?? '' ) )			//  scheme not matching
+			return FALSE;
+
+		if( ($base['port'] ?? NULL ) !== ( $origin['port'] ?? NULL ) )			//  port not matching
+			return FALSE;
+
+		$baseHost	= strtolower( $base['host'] ?? '' );
+		$originHost	= strtolower( $origin['host'] ?? '' );
+
+		if( $originHost === $baseHost )											//  Domain
+			return TRUE;
+
+		return str_ends_with( $originHost, '.'.$baseHost );						//  Subdomain
 	}
 
 	/**
