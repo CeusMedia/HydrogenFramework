@@ -40,6 +40,7 @@ use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 use CeusMedia\HydrogenFramework\Controller;
 use CeusMedia\HydrogenFramework\Controller\Abstraction as ControllerAbstraction;
 
+use JsonException;
 use ReflectionException;
 use RuntimeException;
 use ReflectionMethod;
@@ -152,10 +153,9 @@ class General
 		$right2	= $this->env->getAcl()->has( $controller.'_'.$action );
 //		$right2	= $this->env->getAcl()->has( $controller );
 //		$this->env->getMessenger()->noteNotice( "R1: ".$right1." | R2: ".$right2." | Controller: ".$controller." | Action: ".$action );
-		if( !( $right1 || $right2 ) ){
-			$message	= 'Access to '.$controller.'/'.$action.' denied.';
-			throw HttpClientException::create( $message, 403 );
-		}
+		if( !( $right1 || $right2 ) )
+			throw HttpClientException::create( 'Forbidden', 403 )
+				->setDescription( 'Access to '.$controller.'/'.$action.' denied.' );
 		return TRUE;
 	}
 
@@ -166,6 +166,7 @@ class General
 	 *	@param		?OutputBuffer		$devBuffer
 	 *	@return		string
 	 *	@throws		ReflectionException
+	 *	@throws		JsonException
 	 */
 	public function dispatch( ?OutputBuffer $devBuffer = NULL ): string
 	{
@@ -185,28 +186,24 @@ class General
 				$controller,
 				TRUE
 			);
+			if( !is_object( $controllerInstanceOrFirstGuess ) )
+				throw HttpClientException::create( 'Not Found', 404 )
+					->setDescription( 'No controller available for requested path' );
 
-			if( is_object( $controllerInstanceOrFirstGuess ) ){
-				/** @var string $controller */
-				$controller	= preg_replace( '/^Controller_/', '', $controllerInstanceOrFirstGuess::class );
-				$controller	= str_replace( '_', '/', strtolower( $controller ) );
-			}
+			/** @var string $controller */
+			$controller	= preg_replace( '/^Controller_/', '', $controllerInstanceOrFirstGuess::class );
+			$controller	= str_replace( '_', '/', strtolower( $controller ) );
+
 			$runtime->reach( 'GeneralDispatcher::dispatch: check controller access' );
 			$this->checkAccess( $controller, $action);
 
 			$runtime->reach( 'GeneralDispatcher::dispatch: load controller instance' );
-			if( !is_object( $controllerInstanceOrFirstGuess ) ){
-				$message	= 'Invalid Controller "'.$controllerInstanceOrFirstGuess.'"';
-				throw new RuntimeException( $message, 201 );											// break with internal error
-			}
 			$instance	= $controllerInstanceOrFirstGuess;
 			if( !$instance instanceof Controller\Web &&
 				!$instance instanceof Controller\Api &&
 				!$instance instanceof Controller\Ajax )
-				throw new RuntimeException( sprintf(
-					'Controller class "%s" is not a Hydrogen controller',
-					$instance::class
-				), 301 );
+				throw HttpServerException::create( 'Internal Server Error', 500 )
+					->setDescription('Controller class "%s" is not a Hydrogen controller' );
 
 			$runtime->reach( 'GeneralDispatcher::dispatch: factorized controller' );
 			$this->checkClassAction( $instance, $action );
@@ -331,10 +328,9 @@ class General
 	protected function checkClassAction( object $instance, string $action ): bool
 	{
 		$denied = array( '__construct', '__destruct', 'getView', 'getData' );
-		if( !method_exists( $instance, $action ) || in_array( $action, $denied, TRUE ) ){				// no action method in controller instance
-			$message	= 'Invalid Action "'.$instance::class.'::'.$action.'"';
-			throw HttpClientException::create( $message, 211 );										// break with internal error
-		}
+		if( !method_exists( $instance, $action ) || in_array( $action, $denied, TRUE ) )				// no action method in controller instance
+			throw HttpClientException::create( 'Not Found', 404 )
+				->setDescription( 'Invalid action "'.$instance::class.'::'.$action.'"' );
 		return TRUE;
 	}
 
