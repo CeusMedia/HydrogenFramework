@@ -75,6 +75,10 @@ class HttpError
 			$parts[]	= HtmlTag::create( 'div', $description, ['class' => 'error-description'] );
 		if( '' !== $suggestion )
 			$parts[]	= HtmlTag::create( 'div', $suggestion, ['class' => 'error-suggestion'] );
+
+		$parts[]	= HtmlTag::create( 'hr' );
+		$iconHome		= HtmlTag::create( 'i', '', ['class' => 'fa fa-fw fa-home'] );
+		$parts[]	= HtmlTag::create( 'a', $iconHome.'&nbsp;Home', ['href' => './', 'class' => 'btn'] );
 		return join( $parts );
 	}
 
