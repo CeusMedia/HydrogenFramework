@@ -28,6 +28,8 @@
 
 namespace CeusMedia\HydrogenFramework\Application\Web;
 
+use CeusMedia\Common\Exception\HTTP\Client as HttpClientException;
+use CeusMedia\Common\Exception\HTTP\Server as HttpServerException;
 use CeusMedia\Common\Net\HTTP\Header\Field as HttpHeaderField;
 use CeusMedia\Common\UI\HTML\Exception\Page as HtmlExceptionPage;
 use CeusMedia\Common\UI\OutputBuffer;
@@ -35,6 +37,7 @@ use CeusMedia\HydrogenFramework\ApplicationInterface;
 use CeusMedia\HydrogenFramework\Application\WebAbstraction;
 use CeusMedia\HydrogenFramework\Dispatcher\General as GeneralDispatcher;
 use CeusMedia\HydrogenFramework\Environment\Resource\Database\PDO;
+use CeusMedia\HydrogenFramework\View\Helper\HttpError as HttpErrorHelper;
 use Error;
 use Exception;
 use ReflectionException;
@@ -118,6 +121,12 @@ class Site extends WebAbstraction implements ApplicationInterface
 				'controller'	=> $request->get( '__controller' ),							//  called controller
 				'action'		=> $request->get( '__action' )									//  called action
 			] );
+		}
+		catch( HttpClientException|HttpServerException $e ){
+			$helper	= new HttpErrorHelper( $this->env );
+			$helper->setException( $e );
+			$this->env->getResponse()->setStatus( $e->getCode() );
+			return $helper->render();
 		}
 /*		catch( ErrorException $e ){
 			if( getEnv( 'HTTP_HOST' ) ){
