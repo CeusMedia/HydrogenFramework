@@ -31,6 +31,8 @@ namespace CeusMedia\HydrogenFramework\Dispatcher;
 use CeusMedia\Common\Alg\Obj\Factory as ObjectFactory;
 use CeusMedia\Common\Alg\Obj\MethodFactory as MethodFactory;
 use CeusMedia\Common\Alg\Text\CamelCase;
+use CeusMedia\Common\Exception\HTTP\Client as HttpClientException;
+use CeusMedia\Common\Exception\HTTP\Server as HttpServerException;
 use CeusMedia\Common\Net\HTTP\Request as HttpRequest;
 use CeusMedia\Common\UI\OutputBuffer;
 use CeusMedia\HydrogenFramework\Environment;
@@ -152,7 +154,7 @@ class General
 //		$this->env->getMessenger()->noteNotice( "R1: ".$right1." | R2: ".$right2." | Controller: ".$controller." | Action: ".$action );
 		if( !( $right1 || $right2 ) ){
 			$message	= 'Access to '.$controller.'/'.$action.' denied.';
-			throw new RuntimeException( $message, 403 );											// break with internal error
+			throw HttpClientException::create( $message, 403 );
 		}
 		return TRUE;
 	}
@@ -331,7 +333,7 @@ class General
 		$denied = array( '__construct', '__destruct', 'getView', 'getData' );
 		if( !method_exists( $instance, $action ) || in_array( $action, $denied, TRUE ) ){				// no action method in controller instance
 			$message	= 'Invalid Action "'.$instance::class.'::'.$action.'"';
-			throw new RuntimeException( $message, 211 );											// break with internal error
+			throw HttpClientException::create( $message, 211 );										// break with internal error
 		}
 		return TRUE;
 	}
@@ -357,11 +359,13 @@ class General
 		}
 		if( count( $arguments ) < $numberArgsAtLeast ){
 			$message	= 'Not enough arguments for action "'.$instance::class.'::'.$action.'"';
-			throw new RuntimeException( $message, 212 );											// break with internal error
+			throw HttpClientException::create( 'Not Found', 404 )
+				->setDescription( $message );
 		}
 		if( count( $arguments ) > $numberArgsTotal ){
 			$message	= 'Too much arguments for action "'.$instance::class.'::'.$action.'"';
-			throw new RuntimeException( $message, 212 );											// break with internal error
+			throw HttpClientException::create( 'Not Found', 404 )
+				->setDescription( $message );
 		}
 		return TRUE;
 	}
@@ -370,13 +374,12 @@ class General
 	{
 		$controller	= $this->request->get( '__controller' );
 		$action		= $this->request->get( '__action' );
-		if( !isset( $this->history[$controller][$action] ) )
-			$this->history[$controller][$action]	= 0;
-		if( $this->history[$controller][$action] > 2 ){
-			throw new RuntimeException( 'Too many redirects' );
-#			$this->messenger->noteFailure( 'Too many redirects.' );
-#			break;
-		}
+
+		$this->history[$controller][$action] ??= 0;
+
+		if( $this->history[$controller][$action] > 2 )
+			throw HttpServerException::create( 'Loop Detected', 508 );
+
 		$this->history[$controller][$action]++;
 		return TRUE;
 	}
