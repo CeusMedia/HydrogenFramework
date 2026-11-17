@@ -13,6 +13,7 @@ use CeusMedia\Common\Net\HTTP\PartitionSession;
 use CeusMedia\Common\Net\HTTP\Request as HttpRequest;
 use CeusMedia\Common\Net\HTTP\Response as HttpResponse;
 use CeusMedia\Common\Net\HTTP\Response\Sender as HttpResponseSender;
+use CeusMedia\Common\Net\HTTP\Status as HttpStatus;
 use CeusMedia\HydrogenFramework\Environment\Web as WebEnvironment;
 use Exception;
 use JsonException;
@@ -98,6 +99,7 @@ abstract class Ajax extends Abstraction
 
 
 	//  --  PROTECTED  --  //
+
 
 	/**
 	 *	Use this method to extend construction in you inherited AJAX controller.
@@ -243,6 +245,10 @@ abstract class Ajax extends Abstraction
 	 */
 	protected function respondError( string|int $code, ?string $message = NULL, int $statusCode = 412, ?string $mimeType = NULL ): int
 	{
+		if( '' === ( $message ?? '' ) )
+			if( 100 <= $statusCode && $statusCode <= 600 && HttpStatus::isCode( $statusCode ) )
+				$message	= HttpStatus::getText( $statusCode );
+
 		$response	= [
 			'status'	=> 'error',
 			'code'		=> $code,
